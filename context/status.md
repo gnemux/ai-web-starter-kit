@@ -20,6 +20,7 @@ Initialization.
 - Created GitHub private repository `gnemux/ai-web-starter-kit` and pushed the initial baseline to `origin/main`.
 - Added Supabase collaboration workflow for local databases, Git migrations, staging, production, RLS, and PR checks.
 - Created Linear issue `GNE-116` and project document for Supabase collaboration.
+- Implemented app shell, Dashboard framework, and UI edge states for `GNE-82`, `GNE-84`, and `GNE-85`.
 
 ## Done Issues
 
@@ -30,8 +31,12 @@ Initialization.
 - `GNE-78` FOUNDATION-04
 - `GNE-79` FOUNDATION-05
 - `GNE-80` FOUNDATION-06
+- `GNE-70` APP-00
 - `GNE-81` APP-01
 - `GNE-83` APP-03
+- `GNE-82` APP-02
+- `GNE-84` APP-04
+- `GNE-85` APP-05
 - `GNE-106` DEPLOY-01
 - `GNE-107` DEPLOY-02
 
@@ -41,14 +46,14 @@ Initialization.
 
 ## In Progress
 
-- Review Supabase collaboration documentation before commit and push.
+- Review and push local commits when ready.
 
 ## Next Steps
 
 1. Review, commit, and push the Supabase workflow documentation.
 2. Mark `GNE-116` Done after the documentation is pushed.
 3. Connect Vercel preview deployment.
-4. Start the first implementation issue from Linear.
+4. Start Auth or Supabase implementation from Linear.
 
 ## Risks
 

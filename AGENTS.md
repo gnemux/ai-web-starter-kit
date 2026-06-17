@@ -9,6 +9,7 @@ Before making code or documentation changes, read:
 3. `context/codex-rules.md`
 4. The relevant file under `specs/`
 5. The relevant file under `integrations/` when touching a third-party service
+6. `context/supabase-workflow.md` when touching Supabase schema, RLS, Auth, Storage, Realtime, or database-backed features
 
 ## Working Rules
 
@@ -17,6 +18,7 @@ Before making code or documentation changes, read:
 - Prefer durable patterns over one-off patches.
 - Do not commit secrets, API keys, customer data, private credentials, or real tokens.
 - Do not invent provider behavior. Read the integration document before coding against Supabase, Vercel, analytics, payment, email, or AI APIs.
+- Do not change Supabase schema through remote dashboards without a migration file in the repository.
 - Update `context/status.md` when a change materially affects project progress, deployment state, risks, or next steps.
 - Add or update tests when changing behavior.
 - Keep reusable business logic in `packages/core`, reusable UI in `packages/ui`, and product-specific routes in `apps/web`.

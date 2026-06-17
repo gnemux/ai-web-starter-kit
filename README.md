@@ -42,6 +42,7 @@
 │   ├── linear.md             # Linear 项目、Milestones 和任务树
 │   ├── project.md            # 项目目标、范围和分工
 │   ├── status.md             # 当前进度、阻塞和下一步
+│   ├── supabase-workflow.md  # Supabase 多人数据库协作规范
 │   └── tech-stack.md         # 技术栈和选型原则
 ├── integrations/
 │   ├── _template.md          # 第三方集成文档模板
@@ -52,8 +53,11 @@
 ├── packages/
 │   ├── core/                 # 跨端业务模型、类型和纯逻辑
 │   └── ui/                   # 可复用 UI 组件
-└── specs/
-    └── _template/            # SDD 规格模板
+├── specs/
+│   └── _template/            # SDD 规格模板
+└── supabase/
+    ├── migrations/           # 数据库 migration 文件
+    └── seed.sql              # 本地开发 seed data
 ```
 
 核心边界：
@@ -64,6 +68,7 @@
 - `context` 放项目长期上下文，帮助人和 AI 理解“为什么这样做”。
 - `specs` 放每个功能的产品规格、工程规格、验收标准和测试计划。
 - `integrations` 放外部服务接入边界，避免真实 Provider 逻辑散落在业务代码里。
+- `supabase` 放数据库 migration、seed data 和 Supabase 本地开发入口。
 
 ## 本地运行
 
@@ -101,6 +106,28 @@ pnpm build
 ```
 
 当前 Web 应用默认运行在 `http://127.0.0.1:3000/`。
+
+## Supabase 协作方式
+
+团队成员不应该直接在共享 Supabase Dashboard 里随手建表或改表。数据库结构属于工程代码的一部分，必须通过 migration 进入 Git。
+
+推荐环境分层：
+
+- **个人 local**：每位开发者在自己电脑上运行本地 Supabase，用于开发、试错和 AI Coding。
+- **共享 staging**：团队联调用，只有合并后的 migration 才能进入。
+- **production**：只由 Supabase Maintainer 或 CI 迁移，不能手工改 schema。
+
+常见流程：
+
+```bash
+git checkout -b feature/GNE-89-user-profiles
+supabase migration new create_user_profiles
+supabase db reset
+pnpm typecheck
+pnpm build
+```
+
+详细规范见 `context/supabase-workflow.md`。涉及 Supabase 的 PR 必须说明 migration、RLS、seed、类型更新和部署影响。
 
 ## 团队分工
 
@@ -331,6 +358,7 @@ pnpm build
 
 - 开发前先看 Linear Issue，不要凭感觉扩大范围。
 - 涉及外部服务时，先看 `integrations/`，不要把真实密钥写进仓库。
+- 涉及 Supabase schema / RLS / seed 时，先看 `context/supabase-workflow.md`，必须通过 migration 变更数据库。
 - 涉及业务规则时，优先放在 `packages/core`，让 UI 和服务层复用。
 - 涉及通用界面时，优先放在 `packages/ui`，不要绑定具体页面数据。
 - 涉及页面流程时，放在 `apps/web`，保持路由和用户体验清晰。

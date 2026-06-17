@@ -54,7 +54,8 @@ GNE-11 FOUNDATION-00 [FOUNDATION] GitHub 仓库基础与 AI 协作规则
 ├── GNE-77 FOUNDATION-03 [DOC] 建立 context 项目上下文文档
 ├── GNE-78 FOUNDATION-04 [DOC] 建立 SDD 规格模板
 ├── GNE-79 FOUNDATION-05 [DOC] 建立第三方集成文档模板
-└── GNE-80 FOUNDATION-06 [CI] 配置基础检查：lint、typecheck、build
+├── GNE-80 FOUNDATION-06 [CI] 配置基础检查：lint、typecheck、build
+└── GNE-116 FOUNDATION-07 [DOC] 建立 Supabase 多人数据库协作规范
 
 GNE-70 APP-00 [APP] 产品外壳与可复用 UI
 ├── GNE-81 APP-01 [APP] 初始化 Next.js + TypeScript Web 应用
@@ -109,3 +110,7 @@ GNE-75 GROWTH-00 [GROWTH] 增长营销基础能力
 ## Usage
 
 Use Linear as the source of task progress and this repository as the source of implementation truth. When Linear and repository docs disagree, update the stale side before implementation continues.
+
+## Project Documents
+
+- Supabase 多人数据库协作规范: <https://linear.app/gnemux/document/supabase-多人数据库协作规范-04fd323ff596>

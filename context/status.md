@@ -17,6 +17,9 @@ Initialization.
 - Verified TypeScript projects and Next.js production build.
 - Updated Linear milestones to match the M0-M7 project delivery tracks.
 - Marked completed Linear issues as Done.
+- Created GitHub private repository `gnemux/ai-web-starter-kit` and pushed the initial baseline to `origin/main`.
+- Added Supabase collaboration workflow for local databases, Git migrations, staging, production, RLS, and PR checks.
+- Created Linear issue `GNE-116` and project document for Supabase collaboration.
 
 ## Done Issues
 
@@ -32,17 +35,20 @@ Initialization.
 - `GNE-106` DEPLOY-01
 - `GNE-107` DEPLOY-02
 
+## In Progress Issues
+
+- `GNE-116` FOUNDATION-07 [DOC] 建立 Supabase 多人数据库协作规范
+
 ## In Progress
 
-- Prepare the first GitHub remote repository baseline.
+- Review Supabase collaboration documentation before commit and push.
 
 ## Next Steps
 
-1. Create or connect the GitHub remote repository.
-2. Create the first commit after review.
-3. Push to the selected GitHub remote after explicit approval.
-4. Connect Vercel preview deployment.
-5. Start the first implementation issue from Linear.
+1. Review, commit, and push the Supabase workflow documentation.
+2. Mark `GNE-116` Done after the documentation is pushed.
+3. Connect Vercel preview deployment.
+4. Start the first implementation issue from Linear.
 
 ## Risks
 

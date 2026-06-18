@@ -27,6 +27,7 @@ Initialization.
 - Documented Supabase remote link and Auth environment rules for collaborators.
 - Applied M2 DATA migrations to Supabase staging project `nglilxhkuqzswbwitbdu`.
 - Hardened staging after Supabase advisors by fixing `set_updated_at` search path, optimizing RLS policies, and revoking public execution of `rls_auto_enable()`.
+- Completed M3 API with reusable service result types, Supabase client/server helper boundaries, a demo `demo_items` service path, dashboard service example, and local verification.
 
 ## Done Issues
 
@@ -51,6 +52,12 @@ Initialization.
 - `GNE-136` DATA-03
 - `GNE-137` DATA-04
 - `GNE-138` DATA-05
+- `GNE-133` API-00
+- `GNE-139` API-01
+- `GNE-140` API-02
+- `GNE-141` API-03
+- `GNE-142` API-04
+- `GNE-143` API-05
 
 ## In Progress Issues
 
@@ -58,14 +65,14 @@ Initialization.
 
 ## In Progress
 
-- Prepare M3 API service layer work.
+- None.
 
 ## Next Steps
 
-1. Start M3 API service layer specs and implementation.
-2. Reuse `user_profiles` and `demo_items` from M2 DATA.
-3. Keep `SUPABASE_SERVICE_ROLE_KEY` out of browser code and `NEXT_PUBLIC_` variables.
-4. Add local `.env.local` values for staging Auth when M4 starts.
+1. Start M4 Auth flows on top of the M3 service/helper boundary.
+2. Keep `SUPABASE_SECRET_KEY` and `SUPABASE_SERVICE_ROLE_KEY` out of browser code and `NEXT_PUBLIC_` variables.
+3. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
+4. Commit and push M3 after review.
 
 ## Risks
 

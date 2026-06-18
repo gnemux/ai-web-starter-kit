@@ -1,4 +1,5 @@
 export * from "./data";
+export * from "./api";
 
 export type ProductTrack = {
   name: string;
@@ -109,15 +110,15 @@ export const capabilityTracks: CapabilityTrack[] = [
     name: "Data",
     description: "Profile table, demo business table, local migration workflow, and RLS template.",
     owner: "Data",
-    status: "in-progress",
-    progress: 58
+    status: "ready",
+    progress: 100
   },
   {
     name: "API",
     description: "Service layer and provider boundaries that keep data access out of pages.",
     owner: "API",
-    status: "planned",
-    progress: 0
+    status: "ready",
+    progress: 100
   },
   {
     name: "Billing",
@@ -171,13 +172,13 @@ export const dashboardActions: DashboardAction[] = [
     issue: "GNE-132",
     title: "Ship the DATA foundation",
     description: "Create the profile/demo tables, migration, seed guidance, and RLS template.",
-    status: "in-progress"
+    status: "ready"
   },
   {
     issue: "GNE-133",
     title: "Define the API service layer",
     description: "Keep pages behind services before Auth, Billing, and Payment implementation starts.",
-    status: "planned"
+    status: "ready"
   }
 ];
 

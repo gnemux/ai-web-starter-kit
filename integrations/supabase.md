@@ -6,7 +6,7 @@ Supabase is the default provider for authentication, user profiles, and MVP data
 
 ## Status
 
-M2 DATA verified locally and applied to staging.
+M2 DATA verified locally and applied to staging. M3 API service helpers are verified locally.
 
 ## Collaboration Model
 
@@ -33,7 +33,9 @@ Detailed workflow: `context/supabase-workflow.md`.
 ```text
 SUPABASE_PROJECT_REF=nglilxhkuqzswbwitbdu
 NEXT_PUBLIC_SUPABASE_URL=https://nglilxhkuqzswbwitbdu.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SECRET_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
@@ -64,8 +66,9 @@ Rules:
 - Prefer linking to staging for day-to-day integration work.
 - Do not run unreviewed schema writes against production.
 - Keep remote credentials in `.env.local`, the Supabase CLI auth store, or deployment platform secrets only.
+- For local Next.js preview in this monorepo, keep an ignored `apps/web/.env.local` with the same public app variables or export those variables in the shell before running `pnpm dev`.
 - Use remote project values for Auth only through environment variables; do not hardcode them in app code.
-- `SUPABASE_SERVICE_ROLE_KEY` is server-only and must not be exposed through `NEXT_PUBLIC_` variables.
+- `SUPABASE_SECRET_KEY` and legacy `SUPABASE_SERVICE_ROLE_KEY` are server-only and must not be exposed through `NEXT_PUBLIC_` variables.
 
 Current staging:
 
@@ -110,3 +113,21 @@ Verification completed in this workspace:
 - Owner-only profile and demo item policies were verified with two temporary local users inside a rollback transaction.
 - Authenticated public-read behavior was verified for `demo_items.visibility = 'public'`.
 - Non-owners cannot update another user's private demo item.
+
+## M3 API Service Template
+
+The first reusable service template is tracked by Linear `GNE-133`.
+
+Boundaries:
+
+- Pages and client components render service results and call server actions.
+- Server actions translate framework inputs and call services.
+- Services own auth checks, input validation, provider calls, and safe error mapping.
+- Supabase helpers are centralized under `apps/web/lib/supabase`.
+- `packages/core` owns provider-independent result types and validation.
+
+Implemented examples:
+
+- `listDemoItems`: authenticated read of owner rows plus explicit public rows.
+- `createDemoItemFromFormData`: form input validation, authenticated insert, and safe error mapping.
+- Dashboard API service demo: page calls service methods; client form calls a server action.

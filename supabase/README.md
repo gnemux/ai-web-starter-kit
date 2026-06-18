@@ -53,6 +53,7 @@ supabase link --project-ref nglilxhkuqzswbwitbdu
 - 不要把 remote Postgres password、Supabase access token、service role key 写进仓库。
 - 真实 `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY` 和 `SUPABASE_SERVICE_ROLE_KEY` 只放在本机 `.env.local` 或部署平台环境变量里。
 - Auth 客户端只能使用 `NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_ANON_KEY`；`SUPABASE_SERVICE_ROLE_KEY` 只能出现在 server-only service 层。
+- 本地 Next.js 预览从 `apps/web` 启动时，需要把同样的 public app 变量放在被忽略的 `apps/web/.env.local`，或在启动前通过 shell/export 注入。
 
 当前 staging:
 

@@ -32,10 +32,8 @@ export default function HomePage() {
           <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-normal text-slate-950 sm:text-5xl">
             Build commercial Web products with a reusable product shell.
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600">
-            A pragmatic template for small teams moving from idea validation to
-            AI-assisted implementation, MVP launch, analytics, billing, and
-            growth loops.
+          <p className="mt-5 max-w-2xl text-[1.0625rem] font-medium leading-8 tracking-normal text-slate-600 sm:text-lg">
+            XM，WW， LZZ， CY 一帮杭州中登的 Token 燃烧之旅
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button href="/dashboard" icon={<ArrowRightIcon />}>

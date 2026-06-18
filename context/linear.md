@@ -18,27 +18,35 @@ M1 产品外壳与可复用 UI
 ├── ID: 2b98df48-1869-4005-aa90-bc1253405a04
 └── Main issue: GNE-70 APP-00
 
-M2 登录系统与用户账户
+M2 DATA 最小数据模型与权限模板
+├── ID: f2796ef9-b542-48c6-8b69-2b464c7d43bf
+└── Main issue: GNE-132 DATA-00
+
+M3 API Service 层与业务访问模板
+├── ID: d3a1e9b4-0472-4468-93e6-ae9d2ce3a110
+└── Main issue: GNE-133 API-00
+
+M4 登录系统与用户账户
 ├── ID: cb6f022d-7dcc-4949-be42-30ba969ce4ff
 └── Main issue: GNE-5 AUTH-00
 
-M3 计费、订阅与权益模型
+M5 计费、订阅与权益模型
 ├── ID: a1f0df17-7deb-4c42-ab93-f0afa3d5ce01
 └── Main issue: GNE-71 BILLING-00
 
-M4 支付 Provider 与结账闭环
+M6 支付 Provider 与结账闭环
 ├── ID: 347539e6-aee5-4a2d-a64c-189fa54720a6
 └── Main issue: GNE-72 PAYMENT-00
 
-M5 数据监控与转化事件
+M7 数据监控与转化事件
 ├── ID: d9d0323d-1b92-4a9b-ada7-1e63d2599e2c
 └── Main issue: GNE-73 ANALYTICS-00
 
-M6 部署运维与线上验收
+M8 部署运维与线上验收
 ├── ID: 5eed1508-a480-44d1-aa39-efebe17dd4f9
 └── Main issue: GNE-74 DEPLOY-00
 
-M7 增长营销与反馈闭环
+M9 增长营销与反馈闭环
 ├── ID: f85fc4d2-304b-406b-94aa-12f303b0acbc
 └── Main issue: GNE-75 GROWTH-00
 ```
@@ -63,6 +71,20 @@ GNE-70 APP-00 [APP] 产品外壳与可复用 UI
 ├── GNE-83 APP-03 [UI] 建立首页与营销落地页基础模板
 ├── GNE-84 APP-04 [UI] 建立 Dashboard 基础框架
 └── GNE-85 APP-05 [UI] 建立空状态、加载状态、错误状态和长内容约束
+
+GNE-132 DATA-00 [DATA] 最小数据模型、migration 与 RLS 模板
+├── GNE-134 DATA-01 [DOC] 定义数据建模边界与最小表结构
+├── GNE-135 DATA-02 [DEV] 建立基础 Supabase migration：user_profiles 与 demo_items
+├── GNE-136 DATA-03 [DEV] 建立 RLS policy 模板：owner-only、public-read、service-only
+├── GNE-137 DATA-04 [DEV] 建立 seed.sql 与本地 reset 验证入口
+└── GNE-138 DATA-05 [TEST] 验证 migration、seed 与 RLS 权限边界
+
+GNE-133 API-00 [API] Service 层与业务访问模板
+├── GNE-139 API-01 [DOC] 定义页面、service、provider、database 的调用边界
+├── GNE-140 API-02 [DEV] 建立 Supabase client/server helper 边界
+├── GNE-141 API-03 [DEV] 建立 demo service：读取和创建 demo_items
+├── GNE-142 API-04 [DEV] 建立输入校验、权限与错误返回格式
+└── GNE-143 API-05 [TEST] 验证页面不直接散落查库，高权限逻辑不进客户端
 
 GNE-5 AUTH-00 [AUTH] 主流登录系统集成：注册、登录、会话和用户资料
 ├── GNE-86 AUTH-01 [DOC] 编写 Supabase Auth 集成边界

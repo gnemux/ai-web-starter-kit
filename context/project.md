@@ -26,12 +26,14 @@ idea collection
 
 1. Foundation and AI rules
 2. Product shell and reusable UI
-3. Authentication and user account
-4. Payment, billing, and entitlement
-5. Analytics and monitoring
-6. Deployment and operations
-7. Growth and marketing
-8. Documentation and examples
+3. Data model, migrations, and permissions
+4. API service layer and business access boundaries
+5. Authentication and user account
+6. Payment, billing, and entitlement
+7. Analytics and monitoring
+8. Deployment and operations
+9. Growth and marketing
+10. Documentation and examples
 
 ## Team Collaboration
 

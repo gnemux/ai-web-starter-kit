@@ -21,6 +21,12 @@ Initialization.
 - Added Supabase collaboration workflow for local databases, Git migrations, staging, production, RLS, and PR checks.
 - Created Linear issue `GNE-116` and project document for Supabase collaboration.
 - Implemented app shell, Dashboard framework, and UI edge states for `GNE-82`, `GNE-84`, and `GNE-85`.
+- Added Linear M2 DATA and M3 API milestones before Auth.
+- Completed M2 DATA with specs, local Supabase config, migration, seed guidance, shared TypeScript data model types, and RLS verification.
+- Synced M2 DATA Linear issues to Done.
+- Documented Supabase remote link and Auth environment rules for collaborators.
+- Applied M2 DATA migrations to Supabase staging project `nglilxhkuqzswbwitbdu`.
+- Hardened staging after Supabase advisors by fixing `set_updated_at` search path, optimizing RLS policies, and revoking public execution of `rls_auto_enable()`.
 
 ## Done Issues
 
@@ -39,24 +45,32 @@ Initialization.
 - `GNE-85` APP-05
 - `GNE-106` DEPLOY-01
 - `GNE-107` DEPLOY-02
+- `GNE-132` DATA-00
+- `GNE-134` DATA-01
+- `GNE-135` DATA-02
+- `GNE-136` DATA-03
+- `GNE-137` DATA-04
+- `GNE-138` DATA-05
 
 ## In Progress Issues
 
-- `GNE-116` FOUNDATION-07 [DOC] 建立 Supabase 多人数据库协作规范
+- None.
 
 ## In Progress
 
-- Review and push local commits when ready.
+- Prepare M3 API service layer work.
 
 ## Next Steps
 
-1. Review, commit, and push the Supabase workflow documentation.
-2. Mark `GNE-116` Done after the documentation is pushed.
-3. Connect Vercel preview deployment.
-4. Start Auth or Supabase implementation from Linear.
+1. Start M3 API service layer specs and implementation.
+2. Reuse `user_profiles` and `demo_items` from M2 DATA.
+3. Keep `SUPABASE_SERVICE_ROLE_KEY` out of browser code and `NEXT_PUBLIC_` variables.
+4. Add local `.env.local` values for staging Auth when M4 starts.
 
 ## Risks
 
 - External providers are documented but not configured.
 - No secrets should be added to the repository.
-- Local machine does not currently expose a global `pnpm` binary; use Corepack or install pnpm for day-to-day local commands.
+- Local machine exposes `pnpm@9.15.0`.
+- Local Supabase runs through Colima; analytics is disabled locally because the Supabase vector container cannot mount Colima's Docker socket path.
+- Staging performance advisors currently include only expected unused-index INFO entries until `demo_items` receives representative query traffic.

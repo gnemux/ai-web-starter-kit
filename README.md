@@ -137,12 +137,14 @@ pnpm build
 | --- | --- | --- | --- |
 | M0 工程基础与 AI 协作规则 | 仓库、规范、README、CI、AI 规则 | 工程 Owner | `AGENTS.md`、`context/`、根配置 |
 | M1 产品外壳与可复用 UI | 首页、导航、Dashboard、状态组件 | 前端 / UI Owner | `apps/web`、`packages/ui` |
-| M2 登录系统与用户账户 | 注册、登录、会话、账户设置 | Auth Owner | `apps/web`、`integrations/supabase.md` |
-| M3 计费、订阅与权益模型 | pricing、权益判断、订阅状态 | Billing Owner | `packages/core`、`specs/` |
-| M4 支付 Provider 与结账闭环 | sandbox 支付、checkout、webhook | Payment Owner | `integrations/payment.md`、`apps/web` |
-| M5 数据监控与转化事件 | 事件命名、adapter、漏斗 | Analytics Owner | `integrations/analytics.md`、`packages/core` |
-| M6 部署运维与线上验收 | Vercel、环境变量、smoke test | Deploy Owner | `integrations/vercel.md`、`.env.example` |
-| M7 增长营销与反馈闭环 | SEO、落地页、归因、反馈入口 | Growth Owner | `apps/web`、`specs/` |
+| M2 DATA 最小数据模型与权限模板 | profile、demo business table、migration、RLS、seed | Data Owner | `supabase/`、`specs/data`、`integrations/supabase.md` |
+| M3 API Service 层与业务访问模板 | service 边界、server/client helper、错误返回、demo service | API Owner | `apps/web`、`packages/core`、`specs/api` |
+| M4 登录系统与用户账户 | 注册、登录、会话、账户设置 | Auth Owner | `apps/web`、`integrations/supabase.md` |
+| M5 计费、订阅与权益模型 | pricing、权益判断、订阅状态 | Billing Owner | `packages/core`、`specs/` |
+| M6 支付 Provider 与结账闭环 | sandbox 支付、checkout、webhook | Payment Owner | `integrations/payment.md`、`apps/web` |
+| M7 数据监控与转化事件 | 事件命名、adapter、漏斗 | Analytics Owner | `integrations/analytics.md`、`packages/core` |
+| M8 部署运维与线上验收 | Vercel、环境变量、smoke test | Deploy Owner | `integrations/vercel.md`、`.env.example` |
+| M9 增长营销与反馈闭环 | SEO、落地页、归因、反馈入口 | Growth Owner | `apps/web`、`specs/` |
 
 建议每个功能都保持这个节奏：
 
@@ -366,7 +368,7 @@ pnpm build
 
 ## 当前状态
 
-当前仓库已经完成初始化结构、AI 上下文文档、SDD 模板、集成文档模板、基础 Next.js 应用和 Linear 任务树。后续真实业务能力会按 Linear Milestones 逐步接入。
+当前仓库已经完成初始化结构、AI 上下文文档、SDD 模板、集成文档模板、基础 Next.js 应用和 Linear 任务树。后续真实业务能力会按 Linear M0-M9 Milestones 逐步接入。
 
 已验证：
 

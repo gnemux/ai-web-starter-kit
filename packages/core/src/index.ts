@@ -1,3 +1,5 @@
+export * from "./data";
+
 export type ProductTrack = {
   name: string;
   description: string;
@@ -43,6 +45,14 @@ export const productTracks: ProductTrack[] = [
     description: "Sign up, sign in, protected routes, and user profile."
   },
   {
+    name: "Data",
+    description: "Profile table, demo business table, migrations, seed, and RLS."
+  },
+  {
+    name: "API",
+    description: "Service layer, provider boundaries, and typed business results."
+  },
+  {
     name: "Payment",
     description: "Checkout, orders, subscriptions, and entitlement."
   },
@@ -55,8 +65,8 @@ export const productTracks: ProductTrack[] = [
 export const readinessMetrics: ReadinessMetric[] = [
   {
     label: "Product tracks",
-    value: "8",
-    detail: "Foundation, UI, auth, billing, payment, analytics, deploy, growth",
+    value: "10",
+    detail: "Foundation, UI, data, API, auth, billing, payment, analytics, deploy, growth",
     status: "ready"
   },
   {
@@ -94,6 +104,20 @@ export const capabilityTracks: CapabilityTrack[] = [
     owner: "Auth",
     status: "planned",
     progress: 12
+  },
+  {
+    name: "Data",
+    description: "Profile table, demo business table, local migration workflow, and RLS template.",
+    owner: "Data",
+    status: "in-progress",
+    progress: 58
+  },
+  {
+    name: "API",
+    description: "Service layer and provider boundaries that keep data access out of pages.",
+    owner: "API",
+    status: "planned",
+    progress: 0
   },
   {
     name: "Billing",
@@ -141,6 +165,18 @@ export const dashboardActions: DashboardAction[] = [
     issue: "GNE-108",
     title: "Connect preview deployments",
     description: "Let every PR produce a Vercel preview once the app foundation is ready.",
+    status: "planned"
+  },
+  {
+    issue: "GNE-132",
+    title: "Ship the DATA foundation",
+    description: "Create the profile/demo tables, migration, seed guidance, and RLS template.",
+    status: "in-progress"
+  },
+  {
+    issue: "GNE-133",
+    title: "Define the API service layer",
+    description: "Keep pages behind services before Auth, Billing, and Payment implementation starts.",
     status: "planned"
   }
 ];

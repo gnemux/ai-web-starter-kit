@@ -36,9 +36,12 @@ supabase db reset
 
 团队维护一个共享的 staging Supabase 项目，用于多人联调和接近线上环境的验收。
 
+- 当前 staging project ref: `nglilxhkuqzswbwitbdu`
+- 当前 staging API URL: `https://nglilxhkuqzswbwitbdu.supabase.co`
 - 普通开发者不要直接在 staging Dashboard 建表或改表。
 - 只有合并后的 migration 才能进入 staging。
 - staging 可以由 CI 或 Supabase Maintainer 执行迁移。
+- 本地 CLI 可以 link 到 staging 用于 `db diff`、类型生成或联调检查，但不能从个人分支直接 `db push` 未审查 migration。
 
 ### Production
 
@@ -47,6 +50,44 @@ supabase db reset
 - 只允许 Supabase Maintainer 或 CI 执行 migration。
 - 不允许在生产 Dashboard 里手工改 schema。
 - 生产变更前必须确认备份、回滚思路和影响范围。
+- 普通开发者不要把本地 CLI link 到 production 后执行 schema 写入命令。
+
+## 远程连接规则
+
+本地 Supabase 默认只连接本机容器。需要连接共享线上项目时，必须显式记录目标环境，并且只把非敏感信息放进仓库。
+
+允许提交到仓库：
+
+- `supabase/config.toml` 中的本地开发配置。
+- `.env.example` 中的空占位变量。
+- 远程项目的环境用途说明，例如 staging / production 的责任边界。
+- 非敏感的 Supabase project ref 占位名，例如 `SUPABASE_PROJECT_REF=`。
+
+禁止提交到仓库：
+
+- 真实 `SUPABASE_SERVICE_ROLE_KEY`。
+- 真实远程数据库密码。
+- 真实 Supabase access token。
+- 任何客户数据、生产 seed、导出的远程用户数据。
+
+本地 link 方式：
+
+```bash
+supabase login
+supabase link --project-ref nglilxhkuqzswbwitbdu
+```
+
+如果 CLI 要求输入 remote Postgres password，只能在本机交互输入或使用本机未提交的安全凭据管理方式。不要把密码写入命令历史、脚本、文档或 `.env.example`。
+
+Auth 开发时只允许以下变量进入本机 `.env.local` 或部署平台环境变量：
+
+```text
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+```
+
+`NEXT_PUBLIC_SUPABASE_URL` 和 `NEXT_PUBLIC_SUPABASE_ANON_KEY` 可以被浏览器读取；`SUPABASE_SERVICE_ROLE_KEY` 只能用于 server-only service 代码，不能进入客户端 bundle、日志或 `NEXT_PUBLIC_` 变量。
 
 ## 标准开发流程
 

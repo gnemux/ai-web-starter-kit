@@ -1,2 +1,15 @@
 -- 本地开发 seed data 放在这里。
 -- 不要在这个文件中存储生产数据、客户隐私数据或任何 secret。
+--
+-- M2 DATA 说明：
+-- user_profiles 和 demo_items 都引用 auth.users(id)，因此示例行需要先有
+-- 本地 Supabase Auth 用户。不要提交真实用户 ID 或从远程环境复制的数据。
+--
+-- 推荐本地验证方式：
+-- 1. supabase start
+-- 2. 在本地 Auth 中创建测试用户，或使用 Supabase CLI/Studio 创建本地用户
+-- 3. 插入只属于该本地测试用户的 user_profiles / demo_items 行
+-- 4. supabase db reset 验证 migration + seed 可从空库恢复
+--
+-- 等项目确定统一的本地测试用户创建方式后，再把安全的本地-only seed
+-- 示例写入这里。

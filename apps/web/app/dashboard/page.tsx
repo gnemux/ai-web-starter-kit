@@ -1,6 +1,7 @@
 import {
   capabilityTracks,
   dashboardActions,
+  type DemoItem,
   integrationStatuses,
   longContentSample,
   readinessMetrics
@@ -20,6 +21,8 @@ import {
   StatusBadge
 } from "@starter/ui";
 
+import { listDemoItems } from "@/lib/services/demo-items";
+
 import {
   DashboardIcon,
   DeployIcon,
@@ -29,6 +32,7 @@ import {
   RefreshIcon,
   SpecsIcon
 } from "../../components/app-icons";
+import { DemoItemForm } from "./demo-item-form";
 
 const navItems = [
   {
@@ -70,7 +74,9 @@ const navItems = [
   }
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const demoItemsResult = await listDemoItems();
+
   return (
     <AppShell
       action={
@@ -230,6 +236,31 @@ export default function DashboardPage() {
           </div>
         </section>
 
+        <Panel id="api-service">
+          <SectionHeader
+            action={
+              <StatusBadge status={demoItemsResult.ok ? "ready" : "in-progress"} />
+            }
+            description="Dashboard consumes a stable service result; Supabase calls stay behind server helpers."
+            title="API service demo"
+          />
+
+          {demoItemsResult.ok ? (
+            <DemoItemsList items={demoItemsResult.data.items} />
+          ) : (
+            <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 p-4">
+              <p className="text-sm font-semibold text-amber-900">
+                {demoItemsResult.error.code}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-amber-800">
+                {demoItemsResult.error.message}
+              </p>
+            </div>
+          )}
+
+          <DemoItemForm />
+        </Panel>
+
         <section
           id="specs"
           className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03] md:grid-cols-3"
@@ -256,5 +287,47 @@ export default function DashboardPage() {
         </section>
       </div>
     </AppShell>
+  );
+}
+
+function DemoItemsList({ items }: { items: DemoItem[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
+        <p className="text-sm font-semibold text-slate-950">No demo items yet</p>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          Create the first row to verify the page-to-service-to-database path.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-5 divide-y divide-slate-200">
+      {items.map((item) => (
+        <div className="py-4 first:pt-0 last:pb-0" key={item.id}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-sm font-semibold text-slate-950">
+                  {item.title}
+                </h3>
+                <span className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-500">
+                  {item.visibility}
+                </span>
+              </div>
+              {item.notes ? (
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                  {item.notes}
+                </p>
+              ) : null}
+            </div>
+            <p className="shrink-0 text-xs font-medium text-slate-400">
+              {item.status}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

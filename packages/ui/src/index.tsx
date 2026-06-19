@@ -34,8 +34,10 @@ export function Badge({
 }
 
 export function StatusBadge({
+  label,
   status
 }: {
+  label?: string;
   status: "ready" | "in-progress" | "planned" | "risk";
 }) {
   const labels = {
@@ -45,7 +47,7 @@ export function StatusBadge({
     risk: "Needs review"
   };
 
-  return <Badge tone={status}>{labels[status]}</Badge>;
+  return <Badge tone={status}>{label ?? labels[status]}</Badge>;
 }
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -202,18 +204,18 @@ export function AppShell({
 }
 
 export function BrandMark({
-  subtitle = "Commercial web template"
+  subtitle = "eXtensible Web Launch Core"
 }: {
   subtitle?: string;
 }) {
   return (
     <a className="flex min-w-0 items-center gap-3" href="/">
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-slate-950 text-sm font-semibold text-white">
-        AI
+        X
       </span>
       <span className="min-w-0">
         <span className="block truncate text-sm font-semibold text-slate-950">
-          AI Web Starter Kit
+          XWLC
         </span>
         <span className="block truncate text-xs text-slate-500">{subtitle}</span>
       </span>
@@ -271,18 +273,20 @@ export function MetricCard({
   detail,
   label,
   status,
+  statusLabel,
   value
 }: {
   detail: string;
   label: string;
   status: "ready" | "in-progress" | "planned" | "risk";
+  statusLabel?: string;
   value: string;
 }) {
   return (
     <Panel className="min-h-36">
       <div className="flex items-start justify-between gap-3">
         <p className="text-sm font-medium text-slate-500">{label}</p>
-        <StatusBadge status={status} />
+        <StatusBadge label={statusLabel} status={status} />
       </div>
       <p className="mt-5 text-3xl font-semibold tracking-normal text-slate-950">
         {value}
@@ -353,16 +357,18 @@ export function LoadingState({ rows = 3 }: { rows?: number }) {
 
 export function ErrorState({
   action,
+  badgeLabel = "Recoverable",
   description,
   title
 }: {
   action?: ReactNode;
+  badgeLabel?: string;
   description: string;
   title: string;
 }) {
   return (
     <div className="min-h-44 rounded-lg border border-rose-200 bg-rose-50 p-5">
-      <Badge tone="risk">Recoverable</Badge>
+      <Badge tone="risk">{badgeLabel}</Badge>
       <h3 className="mt-4 text-sm font-semibold text-rose-950">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-rose-800">{description}</p>
       {action ? <div className="mt-4">{action}</div> : null}

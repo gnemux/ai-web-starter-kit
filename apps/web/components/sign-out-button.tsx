@@ -8,7 +8,14 @@ import { Button } from "@starter/ui";
 import { resetAnalytics, trackEvent } from "@/lib/analytics/client";
 import { signOutAction, type SignOutState } from "@/app/account/actions";
 
-export function SignOutButton() {
+export function SignOutButton({
+  labels
+}: {
+  labels: {
+    signOut: string;
+    working: string;
+  };
+}) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState<SignOutState, FormData>(
     signOutAction,
@@ -29,7 +36,7 @@ export function SignOutButton() {
   return (
     <form action={formAction}>
       <Button type="submit" variant="secondary">
-        {isPending ? "Signing out..." : "Sign out"}
+        {isPending ? labels.working : labels.signOut}
       </Button>
     </form>
   );

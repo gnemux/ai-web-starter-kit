@@ -13,11 +13,34 @@ import {
 
 import { submitAuthAction, type AuthFormState } from "./actions";
 
+type AuthFormLabels = {
+  email: string;
+  password: string;
+  createAccount: string;
+  signIn: string;
+  working: string;
+  alreadyHaveAccount: string;
+  newHere: string;
+  switchToSignIn: string;
+  switchToSignUp: string;
+  confirmationPending: string;
+};
+
+type AuthFormErrorLabels = {
+  email: string;
+  password: string;
+  general: string;
+};
+
 export function AuthForm({
+  errorLabels,
   initialMode,
+  labels,
   nextPath
 }: {
+  errorLabels: AuthFormErrorLabels;
   initialMode: AuthMode;
+  labels: AuthFormLabels;
   nextPath: string;
 }) {
   const router = useRouter();
@@ -101,7 +124,7 @@ export function AuthForm({
 
       <div>
         <label className="text-sm font-medium text-slate-700" htmlFor="email">
-          Email
+          {labels.email}
         </label>
         <input
           autoComplete="email"
@@ -112,13 +135,13 @@ export function AuthForm({
           type="email"
         />
         {!state?.ok && state?.error.fields?.email ? (
-          <p className="mt-2 text-sm text-rose-700">{state.error.fields.email}</p>
+          <p className="mt-2 text-sm text-rose-700">{errorLabels.email}</p>
         ) : null}
       </div>
 
       <div>
         <label className="text-sm font-medium text-slate-700" htmlFor="password">
-          Password
+          {labels.password}
         </label>
         <input
           autoComplete={isSignUp ? "new-password" : "current-password"}
@@ -130,7 +153,7 @@ export function AuthForm({
         />
         {!state?.ok && state?.error.fields?.password ? (
           <p className="mt-2 text-sm text-rose-700">
-            {state.error.fields.password}
+            {errorLabels.password}
           </p>
         ) : null}
       </div>
@@ -138,7 +161,7 @@ export function AuthForm({
       {state && !state.ok && !state.error.fields ? (
         <div className="rounded-md border border-rose-200 bg-rose-50 p-3">
           <p className="text-sm font-medium text-rose-900">
-            {state.error.message}
+            {errorLabels.general}
           </p>
         </div>
       ) : null}
@@ -146,23 +169,23 @@ export function AuthForm({
       {state?.ok && state.data.status === "confirmation_pending" ? (
         <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
           <p className="text-sm font-medium text-emerald-900">
-            {state.data.message}
+            {labels.confirmationPending}
           </p>
         </div>
       ) : null}
 
       <Button className="w-full" type="submit">
-        {isPending ? "Working..." : isSignUp ? "Create account" : "Sign in"}
+        {isPending ? labels.working : isSignUp ? labels.createAccount : labels.signIn}
       </Button>
 
       <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-        <span>{isSignUp ? "Already have an account?" : "New here?"}</span>
+        <span>{isSignUp ? labels.alreadyHaveAccount : labels.newHere}</span>
         <button
           className="font-medium text-cyan-700 hover:text-cyan-900"
           onClick={() => setMode(isSignUp ? "signin" : "signup")}
           type="button"
         >
-          {isSignUp ? "Sign in" : "Create account"}
+          {isSignUp ? labels.switchToSignIn : labels.switchToSignUp}
         </button>
       </div>
     </form>

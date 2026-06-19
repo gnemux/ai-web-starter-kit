@@ -1,6 +1,9 @@
 import type { AuthMode } from "@starter/core";
 import { Badge, BrandMark, Button, Panel } from "@starter/ui";
 
+import { getDictionary } from "@/lib/i18n";
+import { getRequestLocale } from "@/lib/i18n-server";
+
 import { AuthForm } from "./auth-form";
 
 type LoginSearchParams = {
@@ -14,6 +17,8 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<LoginSearchParams>;
 }) {
+  const locale = await getRequestLocale();
+  const copy = getDictionary(locale);
   const params = await searchParams;
   const initialMode: AuthMode = params.mode === "signup" ? "signup" : "signin";
   const nextPath = normalizeNext(params.next);
@@ -22,19 +27,18 @@ export default async function LoginPage({
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <div className="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8">
         <section className="min-w-0">
-          <BrandMark subtitle="Supabase Auth template" />
+          <BrandMark subtitle={copy.login.subtitle} />
           <div className="mt-10">
-            <Badge tone="in-progress">GNE-5 · M4 Auth</Badge>
+            <Badge tone="in-progress">{copy.login.badge}</Badge>
             <h1 className="mt-5 max-w-2xl text-4xl font-semibold tracking-normal text-slate-950 sm:text-5xl">
-              Sign in to the product workspace.
+              {copy.login.title}
             </h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-slate-600">
-              Supabase owns identity and sessions. The app keeps account logic
-              behind services and records only safe Auth funnel events.
+              {copy.login.description}
             </p>
             <div className="mt-8">
               <Button href="/" variant="secondary">
-                Back to overview
+                {copy.common.backHome}
               </Button>
             </div>
           </div>
@@ -43,26 +47,34 @@ export default async function LoginPage({
         <Panel className="mx-auto w-full max-w-md p-6">
           <div>
             <p className="text-sm font-semibold text-cyan-700">
-              {initialMode === "signup" ? "Create account" : "Welcome back"}
+              {initialMode === "signup"
+                ? copy.login.createAccount
+                : copy.login.welcomeBack}
             </p>
             <h2 className="mt-2 text-2xl font-semibold tracking-normal text-slate-950">
-              {initialMode === "signup" ? "Start with email" : "Access dashboard"}
+              {initialMode === "signup"
+                ? copy.login.startWithEmail
+                : copy.login.accessDashboard}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Use the staging Supabase project configured in your local or
-              deployment environment.
+              {copy.login.providerNote}
             </p>
           </div>
 
           {params.error === "confirmation_failed" ? (
             <div className="mt-5 rounded-md border border-rose-200 bg-rose-50 p-3">
               <p className="text-sm font-medium text-rose-900">
-                The confirmation link could not be verified.
+                {copy.login.confirmationFailed}
               </p>
             </div>
           ) : null}
 
-          <AuthForm initialMode={initialMode} nextPath={nextPath} />
+          <AuthForm
+            errorLabels={copy.errors.auth}
+            initialMode={initialMode}
+            labels={copy.login.form}
+            nextPath={nextPath}
+          />
         </Panel>
       </div>
     </main>

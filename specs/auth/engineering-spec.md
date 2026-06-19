@@ -20,6 +20,7 @@ M4 implements Supabase Auth and a profile/account reference flow on top of the M
 - Auth server actions translate `FormData`, call services, revalidate affected paths, and redirect on successful navigation.
 - Client form components call server actions and capture safe PostHog events through `trackEvent`.
 - Pages render service results and never import Supabase SDKs directly.
+- Auth pages and controls receive localized labels from `apps/web/lib/i18n.ts`; client components accept label props where needed.
 
 ## Data Model
 
@@ -41,6 +42,7 @@ Validation rules:
 - Loading: submit buttons show pending labels.
 - Error: safe error banners render validation/provider categories.
 - Success: profile update returns a success state and refreshes account/dashboard.
+- I18n: default Chinese labels, English switch available through the single global language switcher.
 
 ## External Providers
 

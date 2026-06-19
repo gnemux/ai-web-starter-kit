@@ -1,89 +1,34 @@
-import {
-  capabilityTracks,
-  dashboardActions,
-  type DemoItem,
-  integrationStatuses,
-  longContentSample,
-  readinessMetrics
-} from "@starter/core";
+import { type DemoItem } from "@starter/core";
 import {
   AppShell,
   BrandMark,
   Button,
   EmptyState,
   ErrorState,
-  LoadingState,
   LongContent,
   MetricCard,
   Panel,
-  ProgressBar,
   SectionHeader,
   StatusBadge
 } from "@starter/ui";
 import { redirect } from "next/navigation";
 
 import { SignOutButton } from "@/components/sign-out-button";
+import { getDictionary } from "@/lib/i18n";
+import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
 import { listDemoItems } from "@/lib/services/demo-items";
 
 import {
   DashboardIcon,
-  DeployIcon,
-  GrowthIcon,
   IntegrationsIcon,
-  OverviewIcon,
-  RefreshIcon,
-  SpecsIcon
+  OverviewIcon
 } from "../../components/app-icons";
 import { DemoItemForm } from "./demo-item-form";
 
-const navItems = [
-  {
-    href: "/",
-    label: "Overview",
-    description: "Landing",
-    icon: <OverviewIcon />
-  },
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    description: "Command center",
-    active: true,
-    icon: <DashboardIcon />
-  },
-  {
-    href: "#specs",
-    label: "Specs",
-    description: "SDD",
-    icon: <SpecsIcon />
-  },
-  {
-    href: "#integrations",
-    label: "Integrations",
-    description: "Providers",
-    icon: <IntegrationsIcon />
-  },
-  {
-    href: "/account",
-    label: "Account",
-    description: "Profile",
-    icon: <IntegrationsIcon />
-  },
-  {
-    href: "#deploy",
-    label: "Deploy",
-    description: "Preview",
-    icon: <DeployIcon />
-  },
-  {
-    href: "#growth",
-    label: "Growth",
-    description: "Loops",
-    icon: <GrowthIcon />
-  }
-];
-
 export default async function DashboardPage() {
+  const locale = await getRequestLocale();
+  const copy = getDictionary(locale);
   const accountResult = await getCurrentAccount();
 
   if (!accountResult.ok) {
@@ -93,232 +38,197 @@ export default async function DashboardPage() {
   const demoItemsResult = await listDemoItems();
   const displayName = accountResult.data.profile?.displayName;
   const userLabel =
-    displayName || accountResult.data.user.email || "Signed user";
+    displayName || accountResult.data.user.email || copy.dashboard.eyebrow;
+  const hasProfileName = Boolean(displayName);
+  const navItems = [
+    {
+      href: "/",
+      label: copy.common.nav.overview,
+      description: copy.common.navDescription.overview,
+      icon: <OverviewIcon />
+    },
+    {
+      href: "/dashboard",
+      label: copy.common.nav.dashboard,
+      description: copy.common.navDescription.dashboard,
+      active: true,
+      icon: <DashboardIcon />
+    },
+    {
+      href: "/account",
+      label: copy.common.nav.account,
+      description: copy.common.navDescription.account,
+      icon: <IntegrationsIcon />
+    }
+  ];
 
   return (
     <AppShell
       action={
         <>
           <Button href="/account" variant="secondary">
-            Account
+            {copy.dashboard.accountButton}
           </Button>
-          <SignOutButton />
+          <SignOutButton labels={copy.common} />
         </>
       }
-      brand={<BrandMark subtitle="Template workspace" />}
+      brand={<BrandMark subtitle={copy.dashboard.shellSubtitle} />}
       navItems={navItems}
       user={{
         name: userLabel,
         role: accountResult.data.user.email
       }}
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <section className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03] lg:flex-row lg:items-end lg:justify-between">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-cyan-700">GNE-70 · APP-00</p>
+            <p className="text-sm font-medium text-cyan-700">
+              {copy.dashboard.eyebrow}
+            </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-normal text-slate-950">
-              Template Command Center
+              {copy.dashboard.title}
             </h1>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-              A restrained SaaS workspace for tracking product shell readiness,
-              implementation tracks, provider setup, and the edge states that
-              keep the template usable outside ideal data.
+              {copy.dashboard.description}
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <Button href="#edge-states" variant="secondary">
-              View states
+            <Button href="/account" variant="secondary">
+              {copy.dashboard.accountButton}
             </Button>
-            <Button href="#next-actions">Next actions</Button>
           </div>
         </section>
 
         <section className="grid gap-4 md:grid-cols-3">
-          {readinessMetrics.map((metric) => (
-            <MetricCard
-              detail={metric.detail}
-              key={metric.label}
-              label={metric.label}
-              status={metric.status}
-              value={metric.value}
-            />
-          ))}
+          <MetricCard
+            detail={copy.dashboard.metrics.session.detail}
+            label={copy.dashboard.metrics.session.label}
+            status="ready"
+            statusLabel={copy.common.status.ready}
+            value={copy.dashboard.metrics.session.value}
+          />
+          <MetricCard
+            detail={
+              hasProfileName
+                ? copy.dashboard.metrics.profile.readyDetail
+                : copy.dashboard.metrics.profile.emptyDetail
+            }
+            label={copy.dashboard.metrics.profile.label}
+            status={hasProfileName ? "ready" : "in-progress"}
+            statusLabel={
+              hasProfileName
+                ? copy.common.status.ready
+                : copy.common.status.inProgress
+            }
+            value={
+              hasProfileName
+                ? copy.dashboard.metrics.profile.ready
+                : copy.dashboard.metrics.profile.empty
+            }
+          />
+          <MetricCard
+            detail={copy.dashboard.metrics.data.detail}
+            label={copy.dashboard.metrics.data.label}
+            status={demoItemsResult.ok ? "ready" : "risk"}
+            statusLabel={
+              demoItemsResult.ok
+                ? copy.common.status.ready
+                : copy.common.status.risk
+            }
+            value={copy.dashboard.metrics.data.value}
+          />
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <Panel id="demo-data">
+            <SectionHeader
+              action={
+                <StatusBadge
+                  label={
+                    demoItemsResult.ok
+                      ? copy.dashboard.demo.statusReady
+                      : copy.dashboard.demo.statusError
+                  }
+                  status={demoItemsResult.ok ? "ready" : "risk"}
+                />
+              }
+              description={copy.dashboard.demo.description}
+              title={copy.dashboard.demo.title}
+            />
+
+            {demoItemsResult.ok ? (
+              <DemoItemsList
+                items={demoItemsResult.data.items}
+                labels={copy.dashboard.demo}
+              />
+            ) : (
+              <ErrorState
+                badgeLabel={copy.common.status.risk}
+                description={`${demoItemsResult.error.code}: ${demoItemsResult.error.message}`}
+                title={copy.dashboard.demo.serviceErrorTitle}
+              />
+            )}
+
+            <DemoItemForm
+              errorLabels={copy.errors.demo}
+              labels={copy.dashboard.demo}
+            />
+          </Panel>
+
           <Panel>
             <SectionHeader
-              description="Each row is intentionally compact and ready to become a real module status surface."
-              title="Capability tracks"
+              description={copy.dashboard.boundaries.description}
+              title={copy.dashboard.boundaries.title}
             />
-            <div className="mt-5 divide-y divide-slate-200">
-              {capabilityTracks.map((track) => (
-                <div className="py-4 first:pt-0 last:pb-0" key={track.name}>
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h2 className="text-sm font-semibold text-slate-950">
-                          {track.name}
-                        </h2>
-                        <StatusBadge status={track.status} />
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
-                        {track.description}
-                      </p>
-                    </div>
-                    <p className="shrink-0 text-xs font-medium text-slate-400">
-                      {track.owner}
-                    </p>
-                  </div>
-                  <div className="mt-3 flex items-center gap-3">
-                    <ProgressBar value={track.progress} />
-                    <span className="w-10 shrink-0 text-right text-xs font-medium text-slate-500">
-                      {track.progress}%
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Panel>
-
-          <Panel id="next-actions">
-            <SectionHeader
-              description="Linear-backed examples for the next implementation pass."
-              title="Next actions"
-            />
-            <div className="mt-5 divide-y divide-slate-200">
-              {dashboardActions.map((action) => (
-                <div className="py-4 first:pt-0 last:pb-0" key={action.issue}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-slate-400">
-                        {action.issue}
-                      </p>
-                      <h3 className="mt-1 text-sm font-semibold text-slate-950">
-                        {action.title}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
-                        {action.description}
-                      </p>
-                    </div>
-                    <StatusBadge status={action.status} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Panel>
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-          <Panel id="integrations">
-            <SectionHeader
-              description="Provider readiness remains explicit so app code does not become tightly coupled."
-              title="Integration readiness"
-            />
-            <div className="mt-5 divide-y divide-slate-200">
-              {integrationStatuses.map((integration) => (
+            <div className="mt-5 space-y-3">
+              {copy.dashboard.boundaries.items.map((item) => (
                 <div
-                  className="flex items-start justify-between gap-4 py-4 first:pt-0 last:pb-0"
-                  key={integration.name}
+                  className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-600"
+                  key={item}
                 >
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-slate-950">
-                      {integration.name}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                      {integration.description}
-                    </p>
-                  </div>
-                  <StatusBadge status={integration.status} />
+                  {item}
                 </div>
               ))}
             </div>
-          </Panel>
-
-          <div id="edge-states" className="grid gap-4 md:grid-cols-2">
-            <EmptyState
-              action={<Button variant="secondary">Create spec</Button>}
-              description="No feature spec has been selected. Start from a Linear issue, then copy the SDD template."
-              title="No active spec"
-            />
-            <LoadingState rows={3} />
-            <ErrorState
-              action={
-                <Button icon={<RefreshIcon />} variant="secondary">
-                  Retry check
-                </Button>
-              }
-              description="A provider check failed, but the core dashboard remains usable while the integration is repaired."
-              title="Integration check failed"
-            />
-            <LongContent label="Long content constraint">
-              {longContentSample}
-            </LongContent>
-          </div>
-        </section>
-
-        <Panel id="api-service">
-          <SectionHeader
-            action={
-              <StatusBadge status={demoItemsResult.ok ? "ready" : "in-progress"} />
-            }
-            description="Dashboard consumes a stable service result; Supabase calls stay behind server helpers."
-            title="API service demo"
-          />
-
-          {demoItemsResult.ok ? (
-            <DemoItemsList items={demoItemsResult.data.items} />
-          ) : (
-            <div className="mt-5 rounded-md border border-amber-200 bg-amber-50 p-4">
-              <p className="text-sm font-semibold text-amber-900">
-                {demoItemsResult.error.code}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-amber-800">
-                {demoItemsResult.error.message}
-              </p>
+            <div className="mt-4">
+              <LongContent label={copy.dashboard.boundaries.longLabel}>
+                {copy.dashboard.boundaries.longText}
+              </LongContent>
             </div>
-          )}
-
-          <DemoItemForm />
-        </Panel>
-
-        <section
-          id="specs"
-          className="grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03] md:grid-cols-3"
-        >
-          <div className="min-w-0 md:col-span-1">
-            <h2 className="text-base font-semibold text-slate-950">
-              Spec-first workflow
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              The shell is built to keep product intent, engineering scope, and
-              validation visible before implementation begins.
-            </p>
-          </div>
-          <div className="grid gap-3 md:col-span-2 md:grid-cols-3">
-            {["Product spec", "Engineering spec", "Acceptance"].map((label) => (
-              <div className="border-l border-slate-200 pl-4" key={label}>
-                <p className="text-sm font-semibold text-slate-950">{label}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Ready to be copied for the next module.
-                </p>
-              </div>
-            ))}
-          </div>
+          </Panel>
         </section>
       </div>
     </AppShell>
   );
 }
 
-function DemoItemsList({ items }: { items: DemoItem[] }) {
+type DemoItemLabels = {
+  emptyTitle: string;
+  emptyDescription: string;
+  itemVisibility: {
+    private: string;
+    public: string;
+  };
+  itemStatus: {
+    active: string;
+    archived: string;
+  };
+};
+
+function DemoItemsList({
+  items,
+  labels
+}: {
+  items: DemoItem[];
+  labels: DemoItemLabels;
+}) {
   if (items.length === 0) {
     return (
-      <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4">
-        <p className="text-sm font-semibold text-slate-950">No demo items yet</p>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          Create the first row to verify the page-to-service-to-database path.
-        </p>
+      <div className="mt-5">
+        <EmptyState
+          description={labels.emptyDescription}
+          title={labels.emptyTitle}
+        />
       </div>
     );
   }
@@ -334,7 +244,7 @@ function DemoItemsList({ items }: { items: DemoItem[] }) {
                   {item.title}
                 </h3>
                 <span className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-500">
-                  {item.visibility}
+                  {labels.itemVisibility[item.visibility]}
                 </span>
               </div>
               {item.notes ? (
@@ -344,7 +254,7 @@ function DemoItemsList({ items }: { items: DemoItem[] }) {
               ) : null}
             </div>
             <p className="shrink-0 text-xs font-medium text-slate-400">
-              {item.status}
+              {labels.itemStatus[item.status]}
             </p>
           </div>
         </div>

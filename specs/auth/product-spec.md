@@ -20,6 +20,7 @@ The starter kit currently has data and service examples, but no complete user ac
 - Read and update `public.user_profiles` through a service boundary.
 - Track safe Auth funnel events in PostHog through a local analytics abstraction.
 - Keep the Auth flow usable as a template without product-specific copy or provider leakage.
+- Render the Auth flow in Chinese by default with an English switch through the shared app i18n layer.
 
 ## Non-goals
 
@@ -48,6 +49,7 @@ landing page
 - Account page shows the current email and profile display name.
 - Profile updates write only the signed-in user's own `user_profiles` row.
 - PostHog events are captured for submitted, succeeded, failed, logout, and profile update events.
+- Login, signup, account, and logout UI labels must read from the shared i18n dictionary instead of route-local hardcoded copy.
 
 ## Edge States
 

@@ -9,6 +9,7 @@
 - [ ] `/account` reads and updates the signed-in user's profile.
 - [ ] Profile update does not allow editing another user's row.
 - [ ] Auth events are routed through the local analytics abstraction.
+- [x] `/login`, `/account`, sign out, and profile update controls render through the shared Chinese/English dictionary.
 
 ## Technical Checks
 

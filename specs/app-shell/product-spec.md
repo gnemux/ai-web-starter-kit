@@ -2,7 +2,7 @@
 
 ## Summary
 
-为模板工程建立第一版可复用产品外壳和登录后 Dashboard 基础框架，让团队成员、未来用户和 AI Agent 都能清晰看到模板工程的能力轨道、下一步任务、集成准备度和基础 UI 状态。
+为模板工程建立第一版可复用产品外壳和登录后 Dashboard 基础框架，让开发者、未来用户和 AI Agent 都能清晰使用已经具备功能的界面，并在干净、克制的模板框架上继续扩展。
 
 ## User
 
@@ -11,14 +11,16 @@
 
 ## Problem
 
-当前工程只有一个首页基础模板，缺少可复用 app shell、Dashboard 空壳和边界状态组件。后续 Auth、Billing、Payment、Analytics、Deploy、Growth 都需要稳定的页面容器和统一的 UI 语言，否则功能会各自生长，难以协作和复用。
+当前工程已经具备 Auth、账户资料和 demo data 服务示例，但页面仍混有用于展示视觉风格的样例内容。后续 Auth、Billing、Payment、Analytics、Deploy、Growth 都需要稳定的页面容器、统一的 UI 语言和多语言约束，否则功能会各自生长，难以协作和复用。
 
 ## Goals
 
 - 建立克制、现代、工程化的 SaaS / Web App 外壳。
-- 提供 Dashboard 基础框架，展示模板工程的模块状态和下一步行动。
+- 界面品牌名统一为 `XWLC`，副标题低调使用 `eXtensible Web Launch Core`。
+- 提供 Dashboard 基础框架，只展示已经有真实功能或明确可操作的内容。
 - 沉淀 loading、empty、error、long content 等边界状态。
 - 让未来功能页面可以复用同一套布局、按钮、状态和信息区组件。
+- 默认支持中文界面，并提供英文界面切换能力。
 
 ## Non-goals
 
@@ -26,25 +28,31 @@
 - 不接入真实支付、数据库或 analytics provider。
 - 不实现复杂权限模型。
 - 不建立完整设计系统网站或组件文档站。
+- 不把 Linear/Milestone、provider roadmap 或纯展示数据伪装成用户功能。
 
 ## User Journey
 
 ```text
 open app
 -> understand template positioning
--> enter dashboard
--> scan readiness and next actions
--> inspect integrations and edge states
--> choose the next Linear-backed implementation task
+-> choose sign up or login
+-> enter protected workspace after authentication
+-> create or inspect demo business data
+-> update account profile
+-> switch language when needed
 ```
 
 ## Requirements
 
-- 首页提供清晰入口，能进入 Dashboard。
-- Dashboard 使用统一 app shell，包含导航、用户状态、主内容区和示例功能入口。
-- Dashboard 展示 capability tracks、next actions、integration readiness 和 edge state preview。
+- 首页提供清晰入口，只保留注册和登录入口；受保护工作区由登录成功后进入。
+- Dashboard 使用统一 app shell，包含导航、用户状态、主内容区和真实可操作功能入口。
+- Dashboard 聚焦 Supabase Auth、账户资料和 demo_items 服务读写示例。
+- 尚未实现的模块不得以工作台功能卡片出现；如需表达，只能作为低干扰的开发提示或规格说明。
 - UI 风格应优雅、克制、易读、现代，不依赖大面积渐变或装饰元素。
 - 移动端和桌面端都不能出现文字溢出、重叠或布局跳动。
+- 所有新增界面文案必须通过项目内 i18n 字典提供中文和英文版本，默认语言为中文。
+- 语言切换应在全局一致位置可见或可达，不应由每个页面单独重复渲染，并保持当前页面语境。
+- 中文和英文文案都应简短、工程化、少装饰，避免为了展示视觉效果而新增无功能实体。
 
 ## Edge States
 

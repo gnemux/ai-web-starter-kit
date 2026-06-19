@@ -30,6 +30,10 @@ Initialization.
 - Completed M3 API with reusable service result types, Supabase client/server helper boundaries, a demo `demo_items` service path, dashboard service example, and local verification.
 - Added Linear issue `GNE-163` so M4 Auth includes PostHog analytics instrumentation.
 - Added M4 Auth specs and implemented Supabase Auth services, protected routes, account/profile UI, and PostHog Auth event wrappers.
+- Refined the visible product interface so landing, login/signup, protected dashboard, and account pages only present currently implemented capabilities.
+- Added lightweight Chinese/English i18n with Chinese as default, cookie-backed global language switching, localized route copy, and i18n requirements in app-shell/auth specs.
+- Removed obsolete static dashboard sample data from `packages/core` so future work consumes real service contracts instead of visual mock arrays.
+- Retouched the visible product brand to `XWLC` with `eXtensible Web Launch Core` as the restrained subtitle.
 
 ## Done Issues
 
@@ -76,6 +80,7 @@ Initialization.
 2. Confirm PostHog events in the target PostHog project after environment variables are configured.
 3. Keep `SUPABASE_SECRET_KEY` and `SUPABASE_SERVICE_ROLE_KEY` out of browser code and `NEXT_PUBLIC_` variables.
 4. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
+5. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
 
 ## Risks
 

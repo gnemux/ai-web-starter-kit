@@ -1,5 +1,6 @@
 export * from "./data";
 export * from "./api";
+export * from "./auth";
 
 export type ProductTrack = {
   name: string;
@@ -103,8 +104,8 @@ export const capabilityTracks: CapabilityTrack[] = [
     name: "Auth",
     description: "Supabase session, user profile, protected route, and account settings.",
     owner: "Auth",
-    status: "planned",
-    progress: 12
+    status: "in-progress",
+    progress: 76
   },
   {
     name: "Data",
@@ -138,8 +139,8 @@ export const capabilityTracks: CapabilityTrack[] = [
     name: "Analytics",
     description: "Typed events, provider adapter, conversion funnel, and production checks.",
     owner: "Analytics",
-    status: "planned",
-    progress: 10
+    status: "in-progress",
+    progress: 36
   }
 ];
 
@@ -179,13 +180,19 @@ export const dashboardActions: DashboardAction[] = [
     title: "Define the API service layer",
     description: "Keep pages behind services before Auth, Billing, and Payment implementation starts.",
     status: "ready"
+  },
+  {
+    issue: "GNE-5",
+    title: "Ship Supabase Auth",
+    description: "Complete sign up, sign in, protected routes, account profile, and Auth analytics.",
+    status: "in-progress"
   }
 ];
 
 export const integrationStatuses: IntegrationStatus[] = [
   {
     name: "Supabase",
-    description: "Auth and database provider documented with local migration workflow.",
+    description: "Database, Auth, profile, and protected route workflow documented and implemented locally.",
     status: "in-progress"
   },
   {
@@ -200,8 +207,8 @@ export const integrationStatuses: IntegrationStatus[] = [
   },
   {
     name: "Analytics",
-    description: "Provider adapter and event naming still need implementation.",
-    status: "planned"
+    description: "PostHog client adapter and Auth event naming are implemented for M4.",
+    status: "in-progress"
   }
 ];
 

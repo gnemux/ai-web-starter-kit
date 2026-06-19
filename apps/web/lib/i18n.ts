@@ -70,16 +70,7 @@ export const dictionaries = {
           title: "Demo 数据流",
           description: "可创建 demo item，用于验证页面到服务到数据库的边界。"
         }
-      ],
-      workflowTitle: "推荐使用路径",
-      workflow: [
-        "先注册或登录测试账号",
-        "登录后创建一条 demo item",
-        "在账户页更新 profile，验证受保护数据链路"
-      ],
-      noteTitle: "开发提示",
-      note:
-        "未实现的支付、计费、分析和 AI 能力不会在界面中伪装成产品功能；它们应先进入规格，再进入实现。"
+      ]
     },
     login: {
       subtitle: "eXtensible Web Launch Core",
@@ -284,16 +275,7 @@ export const dictionaries = {
           title: "Demo data example",
           description: "Create demo items through the page-service-database boundary."
         }
-      ],
-      workflowTitle: "Recommended path",
-      workflow: [
-        "Create or log in with a test account",
-        "Create one demo item after login",
-        "Update profile data on the account page"
-      ],
-      noteTitle: "Developer note",
-      note:
-        "Unimplemented payment, billing, analytics, and AI capabilities are not presented as product features. They should enter specs before implementation."
+      ]
     },
     login: {
       subtitle: "eXtensible Web Launch Core",

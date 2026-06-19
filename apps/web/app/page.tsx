@@ -66,31 +66,6 @@ export default async function HomePage() {
           </div>
         </Panel>
       </section>
-
-      <section id="workflow" className="border-t border-slate-200 bg-white">
-        <div className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:px-8">
-          <div className="min-w-0">
-            <h2 className="text-xl font-semibold tracking-normal text-slate-950">
-              {copy.home.workflowTitle}
-            </h2>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">
-              {copy.home.note}
-            </p>
-          </div>
-          <div className="grid gap-3 md:grid-cols-3">
-            {copy.home.workflow.map((step, index) => (
-              <Panel key={step}>
-                <p className="text-xs font-semibold text-cyan-700">
-                  {String(index + 1).padStart(2, "0")}
-                </p>
-                <p className="mt-3 text-sm font-semibold leading-6 text-slate-950">
-                  {step}
-                </p>
-              </Panel>
-            ))}
-          </div>
-        </div>
-      </section>
     </main>
   );
 }

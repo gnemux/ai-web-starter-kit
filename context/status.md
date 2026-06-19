@@ -28,6 +28,8 @@ Initialization.
 - Applied M2 DATA migrations to Supabase staging project `nglilxhkuqzswbwitbdu`.
 - Hardened staging after Supabase advisors by fixing `set_updated_at` search path, optimizing RLS policies, and revoking public execution of `rls_auto_enable()`.
 - Completed M3 API with reusable service result types, Supabase client/server helper boundaries, a demo `demo_items` service path, dashboard service example, and local verification.
+- Added Linear issue `GNE-163` so M4 Auth includes PostHog analytics instrumentation.
+- Added M4 Auth specs and implemented Supabase Auth services, protected routes, account/profile UI, and PostHog Auth event wrappers.
 
 ## Done Issues
 
@@ -61,18 +63,19 @@ Initialization.
 
 ## In Progress Issues
 
-- None.
+- `GNE-5` AUTH-00
+- `GNE-90` AUTH-06
 
 ## In Progress
 
-- None.
+- M4 Auth is implemented locally and awaiting real Supabase Auth signup/login verification with a test account.
 
 ## Next Steps
 
-1. Start M4 Auth flows on top of the M3 service/helper boundary.
-2. Keep `SUPABASE_SECRET_KEY` and `SUPABASE_SERVICE_ROLE_KEY` out of browser code and `NEXT_PUBLIC_` variables.
-3. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
-4. Commit and push M3 after review.
+1. Verify M4 with a real Supabase Auth test account and email confirmation behavior.
+2. Confirm PostHog events in the target PostHog project after environment variables are configured.
+3. Keep `SUPABASE_SECRET_KEY` and `SUPABASE_SERVICE_ROLE_KEY` out of browser code and `NEXT_PUBLIC_` variables.
+4. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
 
 ## Risks
 
@@ -81,3 +84,5 @@ Initialization.
 - Local machine exposes `pnpm@9.15.0`.
 - Local Supabase runs through Colima; analytics is disabled locally because the Supabase vector container cannot mount Colima's Docker socket path.
 - Staging performance advisors currently include only expected unused-index INFO entries until `demo_items` receives representative query traffic.
+- M4 Auth needs both Supabase environment variables and PostHog environment variables in local, preview, and production deployments.
+- Full Auth verification may require the user to receive an email confirmation or enter test credentials in the browser.

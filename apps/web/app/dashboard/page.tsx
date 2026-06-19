@@ -20,7 +20,10 @@ import {
   SectionHeader,
   StatusBadge
 } from "@starter/ui";
+import { redirect } from "next/navigation";
 
+import { SignOutButton } from "@/components/sign-out-button";
+import { getCurrentAccount } from "@/lib/services/auth";
 import { listDemoItems } from "@/lib/services/demo-items";
 
 import {
@@ -61,6 +64,12 @@ const navItems = [
     icon: <IntegrationsIcon />
   },
   {
+    href: "/account",
+    label: "Account",
+    description: "Profile",
+    icon: <IntegrationsIcon />
+  },
+  {
     href: "#deploy",
     label: "Deploy",
     description: "Preview",
@@ -75,20 +84,32 @@ const navItems = [
 ];
 
 export default async function DashboardPage() {
+  const accountResult = await getCurrentAccount();
+
+  if (!accountResult.ok) {
+    redirect("/login?next=/dashboard");
+  }
+
   const demoItemsResult = await listDemoItems();
+  const displayName = accountResult.data.profile?.displayName;
+  const userLabel =
+    displayName || accountResult.data.user.email || "Signed user";
 
   return (
     <AppShell
       action={
-        <Button href="/" icon={<OverviewIcon />} variant="secondary">
-          Overview
-        </Button>
+        <>
+          <Button href="/account" variant="secondary">
+            Account
+          </Button>
+          <SignOutButton />
+        </>
       }
       brand={<BrandMark subtitle="Template workspace" />}
       navItems={navItems}
       user={{
-        name: "Demo operator",
-        role: "Template maintainer"
+        name: userLabel,
+        role: accountResult.data.user.email
       }}
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">

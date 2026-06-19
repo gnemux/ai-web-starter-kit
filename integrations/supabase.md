@@ -6,7 +6,7 @@ Supabase is the default provider for authentication, user profiles, and MVP data
 
 ## Status
 
-M2 DATA verified locally and applied to staging. M3 API service helpers are verified locally.
+M2 DATA verified locally and applied to staging. M3 API service helpers are verified locally. M4 Auth implementation is in progress with local SSR, protected route, and account UI verification complete.
 
 ## Collaboration Model
 
@@ -131,3 +131,30 @@ Implemented examples:
 - `listDemoItems`: authenticated read of owner rows plus explicit public rows.
 - `createDemoItemFromFormData`: form input validation, authenticated insert, and safe error mapping.
 - Dashboard API service demo: page calls service methods; client form calls a server action.
+
+## M4 Auth Template
+
+The Auth template is tracked by Linear `GNE-5`.
+
+Implemented boundaries:
+
+- Supabase Auth is the identity and session source of truth.
+- `apps/web/proxy.ts` refreshes Auth cookies and protects `/dashboard` and `/account`.
+- Protected server code validates sessions with `supabase.auth.getClaims()`.
+- Auth use cases live in `apps/web/lib/services/auth.ts`.
+- Login, signup, logout, confirmation exchange, current account, and profile update flows return `ServiceResult<T>`.
+- `public.user_profiles` is reused from M2; no M4 schema migration is required.
+
+Routes:
+
+- `/login`: email/password sign in and sign up.
+- `/auth/confirm`: Supabase email confirmation code exchange.
+- `/dashboard`: protected product workspace.
+- `/account`: protected profile settings page.
+
+Operational notes:
+
+- Supabase Auth dashboard settings decide whether signup creates an immediate session or requires email confirmation.
+- Vercel must include `NEXT_PUBLIC_SUPABASE_URL` and either `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- If Auth redirect URLs are restricted in Supabase, add local, preview, and production URLs before testing email confirmation.
+- Real signup/login verification may send email to the test address and should be done by the account owner.

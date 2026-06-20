@@ -9,6 +9,7 @@ For every task, Codex should first read:
 3. `specs/collaboration/engineering-spec.md` when the task may involve code or documentation changes
 4. the relevant feature spec under `specs/`
 5. the relevant integration document under `integrations/`
+6. `specs/deploy/engineering-spec.md` plus the relevant deploy memory document when the task involves deployment status, Preview / Production verification, smoke tests, production monitoring, incidents, or environment matrices
 
 ## SDD Rule
 
@@ -56,6 +57,19 @@ At minimum:
 - run build before release or deploy
 - verify the user path affected by the change
 - test empty, loading, error, and long-content states when UI is involved
+
+## Deployment Memory And Recall
+
+When the user mentions Production deployment, Preview deployment, Vercel redeploy, rollback, smoke test, production monitoring, environment variable separation, multi-environment setup, multi-product setup, or Linear issues `GNE-110`, `GNE-187`, `GNE-129`, or `GNE-74`, Codex must use the deploy memory workflow.
+
+Read:
+
+1. `specs/deploy/engineering-spec.md`
+2. `context/deployment-status.md` for deployment, redeploy, rollback, or smoke test work
+3. `context/production-monitoring.md` for monitoring, incident, or health-check work
+4. `context/environment-matrix.md` for environment, product, market, or provider separation work
+
+Before writing, summarize the currently remembered state. When updating, use `pass`, `fail`, `blocked`, `not_run`, or `unknown`; do not invent successful verification. Record environment variable key names and configured/missing/unknown status only, never values.
 
 ## Security
 

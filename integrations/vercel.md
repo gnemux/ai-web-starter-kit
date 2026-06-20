@@ -21,6 +21,15 @@ Configured for `main`-only automatic deployments.
 
 Use Vercel project environment variables for values listed in `.env.example`.
 
+Production and Preview entries should be configured separately in the Vercel Dashboard. They may temporarily contain the same provider values while the project only has one service environment, but they should remain separate entries so they can diverge later.
+
+Operational memory:
+
+- Deployment status and smoke test writeback: `context/deployment-status.md`
+- Production monitoring checklist: `context/production-monitoring.md`
+- Environment and product matrix: `context/environment-matrix.md`
+- AI automation rules: `specs/deploy/engineering-spec.md`
+
 ## Rules
 
 - `vercel.json` disables automatic Git deployments for all non-`main` branches to avoid blocked collaborator Preview deployments on the current Hobby/private-repo setup.
@@ -28,5 +37,6 @@ Use Vercel project environment variables for values listed in `.env.example`.
 - Build must pass before production deployment.
 - Pull request feature verification should use GitHub CI and local testing by default.
 - Preview deployment may be generated manually by the Vercel project owner when a reviewer needs a shared URL.
+- Manual Preview deployments should be recorded with Preview URL, commit, trigger, verification result, and next action in `context/deployment-status.md`.
 - If a `main` deployment is blocked by Hobby commit-author checks after merging a contributor PR, the Vercel project owner should redeploy `main` manually or upgrade Vercel collaboration.
 - Production verification should cover the main user path, not only static page load.

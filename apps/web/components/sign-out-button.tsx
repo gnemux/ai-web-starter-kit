@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@starter/ui";
 
@@ -16,7 +15,6 @@ export function SignOutButton({
     working: string;
   };
 }) {
-  const router = useRouter();
   const [state, formAction, isPending] = useActionState<SignOutState, FormData>(
     signOutAction,
     null
@@ -29,12 +27,16 @@ export function SignOutButton({
         result: "success"
       });
       resetAnalytics();
-      router.push(state.data.redirectTo);
+      window.location.assign(state.data.redirectTo);
     }
-  }, [router, state]);
+  }, [state]);
+
+  function handleSignOutSubmit() {
+    resetAnalytics();
+  }
 
   return (
-    <form action={formAction}>
+    <form action={formAction} onSubmit={handleSignOutSubmit}>
       <Button type="submit" variant="secondary">
         {isPending ? labels.working : labels.signOut}
       </Button>

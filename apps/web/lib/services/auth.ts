@@ -11,6 +11,7 @@ import {
   type UpdateUserProfileInput,
   type UserProfile
 } from "@starter/core";
+import { cookies } from "next/headers";
 
 import {
   createSupabaseServerClient,
@@ -48,6 +49,18 @@ export async function getCurrentAccount(): Promise<
     user: userResult.data,
     profile: profileResult.data
   });
+}
+
+export async function getCurrentAccountForPublicShell(): Promise<
+  AccountPayload | null
+> {
+  if (!(await hasSupabaseAuthCookie())) {
+    return null;
+  }
+
+  const result = await withTimeout(getCurrentAccount(), 1200);
+
+  return result?.ok ? result.data : null;
 }
 
 export async function signInWithPasswordFromFormData(
@@ -175,7 +188,7 @@ export async function signOutCurrentUser(): Promise<
   return serviceOk({
     status: "authenticated",
     user: null,
-    redirectTo: "/login",
+    redirectTo: "/",
     message: "Signed out."
   });
 }
@@ -361,4 +374,29 @@ function getAppUrl(): string {
     process.env.VERCEL_URL?.replace(/^/, "https://") ??
     "http://localhost:3000"
   );
+}
+
+async function hasSupabaseAuthCookie(): Promise<boolean> {
+  const cookieStore = await cookies();
+
+  return cookieStore.getAll().some(({ name }) => {
+    return name.startsWith("sb-") && name.includes("auth-token");
+  });
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T | null> {
+  return new Promise((resolve) => {
+    const timeout = setTimeout(() => resolve(null), timeoutMs);
+
+    promise.then(
+      (value) => {
+        clearTimeout(timeout);
+        resolve(value);
+      },
+      () => {
+        clearTimeout(timeout);
+        resolve(null);
+      }
+    );
+  });
 }

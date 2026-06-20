@@ -3,15 +3,12 @@ import { redirect } from "next/navigation";
 import {
   AppShell,
   BrandMark,
-  Button,
-  MetricCard,
   Panel,
-  SectionHeader,
-  StatusBadge
+  SectionHeader
 } from "@starter/ui";
 
-import { DashboardIcon, IntegrationsIcon, OverviewIcon } from "@/components/app-icons";
-import { SignOutButton } from "@/components/sign-out-button";
+import { AccountIcon, DashboardIcon } from "@/components/app-icons";
+import { AccountMenu } from "@/components/account-menu";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
@@ -28,33 +25,32 @@ export default async function AccountPage() {
   }
 
   const displayName = accountResult.data.profile?.displayName ?? "";
-  const userLabel = displayName || accountResult.data.user.email || copy.account.title;
-  const hasProfileName = Boolean(displayName);
+  const userLabel =
+    displayName || accountResult.data.user.email || copy.account.title;
   const navItems = [
-    {
-      href: "/",
-      label: copy.common.nav.overview,
-      description: copy.common.navDescription.overview,
-      icon: <OverviewIcon />
-    },
     {
       href: "/dashboard",
       label: copy.common.nav.dashboard,
-      description: copy.common.navDescription.dashboard,
       icon: <DashboardIcon />
     },
     {
       href: "/account",
       label: copy.common.nav.account,
-      description: copy.common.navDescription.account,
       active: true,
-      icon: <IntegrationsIcon />
+      icon: <AccountIcon />
     }
   ];
 
   return (
     <AppShell
-      action={<SignOutButton labels={copy.common} />}
+      action={
+        <AccountMenu
+          avatarUrl={accountResult.data.profile?.avatarUrl}
+          email={accountResult.data.user.email}
+          labels={copy.common.accountMenu}
+          name={userLabel}
+        />
+      }
       brand={<BrandMark subtitle={copy.account.shellSubtitle} />}
       navItems={navItems}
       user={{
@@ -75,57 +71,10 @@ export default async function AccountPage() {
               {copy.account.description}
             </p>
           </div>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            <Button href="/dashboard" variant="secondary">
-              {copy.account.dashboardButton}
-            </Button>
-          </div>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-3">
-          <MetricCard
-            detail={copy.account.metrics.session.detail}
-            label={copy.account.metrics.session.label}
-            status="ready"
-            statusLabel={copy.common.status.ready}
-            value={copy.account.metrics.session.value}
-          />
-          <MetricCard
-            detail={
-              hasProfileName
-                ? copy.account.metrics.profile.readyDetail
-                : copy.account.metrics.profile.emptyDetail
-            }
-            label={copy.account.metrics.profile.label}
-            status={hasProfileName ? "ready" : "in-progress"}
-            statusLabel={
-              hasProfileName
-                ? copy.common.status.ready
-                : copy.common.status.inProgress
-            }
-            value={
-              hasProfileName
-                ? copy.account.metrics.profile.ready
-                : copy.account.metrics.profile.empty
-            }
-          />
-          <MetricCard
-            detail={copy.account.metrics.analytics.detail}
-            label={copy.account.metrics.analytics.label}
-            status="in-progress"
-            statusLabel={copy.common.status.inProgress}
-            value={copy.account.metrics.analytics.value}
-          />
         </section>
 
         <Panel>
           <SectionHeader
-            action={
-              <StatusBadge
-                label={copy.common.status.ready}
-                status="ready"
-              />
-            }
             description={copy.account.profile.description}
             title={copy.account.profile.title}
           />

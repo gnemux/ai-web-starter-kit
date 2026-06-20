@@ -34,6 +34,16 @@ Initialization.
 - Added lightweight Chinese/English i18n with Chinese as default, cookie-backed global language switching, localized route copy, and i18n requirements in app-shell/auth specs.
 - Removed obsolete static dashboard sample data from `packages/core` so future work consumes real service contracts instead of visual mock arrays.
 - Retouched the visible product brand to `XWLC` with `eXtensible Web Launch Core` as the restrained subtitle.
+- Made the landing page header Auth-aware so authenticated users see a compact account menu instead of a Login button.
+- Added a global product footer with localized product links, capability categories, engineering resource notes, copyright text, and moved the language switcher into the footer.
+- Simplified authenticated app shell navigation so work area pages use one primary nav with Dashboard and Account only, while the top header is reserved for account actions.
+- Removed non-functional status cards from Dashboard and Account so protected pages focus on demo data testing and profile editing.
+- Clarified footer slot copy so future teams understand where real product and engineering links can live.
+- Reworked the landing page into a restrained, low-fidelity product-style first screen and changed sign out to return users to the landing page.
+- Retouched the landing first screen typography and core layout so the product preview and sample points stay orderly on desktop and mobile.
+- Simplified the landing first screen by removing the non-functional header sample nav and lower three-column slot band, keeping the hero content vertically centered.
+- Fixed sign-out navigation so logout redirects from the server action to `/` and cannot be intercepted by protected-route refreshes.
+- Fixed the landing login regression by keeping Supabase Auth proxy checks on protected routes only and making public landing account detection bounded and safely degradable.
 - Completed MVP1 AUTH / M4 Auth verification and synced `GNE-5`, `GNE-87`, `GNE-88`, `GNE-89`, `GNE-90`, and `GNE-163` to Done in Linear.
 - Synced Linear planning to the `GNE-172` MVP factory route: added MVP1/MVP2/MVP3 prefixes to module parent issues, updated `GNE-168` with the stage mapping, promoted `GNE-171` to the MVP3 Product Validation Kit entry, and created `GNE-173` through `GNE-179` as MVP3 CP execution tasks.
 - Closed the MVP2 integrations planning gap in Linear by upgrading `GNE-167` into the MVP2/MVP4 integrations entry and creating `GNE-180` through `GNE-183` for provider matrix, provider interfaces, env naming, and secret-leakage/config checks.

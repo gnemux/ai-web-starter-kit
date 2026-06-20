@@ -37,7 +37,7 @@ landing page
 -> Supabase validates credentials and sets cookies
 -> protected dashboard loads user data through services
 -> user updates profile on account page
--> user signs out and returns to login
+-> user signs out and returns to landing page
 ```
 
 ## Requirements
@@ -45,8 +45,10 @@ landing page
 - `GET /login` exposes sign in and sign up modes.
 - Auth forms validate email and password before calling Supabase.
 - Successful Auth redirects to the requested protected path or `/dashboard`.
+- Public landing header reads the server-validated session when available and replaces Login with an account menu trigger for Dashboard, account settings, and sign out.
+- Successful sign out clears the session and returns the user to `/`.
 - `/dashboard` and `/account` require a Supabase session validated with `getClaims()`.
-- Account page shows the current email and profile display name.
+- Account page shows the current email and editable profile display name, without adding unrelated session, analytics, or status summary cards.
 - Profile updates write only the signed-in user's own `user_profiles` row.
 - PostHog events are captured for submitted, succeeded, failed, logout, and profile update events.
 - Login, signup, account, and logout UI labels must read from the shared i18n dictionary instead of route-local hardcoded copy.

@@ -11,7 +11,7 @@
 
 ## Problem
 
-当前 GitHub 免费个人私有仓库的 branch protection 可能无法强制执行，Vercel Hobby 在私有仓库多人协作下也不适合作为 PR Preview 的硬性门禁。团队必须通过仓库文档和 AI 执行规则保证流程一致：每个任务从最新 `main` 新开分支，PR 合并进入 `main`，由 Repo 拥有者在网页 review、merge，并验证 Vercel Production。
+当前 GitHub 免费个人私有仓库的 branch protection 可能无法强制执行，Vercel Hobby 在私有仓库多人协作下也不适合作为 PR Preview 的硬性门禁。团队必须通过仓库文档和 AI 执行规则保证流程一致：每个任务从最新 `main` 新开分支，PR 合并进入 `main`，由 Repo 拥有者在网页 review、选择适合当前 Vercel 限制的 merge method，并验证 Vercel Production。
 
 ## Goals
 
@@ -20,6 +20,7 @@
 - 防止 AI 或开发者在旧功能分支上继续开发新任务。
 - 防止直接在 `main` 上实现新功能或修复，除非用户明确要求且风险已说明。
 - 固化当前 Vercel 规则：非 `main` 分支不自动部署，`main` 合并后触发 Production。
+- 固化当前 Vercel Hobby / private repo 经验：外部 Collaborator PR 默认用 `Create a merge commit`，让 `main` 最新部署提交由 Repo Owner 生成。
 
 ## Non-goals
 
@@ -39,7 +40,7 @@ kick off Linear task
 -> open PR to main
 -> owner reviews in GitHub
 -> author updates same branch if needed
--> owner squash merges
+-> owner uses Create a merge commit for collaborator-authored PRs
 -> main deploys on Vercel
 -> owner verifies production
 -> close Linear task
@@ -52,7 +53,10 @@ kick off Linear task
 - 开发者在本地完成开发、检查和预览后 push 任务分支，并创建 PR 到 `main`。
 - PR 阶段不依赖 Vercel Preview。开发者必须在 PR 描述中写清楚本地验证方式，并尽量提供截图或录屏。
 - 如果 Repo 拥有者要求修改，开发者必须在同一个分支继续 commit 和 push，让原 PR 自动更新。
-- Repo 拥有者只在 GitHub 网页进行 review、Request changes、Approve、Squash and merge。
+- Repo 拥有者只在 GitHub 网页进行 review、Request changes、Approve 和 merge。
+- 在当前 Vercel Hobby / private repo 设置下，非 Repo Owner 的 Collaborator PR 默认使用 `Create a merge commit`，确保 `main` 上触发 Production 的最新 commit 是 Repo Owner 生成的 merge commit。
+- 不要把 `Squash and merge` 作为非 Repo Owner PR 的默认发布方式；GitHub 生成的 squash commit 可能仍以 PR 作者为 author，导致 Vercel Hobby commit-author 校验 block Production build。
+- `Squash and merge` 只适合不会触发 Hobby commit-author block 的场景，例如 Repo Owner 自己 authored 的 PR，或以后升级到支持 team collaboration 的 Vercel 方案后重新确认。
 - PR merge 后删除远程分支；开发者同步 `main` 后删除本地任务分支。
 - Linear 状态建议：开发完成并创建 PR 后进入 `In Review`；PR merge 并完成 Production 验证后进入 `Done`。
 - AI Coding Agent 开始任何代码或文档修改前必须检查当前分支和工作区状态。

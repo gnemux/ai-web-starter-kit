@@ -11,6 +11,8 @@
 - [ ] AI responses include the completed step result and the next best-practice action.
 - [ ] AI can create a PR after push and fill the PR description from the repository template.
 - [ ] The default PR template is generic and does not include a permanent Supabase-only checklist.
+- [ ] Repo owner workflow documents `Create a merge commit` as the default for non-owner collaborator PRs under the current Vercel Hobby / private repo setup.
+- [ ] Vercel blocked-deployment remediation explains when an owner-authored no-op trigger commit is acceptable after reviewed code is already merged.
 
 ## Technical Checks
 
@@ -27,4 +29,5 @@
 - [ ] The workflow does not require GitHub Actions.
 - [ ] The workflow does not require automatic Vercel PR Preview deployments.
 - [ ] The workflow keeps Repo owner review and merge in GitHub web.
+- [ ] The workflow avoids `Squash and merge` as the default for collaborator-authored PRs while Vercel Hobby commit-author checks apply.
 - [ ] The workflow guides developers to the next correct action after push, PR update, merge, deployment, and branch cleanup.

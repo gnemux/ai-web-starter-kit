@@ -34,7 +34,9 @@ Before making code or documentation edits, Codex must inspect the current branch
 - If uncommitted changes exist, do not switch branches, delete files, reset, or overwrite work without explicit user approval.
 - Use one branch per task and one PR per focused change.
 - PR branches do not rely on Vercel Preview in the current setup; only `main` automatically deploys to Vercel.
-- Repo owner review, squash merge, remote branch cleanup, and Production verification happen through GitHub and Vercel web UI unless the user explicitly requests CLI operations.
+- Repo owner review, merge method selection, remote branch cleanup, and Production verification happen through GitHub and Vercel web UI unless the user explicitly requests CLI operations.
+- While Vercel remains on Hobby with a private repository, non-owner collaborator PRs should use `Create a merge commit` so the latest `main` deployment commit is owner-authored. Avoid `Squash and merge` for collaborator PRs unless the resulting commit author is confirmed to pass Vercel checks.
+- If a reviewed collaborator PR was already merged with a contributor-authored commit and Vercel blocks Production, the Repo Owner may create an owner-authored no-op trigger commit after confirming no unreviewed code is being introduced.
 - After a PR is merged and production is verified, the associated Linear task can move to Done.
 - After each key workflow step, Codex should state the result and the next best-practice action. Examples: after pushing a branch, suggest opening a PR to `main`; after merge, suggest checking Vercel Production; after Production verification, suggest syncing `main`, deleting the local branch, and moving Linear to Done.
 - If the user asks Codex to complete the publish flow, Codex may create the PR after push and should fill the PR title and description using the repository template. The PR body must include what changed, the Linear issue when known, validation actually run, checks not run with reasons, reviewer notes, and a no-secrets confirmation.

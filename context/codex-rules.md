@@ -36,6 +36,8 @@ Before making code or documentation edits, Codex must inspect the current branch
 - Repo owner review, squash merge, remote branch cleanup, and Production verification happen through GitHub and Vercel web UI unless the user explicitly requests CLI operations.
 - After a PR is merged and production is verified, the associated Linear task can move to Done.
 - After each key workflow step, Codex should state the result and the next best-practice action. Examples: after pushing a branch, suggest opening a PR to `main`; after merge, suggest checking Vercel Production; after Production verification, suggest syncing `main`, deleting the local branch, and moving Linear to Done.
+- If the user asks Codex to complete the publish flow, Codex may create the PR after push and should fill the PR title and description using the repository template. The PR body must include what changed, the Linear issue when known, validation actually run, checks not run with reasons, reviewer notes, and a no-secrets confirmation.
+- Supabase-specific checklist items should appear in the PR body only when the PR touches Supabase schema, RLS, Auth, Storage, Realtime, or database-backed behavior.
 
 ## Code Boundaries
 

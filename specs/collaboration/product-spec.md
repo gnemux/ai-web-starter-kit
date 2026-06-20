@@ -60,6 +60,8 @@ kick off Linear task
 - AI Coding Agent 如果发现当前在旧任务分支、已 merge 分支或与新任务不匹配的分支，应提示用户并建议先切回 `main` 再新开分支。
 - AI Coding Agent 如果工作区已有未提交变更，不得擅自切分支、覆盖或丢弃，应先说明状态并保护已有变更。
 - AI Coding Agent 完成关键步骤后，必须同时说明处理结果和下一步符合最佳实践的建议。例如 push 分支后提示创建 PR，PR merge 后提示验证 Vercel Production 和清理本地分支。
+- 当用户要求 AI 完成提交和推送时，AI 可以同时创建 PR，并根据仓库 PR 模板填写标题、变更摘要、Linear issue、验证记录、未运行检查和剩余风险。
+- PR 模板应保持通用。Supabase 专项检查应放在 Supabase 相关 spec 或工作流文档中，只有触及 Supabase schema、RLS、Auth、Storage、Realtime 或数据库功能时才需要在 PR 描述中补充。
 
 ## Edge States
 

@@ -19,6 +19,8 @@
 - Check `AGENTS.md` instructs future agents to inspect branch state and avoid direct `main` edits.
 - Check `context/codex-rules.md` provides a concrete branch safety checklist before edits.
 - Check `context/codex-rules.md` requires result plus next-step guidance after key workflow actions.
+- Check `specs/collaboration/engineering-spec.md` documents AI-created PR body expectations.
+- Check `.github/pull_request_template.md` no longer contains a default Supabase-only checklist.
 - Check `context/status.md` records the documentation update.
 
 ## Regression Risks

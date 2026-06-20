@@ -64,6 +64,20 @@ AI Coding Agent responses should keep the developer oriented after each operatio
 - After Production verification, remind the developer to sync `main`, delete the local task branch, and move the Linear task to Done when appropriate.
 - If a step cannot be completed, explain the blocker and the safest next action instead of only reporting failure.
 
+## AI PR Creation And Description
+
+When the user asks AI to handle the publish flow, AI may create the PR after the branch is committed and pushed.
+
+The PR should target `current-branch -> main` unless the user explicitly requests a different base branch. The PR body should use the repository template and fill in useful content instead of leaving placeholders blank:
+
+- `变更摘要`: concise bullets covering what changed and why.
+- `Linear`: the relevant issue identifier, if known.
+- `验证`: checks that actually ran, plus checks intentionally not run with a short reason.
+- `影响范围 / 备注`: user-facing impact, deployment notes, or reviewer attention points.
+- `安全检查`: confirm that no secrets, private tokens, customer data, or credentials were committed.
+
+If the PR is documentation-only, the PR body should say so and avoid implying that runtime checks were executed. If the change touches Supabase schema, RLS, Auth, Storage, Realtime, or database-backed behavior, add a Supabase-specific checklist in the PR body or link to the relevant Supabase workflow.
+
 ## Developer Workflow
 
 1. Claim a Linear task.

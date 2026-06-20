@@ -44,6 +44,11 @@ Initialization.
 - Simplified the landing first screen by removing the non-functional header sample nav and lower three-column slot band, keeping the hero content vertically centered.
 - Fixed sign-out navigation so logout redirects from the server action to `/` and cannot be intercepted by protected-route refreshes.
 - Fixed the landing login regression by keeping Supabase Auth proxy checks on protected routes only and making public landing account detection bounded and safely degradable.
+- Completed MVP1 AUTH / M4 Auth verification and synced `GNE-5`, `GNE-87`, `GNE-88`, `GNE-89`, `GNE-90`, and `GNE-163` to Done in Linear.
+- Synced Linear planning to the `GNE-172` MVP factory route: added MVP1/MVP2/MVP3 prefixes to module parent issues, updated `GNE-168` with the stage mapping, promoted `GNE-171` to the MVP3 Product Validation Kit entry, and created `GNE-173` through `GNE-179` as MVP3 CP execution tasks.
+- Closed the MVP2 integrations planning gap in Linear by upgrading `GNE-167` into the MVP2/MVP4 integrations entry and creating `GNE-180` through `GNE-183` for provider matrix, provider interfaces, env naming, and secret-leakage/config checks.
+- Reworked Linear project milestone display so MVP milestones are assigned only to module parent issues; execution child issues use `No milestone` and are reached through their parent issue.
+- Audited Linear child issues against the milestone display rule and updated `context/linear.md` so the local issue tree matches the current Linear parent/child structure.
 
 ## Done Issues
 
@@ -74,21 +79,27 @@ Initialization.
 - `GNE-141` API-03
 - `GNE-142` API-04
 - `GNE-143` API-05
+- `GNE-5` AUTH-00
+- `GNE-86` AUTH-01
+- `GNE-87` AUTH-02
+- `GNE-88` AUTH-03
+- `GNE-89` AUTH-04
+- `GNE-163` AUTH-05
+- `GNE-90` AUTH-06
 
 ## In Progress Issues
 
-- `GNE-5` AUTH-00
-- `GNE-90` AUTH-06
+None.
 
 ## In Progress
 
-- M4 Auth is implemented locally and awaiting real Supabase Auth signup/login verification with a test account.
+No active implementation task is currently recorded in this context file.
 
 ## Next Steps
 
-1. Verify M4 with a real Supabase Auth test account and email confirmation behavior.
-2. Confirm PostHog events in the target PostHog project after environment variables are configured.
-3. Keep `SUPABASE_SECRET_KEY` and `SUPABASE_SERVICE_ROLE_KEY` out of browser code and `NEXT_PUBLIC_` variables.
+1. Before implementing MVP2 provider-dependent work, start from `GNE-180` and define the provider matrix, env naming, mock/no-op/sandbox strategy, and config checklist.
+2. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
+3. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
 4. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
 5. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
 
@@ -99,5 +110,4 @@ Initialization.
 - Local machine exposes `pnpm@9.15.0`.
 - Local Supabase runs through Colima; analytics is disabled locally because the Supabase vector container cannot mount Colima's Docker socket path.
 - Staging performance advisors currently include only expected unused-index INFO entries until `demo_items` receives representative query traffic.
-- M4 Auth needs both Supabase environment variables and PostHog environment variables in local, preview, and production deployments.
-- Full Auth verification may require the user to receive an email confirmation or enter test credentials in the browser.
+- Future deployments still need Supabase and PostHog environment variables configured per environment before Auth smoke tests can pass there.

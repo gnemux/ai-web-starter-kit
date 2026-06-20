@@ -7,13 +7,20 @@ const DEFAULT_VERSION = "v0.1";
 
 export function getAnalyticsBaseProperties(): AnalyticsBaseProperties {
   return {
-    app: process.env.NEXT_PUBLIC_APP_NAME ?? DEFAULT_APP_NAME,
-    mvp_stage: process.env.NEXT_PUBLIC_MVP_STAGE ?? DEFAULT_MVP_STAGE,
-    market: normalizeMarket(process.env.NEXT_PUBLIC_APP_MARKET),
-    env: normalizeEnv(process.env.NEXT_PUBLIC_APP_ENV),
-    version: process.env.NEXT_PUBLIC_APP_VERSION ?? DEFAULT_VERSION,
+    app: readOptionalPublicEnv(process.env.NEXT_PUBLIC_APP_NAME) ?? DEFAULT_APP_NAME,
+    mvp_stage:
+      readOptionalPublicEnv(process.env.NEXT_PUBLIC_MVP_STAGE) ?? DEFAULT_MVP_STAGE,
+    market: normalizeMarket(readOptionalPublicEnv(process.env.NEXT_PUBLIC_APP_MARKET)),
+    env: normalizeEnv(readOptionalPublicEnv(process.env.NEXT_PUBLIC_APP_ENV)),
+    version:
+      readOptionalPublicEnv(process.env.NEXT_PUBLIC_APP_VERSION) ?? DEFAULT_VERSION,
     module: "auth"
   };
+}
+
+export function readOptionalPublicEnv(value: string | undefined): string | undefined {
+  const trimmedValue = value?.trim();
+  return trimmedValue ? trimmedValue : undefined;
 }
 
 function normalizeMarket(value: string | undefined): AnalyticsBaseProperties["market"] {

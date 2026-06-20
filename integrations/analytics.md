@@ -10,6 +10,12 @@ M4 Auth analytics implementation is in place. Client-side PostHog initialization
 
 The Linear planning source is `GNE-73 MVP1/MVP2 ANALYTICS-00 [ANALYTICS] 数据监控与转化事件`. Its current execution order is mirrored in `context/linear.md`.
 
+Deployment and environment memory:
+
+- Production event verification should be recorded in `context/deployment-status.md`.
+- Environment and product separation rules live in `context/environment-matrix.md`.
+- Production monitoring checks live in `context/production-monitoring.md`.
+
 ## Default Providers
 
 - PostHog for global-friendly product analytics.

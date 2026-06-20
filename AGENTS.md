@@ -10,6 +10,7 @@ Before making code or documentation changes, read:
 4. The relevant file under `specs/`
 5. The relevant file under `integrations/` when touching a third-party service
 6. `context/supabase-workflow.md` when touching Supabase schema, RLS, Auth, Storage, Realtime, or database-backed features
+7. `specs/deploy/engineering-spec.md` and the relevant deploy memory document when touching deployment status, Preview / Production verification, production monitoring, environment matrices, or deploy-related Linear issues
 
 ## Working Rules
 
@@ -23,6 +24,7 @@ Before making code or documentation changes, read:
 - Add or update tests when changing behavior.
 - Keep reusable business logic in `packages/core`, reusable UI in `packages/ui`, and product-specific routes in `apps/web`.
 - Follow `specs/collaboration/*` for branch, PR, review, Vercel, and Linear workflow rules.
+- Follow `specs/deploy/*` for deployment status writeback, production monitoring, environment matrix, Preview / Production verification, and AI recall/writeback rules.
 
 ## Branch And PR Safety
 

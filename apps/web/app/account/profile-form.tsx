@@ -32,7 +32,7 @@ export function ProfileForm({
 
   useEffect(() => {
     if (state?.ok) {
-      trackEvent("auth_profile_updated", {
+      trackEvent("user_profile_updated", {
         auth_provider: "supabase",
         result: "success",
         has_display_name: Boolean(state.data.displayName)

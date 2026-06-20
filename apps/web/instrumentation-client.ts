@@ -1,5 +1,7 @@
 import posthog from "posthog-js";
 
+import { getAnalyticsBaseProperties } from "@/lib/analytics/config";
+
 const posthogKey =
   process.env.NEXT_PUBLIC_POSTHOG_KEY ??
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
@@ -10,4 +12,5 @@ if (posthogKey) {
     defaults: "2026-01-30",
     capture_pageview: true
   });
+  posthog.register(getAnalyticsBaseProperties());
 }

@@ -76,7 +76,7 @@ export function AuthForm({
     }
 
     if (submittedMode === "signup") {
-      trackEvent("auth_signup_succeeded", {
+      trackEvent("user_signed_up", {
         auth_provider: "supabase",
         auth_method: "password",
         result:
@@ -86,7 +86,7 @@ export function AuthForm({
         next_path: nextPath
       });
     } else {
-      trackEvent("auth_login_succeeded", {
+      trackEvent("user_logged_in", {
         auth_provider: "supabase",
         auth_method: "password",
         result: "success",
@@ -108,9 +108,7 @@ export function AuthForm({
         const submitted = String(formData.get("mode") ?? "signin") as AuthMode;
         setSubmittedMode(submitted);
         trackEvent(
-          submitted === "signup"
-            ? "auth_signup_submitted"
-            : "auth_login_submitted",
+          submitted === "signup" ? "signup_started" : "login_started",
           {
             auth_provider: "supabase",
             auth_method: "password",

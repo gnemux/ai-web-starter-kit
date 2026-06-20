@@ -49,6 +49,9 @@ Initialization.
 - Closed the MVP2 integrations planning gap in Linear by upgrading `GNE-167` into the MVP2/MVP4 integrations entry and creating `GNE-180` through `GNE-183` for provider matrix, provider interfaces, env naming, and secret-leakage/config checks.
 - Reworked Linear project milestone display so MVP milestones are assigned only to module parent issues; execution child issues use `No milestone` and are reached through their parent issue.
 - Audited Linear child issues against the milestone display rule and updated `context/linear.md` so the local issue tree matches the current Linear parent/child structure.
+- Synced `GNE-74` MVP1 DEPLOY Linear cleanup into the local issue tree: DEPLOY execution order now runs env/docs first, Supabase/PostHog production checks next, Production Smoke Path after that, and monitoring/multi-env tasks last.
+- Aligned M4 Auth PostHog instrumentation with `GNE-172` MVP factory rules by adding shared event properties and switching successful signup/login events to `user_signed_up` / `user_logged_in`.
+- Synced `GNE-73` MVP1/MVP2 ANALYTICS Linear cleanup into project docs: PostHog uses one Project for MVP1-MVP3 by default, events require `app`, `mvp_stage`, `market`, `env`, `version`, and `module`, and ANALYTICS child issues now follow spec -> config -> adapter -> Auth/pageview -> activation -> production verification -> dashboards -> multi-env isolation -> payment -> AI order.
 
 ## Done Issues
 
@@ -65,8 +68,8 @@ Initialization.
 - `GNE-82` APP-02
 - `GNE-84` APP-04
 - `GNE-85` APP-05
-- `GNE-106` DEPLOY-01
-- `GNE-107` DEPLOY-02
+- `GNE-107` DEPLOY-01
+- `GNE-106` DEPLOY-02
 - `GNE-132` DATA-00
 - `GNE-134` DATA-01
 - `GNE-135` DATA-02
@@ -86,22 +89,25 @@ Initialization.
 - `GNE-89` AUTH-04
 - `GNE-163` AUTH-05
 - `GNE-90` AUTH-06
+- `GNE-101` ANALYTICS-01
 
 ## In Progress Issues
 
-None.
+- `GNE-73` MVP1/MVP2 ANALYTICS-00
 
 ## In Progress
 
-No active implementation task is currently recorded in this context file.
+Analytics planning and documentation are being synchronized with Linear. `GNE-101` is Done. `GNE-123`, `GNE-102`, and `GNE-103` are In Review because the local branch contains the implementation and verification, but PR/main synchronization still needs team confirmation.
 
 ## Next Steps
 
-1. Before implementing MVP2 provider-dependent work, start from `GNE-180` and define the provider matrix, env naming, mock/no-op/sandbox strategy, and config checklist.
-2. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
-3. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
-4. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
-5. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+1. Finish PR/main confirmation for Analytics `In Review` items before marking `GNE-123`, `GNE-102`, and `GNE-103` Done in Linear.
+2. Continue Analytics with `GNE-188 ANALYTICS-05` to define and implement activation/core feature events.
+3. Before implementing MVP2 provider-dependent work, start from `GNE-180` and define the provider matrix, env naming, mock/no-op/sandbox strategy, and config checklist.
+4. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
+5. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
+6. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
+7. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
 
 ## Risks
 

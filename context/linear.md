@@ -59,7 +59,7 @@ Milestone display rule: assign MVP milestones only to module parent issues. Exec
 
 ## MVP Stage Overlay
 
-Updated on 2026-06-19 from `GNE-172` MVP factory route consensus.
+Updated on 2026-06-20 from `GNE-172` MVP factory route consensus, the `GNE-74` DEPLOY planning cleanup, and the `GNE-73` ANALYTICS PostHog planning cleanup.
 
 The project now keeps two planning views at the same time:
 
@@ -151,26 +151,29 @@ GNE-72 PAYMENT-00 [PAYMENT] 支付 Provider 与结账闭环
 ├── GNE-100 PAYMENT-05 [TEST] 验证真实 Provider 测试闭环
 └── GNE-158 PAYMENT-06 [AI] Token 包、积分充值与订阅赠送额度 checkout flow
 
-GNE-73 ANALYTICS-00 [ANALYTICS] 数据监控与转化事件
-├── GNE-101 ANALYTICS-01 [DOC] 定义 analytics 事件命名和属性规范
-├── GNE-102 ANALYTICS-02 [DEV] 建立 analytics provider adapter
-├── GNE-103 ANALYTICS-03 [DEV] 接入访问、注册、登录和核心功能事件
-├── GNE-104 ANALYTICS-04 [DEV] 接入支付转化事件
-├── GNE-105 ANALYTICS-05 [TEST] 验证生产环境事件上报
-├── GNE-122 ANALYTICS-06 [DOC] 定义多产品 analytics 配置与数据查看约定
-├── GNE-123 ANALYTICS-07 [DEV] 建立产品级 analytics 配置入口
-├── GNE-124 ANALYTICS-08 [DOC] 建立 PostHog 漏斗和看板模板
-├── GNE-125 ANALYTICS-09 [TEST] 验证单产品与多产品数据隔离场景
-└── GNE-159 ANALYTICS-10 [AI] AI 使用量、成本与转化事件看板
+GNE-73 MVP1/MVP2 ANALYTICS-00 [ANALYTICS] 数据监控与转化事件
+├── GNE-101 ANALYTICS-01 [DOC][MVP1] 事件命名、shared properties 与隐私边界（Done）
+├── GNE-123 ANALYTICS-02 [DEV][MVP1] 建立产品级 analytics 配置与环境变量入口（In Review）
+├── GNE-102 ANALYTICS-03 [DEV][MVP1] 建立 PostHog adapter、no-op 与 shared properties 注入（In Review）
+├── GNE-103 ANALYTICS-04 [DEV][MVP1] 接入 Auth 与 pageview 转化事件（In Review）
+├── GNE-188 ANALYTICS-05 [DEV][MVP1] 接入 activation 与核心功能事件
+├── GNE-105 ANALYTICS-06 [TEST][MVP1] 验证 Production PostHog 事件接收与字段完整性
+├── GNE-124 ANALYTICS-07 [DOC][MVP1] 建立 PostHog 漏斗和看板模板
+├── GNE-122 ANALYTICS-08 [DOC][MVP1/MVP2] 定义多环境与多产品数据查看约定
+├── GNE-125 ANALYTICS-09 [TEST][MVP1/MVP2] 验证单 Project 多环境/多产品数据隔离
+├── GNE-104 ANALYTICS-10 [DEV][MVP2] 接入支付转化事件
+└── GNE-159 ANALYTICS-11 [AI][MVP2] AI 使用量、成本与转化事件看板
 
 GNE-74 DEPLOY-00 [DEPLOY] 部署、环境变量与线上验收
-├── GNE-106 DEPLOY-01 [DOC] 编写 Vercel 部署规范
-├── GNE-107 DEPLOY-02 [DOC] 建立环境变量清单和 .env.example
-├── GNE-108 DEPLOY-03 [DEPLOY] 配置 Preview Deployment
-├── GNE-109 DEPLOY-04 [TEST] 验证生产 smoke path
-├── GNE-110 DEPLOY-05 [DOC] 建立上线状态回写和故障排查记录
-├── GNE-129 DEPLOY-06 [DOC] 建立多产品线上配置与监测验收清单
-└── GNE-160 DEPLOY-07 [AI] 模型 Provider secrets、预算上限与生产 smoke test
+├── GNE-107 DEPLOY-01 [DOC] 建立环境变量清单与 .env.example
+├── GNE-106 DEPLOY-02 [DOC] 编写 Vercel 部署规范
+├── GNE-108 DEPLOY-03 [DEPLOY] 配置 Vercel Preview / Production 部署入口
+├── GNE-185 DEPLOY-04 [TEST] 验证 Vercel 线上环境访问 Supabase
+├── GNE-186 DEPLOY-05 [TEST] 验证 PostHog Production 埋点接收
+├── GNE-109 DEPLOY-06 [TEST] 整合 Production Smoke Path 验收
+├── GNE-110 DEPLOY-07 [DOC] 建立上线状态回写和故障排查记录
+├── GNE-187 DEPLOY-08 [OPS] 建立生产监控与告警检查清单
+└── GNE-129 DEPLOY-09 [DOC] 建立多环境 / 多产品配置预留清单
 
 GNE-75 GROWTH-00 [GROWTH] 增长营销基础能力
 ├── GNE-111 GROWTH-01 [DOC] 定义 SEO baseline
@@ -191,6 +194,7 @@ GNE-148 AI-00 [AI] AI 能力集成、模型 Provider 与 Token 计量模板
 ├── GNE-153 AI-05 [DEV] 建立 Credit / Quota Ledger 与订阅额度关联
 ├── GNE-154 AI-06 [DEV] 建立 AI Entitlement Gate 与模型访问限制
 ├── GNE-155 AI-07 [TEST] 验证 AI key 安全、token 扣减幂等和额度边界
+├── GNE-160 AI-08 [DEPLOY] 模型 Provider secrets、预算上限与生产 smoke test（MVP2）
 └── GNE-156 API-06 [AI] AI service 与 server-only 调用边界
 
 GNE-167 INTEGRATIONS-00 [DECISION] Provider matrix、环境变量与国内外双模式预留

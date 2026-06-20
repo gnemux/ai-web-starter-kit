@@ -33,13 +33,22 @@ export type UpdateUserProfileInput = {
 };
 
 export type AuthAnalyticsEvent =
-  | "auth_signup_submitted"
-  | "auth_signup_succeeded"
-  | "auth_login_submitted"
-  | "auth_login_succeeded"
+  | "signup_started"
+  | "user_signed_up"
+  | "login_started"
+  | "user_logged_in"
   | "auth_login_failed"
-  | "auth_logout_succeeded"
-  | "auth_profile_updated";
+  | "user_logged_out"
+  | "user_profile_updated";
+
+export type AnalyticsBaseProperties = {
+  app: string;
+  mvp_stage: string;
+  market: "overseas" | "china";
+  env: "local" | "preview" | "production";
+  version: string;
+  module: "auth";
+};
 
 export type AuthAnalyticsProperties = {
   auth_provider: "supabase";

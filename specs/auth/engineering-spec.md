@@ -58,6 +58,7 @@ PostHog:
 
 - Client values: `NEXT_PUBLIC_POSTHOG_KEY` or `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`, plus `NEXT_PUBLIC_POSTHOG_HOST`.
 - If PostHog env is missing, tracking is a no-op.
+- Auth events must include the shared MVP factory properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
 - Auth analytics must not capture passwords, tokens, OTPs, cookies, raw provider payloads, or service keys.
 
 ## Security

@@ -8,6 +8,8 @@ import type {
   AuthenticatedUser
 } from "@starter/core";
 
+import { getAnalyticsBaseProperties } from "./config";
+
 const posthogKey =
   process.env.NEXT_PUBLIC_POSTHOG_KEY ??
   process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
@@ -20,7 +22,10 @@ export function trackEvent(
     return;
   }
 
-  posthog.capture(event, sanitizeAuthProperties(properties));
+  posthog.capture(event, {
+    ...getAnalyticsBaseProperties(),
+    ...sanitizeAuthProperties(properties)
+  });
 }
 
 export function identifyAuthUser(user: AuthenticatedUser) {
@@ -29,6 +34,7 @@ export function identifyAuthUser(user: AuthenticatedUser) {
   }
 
   posthog.identify(user.id, {
+    ...getAnalyticsBaseProperties(),
     email: user.email
   });
 }

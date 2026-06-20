@@ -75,7 +75,7 @@ export function AccountMenu({
 
   useEffect(() => {
     if (state?.ok) {
-      trackEvent("auth_logout_succeeded", {
+      trackEvent("user_logged_out", {
         auth_provider: "supabase",
         result: "success"
       });

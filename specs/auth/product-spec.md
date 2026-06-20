@@ -50,7 +50,9 @@ landing page
 - `/dashboard` and `/account` require a Supabase session validated with `getClaims()`.
 - Account page shows the current email and editable profile display name, without adding unrelated session, analytics, or status summary cards.
 - Profile updates write only the signed-in user's own `user_profiles` row.
-- PostHog events are captured for submitted, succeeded, failed, logout, and profile update events.
+- PostHog events are captured for `signup_started`, `user_signed_up`, `login_started`, `user_logged_in`, `auth_login_failed`, `user_logged_out`, and `user_profile_updated`.
+- Auth PostHog events include the shared MVP factory properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
+- Auth PostHog events do not include passwords, OTPs, magic links, OAuth codes, Supabase tokens, session cookies, or raw provider payloads.
 - Login, signup, account, and logout UI labels must read from the shared i18n dictionary instead of route-local hardcoded copy.
 
 ## Edge States
@@ -63,7 +65,7 @@ landing page
 
 ## Success Metrics
 
-- Activation: `auth_signup_succeeded`.
+- Activation: `user_signed_up`.
 - Retention: repeat authenticated dashboard access.
 - Conversion: later billing events can join against identified users.
 - Quality: low `auth_login_failed` rate after deployment configuration is complete.

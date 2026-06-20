@@ -8,11 +8,11 @@ import type {
   AuthenticatedUser
 } from "@starter/core";
 
-import { getAnalyticsBaseProperties } from "./config";
+import { getAnalyticsBaseProperties, readOptionalPublicEnv } from "./config";
 
 const posthogKey =
-  process.env.NEXT_PUBLIC_POSTHOG_KEY ??
-  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
+  readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_KEY) ??
+  readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN);
 
 export function trackEvent(
   event: AuthAnalyticsEvent,

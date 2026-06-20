@@ -6,10 +6,10 @@ export type SupabasePublicConfig = {
 };
 
 export function getSupabasePublicConfig(): ServiceResult<SupabasePublicConfig> {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = readOptionalEnv(process.env.NEXT_PUBLIC_SUPABASE_URL);
   const publishableKey =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    readOptionalEnv(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) ??
+    readOptionalEnv(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   if (!url || !publishableKey) {
     return serviceError(
@@ -22,4 +22,9 @@ export function getSupabasePublicConfig(): ServiceResult<SupabasePublicConfig> {
     url,
     publishableKey
   });
+}
+
+function readOptionalEnv(value: string | undefined): string | undefined {
+  const trimmedValue = value?.trim();
+  return trimmedValue ? trimmedValue : undefined;
 }

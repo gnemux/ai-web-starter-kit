@@ -19,6 +19,12 @@ Supabase schema changes are managed through Git migrations, not remote Dashboard
 
 Detailed workflow: `context/supabase-workflow.md`.
 
+Deployment and environment memory:
+
+- Deployment status writeback: `context/deployment-status.md`
+- Environment separation rules: `context/environment-matrix.md`
+- Production monitoring checks: `context/production-monitoring.md`
+
 ## Initial Scope
 
 - Email or OAuth sign up and sign in.

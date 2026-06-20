@@ -56,6 +56,23 @@ export function IntegrationsIcon({ className = "h-4 w-4" }: IconProps) {
   );
 }
 
+export function AccountIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M12 12.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+      <path d="M5 20a7 7 0 0 1 14 0" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
 export function DeployIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg className={className} {...iconProps}>
@@ -81,6 +98,16 @@ export function ArrowRightIcon({ className = "h-4 w-4" }: IconProps) {
     <svg className={className} {...iconProps}>
       <path d="M5 12h14" />
       <path d="M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+export function SignOutIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M10 5H6.5A2.5 2.5 0 0 0 4 7.5v9A2.5 2.5 0 0 0 6.5 19H10" />
+      <path d="M14 8l4 4-4 4" />
+      <path d="M18 12H9" />
     </svg>
   );
 }

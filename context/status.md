@@ -34,6 +34,16 @@ Initialization.
 - Added lightweight Chinese/English i18n with Chinese as default, cookie-backed global language switching, localized route copy, and i18n requirements in app-shell/auth specs.
 - Removed obsolete static dashboard sample data from `packages/core` so future work consumes real service contracts instead of visual mock arrays.
 - Retouched the visible product brand to `XWLC` with `eXtensible Web Launch Core` as the restrained subtitle.
+- Made the landing page header Auth-aware so authenticated users see a compact account menu instead of a Login button.
+- Added a global product footer with localized product links, capability categories, engineering resource notes, copyright text, and moved the language switcher into the footer.
+- Simplified authenticated app shell navigation so work area pages use one primary nav with Dashboard and Account only, while the top header is reserved for account actions.
+- Removed non-functional status cards from Dashboard and Account so protected pages focus on demo data testing and profile editing.
+- Clarified footer slot copy so future teams understand where real product and engineering links can live.
+- Reworked the landing page into a restrained, low-fidelity product-style first screen and changed sign out to return users to the landing page.
+- Retouched the landing first screen typography and core layout so the product preview and sample points stay orderly on desktop and mobile.
+- Simplified the landing first screen by removing the non-functional header sample nav and lower three-column slot band, keeping the hero content vertically centered.
+- Fixed sign-out navigation so logout redirects from the server action to `/` and cannot be intercepted by protected-route refreshes.
+- Fixed the landing login regression by keeping Supabase Auth proxy checks on protected routes only and making public landing account detection bounded and safely degradable.
 
 ## Done Issues
 

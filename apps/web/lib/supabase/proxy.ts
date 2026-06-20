@@ -8,9 +8,14 @@ const protectedPathPrefixes = ["/account", "/dashboard"];
 
 export async function updateSession(request: NextRequest) {
   const config = getSupabasePublicConfig();
+  const isProtected = isProtectedPath(request.nextUrl.pathname);
   let response = NextResponse.next({
     request
   });
+
+  if (!isProtected) {
+    return response;
+  }
 
   if (!config.ok) {
     return response;
@@ -40,7 +45,7 @@ export async function updateSession(request: NextRequest) {
   const { data, error } = await supabase.auth.getClaims();
   const hasClaims = Boolean(data?.claims?.sub) && !error;
 
-  if (!hasClaims && isProtectedPath(request.nextUrl.pathname)) {
+  if (!hasClaims) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.search = "";

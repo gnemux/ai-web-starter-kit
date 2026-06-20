@@ -2,28 +2,21 @@ import { type DemoItem } from "@starter/core";
 import {
   AppShell,
   BrandMark,
-  Button,
   EmptyState,
   ErrorState,
-  LongContent,
-  MetricCard,
   Panel,
   SectionHeader,
   StatusBadge
 } from "@starter/ui";
 import { redirect } from "next/navigation";
 
-import { SignOutButton } from "@/components/sign-out-button";
+import { AccountMenu } from "@/components/account-menu";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
 import { listDemoItems } from "@/lib/services/demo-items";
 
-import {
-  DashboardIcon,
-  IntegrationsIcon,
-  OverviewIcon
-} from "../../components/app-icons";
+import { AccountIcon, DashboardIcon } from "../../components/app-icons";
 import { DemoItemForm } from "./demo-item-form";
 
 export default async function DashboardPage() {
@@ -39,38 +32,29 @@ export default async function DashboardPage() {
   const displayName = accountResult.data.profile?.displayName;
   const userLabel =
     displayName || accountResult.data.user.email || copy.dashboard.eyebrow;
-  const hasProfileName = Boolean(displayName);
   const navItems = [
-    {
-      href: "/",
-      label: copy.common.nav.overview,
-      description: copy.common.navDescription.overview,
-      icon: <OverviewIcon />
-    },
     {
       href: "/dashboard",
       label: copy.common.nav.dashboard,
-      description: copy.common.navDescription.dashboard,
       active: true,
       icon: <DashboardIcon />
     },
     {
       href: "/account",
       label: copy.common.nav.account,
-      description: copy.common.navDescription.account,
-      icon: <IntegrationsIcon />
+      icon: <AccountIcon />
     }
   ];
 
   return (
     <AppShell
       action={
-        <>
-          <Button href="/account" variant="secondary">
-            {copy.dashboard.accountButton}
-          </Button>
-          <SignOutButton labels={copy.common} />
-        </>
+        <AccountMenu
+          avatarUrl={accountResult.data.profile?.avatarUrl}
+          email={accountResult.data.user.email}
+          labels={copy.common.accountMenu}
+          name={userLabel}
+        />
       }
       brand={<BrandMark subtitle={copy.dashboard.shellSubtitle} />}
       navItems={navItems}
@@ -92,111 +76,42 @@ export default async function DashboardPage() {
               {copy.dashboard.description}
             </p>
           </div>
-          <div className="flex shrink-0 flex-wrap gap-2">
-            <Button href="/account" variant="secondary">
-              {copy.dashboard.accountButton}
-            </Button>
-          </div>
         </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          <MetricCard
-            detail={copy.dashboard.metrics.session.detail}
-            label={copy.dashboard.metrics.session.label}
-            status="ready"
-            statusLabel={copy.common.status.ready}
-            value={copy.dashboard.metrics.session.value}
-          />
-          <MetricCard
-            detail={
-              hasProfileName
-                ? copy.dashboard.metrics.profile.readyDetail
-                : copy.dashboard.metrics.profile.emptyDetail
-            }
-            label={copy.dashboard.metrics.profile.label}
-            status={hasProfileName ? "ready" : "in-progress"}
-            statusLabel={
-              hasProfileName
-                ? copy.common.status.ready
-                : copy.common.status.inProgress
-            }
-            value={
-              hasProfileName
-                ? copy.dashboard.metrics.profile.ready
-                : copy.dashboard.metrics.profile.empty
-            }
-          />
-          <MetricCard
-            detail={copy.dashboard.metrics.data.detail}
-            label={copy.dashboard.metrics.data.label}
-            status={demoItemsResult.ok ? "ready" : "risk"}
-            statusLabel={
-              demoItemsResult.ok
-                ? copy.common.status.ready
-                : copy.common.status.risk
-            }
-            value={copy.dashboard.metrics.data.value}
-          />
-        </section>
-
-        <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-          <Panel id="demo-data">
-            <SectionHeader
-              action={
-                <StatusBadge
-                  label={
-                    demoItemsResult.ok
-                      ? copy.dashboard.demo.statusReady
-                      : copy.dashboard.demo.statusError
-                  }
-                  status={demoItemsResult.ok ? "ready" : "risk"}
-                />
-              }
-              description={copy.dashboard.demo.description}
-              title={copy.dashboard.demo.title}
-            />
-
-            {demoItemsResult.ok ? (
-              <DemoItemsList
-                items={demoItemsResult.data.items}
-                labels={copy.dashboard.demo}
+        <Panel id="demo-data">
+          <SectionHeader
+            action={
+              <StatusBadge
+                label={
+                  demoItemsResult.ok
+                    ? copy.dashboard.demo.statusReady
+                    : copy.dashboard.demo.statusError
+                }
+                status={demoItemsResult.ok ? "ready" : "risk"}
               />
-            ) : (
-              <ErrorState
-                badgeLabel={copy.common.status.risk}
-                description={`${demoItemsResult.error.code}: ${demoItemsResult.error.message}`}
-                title={copy.dashboard.demo.serviceErrorTitle}
-              />
-            )}
+            }
+            description={copy.dashboard.demo.description}
+            title={copy.dashboard.demo.title}
+          />
 
-            <DemoItemForm
-              errorLabels={copy.errors.demo}
+          {demoItemsResult.ok ? (
+            <DemoItemsList
+              items={demoItemsResult.data.items}
               labels={copy.dashboard.demo}
             />
-          </Panel>
-
-          <Panel>
-            <SectionHeader
-              description={copy.dashboard.boundaries.description}
-              title={copy.dashboard.boundaries.title}
+          ) : (
+            <ErrorState
+              badgeLabel={copy.common.status.risk}
+              description={`${demoItemsResult.error.code}: ${demoItemsResult.error.message}`}
+              title={copy.dashboard.demo.serviceErrorTitle}
             />
-            <div className="mt-5 space-y-3">
-              {copy.dashboard.boundaries.items.map((item) => (
-                <div
-                  className="rounded-md border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-600"
-                  key={item}
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <LongContent label={copy.dashboard.boundaries.longLabel}>
-                {copy.dashboard.boundaries.longText}
-              </LongContent>
-            </div>
-          </Panel>
-        </section>
+          )}
+
+          <DemoItemForm
+            errorLabels={copy.errors.demo}
+            labels={copy.dashboard.demo}
+          />
+        </Panel>
       </div>
     </AppShell>
   );

@@ -14,13 +14,14 @@ M4 implements Supabase Auth and a profile/account reference flow on top of the M
 ## Architecture
 
 - `apps/web/lib/supabase/server.ts` creates cookie-aware Supabase server clients.
-- `apps/web/lib/supabase/proxy.ts` refreshes sessions and protects selected routes with `getClaims()`.
+- `apps/web/lib/supabase/proxy.ts` protects selected routes with `getClaims()` and must not block public routes such as `/` or `/login` on a remote Auth check.
 - `apps/web/proxy.ts` connects the Next.js proxy boundary.
 - `apps/web/lib/services/auth.ts` owns sign up, sign in, sign out, current user, and profile update use cases.
 - Auth server actions translate `FormData`, call services, revalidate affected paths, and redirect on successful navigation.
 - Client form components call server actions and capture safe PostHog events through `trackEvent`.
 - Pages render service results and never import Supabase SDKs directly.
 - Auth pages and controls receive localized labels from `apps/web/lib/i18n.ts`; client components accept label props where needed.
+- Public landing may call the bounded `getCurrentAccountForPublicShell()` helper to personalize navigation, but it must not redirect unauthenticated visitors or block the public page if Supabase Auth is slow or unavailable. Its account menu must reuse existing Auth server actions for sign out.
 
 ## Data Model
 
@@ -38,6 +39,7 @@ Validation rules:
 ## UI States
 
 - Default: login page shows sign in by default and can switch to sign up.
+- Public: landing header shows Login for unauthenticated visitors and a compact account menu for authenticated visitors.
 - Empty: account page works when no display name is set.
 - Loading: submit buttons show pending labels.
 - Error: safe error banners render validation/provider categories.

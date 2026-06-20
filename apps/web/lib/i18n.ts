@@ -39,36 +39,82 @@ export const dictionaries = {
         risk: "需检查"
       },
       nav: {
-        overview: "首页",
         dashboard: "工作台",
         account: "账户"
       },
-      navDescription: {
-        overview: "开始",
-        dashboard: "数据",
-        account: "资料"
+      accountMenu: {
+        label: "账户菜单",
+        signedIn: "已登录",
+        dashboard: "工作台",
+        account: "账户设置",
+        signOut: "退出登录",
+        working: "退出中..."
+      },
+      footer: {
+        ariaLabel: "页脚",
+        description:
+          "XWLC 是用于快速验证 Web 产品想法的商业化模板工程，优先提供真实可复用的账户、工作台和服务层边界。",
+        languageTitle: "界面语言",
+        productTitle: "产品入口",
+        productLinks: {
+          home: "首页",
+          signUp: "注册",
+          login: "登录",
+          dashboard: "工作台",
+          account: "账户设置"
+        },
+        capabilitiesTitle: "产品预留位",
+        capabilities: [
+          "真实产品导航位",
+          "核心业务入口位",
+          "计费与权益入口位",
+          "帮助与支持入口位"
+        ],
+        resourcesTitle: "工程预留位",
+        resources: [
+          "产品规格链接位",
+          "服务边界文档位",
+          "权限安全说明位",
+          "部署观测说明位"
+        ],
+        copyright: "© {year} XWLC. 保留所有权利。"
       }
     },
     home: {
-      badge: "模板工程",
-      title: "一个干净、可生长的 Web 产品起点",
-      description:
-        "默认提供登录注册、受保护工作区、账户资料和服务层数据示例。界面只保留真实可用能力，方便后续产品在清晰框架上继续迭代。",
-      primaryAction: "开始注册",
-      secondaryAction: "已有账户，去登录",
-      featureTitle: "当前已具备",
-      features: [
+      badge: "产品点位 · 第一屏",
+      title: "一句清晰的产品主张",
+      titleAccent: "承接一个真实场景",
+      description: "面向一个明确场景，交付一个可感知的结果。",
+      primaryAction: "开始使用",
+      secondaryAction: "登录",
+      trustLine: "适用于早期验证、团队协作与持续迭代",
+      metaLine: "身份 · 数据 · 服务层 · 部署",
+      preview: {
+        activity: "最近更新",
+        description: "一条主要任务正在推进。",
+        label: "产品界面",
+        primaryPanel: "关键结果",
+        secondaryPanel: "下一步动作",
+        status: "当前状态",
+        statusValue: "稳定运行",
+        title: "核心工作区"
+      },
+      callouts: [
         {
-          title: "邮箱注册与登录",
-          description: "Supabase Auth 负责身份、会话和受保护路由。"
+          title: "核心场景",
+          description: "用户在这里看到主要问题。"
         },
         {
-          title: "账户资料",
-          description: "用户可维护 display name，数据受 RLS 保护。"
+          title: "用户价值",
+          description: "一句话说明可以获得的结果。"
         },
         {
-          title: "Demo 数据流",
-          description: "可创建 demo item，用于验证页面到服务到数据库的边界。"
+          title: "关键动作",
+          description: "让下一步操作足够明确。"
+        },
+        {
+          title: "结果反馈",
+          description: "展示完成、进度或可信信号。"
         }
       ]
     },
@@ -102,27 +148,7 @@ export const dictionaries = {
       title: "工作台",
       eyebrow: "已登录",
       description:
-        "这里展示模板当前已经可用的功能：账户会话、profile 状态，以及经过服务层和 RLS 保护的 demo 数据。",
-      accountButton: "账户设置",
-      metrics: {
-        session: {
-          label: "会话",
-          value: "有效",
-          detail: "页面渲染前已通过 Supabase claims 校验。"
-        },
-        profile: {
-          label: "Profile",
-          ready: "已设置",
-          empty: "未填写",
-          readyDetail: "账户资料可在账户页继续维护。",
-          emptyDetail: "还没有 display name，可在账户页补充。"
-        },
-        data: {
-          label: "数据服务",
-          value: "已接入",
-          detail: "demo_items 通过 Server Action 和服务层写入。"
-        }
-      },
+        "这里保留模板当前可直接测试的功能：创建、读取 demo item，验证页面、Server Action、服务层、Supabase 和 RLS 的完整链路。",
       demo: {
         title: "Demo 数据",
         description:
@@ -151,19 +177,6 @@ export const dictionaries = {
           active: "有效",
           archived: "已归档"
         }
-      },
-      boundaries: {
-        title: "实现边界",
-        description:
-          "页面只组合结果；鉴权、验证、Provider 调用和错误归一都在服务层内完成。",
-        items: [
-          "页面不直接导入 Supabase SDK",
-          "受保护路由依赖服务端 session 校验",
-          "用户数据由 RLS 做最终保护"
-        ],
-        longLabel: "长内容约束",
-        longText:
-          "这里保留一段较长的中文说明，用于验证真实产品文案在卡片和移动端布局中会自动换行，不会撑破容器，也不会和操作按钮重叠。"
       }
     },
     account: {
@@ -171,38 +184,18 @@ export const dictionaries = {
       title: "账户设置",
       eyebrow: "Profile",
       description:
-        "维护当前登录用户的最小账户资料。profile 数据写入 Supabase，并由 RLS 限制为本人可改。",
-      dashboardButton: "返回工作台",
+        "维护当前登录用户的最小账户资料。这里只保留邮箱展示与 display name 保存这条真实可测试链路。",
       emailLabel: "邮箱",
-      metrics: {
-        session: {
-          label: "会话",
-          value: "有效",
-          detail: "受保护页面渲染前已校验登录状态。"
-        },
-        profile: {
-          label: "资料",
-          ready: "已设置",
-          empty: "未填写",
-          readyDetail: "当前账户已存在 profile row。",
-          emptyDetail: "display name 为空时会回退显示邮箱。"
-        },
-        analytics: {
-          label: "事件",
-          value: "安全",
-          detail: "仅记录安全的 Auth 事件，不发送密码或 token。"
-        }
-      },
       profile: {
         title: "个人资料",
-        description: "后续产品可在这个 profile 模型上继续扩展。",
+        description: "保存后会写入当前用户自己的 profile 记录。",
         displayName: "显示名称",
         save: "保存资料",
         saving: "保存中...",
         updated: "资料已更新。"
       }
     },
-      errors: {
+    errors: {
       fallback: "操作失败，请检查表单后重试。",
       auth: {
         email: "请输入有效邮箱。",
@@ -244,36 +237,82 @@ export const dictionaries = {
         risk: "Needs review"
       },
       nav: {
-        overview: "Home",
         dashboard: "Dashboard",
         account: "Account"
       },
-      navDescription: {
-        overview: "Start",
-        dashboard: "Data",
-        account: "Profile"
+      accountMenu: {
+        label: "Account menu",
+        signedIn: "Signed in",
+        dashboard: "Dashboard",
+        account: "Account settings",
+        signOut: "Sign out",
+        working: "Signing out..."
+      },
+      footer: {
+        ariaLabel: "Footer",
+        description:
+          "XWLC is a commercial starter kit for validating Web product ideas with reusable account, workspace, and service-layer boundaries.",
+        languageTitle: "Interface language",
+        productTitle: "Product",
+        productLinks: {
+          home: "Home",
+          signUp: "Sign up",
+          login: "Log in",
+          dashboard: "Dashboard",
+          account: "Account settings"
+        },
+        capabilitiesTitle: "Product slots",
+        capabilities: [
+          "Product navigation slot",
+          "Core workflow slot",
+          "Billing and access slot",
+          "Support link slot"
+        ],
+        resourcesTitle: "Engineering slots",
+        resources: [
+          "Product spec link slot",
+          "Service boundary doc slot",
+          "Access and security note slot",
+          "Deployment and observability slot"
+        ],
+        copyright: "© {year} XWLC. All rights reserved."
       }
     },
     home: {
-      badge: "Starter template",
-      title: "A clean Web product foundation that can grow",
-      description:
-        "The template starts with sign up, login, a protected workspace, account profile, and a service-layer data example. The interface only keeps working capabilities so future product work stays focused.",
-      primaryAction: "Create account",
+      badge: "Product surface · First screen",
+      title: "A clear product promise",
+      titleAccent: "for one real scenario",
+      description: "Focused on one audience, one job, and one visible outcome.",
+      primaryAction: "Start now",
       secondaryAction: "Log in",
-      featureTitle: "Available now",
-      features: [
+      trustLine: "Built for early validation, team workflows, and continuous iteration",
+      metaLine: "Identity · Data · Service layer · Deployment",
+      preview: {
+        activity: "Recent activity",
+        description: "A primary task is moving through the workspace.",
+        label: "Product surface",
+        primaryPanel: "Key outcome",
+        secondaryPanel: "Next action",
+        status: "Current state",
+        statusValue: "Running steadily",
+        title: "Core workspace"
+      },
+      callouts: [
         {
-          title: "Email auth",
-          description: "Supabase Auth owns identity, sessions, and protected routes."
+          title: "Core scene",
+          description: "The main user problem is visible here."
         },
         {
-          title: "Account profile",
-          description: "Users can maintain a display name protected by RLS."
+          title: "User value",
+          description: "A concise result the user can recognize."
         },
         {
-          title: "Demo data example",
-          description: "Create demo items through the page-service-database boundary."
+          title: "Primary action",
+          description: "The next step stays clear and reachable."
+        },
+        {
+          title: "Outcome signal",
+          description: "Progress, completion, or trust appears here."
         }
       ]
     },
@@ -307,27 +346,7 @@ export const dictionaries = {
       title: "Dashboard",
       eyebrow: "Signed in",
       description:
-        "This page shows the template capabilities that work today: account session, profile state, and demo data protected by the service layer and RLS.",
-      accountButton: "Account settings",
-      metrics: {
-        session: {
-          label: "Session",
-          value: "Active",
-          detail: "Supabase claims are validated before the page renders."
-        },
-        profile: {
-          label: "Profile",
-          ready: "Ready",
-          empty: "Empty",
-          readyDetail: "Profile data can be maintained from the account page.",
-          emptyDetail: "No display name yet; the UI falls back to email."
-        },
-        data: {
-          label: "Data service",
-          value: "Connected",
-          detail: "demo_items writes go through a Server Action and service boundary."
-        }
-      },
+        "This page keeps the template's directly testable flow: create and read demo items through the page, Server Action, service layer, Supabase, and RLS.",
       demo: {
         title: "Demo data",
         description:
@@ -356,19 +375,6 @@ export const dictionaries = {
           active: "Active",
           archived: "Archived"
         }
-      },
-      boundaries: {
-        title: "Implementation boundary",
-        description:
-          "Pages compose results only. Auth checks, validation, provider calls, and safe error mapping stay in services.",
-        items: [
-          "Pages do not import the Supabase SDK directly",
-          "Protected routes rely on server-side session checks",
-          "RLS remains the final guard for user data"
-        ],
-        longLabel: "Long content constraint",
-        longText:
-          "This longer implementation note verifies that real product copy wraps cleanly inside cards and mobile layouts without forcing horizontal scrolling or overlapping actions."
       }
     },
     account: {
@@ -376,38 +382,18 @@ export const dictionaries = {
       title: "Account settings",
       eyebrow: "Profile",
       description:
-        "Maintain the minimal profile for the signed-in user. Profile data is written to Supabase and RLS limits updates to the owner.",
-      dashboardButton: "Back to dashboard",
+        "Maintain the minimal profile for the signed-in user. This page keeps only the real testable email and display-name flow.",
       emailLabel: "Email",
-      metrics: {
-        session: {
-          label: "Session",
-          value: "Active",
-          detail: "Protected pages validate the signed-in state before rendering."
-        },
-        profile: {
-          label: "Profile",
-          ready: "Ready",
-          empty: "Empty",
-          readyDetail: "The current account has a profile row.",
-          emptyDetail: "When display name is empty, the UI falls back to email."
-        },
-        analytics: {
-          label: "Events",
-          value: "Safe",
-          detail: "Only safe Auth events are captured; passwords and tokens are never sent."
-        }
-      },
       profile: {
         title: "Profile",
-        description: "Future products can extend this profile model.",
+        description: "Saving writes to the signed-in user's own profile row.",
         displayName: "Display name",
         save: "Save profile",
         saving: "Saving...",
         updated: "Profile updated."
       }
     },
-      errors: {
+    errors: {
       fallback: "The action failed. Review the form and try again.",
       auth: {
         email: "Enter a valid email address.",

@@ -4,8 +4,9 @@
 
 - [ ] `/login` supports sign in and sign up modes.
 - [ ] Successful sign in redirects to `/dashboard` or the `next` path.
-- [ ] Successful sign out clears the session and returns to `/login`.
+- [x] Successful sign out clears the session and returns to `/`.
 - [ ] `/dashboard` and `/account` redirect unauthenticated users to `/login`.
+- [x] `/` replaces the header Login button with a compact account menu when a valid session exists.
 - [ ] `/account` reads and updates the signed-in user's profile.
 - [ ] Profile update does not allow editing another user's row.
 - [ ] Auth events are routed through the local analytics abstraction.

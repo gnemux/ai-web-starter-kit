@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import type { AuthActionPayload, ServiceResult, UserProfile } from "@starter/core";
 
@@ -33,8 +34,8 @@ export async function signOutAction(
   const result = await signOutCurrentUser();
 
   if (result.ok) {
-    revalidatePath("/dashboard");
-    revalidatePath("/account");
+    revalidatePath("/");
+    redirect(result.data.redirectTo);
   }
 
   return result;

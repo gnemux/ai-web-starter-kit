@@ -37,6 +37,14 @@ XWLC 是 XUMENG、WANGWEI、LIZUZHUANG、CHUYI 四位中年人在工作与家庭
 └── turbo.json            # Turborepo 配置
 ```
 
+## 协作入口
+
+- MVP 路线与阶段边界：`context/project.md`
+- Linear issue 树镜像与执行顺序：`context/linear.md`
+- 当前完成状态、风险和下一步：`context/status.md`
+- 环境、部署和生产验收记录：`context/environment-matrix.md`、`context/deployment-status.md`
+- Provider / Analytics / Payment / AI 约定：`integrations/`
+
 ## 启动方式
 
 启用固定 pnpm 版本：

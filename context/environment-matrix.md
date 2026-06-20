@@ -49,6 +49,8 @@ china
 
 China mode is reserved for MVP4 or later. MVP1 only reserves naming and does not integrate China cloud, China analytics, WeChat Pay, or Alipay.
 
+`GNE-193 MVP4 INTEGRATIONS-00` owns the future real overseas/china dual-mode provider rollout. MVP2 only defines provider matrix, env naming, public/secret boundaries, and mock/no-op/sandbox behavior.
+
 ## Vercel Matrix
 
 | Area | Current rule |
@@ -85,6 +87,8 @@ Supabase public browser keys:
 
 MVP1-MVP3 use one PostHog Project by default. Split into multiple PostHog Projects only for clear reasons such as event volume, customer isolation, permission isolation, compliance boundary, or separate legal entity.
 
+Current production evidence is recorded in `context/deployment-status.md`: PostHog Activity has shown production Vercel URL events for `ai-web-starter-kit`, including `Pageview`, `Identify`, `login_started`, and `user_logged_in`. Final `ANALYTICS-06` closure still requires expanded event proof for the required shared properties.
+
 Required shared event properties:
 
 ```text
@@ -102,6 +106,7 @@ module
 | --- | --- | --- | --- |
 | Starter kit | `ai-web-starter-kit` | MVP1 / MVP2 | Current reusable foundation. |
 | Product Validation Kit | `product-validation-kit` or agreed slug | MVP3 | Future validation workspace. |
+| Overseas/china provider foundation | product-specific or shared provider mode slug | MVP4 | Real dual-mode provider rollout; see `GNE-193`. |
 | Real overseas vertical product | product slug | MVP5 | Should receive its own URL and provider isolation plan. |
 | Real China product | product slug | MVP6 or later | Requires MVP4 dual-mode provider decisions first. |
 

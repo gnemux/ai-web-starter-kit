@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | unknown |
-| Latest production URL | unknown |
+| Latest production status | partial smoke pass for PostHog production event reception; full Production Smoke Path not recorded |
+| Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
 | Latest production commit | unknown |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | unknown |
-| Next owner action | Run and record GNE-108 deployment entry verification, then continue GNE-185 and GNE-186. |
+| Current blocked items | `ANALYTICS-06` still needs expanded PostHog event proof for shared properties: `app`, `mvp_stage`, `market`, `env`, `version`, `module`. |
+| Next owner action | Expand one production PostHog event and confirm shared properties, then continue or close `GNE-105 ANALYTICS-06`. |
 
 ## Status Values
 
@@ -125,6 +125,43 @@ No Preview deployment result has been recorded in this file yet.
 ## Production Smoke Path
 
 No full Production Smoke Path has been recorded in this file yet.
+
+## 2026-06-20 19:58 CST - production PostHog event verification
+
+### Deployment Metadata
+
+| Field | Value |
+| --- | --- |
+| Linear issue | `GNE-105` / `ANALYTICS-06` |
+| Environment | production |
+| Deployment type | smoke-test update |
+| Trigger | User verified PostHog Activity from deployed site |
+| Branch | `main` |
+| Commit | unknown |
+| Vercel URL | `https://ai-web-starter-kit-web.vercel.app` |
+| Actor | wangwei |
+| Verifier | wangwei |
+| Provider values | unknown |
+| Notes | PostHog Activity shows production Vercel URL events. No secrets recorded. |
+
+### Provider Configuration Status
+
+Record configured/missing/unknown only. Do not record values.
+
+| Key or provider | Production | Preview | Notes |
+| --- | --- | --- | --- |
+| NEXT_PUBLIC_POSTHOG_KEY | configured | unknown | Production event reception observed in PostHog. |
+| NEXT_PUBLIC_POSTHOG_HOST | configured | unknown | Production event reception observed in PostHog. |
+| PostHog Project | configured | unknown | Project name observed as `ai-web-starter-kit`. |
+
+### Smoke Test Result
+
+| Check | Status | Evidence | Next action |
+| --- | --- | --- | --- |
+| PostHog production pageview | pass | PostHog Activity shows `Pageview` for `https://ai-web-starter-kit-web.vercel.app/account`. | Confirm shared properties on expanded event. |
+| PostHog Auth event | pass | PostHog Activity shows `login_started`, `user_logged_in`, and `Identify` on production Vercel URL. | Confirm shared properties on expanded Auth event. |
+| PostHog shared properties | blocked | Expanded event screenshot showed production URL and `App version = v0.1`; required shared property set was not fully visible yet. | Search event properties for `app`, `mvp_stage`, `market`, `env`, `version`, and `module`. |
+| Full Production Smoke Path | not_run | This entry only records PostHog production event verification. | Run full smoke path separately under `GNE-109` when needed. |
 
 ## Known Issues
 

@@ -6,9 +6,16 @@ Analytics tracks activation, feature usage, checkout conversion, and product val
 
 ## Status
 
-M4 Auth analytics implementation is in place. Client-side PostHog initialization and Auth event wrappers are implemented; production event verification depends on deployment environment variables and real Auth testing.
+MVP1 base analytics is implemented and merged for Auth/pageview:
 
-The Linear planning source is `GNE-73 MVP1/MVP2 ANALYTICS-00 [ANALYTICS] 数据监控与转化事件`. Its current execution order is mirrored in `context/linear.md`.
+- product analytics config and env reader
+- PostHog adapter with no-op fallback
+- shared property injection
+- Auth and pageview events
+
+Production PostHog reception has been visually verified from the `ai-web-starter-kit` PostHog Activity page against the deployed Vercel URL. Full `ANALYTICS-06` closure still requires one expanded production event showing the expected shared properties.
+
+The Linear planning source is `GNE-73 MVP1-MVP3 ANALYTICS-00 [ANALYTICS] 统一事件标准、生产验收与转化看板`. Its current execution order is mirrored in `context/linear.md`.
 
 Deployment and environment memory:
 
@@ -95,16 +102,16 @@ NEXT_PUBLIC_JIGUANG_APP_KEY=
 ## Linear Execution Order
 
 ```text
-GNE-73 MVP1/MVP2 ANALYTICS-00
+GNE-73 MVP1-MVP3 ANALYTICS-00
 ├── GNE-101 ANALYTICS-01 [DOC][MVP1] Event naming, shared properties, and privacy boundary
 ├── GNE-123 ANALYTICS-02 [DEV][MVP1] Product analytics config and env entry
 ├── GNE-102 ANALYTICS-03 [DEV][MVP1] PostHog adapter, no-op, and shared property injection
 ├── GNE-103 ANALYTICS-04 [DEV][MVP1] Auth and pageview conversion events
-├── GNE-188 ANALYTICS-05 [DEV][MVP1] Activation and core feature events
-├── GNE-105 ANALYTICS-06 [TEST][MVP1] Production PostHog event and field verification
-├── GNE-124 ANALYTICS-07 [DOC][MVP1] PostHog funnel and dashboard templates
-├── GNE-122 ANALYTICS-08 [DOC][MVP1/MVP2] Multi-env and multi-product data viewing rules
-├── GNE-125 ANALYTICS-09 [TEST][MVP1/MVP2] Single Project data isolation verification
+├── GNE-188 ANALYTICS-05 [DEV][MVP3] Activation and core feature events
+├── GNE-105 ANALYTICS-06 [TEST][MVP2] Production PostHog event and field verification
+├── GNE-124 ANALYTICS-07 [DOC][MVP2/MVP3] PostHog funnel and dashboard templates
+├── GNE-122 ANALYTICS-08 [DOC][MVP2] Multi-env and multi-product data viewing rules
+├── GNE-125 ANALYTICS-09 [TEST][MVP2/MVP3] Single Project data isolation verification
 ├── GNE-104 ANALYTICS-10 [DEV][MVP2] Payment conversion events
 └── GNE-159 ANALYTICS-11 [AI][MVP2] AI usage, cost, and conversion dashboards
 ```
@@ -112,8 +119,14 @@ GNE-73 MVP1/MVP2 ANALYTICS-00
 Status rule:
 
 - `Done`: the spec or delivery is complete and can be used by downstream work.
-- `In Review`: implemented locally or on a branch, but still needs PR, main branch, or team confirmation.
+- `In Progress`: verified enough to move forward, but still has a documented remaining acceptance item.
 - `Todo`: not implemented; execute later in number order.
+
+Current status:
+
+- `ANALYTICS-01..04`: Done for MVP1.
+- `ANALYTICS-06`: In Progress. Production PostHog event reception is verified; expanded event property proof is still required for final Done.
+- `ANALYTICS-05`, `ANALYTICS-07..11`: Todo.
 
 ## M4 Auth Events
 
@@ -152,3 +165,16 @@ Production analytics is not complete until the deployed site sends at least one 
 - the correct PostHog project key and host
 
 If production events are missing, check Vercel environment variables, redeploy timing, browser request blocking, PostHog key/host, and whether the deployed commit includes the latest instrumentation.
+
+### 2026-06-20 Production Evidence
+
+Observed in PostHog Activity for project `ai-web-starter-kit`:
+
+- Production URL: `https://ai-web-starter-kit-web.vercel.app/...`
+- Visible events: `Pageview`, `Identify`, `login_started`, `user_logged_in`, submitted form, and click events.
+- Visible library/source: `web`.
+- Visible event detail example: `Pageview` for `/account` on the production Vercel URL, with browser/runtime properties and `App version = v0.1`.
+
+Remaining strict check:
+
+- Expand a production event and confirm shared properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.

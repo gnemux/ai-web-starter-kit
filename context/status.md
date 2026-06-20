@@ -53,6 +53,7 @@ Initialization.
 - Aligned M4 Auth PostHog instrumentation with `GNE-172` MVP factory rules by adding shared event properties and switching successful signup/login events to `user_signed_up` / `user_logged_in`.
 - Synced `GNE-73` MVP1/MVP2 ANALYTICS Linear cleanup into project docs: PostHog uses one Project for MVP1-MVP3 by default, events require `app`, `mvp_stage`, `market`, `env`, `version`, and `module`, and ANALYTICS child issues now follow spec -> config -> adapter -> Auth/pageview -> activation -> production verification -> dashboards -> multi-env isolation -> payment -> AI order.
 - Added mirrored Vercel Git deployment gating at the repository root and `apps/web` so only `main` triggers automatic Vercel deployments; collaborator PR branches rely on GitHub CI plus local or maintainer-run preview checks under the current Hobby/private-repo constraint.
+- Added collaboration workflow specs and AI branch-safety rules so future AI-assisted work starts from the correct branch, avoids reusing old task branches, follows PR plus owner review practices, and gives developers next-step guidance after key workflow actions.
 
 ## Done Issues
 
@@ -110,6 +111,7 @@ Analytics planning and documentation are being synchronized with Linear. `GNE-10
 6. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
 7. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
 8. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
+9. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
 
 ## Risks
 
@@ -121,3 +123,4 @@ Analytics planning and documentation are being synchronized with Linear. `GNE-10
 - Future deployments still need Supabase and PostHog environment variables configured per environment before Auth smoke tests can pass there.
 - Automatic Vercel Preview deployments are intentionally disabled for non-`main` branches while the project stays on a Hobby/private-repo collaboration setup.
 - Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits.
+- GitHub branch protection may remain unenforced on the current free personal private repository, so the documented branch and PR workflow is still a required team convention.

@@ -49,6 +49,7 @@ Initialization.
 - Closed the MVP2 integrations planning gap in Linear by upgrading `GNE-167` into the MVP2/MVP4 integrations entry and creating `GNE-180` through `GNE-183` for provider matrix, provider interfaces, env naming, and secret-leakage/config checks.
 - Reworked Linear project milestone display so MVP milestones are assigned only to module parent issues; execution child issues use `No milestone` and are reached through their parent issue.
 - Audited Linear child issues against the milestone display rule and updated `context/linear.md` so the local issue tree matches the current Linear parent/child structure.
+- Added mirrored Vercel Git deployment gating at the repository root and `apps/web` so only `main` triggers automatic Vercel deployments; collaborator PR branches rely on GitHub CI plus local or maintainer-run preview checks under the current Hobby/private-repo constraint.
 
 ## Done Issues
 
@@ -102,6 +103,7 @@ No active implementation task is currently recorded in this context file.
 3. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
 4. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
 5. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+6. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
 
 ## Risks
 
@@ -111,3 +113,5 @@ No active implementation task is currently recorded in this context file.
 - Local Supabase runs through Colima; analytics is disabled locally because the Supabase vector container cannot mount Colima's Docker socket path.
 - Staging performance advisors currently include only expected unused-index INFO entries until `demo_items` receives representative query traffic.
 - Future deployments still need Supabase and PostHog environment variables configured per environment before Auth smoke tests can pass there.
+- Automatic Vercel Preview deployments are intentionally disabled for non-`main` branches while the project stays on a Hobby/private-repo collaboration setup.
+- Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits.

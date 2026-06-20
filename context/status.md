@@ -2,7 +2,7 @@
 
 ## Phase
 
-Initialization.
+MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in Linear and repository docs.
 
 ## Completed
 
@@ -51,12 +51,17 @@ Initialization.
 - Audited Linear child issues against the milestone display rule and updated `context/linear.md` so the local issue tree matches the current Linear parent/child structure.
 - Synced `GNE-74` MVP1 DEPLOY Linear cleanup into the local issue tree: DEPLOY execution order now runs env/docs first, Supabase/PostHog production checks next, Production Smoke Path after that, and monitoring/multi-env tasks last.
 - Aligned M4 Auth PostHog instrumentation with `GNE-172` MVP factory rules by adding shared event properties and switching successful signup/login events to `user_signed_up` / `user_logged_in`.
-- Synced `GNE-73` MVP1/MVP2 ANALYTICS Linear cleanup into project docs: PostHog uses one Project for MVP1-MVP3 by default, events require `app`, `mvp_stage`, `market`, `env`, `version`, and `module`, and ANALYTICS child issues now follow spec -> config -> adapter -> Auth/pageview -> activation -> production verification -> dashboards -> multi-env isolation -> payment -> AI order.
+- Synced `GNE-73` MVP1-MVP3 ANALYTICS Linear cleanup into project docs: PostHog uses one Project for MVP1-MVP3 by default, events require `app`, `mvp_stage`, `market`, `env`, `version`, and `module`, and ANALYTICS child issues now follow spec -> config -> adapter -> Auth/pageview -> activation -> production verification -> dashboards -> multi-env isolation -> payment -> AI order.
 - Added mirrored Vercel Git deployment gating at the repository root and `apps/web` so only `main` triggers automatic Vercel deployments; collaborator PR branches rely on GitHub CI plus local or maintainer-run preview checks under the current Hobby/private-repo constraint.
 - Added collaboration workflow specs and AI branch-safety rules so future AI-assisted work starts from the correct branch, avoids reusing old task branches, follows PR plus owner review practices, and gives developers next-step guidance after key workflow actions.
 - Refined PR workflow rules so AI can create PRs with filled descriptions after push, while the default PR template stays generic and Supabase-specific checks are added only for Supabase-related changes.
 - Organized MVP1 deployment environment templates: `.env.example` now documents separate Vercel Production and Preview entries with temporarily shared provider values allowed, local `.env.local` is aligned to the same key set, and runtime env readers treat empty fallback variables as unset.
 - Added MVP1 deploy operations memory docs and specs for `GNE-110`, `GNE-187`, and `GNE-129`: deployment status writeback, production monitoring checklist, environment/product matrix, and AI recall/writeback rules.
+- Synced the MVP2 Linear consensus into repository docs: `GNE-190` is now the MVP2 commercial expansion consensus document, while execution stays under `MVP2 INTEGRATIONS-00`, `MVP2 BILLING-00`, `MVP2 PAYMENT-00`, `MVP2 AI-00`, and `MVP1-MVP3 ANALYTICS-00`.
+- Split Integrations stage boundaries in docs: `GNE-167` is MVP2 provider matrix/env/adapter foundation, and `GNE-193` is the MVP4 overseas/china real provider rollout parent.
+- Updated MVP3 Product Validation Kit planning so sandbox/mock/no-op Payment and AI remain the core path, while real Payment and real AI provider product acceptance are conditionally tracked through `GNE-194` and `GNE-195`.
+- Clarified Analytics stage status: `ANALYTICS-01..04` are MVP1 Done, while `ANALYTICS-05..11` cover MVP2/MVP3 production verification, dashboards, multi-env isolation, Payment conversion, and AI analytics.
+- Recorded PostHog production event evidence for `GNE-105`: PostHog Activity shows production Vercel URL events including `Pageview`, `Identify`, `login_started`, and `user_logged_in`; final Done still needs expanded shared property proof.
 
 ## Done Issues
 
@@ -95,36 +100,43 @@ Initialization.
 - `GNE-163` AUTH-05
 - `GNE-90` AUTH-06
 - `GNE-101` ANALYTICS-01
+- `GNE-123` ANALYTICS-02
+- `GNE-102` ANALYTICS-03
+- `GNE-103` ANALYTICS-04
+- `GNE-190` MVP2-KNOW-01
 
 ## In Progress Issues
 
-- `GNE-73` MVP1/MVP2 ANALYTICS-00
+- `GNE-73` MVP1-MVP3 ANALYTICS-00
+- `GNE-105` ANALYTICS-06
 
 ## In Progress
 
-Analytics planning and documentation are being synchronized with Linear. `GNE-101` is Done. `GNE-123`, `GNE-102`, and `GNE-103` are In Review because the local branch contains the implementation and verification, but PR/main synchronization still needs team confirmation.
+MVP2/MVP3 planning and Analytics production verification are being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done. `ANALYTICS-06` is In Progress because production PostHog event reception is verified, but expanded shared property proof is still required.
 
 ## Next Steps
 
-1. Finish PR/main confirmation for Analytics `In Review` items before marking `GNE-123`, `GNE-102`, and `GNE-103` Done in Linear.
-2. Continue Analytics with `GNE-188 ANALYTICS-05` to define and implement activation/core feature events.
-3. Before implementing MVP2 provider-dependent work, start from `GNE-180` and define the provider matrix, env naming, mock/no-op/sandbox strategy, and config checklist.
+1. For `GNE-105 ANALYTICS-06`, expand one production PostHog event and confirm `app`, `mvp_stage`, `market`, `env`, `version`, and `module`; then mark the issue Done in Linear if the fields are present.
+2. Begin MVP2 implementation from `GNE-180 MVP2-INT-01` by defining the provider matrix, env naming, mock/no-op/sandbox strategy, and config checklist.
+3. Continue MVP2 Billing with `GNE-91` and `GNE-191` before implementing entitlement service, Payment, or AI credit logic.
 4. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
-5. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
-6. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
-7. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-8. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
-9. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
-10. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+5. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
+6. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
+7. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
+8. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+9. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
+10. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
+11. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
 
 ## Risks
 
-- External providers are documented but not configured.
+- External providers beyond Supabase/PostHog are documented or planned but not configured.
 - No secrets should be added to the repository.
 - Local machine exposes `pnpm@9.15.0`.
 - Local Supabase runs through Colima; analytics is disabled locally because the Supabase vector container cannot mount Colima's Docker socket path.
 - Staging performance advisors currently include only expected unused-index INFO entries until `demo_items` receives representative query traffic.
-- Future deployments still need Supabase and PostHog environment variables configured per environment before Auth smoke tests can pass there.
+- Future deployments still need Supabase and PostHog environment variables configured per environment before full Auth smoke tests can pass there.
+- `ANALYTICS-06` should not be marked Done until production event shared properties are visible in expanded PostHog event detail or verified by a working PostHog query.
 - Automatic Vercel Preview deployments are intentionally disabled for non-`main` branches while the project stays on a Hobby/private-repo collaboration setup.
 - Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits.
 - GitHub branch protection may remain unenforced on the current free personal private repository, so the documented branch and PR workflow is still a required team convention.

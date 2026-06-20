@@ -62,6 +62,7 @@ MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in 
 - Updated MVP3 Product Validation Kit planning so sandbox/mock/no-op Payment and AI remain the core path, while real Payment and real AI provider product acceptance are conditionally tracked through `GNE-194` and `GNE-195`.
 - Clarified Analytics stage status: `ANALYTICS-01..04` are MVP1 Done, while `ANALYTICS-05..11` cover MVP2/MVP3 production verification, dashboards, multi-env isolation, Payment conversion, and AI analytics.
 - Recorded PostHog production event evidence for `GNE-105`: PostHog Activity shows production Vercel URL events including `Pageview`, `Identify`, `login_started`, and `user_logged_in`; final Done still needs expanded shared property proof.
+- Documented the Vercel Hobby / private repo merge-method rule: non-owner collaborator PRs should use `Create a merge commit` by default so the `main` deployment-triggering commit is owner-authored; already-reviewed blocked squash merges may be followed by an owner-authored no-op trigger commit.
 
 ## Done Issues
 
@@ -125,8 +126,9 @@ MVP2/MVP3 planning and Analytics production verification are being synchronized 
 7. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
 8. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
 9. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
-10. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
-11. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+10. For collaborator-authored PRs while Vercel remains on Hobby/private-repo constraints, the Repo Owner should use `Create a merge commit`; use `Squash and merge` only after confirming the resulting deployment commit author will pass Vercel checks.
+11. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
+12. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
 
 ## Risks
 
@@ -138,5 +140,5 @@ MVP2/MVP3 planning and Analytics production verification are being synchronized 
 - Future deployments still need Supabase and PostHog environment variables configured per environment before full Auth smoke tests can pass there.
 - `ANALYTICS-06` should not be marked Done until production event shared properties are visible in expanded PostHog event detail or verified by a working PostHog query.
 - Automatic Vercel Preview deployments are intentionally disabled for non-`main` branches while the project stays on a Hobby/private-repo collaboration setup.
-- Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits.
+- Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits, especially if a collaborator PR is merged with `Squash and merge`.
 - GitHub branch protection may remain unenforced on the current free personal private repository, so the documented branch and PR workflow is still a required team convention.

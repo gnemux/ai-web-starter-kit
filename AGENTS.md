@@ -33,7 +33,8 @@ Before making code or documentation changes, read:
 - Use one branch per task. Do not reuse old, merged, closed, or unrelated task branches.
 - If the current branch does not match the requested task, stop and explain the mismatch before editing.
 - If the working tree has uncommitted changes, protect them. Do not switch branches, reset, delete, or overwrite files without explicit user approval.
-- Push task branches and use PRs into `main`; Repo owner performs final review, squash merge, and Vercel Production verification.
+- Push task branches and use PRs into `main`; Repo owner performs final review, chooses the merge method, and verifies Vercel Production.
+- While the project uses Vercel Hobby with a private repository, Repo owner should use **Create a merge commit** for non-owner collaborator PRs so the `main` deployment-triggering commit is owner-authored. Avoid **Squash and merge** for collaborator PRs unless the resulting commit author is confirmed to pass Vercel checks.
 - After completing a workflow step, report the result and the next best-practice action so the developer knows what to do next.
 
 ## AI Coding Flow

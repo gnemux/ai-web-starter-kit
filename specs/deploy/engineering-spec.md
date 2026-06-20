@@ -146,7 +146,7 @@ Environment matrix entries should include:
 
 ## External Providers
 
-- Vercel: Production is triggered from `main`. PR branches do not automatically deploy Preview in the current setup. Repo Owner may manually create Preview deployments from a PR branch or commit SHA.
+- Vercel: Production is triggered from `main`. PR branches do not automatically deploy Preview in the current setup. Repo Owner may manually create Preview deployments from a PR branch or commit SHA. While the project uses Vercel Hobby with a private repository, contributor-authored `main` commits may be blocked by commit-author checks; non-owner collaborator PRs should use `Create a merge commit`, and already-reviewed blocked squash merges may need an owner-authored no-op trigger commit.
 - Supabase: Current staging project is the only documented shared remote project. Production Supabase separation is reserved until a real production project exists.
 - PostHog: MVP1-MVP3 use one project by default and separate data with shared event properties.
 - Payment, AI, Email, Webhook providers: reserved for future MVPs and not MVP1 deploy blockers unless explicitly configured.

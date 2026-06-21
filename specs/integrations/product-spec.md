@@ -20,6 +20,7 @@ The project already uses Supabase, PostHog, and Vercel, while Payment, AI, Email
 - Record which providers are already real, which are sandbox/mock/no-op, and which are reserved for MVP4.
 - Define the public/server-only boundary at the planning level.
 - Link provider-specific integration documents from a single entry point.
+- Define a reusable provider configuration and secret leakage checklist for downstream provider PRs.
 
 ## Non-Goals
 
@@ -34,3 +35,4 @@ The project already uses Supabase, PostHog, and Vercel, while Payment, AI, Email
 - Reviewer can answer what is real, what is sandbox/mock/no-op, and what waits for MVP4.
 - Future provider work has a documented boundary before implementation starts.
 - The matrix can be reached from README and integration docs.
+- Downstream Billing, Payment, AI, Analytics, Email, Storage, and SMS PRs can run one shared checklist before review.

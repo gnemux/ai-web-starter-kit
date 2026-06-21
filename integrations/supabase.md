@@ -29,6 +29,11 @@ Provider matrix:
 
 - MVP2 provider stage boundaries and public/server-only rules live in `integrations/provider-matrix.md`.
 
+Provider adapter boundary:
+
+- GNE-181 records Supabase as the real Auth and Database provider in `apps/web/lib/providers/catalog.ts`.
+- Supabase Auth and Database are not deeply providerized in GNE-181; existing helpers and service modules remain the boundary.
+
 ## Initial Scope
 
 - Email or OAuth sign up and sign in.

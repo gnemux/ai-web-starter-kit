@@ -10,6 +10,8 @@ Reserved for future MVP2/MVP3 execution. No real SMS provider is configured in t
 
 The provider boundary and stage split are defined in `integrations/provider-matrix.md`.
 
+GNE-181 defines provider-neutral SMS contract types in `packages/core/src/providers.ts` and a no-op adapter landing point in `apps/web/lib/providers/server.ts`.
+
 ## Strategy
 
 Start with a no-op adapter. Real SMS should wait until the product needs it, because provider selection depends on target market, template registration, compliance, sender identity, and cost controls.

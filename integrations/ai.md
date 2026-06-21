@@ -10,6 +10,12 @@ Planned for MVP2. The Linear execution source is `GNE-148 MVP2 AI-00 [AI] AI Pro
 
 Provider matrix and stage boundaries live in `integrations/provider-matrix.md`.
 
+Provider adapter boundary:
+
+- GNE-181 defines provider-neutral AI contract types in `packages/core/src/providers.ts`.
+- The MVP2 mock adapter landing point is `apps/web/lib/providers/server.ts`.
+- No real model SDK, model provider key, or prompt logging behavior is introduced by GNE-181.
+
 ## Strategy
 
 AI calls must go through a server-only service boundary and provider adapter. Pages and client components must not call model provider SDKs directly.
@@ -50,6 +56,7 @@ Provider secrets must be server-only. Do not create `NEXT_PUBLIC_` AI provider s
 - AI usage is a measurement fact; Billing credit/quota ledger is the commercial fact.
 - Analytics may observe AI events, but it must not be the source of entitlement, usage, or credit truth.
 - Failed, timed-out, retried, or duplicated model calls must have explicit usage and credit handling rules.
+- Product code should call a local AI service/provider adapter instead of importing a model SDK in pages or client components.
 
 ## Linear Execution Order
 

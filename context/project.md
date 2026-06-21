@@ -55,6 +55,24 @@ MVP4 海外/国内双模式真实 Provider 接入
 
 MVP2 is intentionally not a single giant implementation issue. `MVP2-KNOW-01` is a consensus document; execution remains under module parent issues such as `MVP2 INTEGRATIONS-00`, `MVP2 BILLING-00`, `MVP2 PAYMENT-00`, `MVP2 AI-00`, and `MVP1-MVP3 ANALYTICS-00`.
 
+Commercial and AI work must not remain invisible infrastructure only. Billing, Payment, AI, and MVP3 Product Validation issues need reviewer-facing surfaces so a non-implementing teammate can verify the user journey from the app itself.
+
+```text
+Billing
+-> current plan, Free/Pro differences, entitlement or credit state
+
+Payment
+-> pricing/billing entry, checkout start, success/cancel/failure result, order/subscription/entitlement status
+
+AI
+-> AI entry, prompt/input, entitlement gate, provider mode, result, usage/credit/quota state
+
+MVP3 Product Validation Kit
+-> login/signup, project creation, public page, lead submission, owner dashboard, Free/Pro gating, sandbox checkout, AI generation, analytics funnel
+```
+
+If an execution issue only changes code, SQL, or docs and gives no page, status view, event proof, or reviewer checklist, it is not ready for human acceptance unless the parent issue explicitly marks it as a pure internal contract task.
+
 ## Team Collaboration
 
 Each capability track should have:
@@ -74,4 +92,5 @@ Each capability track should have:
 - Payment starts with a Sandbox Provider before real provider integration.
 - Analytics starts with PostHog and keeps space for China-friendly providers.
 - MVP3 should not be blocked by real Payment or real AI provider readiness. It uses sandbox/mock/no-op paths first, then runs real provider product acceptance through dedicated follow-up tasks when MVP2 provider readiness exists.
+- Payment success pages, AI result pages, and analytics events are not sources of truth. They are reviewer surfaces over trusted server-side Billing, Payment, AI, and ledger facts.
 - MVP4 owns real overseas/china dual-mode provider rollout, including domestic payment, domestic AI, domestic analytics, cloud, CDN, SMS, email, storage, and compliance/deployment differences.

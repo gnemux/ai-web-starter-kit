@@ -12,7 +12,9 @@ import { AccountMenu } from "@/components/account-menu";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
+import { getCurrentBillingEntitlements } from "@/lib/services/billing";
 
+import { BillingOverview } from "./billing-overview";
 import { ProfileForm } from "./profile-form";
 
 export default async function AccountPage() {
@@ -24,6 +26,7 @@ export default async function AccountPage() {
     redirect("/login?next=/account");
   }
 
+  const billingResult = await getCurrentBillingEntitlements();
   const displayName = accountResult.data.profile?.displayName ?? "";
   const userLabel =
     displayName || accountResult.data.user.email || copy.account.title;
@@ -92,6 +95,11 @@ export default async function AccountPage() {
             labels={copy.account.profile}
           />
         </Panel>
+
+        <BillingOverview
+          billingResult={billingResult}
+          labels={copy.account.billing}
+        />
       </div>
     </AppShell>
   );

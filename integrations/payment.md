@@ -34,6 +34,23 @@ Checkout
 - MVP3 Product Validation Kit uses the Sandbox Provider first for the Free/Pro entitlement loop. Real provider product acceptance is a conditional follow-up under `MVP3-CP-07`, not a blocker for MVP3 core validation.
 - MVP4 owns overseas/china real dual-mode provider rollout, including China payment providers, settlement/account readiness, callback domains, refunds, reconciliation, and compliance/deployment differences.
 
+## Reviewer Surface
+
+Payment work must expose a page-level path that a teammate can test without reading implementation details:
+
+```text
+pricing or billing entry
+-> checkout started
+-> success / cancel / failure result
+-> order / subscription / entitlement status
+```
+
+The result page is a status surface only. It must not grant entitlement directly from query params, route state, or client-only state. Entitlement changes must come from trusted server-side Payment/Billing facts, and the UI should show pending, failed, or already-processed states clearly.
+
+The dedicated Linear task for this surface is `GNE-198 PAYMENT-08 [APP/REVIEW][MVP2]`. Run it after Sandbox Provider, checkout flow, and webhook/status facts are usable, and before real provider test closure.
+
+UI must follow the app-shell conventions instead of a marketing landing-page style. Frontend pages call service/API boundaries and never import payment SDKs, write Billing facts directly, or infer entitlement from route params.
+
 ## Candidate Real Providers
 
 - Creem
@@ -70,6 +87,7 @@ GNE-72 MVP2 PAYMENT-00
 ├── GNE-96 PAYMENT-02 [DEV][MVP2] Implement Sandbox Payment Provider
 ├── GNE-97 PAYMENT-03 [DEV][MVP2] Build checkout demo flow
 ├── GNE-98 PAYMENT-04 [DEV][MVP2] Define webhook signature, idempotency, and event deduplication
+├── GNE-198 PAYMENT-08 [APP/REVIEW][MVP2] Build checkout and payment result review pages
 ├── GNE-99 PAYMENT-05 [DECISION][MVP2] Select the first real payment provider
 ├── GNE-100 PAYMENT-06 [TEST][MVP2] Verify the real provider test loop
 └── GNE-158 PAYMENT-07 [AI][MVP2] Token package, credit top-up, and subscription allowance checkout flow

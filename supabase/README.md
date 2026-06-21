@@ -37,6 +37,28 @@ supabase db reset
 
 当前仓库不包含真实远程 Supabase 配置，也不包含任何 secret。`supabase db reset` 已验证 `20260618021000_create_data_template.sql` 可以从空库恢复，并验证了 `user_profiles` / `demo_items` 的 owner-only 与 authenticated public-read RLS 边界。
 
+## MVP2 Billing migration
+
+MVP2 Billing 增加 `create_billing_foundation` migration，用于建立 Billing 的最小可信事实表：
+
+- `billing_orders`
+- `billing_subscriptions`
+- `billing_entitlements`
+- `billing_credit_ledger`
+- `billing_usage_ledger`
+
+这些表默认启用 RLS。普通 authenticated 用户只允许读取自己的 Billing rows；写入、发放权益、扣减 credit、处理支付事件和 AI usage 记录都应通过 server-only service 或 maintainer-controlled backend 执行。Plans / prices 在 MVP2 先由 `packages/core/src/billing.ts` 的配置模型承载，后续如果需要动态 pricing admin 再升级为数据库管理。
+
+本地已验证：
+
+```bash
+supabase db reset
+```
+
+结果：`20260621130735_create_billing_foundation.sql` 可以在空库恢复流程中成功应用。
+
+不要把 Billing migration 直接手工复制到 staging 或 production Dashboard。
+
 ## 连接共享远程项目
 
 默认开发不需要连接远程 Supabase；先使用本地容器完成 migration 和 RLS 验证。需要为 Auth、OAuth 回调、邮件或团队联调连接线上项目时：

@@ -26,3 +26,7 @@ GNE-182 provider selector names are documented in `.env.example` and `context/en
 - Browser-visible selector: `NEXT_PUBLIC_ANALYTICS_PROVIDER`
 
 Server-only provider secrets must not use `NEXT_PUBLIC_`.
+
+## Configuration Checks
+
+Use `integrations/provider-config-checklist.md` before handing off provider-related PRs. It defines the expected no-op/mock/sandbox behavior, server-only import checks, secret leakage scope, and the minimum smoke paths for Analytics, Payment, AI, Email, Storage, and SMS.

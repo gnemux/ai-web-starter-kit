@@ -4,7 +4,7 @@
 
 This spec owns the MVP2 provider foundation tracked by `GNE-167`, with execution split into `GNE-180` through `GNE-183`.
 
-`GNE-180` is documentation-only. It establishes the provider matrix and stage boundary. `GNE-181` adds provider-independent contracts and app-side adapter landing points without replacing already-working Supabase or PostHog code paths. `GNE-182` standardizes environment variable naming and public/server-only layering. Later child issues add reusable checks.
+`GNE-180` is documentation-only. It establishes the provider matrix and stage boundary. `GNE-181` adds provider-independent contracts and app-side adapter landing points without replacing already-working Supabase or PostHog code paths. `GNE-182` standardizes environment variable naming and public/server-only layering. `GNE-183` adds the reusable provider configuration, no-op/mock/sandbox behavior, and secret leakage checklist.
 
 ## Affected Areas
 
@@ -16,7 +16,8 @@ This spec owns the MVP2 provider foundation tracked by `GNE-167`, with execution
 - `apps/web/lib/providers/*`
 - `.env.example`
 - `context/environment-matrix.md`
-- Later child issues may touch test/checklist docs.
+- `integrations/provider-config-checklist.md`
+- Test/checklist docs under `specs/integrations/*`
 
 ## Current Provider State
 
@@ -83,6 +84,23 @@ GNE-182 standardizes server-only placeholders for future providers:
 
 Vercel Production and Preview entries must be configured separately. Any Vercel environment variable change requires redeploying the affected Production or Preview deployment before runtime verification.
 
+## GNE-183 Provider Configuration Checklist
+
+The reusable review checklist lives in `integrations/provider-config-checklist.md`.
+
+It covers:
+
+- optional provider not configured
+- required provider missing
+- provider host errors
+- provider disabled by selector
+- server-only adapter imported by client code
+- browser request blocking, especially analytics blockers
+- minimum smoke/mock paths for Analytics, Payment, AI, Email, Storage, and SMS
+- secret leakage review across Git diff, `.env.example`, README, `context/`, `integrations/`, `specs/`, Linear, PR text, screenshots, browser source, and client bundle/build artifacts
+
+The checklist is intentionally provider-foundation work. It does not add real Payment, AI, Email, Storage, or SMS SDKs, and it does not deep-providerize Supabase Auth/Database or rewrite the working PostHog path.
+
 ## Boundary Rules
 
 - Product routes and UI components should not directly scatter provider SDK calls.
@@ -122,4 +140,13 @@ For GNE-182 environment naming changes:
 - Confirm `.env.example` contains only placeholders for provider values.
 - Confirm server-only secrets do not use `NEXT_PUBLIC_`.
 - Confirm provider selectors are documented in `.env.example`, `context/environment-matrix.md`, and related integration docs.
+- Start the local web app and smoke test `/`, `/login`, `/dashboard`, and `/account`.
+
+For GNE-183 provider configuration and leakage checklist changes:
+
+- Run `pnpm typecheck`.
+- Run `pnpm lint`.
+- Run `pnpm build`.
+- Run the static boundary and secret searches documented in `integrations/provider-config-checklist.md`.
+- Confirm the checklist covers optional provider absence, required provider absence, host errors, disabled providers, server-only client imports, browser blocking, and client bundle leakage checks.
 - Start the local web app and smoke test `/`, `/login`, `/dashboard`, and `/account`.

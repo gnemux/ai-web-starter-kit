@@ -62,3 +62,22 @@ A reviewer should be able to answer:
 - Are all future provider secrets clearly server-only?
 - Is `NEXT_PUBLIC_ANALYTICS_PROVIDER` the only browser-visible provider selector introduced here?
 - Does the template avoid committing real provider values while still documenting default mock/no-op/sandbox behavior?
+
+## GNE-183 Acceptance
+
+- A reusable provider configuration checklist exists in `integrations/provider-config-checklist.md`.
+- The checklist covers optional provider not configured, required provider missing, provider host wrong, provider disabled by selector, server-only adapter imported by client code, and browser request blocking.
+- The checklist defines minimum smoke/mock paths for Analytics, Payment, AI, Email, Storage, and SMS.
+- The checklist defines secret leakage review scope across Git diff, `.env.example`, README, `context/`, `integrations/`, `specs/`, Linear, PR text, screenshots, browser source, and client bundle/build artifacts.
+- `specs/integrations/test-plan.md` includes commands for provider boundary, server-only import, `NEXT_PUBLIC_` secret misuse, placeholder-only env, and client bundle leakage checks.
+- README, provider matrix, and adapter directory docs point reviewers to the checklist.
+- `context/status.md` records the current GNE-167/GNE-183 state and points downstream work to Billing, Payment, and AI entry issues.
+- No real keys, tokens, webhook secrets, service-role keys, private provider payloads, customer data, or account screenshots are committed.
+
+## GNE-183 Reviewer Questions
+
+- Can a future Billing, Payment, or AI PR reuse the checklist without asking for a new review process in chat?
+- Does the checklist distinguish current Supabase/PostHog real providers from sandbox/mock/no-op providers?
+- Do optional provider gaps degrade safely while required provider gaps fail at the owning boundary?
+- Are server-only adapters and secrets protected from client components and client bundles?
+- Is the checklist concrete enough to run before every provider-related PR?

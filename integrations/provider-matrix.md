@@ -6,6 +6,8 @@ This matrix is the MVP2 source of truth for provider choices, stage boundaries, 
 
 Use it before implementing Billing, Payment, AI, Analytics, Email, Storage, SMS, Auth, Database, or deployment-related provider work.
 
+For repeatable PR review and smoke checks, use `integrations/provider-config-checklist.md` after reading this matrix.
+
 ## Stage Boundary
 
 - MVP2 defines provider matrix, env naming, public/secret rules, provider interface conventions, and mock/no-op/sandbox behavior.
@@ -55,6 +57,15 @@ Use it before implementing Billing, Payment, AI, Analytics, Email, Storage, SMS,
 - Vercel Production and Preview must have separate environment variable entries. Any env change requires redeploying the affected deployment before verification.
 - `.env.example` uses placeholders for provider values and must not contain real project keys, service-role keys, webhook secrets, account tokens, or customer data.
 
+## GNE-183 Configuration And Leakage Checklist
+
+- Provider configuration review lives in `integrations/provider-config-checklist.md`.
+- Optional providers must degrade through no-op, mock, or sandbox behavior instead of breaking page load.
+- Required providers must fail at the owning service boundary with safe error text and without logging secrets.
+- Server-only adapters in `apps/web/lib/providers/server.ts` must not be imported by client components.
+- Secret leakage checks must cover Git diff, `.env.example`, README, `context/`, `integrations/`, `specs/`, Linear, PR text, screenshots, browser source, and client bundle/build artifacts.
+- Minimum smoke paths for Analytics, Payment, AI, Email, Storage, and SMS are documented in the checklist so downstream Billing, Payment, and AI work can reuse the same review gate.
+
 ## Required Reading For Provider Work
 
 - Supabase: `integrations/supabase.md`
@@ -66,6 +77,7 @@ Use it before implementing Billing, Payment, AI, Analytics, Email, Storage, SMS,
 - SMS: `integrations/sms.md`
 - Deploy/CDN: `integrations/vercel.md`
 - Environment matrix: `context/environment-matrix.md`
+- Provider config checklist: `integrations/provider-config-checklist.md`
 - Supabase workflow: `context/supabase-workflow.md`
 
 ## Security Rules

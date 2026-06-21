@@ -152,7 +152,7 @@ Supabase public browser keys:
 
 MVP1-MVP3 use one PostHog Project by default. Split into multiple PostHog Projects only for clear reasons such as event volume, customer isolation, permission isolation, compliance boundary, or separate legal entity.
 
-Current production evidence is recorded in `context/deployment-status.md`: PostHog Activity has shown production Vercel URL events for `ai-web-starter-kit`, including `Pageview`, `Identify`, `login_started`, and `user_logged_in`. Final `ANALYTICS-06` closure still requires expanded event proof for the required shared properties.
+Current production evidence is recorded in `context/deployment-status.md`: PostHog Activity has shown production Vercel URL events for the deployed site, including `Pageview`, `Identify`, `login_started`, and `user_logged_in`. On 2026-06-21, a recent production `Pageview` confirmed `env=production` after the Vercel Production env correction and redeploy.
 
 Required shared event properties:
 

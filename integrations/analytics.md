@@ -13,7 +13,7 @@ MVP1 base analytics is implemented and merged for Auth/pageview:
 - shared property injection
 - Auth and pageview events
 
-Production PostHog reception has been visually verified from the `ai-web-starter-kit` PostHog Activity page against the deployed Vercel URL. Full `ANALYTICS-06` closure still requires one expanded production event showing the expected shared properties.
+Production PostHog reception and required shared properties have been visually verified from the PostHog Activity page against the deployed Vercel URL. The latest verification confirmed the corrected production event property `env=production`.
 
 The Linear planning source is `GNE-73 MVP1-MVP3 ANALYTICS-00 [ANALYTICS] 统一事件标准、生产验收与转化看板`. Its current execution order is mirrored in `context/linear.md`.
 
@@ -140,7 +140,7 @@ Status rule:
 Current status:
 
 - `ANALYTICS-01..04`: Done for MVP1.
-- `ANALYTICS-06`: In Progress. Production PostHog event reception is verified; expanded event property proof is still required for final Done.
+- `ANALYTICS-06`: Done. Production PostHog event reception and required shared properties have visual proof.
 - `ANALYTICS-05`, `ANALYTICS-07..11`: Todo.
 
 ## M4 Auth Events
@@ -190,6 +190,13 @@ Observed in PostHog Activity for project `ai-web-starter-kit`:
 - Visible library/source: `web`.
 - Visible event detail example: `Pageview` for `/account` on the production Vercel URL, with browser/runtime properties and `App version = v0.1`.
 
-Remaining strict check:
+### 2026-06-21 Production Evidence
 
-- Expand a production event and confirm shared properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
+Observed in PostHog Activity after the Vercel Production env correction and redeploy:
+
+- Production URL: `https://ai-web-starter-kit-web.vercel.app/account`
+- Visible event: recent `Pageview`.
+- Corrected shared property: `env=production`.
+- Combined with the prior expanded production evidence, the required safe shared property set is now visually confirmed: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
+
+Full Production Smoke Path remains separate from `ANALYTICS-06`.

@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | partial smoke pass for PostHog production event reception; full Production Smoke Path not recorded |
+| Latest production status | partial smoke pass for PostHog production event reception and required shared properties; full Production Smoke Path not recorded |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
 | Latest production commit | unknown |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | `ANALYTICS-06` still needs expanded PostHog event proof for shared properties: `app`, `mvp_stage`, `market`, `env`, `version`, `module`. |
-| Next owner action | Expand one production PostHog event and confirm shared properties, then continue or close `GNE-105 ANALYTICS-06`. |
+| Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. |
+| Next owner action | Continue MVP2 Billing / Payment / AI work from the provider matrix and checklist; run full Production Smoke Path separately when needed. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -180,6 +180,43 @@ Record configured/missing/unknown only. Do not record values.
 | PostHog Auth event | pass | PostHog Activity shows `login_started`, `user_logged_in`, and `Identify` on production Vercel URL. | Confirm shared properties on expanded Auth event. |
 | PostHog shared properties | blocked | Expanded event screenshot showed production URL and `App version = v0.1`; required shared property set was not fully visible yet. | Search event properties for `app`, `mvp_stage`, `market`, `env`, `version`, and `module`. |
 | Full Production Smoke Path | not_run | This entry only records PostHog production event verification. | Run full smoke path separately under `GNE-109` when needed. |
+
+## 2026-06-21 20:41 CST - production PostHog env verification
+
+### Deployment Metadata
+
+| Field | Value |
+| --- | --- |
+| Linear issue | `GNE-105` / `ANALYTICS-06` |
+| Environment | production |
+| Deployment type | smoke-test update |
+| Trigger | User verified PostHog Activity after Vercel Production env correction and redeploy |
+| Branch | `main` |
+| Commit | unknown |
+| Vercel URL | `https://ai-web-starter-kit-web.vercel.app` |
+| Actor | deployment partner / Repo Owner |
+| Verifier | wangwei |
+| Provider values | same-as-current-single-service |
+| Notes | PostHog Activity shows a recent production `Pageview` for `/account` with `env=production`. No secrets recorded. |
+
+### Provider Configuration Status
+
+Record configured/missing/unknown only. Do not record values.
+
+| Key or provider | Production | Preview | Notes |
+| --- | --- | --- | --- |
+| NEXT_PUBLIC_APP_ENV | configured | unknown | Production event now reports `env=production`. |
+| NEXT_PUBLIC_POSTHOG_KEY | configured | unknown | Production event reception observed in PostHog. |
+| NEXT_PUBLIC_POSTHOG_HOST | configured | unknown | Production event reception observed in PostHog. |
+| PostHog Project | configured | unknown | Project observed through PostHog Activity. |
+
+### Smoke Test Result
+
+| Check | Status | Evidence | Next action |
+| --- | --- | --- | --- |
+| PostHog production pageview | pass | PostHog Activity shows a recent `Pageview` for `https://ai-web-starter-kit-web.vercel.app/account`. | None for `ANALYTICS-06`; full smoke path remains separate. |
+| PostHog shared properties | pass | Visual checks across expanded production events show `app`, `mvp_stage`, `market`, `module`, version label, and the corrected `env=production`. | Use the same shared property checks for future Preview / Production events. |
+| Full Production Smoke Path | not_run | This entry only records PostHog production analytics evidence. | Run full smoke path separately under `GNE-109` when needed. |
 
 ## Known Issues
 

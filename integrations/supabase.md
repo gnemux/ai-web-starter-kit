@@ -46,15 +46,17 @@ Provider adapter boundary:
 ## Environment Variables
 
 ```text
-SUPABASE_PROJECT_REF=nglilxhkuqzswbwitbdu
-NEXT_PUBLIC_SUPABASE_URL=https://nglilxhkuqzswbwitbdu.supabase.co
+AUTH_PROVIDER=supabase
+DATABASE_PROVIDER=supabase
+SUPABASE_PROJECT_REF=your-supabase-project-ref
+NEXT_PUBLIC_SUPABASE_URL=https://your-supabase-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SECRET_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-`SUPABASE_PROJECT_REF` is not a secret, but it identifies the linked remote project. Keep real URL, anon key, service role key, access token, and database password out of Git.
+`AUTH_PROVIDER` and `DATABASE_PROVIDER` are non-secret server-side selectors. `SUPABASE_PROJECT_REF` is not a secret, but it identifies a linked project and should use a placeholder in `.env.example`. Keep real URL, publishable/anon key, service role key, access token, and database password out of Git.
 
 ## Rules
 
@@ -171,5 +173,6 @@ Operational notes:
 
 - Supabase Auth dashboard settings decide whether signup creates an immediate session or requires email confirmation.
 - Vercel must include `NEXT_PUBLIC_SUPABASE_URL` and either `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` or legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Vercel Production and Preview entries must be configured separately. Redeploy after changing any Supabase env key before using that deployment as verification evidence.
 - If Auth redirect URLs are restricted in Supabase, add local, preview, and production URLs before testing email confirmation.
 - Real signup/login verification may send email to the test address and should be done by the account owner.

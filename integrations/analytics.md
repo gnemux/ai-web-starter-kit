@@ -82,16 +82,20 @@ Split into multiple PostHog Projects only when there is a clear reason such as e
 
 ```text
 NEXT_PUBLIC_APP_NAME=
+NEXT_PUBLIC_PRODUCT_ID=
 NEXT_PUBLIC_APP_URL=
 NEXT_PUBLIC_APP_ENV=
 NEXT_PUBLIC_APP_MARKET=
 NEXT_PUBLIC_APP_VERSION=
 NEXT_PUBLIC_MVP_STAGE=
+NEXT_PUBLIC_ANALYTICS_PROVIDER=posthog
 NEXT_PUBLIC_POSTHOG_KEY=
 NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=
 NEXT_PUBLIC_POSTHOG_HOST=
 NEXT_PUBLIC_JIGUANG_APP_KEY=
 ```
+
+`NEXT_PUBLIC_ANALYTICS_PROVIDER` is the only browser-visible provider selector introduced by GNE-182. It is not a secret.
 
 `NEXT_PUBLIC_POSTHOG_KEY` is the preferred project variable name in this starter. `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` is also supported for compatibility with PostHog's current Next.js docs.
 
@@ -102,6 +106,7 @@ NEXT_PUBLIC_JIGUANG_APP_KEY=
 - Analytics must not be used as a payment or entitlement source of truth.
 - Analytics must not be used as the Auth, Payment, Entitlement, or AI token ledger source of truth.
 - Production event verification should be documented after deployment.
+- Vercel Production and Preview entries must be configured separately. Redeploy after changing analytics env keys before using that deployment as production or preview evidence.
 - M4 Auth uses Supabase Auth as the source of truth and PostHog only for product analytics.
 - Every event should carry the shared MVP factory properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
 - For local M4 testing, the current operator account can be identified with the GitHub-bound email `1851884@qq.com` after successful login.

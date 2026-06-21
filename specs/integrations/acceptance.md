@@ -44,3 +44,21 @@ A reviewer should be able to answer:
 - Did this task avoid rewriting working Supabase and PostHog paths?
 - Are real provider SDKs and secrets still absent?
 - Can client code accidentally import server-only adapters?
+
+## GNE-182 Acceptance
+
+- `.env.example` contains provider selectors for Auth, Database, Analytics, Payment, AI, Email, Storage, and SMS.
+- `.env.example` does not contain real provider keys, real webhook secrets, real service-role keys, private tokens, customer data, or private account values.
+- Supabase public config is represented as placeholders, not a hardcoded shared project URL in the template.
+- Public app/product metadata includes `NEXT_PUBLIC_PRODUCT_ID` without changing the analytics shared property contract.
+- Public/browser env is limited to `NEXT_PUBLIC_` app metadata, public analytics config, and public Supabase client config.
+- Server-only Payment, AI, Email, Storage, and SMS secret placeholders do not use `NEXT_PUBLIC_`.
+- `context/environment-matrix.md` explains local, Vercel Preview, and Vercel Production placement for provider selectors and secrets.
+- Related integration docs use the same env names and explain that Vercel env changes require redeploy.
+
+## GNE-182 Reviewer Questions
+
+- Can a developer decide which keys belong in local `.env.local`, Vercel Preview, and Vercel Production without asking in chat?
+- Are all future provider secrets clearly server-only?
+- Is `NEXT_PUBLIC_ANALYTICS_PROVIDER` the only browser-visible provider selector introduced here?
+- Does the template avoid committing real provider values while still documenting default mock/no-op/sandbox behavior?

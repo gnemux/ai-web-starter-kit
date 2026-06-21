@@ -24,10 +24,18 @@ Start with a no-op adapter. Real SMS should wait until the product needs it, bec
 
 ## Environment Variables
 
-Names will be finalized by `GNE-182`. Until then, SMS secrets are server-only placeholders and must not use `NEXT_PUBLIC_`.
+```text
+SMS_PROVIDER=noop
+SMS_PROVIDER_API_KEY=
+SMS_PROVIDER_SECRET=
+SMS_SENDER_ID=
+```
+
+`SMS_PROVIDER` is a non-secret server-side selector. SMS provider keys and signing secrets are server-only placeholders and must not use `NEXT_PUBLIC_`.
 
 ## Rules
 
 - Do not commit SMS provider keys, signing secrets, verification codes, phone lists, or raw provider payloads.
 - Do not send real SMS from local tests unless the task explicitly requires it and uses safe test numbers.
 - Product code should call a local SMS service/provider adapter instead of importing a provider SDK in pages or components.
+- Vercel Production and Preview entries must be configured separately. Redeploy after changing SMS env keys before verifying delivery behavior.

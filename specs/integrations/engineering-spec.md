@@ -4,7 +4,7 @@
 
 This spec owns the MVP2 provider foundation tracked by `GNE-167`, with execution split into `GNE-180` through `GNE-183`.
 
-`GNE-180` is documentation-only. It establishes the provider matrix and stage boundary. `GNE-181` adds provider-independent contracts and app-side adapter landing points without replacing already-working Supabase or PostHog code paths. Later child issues add env naming and reusable checks.
+`GNE-180` is documentation-only. It establishes the provider matrix and stage boundary. `GNE-181` adds provider-independent contracts and app-side adapter landing points without replacing already-working Supabase or PostHog code paths. `GNE-182` standardizes environment variable naming and public/server-only layering. Later child issues add reusable checks.
 
 ## Affected Areas
 
@@ -14,7 +14,9 @@ This spec owns the MVP2 provider foundation tracked by `GNE-167`, with execution
 - `context/status.md`
 - `packages/core/src/providers.ts`
 - `apps/web/lib/providers/*`
-- Later child issues may touch `.env.example` and test/checklist docs.
+- `.env.example`
+- `context/environment-matrix.md`
+- Later child issues may touch test/checklist docs.
 
 ## Current Provider State
 
@@ -52,6 +54,35 @@ GNE-181 intentionally does not:
 - install real Payment, AI, Email, Storage, or SMS SDKs
 - introduce real provider secrets or new environment variables
 
+## GNE-182 Environment Naming
+
+The environment template in `.env.example` must use placeholders only for provider values. Real provider keys, webhook secrets, service-role keys, account tokens, private URLs, and customer data must stay in local ignored files or provider dashboards.
+
+Provider selectors:
+
+```text
+AUTH_PROVIDER=supabase
+DATABASE_PROVIDER=supabase
+NEXT_PUBLIC_ANALYTICS_PROVIDER=posthog
+PAYMENT_PROVIDER=sandbox
+AI_PROVIDER=mock
+EMAIL_PROVIDER=noop
+STORAGE_PROVIDER=noop
+SMS_PROVIDER=noop
+```
+
+Public browser variables are limited to app/product metadata, analytics public config, and Supabase public client config. Server-only provider secrets must not use `NEXT_PUBLIC_`.
+
+GNE-182 standardizes server-only placeholders for future providers:
+
+- Payment: `PAYMENT_SECRET_KEY`, `PAYMENT_WEBHOOK_SECRET`
+- AI: `AI_PROVIDER_API_KEY`, `AI_BUDGET_LIMIT`
+- Email: `EMAIL_PROVIDER_API_KEY`
+- Storage: `STORAGE_SECRET_ACCESS_KEY`
+- SMS: `SMS_PROVIDER_API_KEY`, `SMS_PROVIDER_SECRET`
+
+Vercel Production and Preview entries must be configured separately. Any Vercel environment variable change requires redeploying the affected Production or Preview deployment before runtime verification.
+
 ## Boundary Rules
 
 - Product routes and UI components should not directly scatter provider SDK calls.
@@ -59,6 +90,7 @@ GNE-181 intentionally does not:
 - Existing PostHog usage remains behind local analytics helpers.
 - Server-only secrets must not use `NEXT_PUBLIC_`.
 - Public browser variables are allowed only for browser-required publishable, anon, project, host, or client config.
+- Provider selector variables are non-secret. Keep them server-side unless browser code needs the selector; currently only `NEXT_PUBLIC_ANALYTICS_PROVIDER` is browser-visible.
 - Provider docs must never contain real secrets, tokens, service-role keys, webhook secrets, raw payloads, account screenshots, or customer data.
 - Server-only provider adapters must not be imported by client components.
 
@@ -83,4 +115,11 @@ For GNE-181 provider contract changes:
 - Run `pnpm lint`.
 - Search for provider SDK imports and confirm Supabase/PostHog remain behind their existing helper boundaries.
 - Search client-facing app code for server-only provider adapter imports.
+- Start the local web app and smoke test `/`, `/login`, `/dashboard`, and `/account`.
+
+For GNE-182 environment naming changes:
+
+- Confirm `.env.example` contains only placeholders for provider values.
+- Confirm server-only secrets do not use `NEXT_PUBLIC_`.
+- Confirm provider selectors are documented in `.env.example`, `context/environment-matrix.md`, and related integration docs.
 - Start the local web app and smoke test `/`, `/login`, `/dashboard`, and `/account`.

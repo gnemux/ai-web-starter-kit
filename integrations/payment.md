@@ -45,8 +45,11 @@ Checkout
 
 ```text
 PAYMENT_PROVIDER=sandbox
+PAYMENT_SECRET_KEY=
 PAYMENT_WEBHOOK_SECRET=
 ```
+
+`PAYMENT_PROVIDER` is a non-secret server-side selector. `PAYMENT_SECRET_KEY` and `PAYMENT_WEBHOOK_SECRET` are server-only placeholders and must not use `NEXT_PUBLIC_`.
 
 ## Rules
 
@@ -57,6 +60,7 @@ PAYMENT_WEBHOOK_SECRET=
 - Success or cancel pages record user navigation only. They must not directly grant entitlement.
 - Real provider secrets and webhook secrets must remain server-only and never use `NEXT_PUBLIC_`.
 - Product code should call a local Payment service/provider adapter instead of importing a real provider SDK in pages or components.
+- Vercel Production and Preview entries must be configured separately. Redeploy after changing Payment env keys before verifying checkout or webhook behavior.
 
 ## Linear Execution Order
 

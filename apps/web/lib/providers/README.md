@@ -17,3 +17,12 @@ This directory is the GNE-181 landing point for app-side provider adapters.
 - Email, Storage, and SMS use no-op adapters only.
 
 Server-only provider adapters must not be imported by client components. Client code may use `analytics-client.ts` for browser-safe analytics calls.
+
+## Environment Selectors
+
+GNE-182 provider selector names are documented in `.env.example` and `context/environment-matrix.md`.
+
+- Server-side selectors: `AUTH_PROVIDER`, `DATABASE_PROVIDER`, `PAYMENT_PROVIDER`, `AI_PROVIDER`, `EMAIL_PROVIDER`, `STORAGE_PROVIDER`, `SMS_PROVIDER`
+- Browser-visible selector: `NEXT_PUBLIC_ANALYTICS_PROVIDER`
+
+Server-only provider secrets must not use `NEXT_PUBLIC_`.

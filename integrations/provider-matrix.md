@@ -46,6 +46,15 @@ Use it before implementing Billing, Payment, AI, Analytics, Email, Storage, SMS,
 - PostHog remains behind `apps/web/lib/analytics/*`; `apps/web/lib/providers/analytics-client.ts` is only a facade for future convention alignment.
 - Payment, AI, Email, Storage, and SMS adapters in GNE-181 are contracts only. They do not install real provider SDKs or introduce secrets.
 
+## GNE-182 Environment Boundary
+
+- Provider selectors live in `.env.example` and `context/environment-matrix.md`.
+- Only Analytics exposes a provider selector to browser code: `NEXT_PUBLIC_ANALYTICS_PROVIDER`.
+- Auth, Database, Payment, AI, Email, Storage, and SMS selectors are server-side env names by default.
+- Server-only provider secrets must not use `NEXT_PUBLIC_`.
+- Vercel Production and Preview must have separate environment variable entries. Any env change requires redeploying the affected deployment before verification.
+- `.env.example` uses placeholders for provider values and must not contain real project keys, service-role keys, webhook secrets, account tokens, or customer data.
+
 ## Required Reading For Provider Work
 
 - Supabase: `integrations/supabase.md`

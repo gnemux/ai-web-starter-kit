@@ -23,6 +23,25 @@ Use Vercel project environment variables for values listed in `.env.example`.
 
 Production and Preview entries should be configured separately in the Vercel Dashboard. They may temporarily contain the same provider values while the project only has one service environment, but they should remain separate entries so they can diverge later.
 
+After any Vercel environment variable change, redeploy the affected Preview or Production deployment before verifying runtime behavior. Existing deployments do not automatically receive new env values.
+
+Provider selector keys from GNE-182:
+
+```text
+AUTH_PROVIDER=supabase
+DATABASE_PROVIDER=supabase
+NEXT_PUBLIC_ANALYTICS_PROVIDER=posthog
+PAYMENT_PROVIDER=sandbox
+AI_PROVIDER=mock
+EMAIL_PROVIDER=noop
+STORAGE_PROVIDER=noop
+SMS_PROVIDER=noop
+```
+
+Only `NEXT_PUBLIC_ANALYTICS_PROVIDER` is browser-visible. Payment, AI, Email, Storage, SMS, webhook, service-role, SMTP, signing, and private provider API key values must remain server-only and must not use `NEXT_PUBLIC_`.
+
+Public product/environment metadata includes `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_PRODUCT_ID`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_APP_ENV`, `NEXT_PUBLIC_APP_MARKET`, `NEXT_PUBLIC_APP_VERSION`, and `NEXT_PUBLIC_MVP_STAGE`.
+
 Operational memory:
 
 - Deployment status and smoke test writeback: `context/deployment-status.md`
@@ -47,3 +66,4 @@ Provider matrix:
 - Manual Preview deployments should be recorded with Preview URL, commit, trigger, verification result, and next action in `context/deployment-status.md`.
 - If a `main` deployment is blocked by Hobby commit-author checks after merging a contributor PR, the Vercel project owner should redeploy `main` manually. If the same contributor-authored commit remains blocked, create an owner-authored no-op trigger commit after confirming the reviewed tree is already merged, or upgrade Vercel collaboration.
 - Production verification should cover the main user path, not only static page load.
+- Do not create empty Vercel entries for optional fallback keys. Leave unused optional placeholders empty only in `.env.example`.

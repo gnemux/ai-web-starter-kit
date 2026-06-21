@@ -16,7 +16,12 @@ export const providerCatalog = [
       "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
       "NEXT_PUBLIC_SUPABASE_ANON_KEY"
     ],
-    serverEnv: ["SUPABASE_SECRET_KEY", "SUPABASE_SERVICE_ROLE_KEY"],
+    serverEnv: [
+      "AUTH_PROVIDER",
+      "SUPABASE_PROJECT_REF",
+      "SUPABASE_SECRET_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY"
+    ],
     notes:
       "Existing Auth calls stay behind apps/web/lib/services/auth.ts and apps/web/lib/supabase/*."
   },
@@ -32,7 +37,12 @@ export const providerCatalog = [
       "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
       "NEXT_PUBLIC_SUPABASE_ANON_KEY"
     ],
-    serverEnv: ["SUPABASE_SECRET_KEY", "SUPABASE_SERVICE_ROLE_KEY"],
+    serverEnv: [
+      "DATABASE_PROVIDER",
+      "SUPABASE_PROJECT_REF",
+      "SUPABASE_SECRET_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY"
+    ],
     notes:
       "Database access stays in server services and Supabase helpers; RLS remains the security boundary."
   },
@@ -45,14 +55,17 @@ export const providerCatalog = [
     serverOnly: false,
     publicEnv: [
       "NEXT_PUBLIC_APP_NAME",
+      "NEXT_PUBLIC_PRODUCT_ID",
       "NEXT_PUBLIC_APP_URL",
       "NEXT_PUBLIC_APP_ENV",
       "NEXT_PUBLIC_APP_MARKET",
       "NEXT_PUBLIC_APP_VERSION",
       "NEXT_PUBLIC_MVP_STAGE",
+      "NEXT_PUBLIC_ANALYTICS_PROVIDER",
       "NEXT_PUBLIC_POSTHOG_KEY",
       "NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN",
-      "NEXT_PUBLIC_POSTHOG_HOST"
+      "NEXT_PUBLIC_POSTHOG_HOST",
+      "NEXT_PUBLIC_JIGUANG_APP_KEY"
     ],
     serverEnv: [],
     notes:
@@ -66,7 +79,11 @@ export const providerCatalog = [
     configStatus: "configured",
     serverOnly: true,
     publicEnv: [],
-    serverEnv: [],
+    serverEnv: [
+      "PAYMENT_PROVIDER",
+      "PAYMENT_SECRET_KEY",
+      "PAYMENT_WEBHOOK_SECRET"
+    ],
     notes:
       "Sandbox checkout contract only; real provider SDKs and webhook secrets are outside GNE-181."
   },
@@ -78,7 +95,12 @@ export const providerCatalog = [
     configStatus: "configured",
     serverOnly: true,
     publicEnv: [],
-    serverEnv: [],
+    serverEnv: [
+      "AI_PROVIDER",
+      "AI_MODEL",
+      "AI_PROVIDER_API_KEY",
+      "AI_BUDGET_LIMIT"
+    ],
     notes:
       "Mock text generation contract only; real model SDKs and keys are outside GNE-181."
   },
@@ -90,7 +112,11 @@ export const providerCatalog = [
     configStatus: "configured",
     serverOnly: true,
     publicEnv: [],
-    serverEnv: [],
+    serverEnv: [
+      "EMAIL_PROVIDER",
+      "EMAIL_PROVIDER_API_KEY",
+      "EMAIL_FROM_ADDRESS"
+    ],
     notes:
       "No-op transactional email contract for future product workflows."
   },
@@ -102,7 +128,13 @@ export const providerCatalog = [
     configStatus: "configured",
     serverOnly: true,
     publicEnv: [],
-    serverEnv: [],
+    serverEnv: [
+      "STORAGE_PROVIDER",
+      "STORAGE_ENDPOINT",
+      "STORAGE_BUCKET",
+      "STORAGE_ACCESS_KEY_ID",
+      "STORAGE_SECRET_ACCESS_KEY"
+    ],
     notes:
       "No-op upload target contract until a product feature needs file storage."
   },
@@ -114,7 +146,12 @@ export const providerCatalog = [
     configStatus: "configured",
     serverOnly: true,
     publicEnv: [],
-    serverEnv: [],
+    serverEnv: [
+      "SMS_PROVIDER",
+      "SMS_PROVIDER_API_KEY",
+      "SMS_PROVIDER_SECRET",
+      "SMS_SENDER_ID"
+    ],
     notes:
       "No-op SMS contract until a product workflow explicitly requires SMS."
   },
@@ -126,10 +163,13 @@ export const providerCatalog = [
     configStatus: "configured",
     serverOnly: true,
     publicEnv: [
+      "NEXT_PUBLIC_APP_NAME",
+      "NEXT_PUBLIC_PRODUCT_ID",
       "NEXT_PUBLIC_APP_URL",
       "NEXT_PUBLIC_APP_ENV",
       "NEXT_PUBLIC_APP_MARKET",
-      "NEXT_PUBLIC_APP_VERSION"
+      "NEXT_PUBLIC_APP_VERSION",
+      "NEXT_PUBLIC_MVP_STAGE"
     ],
     serverEnv: [],
     notes:

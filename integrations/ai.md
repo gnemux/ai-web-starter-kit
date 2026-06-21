@@ -38,14 +38,14 @@ UI action
 
 ## Environment Variables
 
-Names will be finalized by `MVP2-INT-03` and `AI-09`. Until then:
-
 ```text
-AI_PROVIDER=
-AI_MODEL=
+AI_PROVIDER=mock
+AI_MODEL=mock-text
 AI_PROVIDER_API_KEY=
 AI_BUDGET_LIMIT=
 ```
+
+`AI_PROVIDER` is a non-secret server-side selector. `AI_PROVIDER_API_KEY` and budget controls are server-only and must not use `NEXT_PUBLIC_`.
 
 Provider secrets must be server-only. Do not create `NEXT_PUBLIC_` AI provider secret variables.
 
@@ -57,6 +57,7 @@ Provider secrets must be server-only. Do not create `NEXT_PUBLIC_` AI provider s
 - Analytics may observe AI events, but it must not be the source of entitlement, usage, or credit truth.
 - Failed, timed-out, retried, or duplicated model calls must have explicit usage and credit handling rules.
 - Product code should call a local AI service/provider adapter instead of importing a model SDK in pages or client components.
+- Vercel Production and Preview entries must be configured separately. Redeploy after changing AI env keys before verifying model behavior.
 
 ## Linear Execution Order
 

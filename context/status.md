@@ -61,7 +61,7 @@ MVP1 foundation complete; the MVP2 integrations provider foundation is complete 
 - Split Integrations stage boundaries in docs: `GNE-167` is MVP2 provider matrix/env/adapter foundation, and `GNE-193` is the MVP4 overseas/china real provider rollout parent.
 - Updated MVP3 Product Validation Kit planning so sandbox/mock/no-op Payment and AI remain the core path, while real Payment and real AI provider product acceptance are conditionally tracked through `GNE-194` and `GNE-195`.
 - Clarified Analytics stage status: `ANALYTICS-01..04` are MVP1 Done, while `ANALYTICS-05..11` cover MVP2/MVP3 production verification, dashboards, multi-env isolation, Payment conversion, and AI analytics.
-- Recorded PostHog production event evidence for `GNE-105`: PostHog Activity shows production Vercel URL events including `Pageview`, `Identify`, `login_started`, and `user_logged_in`; final Done still needs expanded shared property proof.
+- Recorded PostHog production event evidence for `GNE-105`: PostHog Activity shows production Vercel URL events including `Pageview`, `Identify`, `login_started`, and `user_logged_in`.
 - Updated public app branding defaults so metadata, favicon, `.env.example`, analytics default app name, and environment matrix use `XWLC` instead of the old `ai-web-starter-kit` display name.
 - Documented the Vercel Hobby / private repo merge-method rule: non-owner collaborator PRs should use `Create a merge commit` by default so the `main` deployment-triggering commit is owner-authored; already-reviewed blocked squash merges may be followed by an owner-authored no-op trigger commit.
 - Completed `GNE-180` by adding the MVP2 provider matrix, integrations spec entry, and placeholder integration docs for Email, Storage, and SMS.
@@ -69,6 +69,7 @@ MVP1 foundation complete; the MVP2 integrations provider foundation is complete 
 - Completed `GNE-182` by standardizing provider selectors, public/server-only env naming, `.env.example` placeholders, environment matrix guidance, and related integration docs.
 - Completed `GNE-183` by adding the reusable provider configuration, no-op/mock/sandbox behavior, smoke path, and secret leakage checklist.
 - Completed `GNE-167` as the MVP2 integrations provider foundation: matrix, adapter/interface landing points, env/public-secret rules, and reusable verification checklist are all reachable from repository entry points.
+- Completed `GNE-105 ANALYTICS-06`: production PostHog Activity now shows the deployed Vercel URL with the required shared properties, including the corrected `env=production`.
 
 ## Done Issues
 
@@ -110,6 +111,7 @@ MVP1 foundation complete; the MVP2 integrations provider foundation is complete 
 - `GNE-123` ANALYTICS-02
 - `GNE-102` ANALYTICS-03
 - `GNE-103` ANALYTICS-04
+- `GNE-105` ANALYTICS-06
 - `GNE-190` MVP2-KNOW-01
 - `GNE-167` MVP2 INTEGRATIONS-00
 - `GNE-180` MVP2-INT-01
@@ -120,27 +122,25 @@ MVP1 foundation complete; the MVP2 integrations provider foundation is complete 
 ## In Progress Issues
 
 - `GNE-73` MVP1-MVP3 ANALYTICS-00
-- `GNE-105` ANALYTICS-06
 
 ## In Progress
 
-MVP2/MVP3 planning and Analytics production verification are being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done. `ANALYTICS-06` is In Progress because production PostHog event reception is verified, but expanded shared property proof is still required.
+MVP2/MVP3 planning is being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done, and `ANALYTICS-06` production PostHog event/field verification is Done.
 
 ## Next Steps
 
-1. For `GNE-105 ANALYTICS-06`, expand one production PostHog event and confirm `app`, `mvp_stage`, `market`, `env`, `version`, and `module`; then mark the issue Done in Linear if the fields are present.
-2. Continue MVP2 Billing with `GNE-91` and `GNE-191` before implementing entitlement service, Payment, or AI credit logic.
-3. Continue MVP2 Payment from `GNE-192` and `GNE-96`, using the provider matrix and config checklist before adding any real checkout provider.
-4. Continue MVP2 AI from `GNE-149`, `GNE-156`, and `GNE-150`, using the provider matrix and config checklist before adding any real model provider.
-5. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
-6. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
-7. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
-8. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
-9. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-10. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
-11. For collaborator-authored PRs while Vercel remains on Hobby/private-repo constraints, the Repo Owner should use `Create a merge commit`; use `Squash and merge` only after confirming the resulting deployment commit author will pass Vercel checks.
-12. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
-13. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+1. Continue MVP2 Billing with `GNE-91` and `GNE-191` before implementing entitlement service, Payment, or AI credit logic.
+2. Continue MVP2 Payment from `GNE-192` and `GNE-96`, using the provider matrix and config checklist before adding any real checkout provider.
+3. Continue MVP2 AI from `GNE-149`, `GNE-156`, and `GNE-150`, using the provider matrix and config checklist before adding any real model provider.
+4. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
+5. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
+6. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
+7. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
+8. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+9. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
+10. For collaborator-authored PRs while Vercel remains on Hobby/private-repo constraints, the Repo Owner should use `Create a merge commit`; use `Squash and merge` only after confirming the resulting deployment commit author will pass Vercel checks.
+11. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
+12. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
 
 ## Risks
 
@@ -150,7 +150,6 @@ MVP2/MVP3 planning and Analytics production verification are being synchronized 
 - Local Supabase runs through Colima; analytics is disabled locally because the Supabase vector container cannot mount Colima's Docker socket path.
 - Staging performance advisors currently include only expected unused-index INFO entries until `demo_items` receives representative query traffic.
 - Future deployments still need Supabase and PostHog environment variables configured per environment before full Auth smoke tests can pass there.
-- `ANALYTICS-06` should not be marked Done until production event shared properties are visible in expanded PostHog event detail or verified by a working PostHog query.
 - Automatic Vercel Preview deployments are intentionally disabled for non-`main` branches while the project stays on a Hobby/private-repo collaboration setup.
 - Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits, especially if a collaborator PR is merged with `Squash and merge`.
 - GitHub branch protection may remain unenforced on the current free personal private repository, so the documented branch and PR workflow is still a required team convention.

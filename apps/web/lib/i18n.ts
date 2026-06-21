@@ -193,6 +193,58 @@ export const dictionaries = {
         save: "保存资料",
         saving: "保存中...",
         updated: "资料已更新。"
+      },
+      billing: {
+        title: "计费与权益",
+        description:
+          "这里展示 MVP2 Billing 底座当前可人工验收的状态：当前账户权益、Free/Pro 套餐配置、AI 额度包和 provider 映射边界。",
+        statusReady: "可验收",
+        statusNeedsReview: "需检查",
+        errorTitle: "Billing service 暂不可用",
+        currentPlan: "当前账户计划",
+        currentDescription:
+          "未产生可信订阅事实时，账户默认回退到 Free 权益；后续 Payment sandbox 或真实 provider 会通过服务端事件更新 Billing facts。",
+        entitlements: "当前权益",
+        recommended: "推荐",
+        baseline: "基础",
+        enabled: "已启用",
+        disabled: "未启用",
+        creditPackTitle: "AI 额度包",
+        creditPackDescription:
+          "一次性额度包先保留为 Billing/Pricing contract，真实 checkout 与发放会由后续 Payment / AI 任务接入。",
+        sandboxOnly: "Sandbox 预留",
+        creditAmount: "额度",
+        price: "价格",
+        providerMapping: "Provider 映射",
+        notMapped: "尚未绑定真实 price id",
+        planNames: {
+          free: "Free",
+          pro: "Pro"
+        },
+        planDescriptions: {
+          free: "默认免费计划，用于未付费账户、注册后试用和本地验收。",
+          pro: "付费订阅计划模板，用于后续 sandbox checkout、真实支付和产品验证。"
+        },
+        subscriptionStatuses: {
+          none: "无订阅",
+          trialing: "试用中",
+          active: "有效",
+          past_due: "逾期",
+          canceled: "已取消",
+          expired: "已过期",
+          refunded: "已退款"
+        },
+        features: {
+          projects: "项目数",
+          pages: "页面数",
+          leads: "线索数",
+          ai_tokens: "AI tokens",
+          custom_domain: "自定义域名"
+        },
+        units: {
+          count: "次",
+          token: "tokens"
+        }
       }
     },
     errors: {
@@ -391,6 +443,58 @@ export const dictionaries = {
         save: "Save profile",
         saving: "Saving...",
         updated: "Profile updated."
+      },
+      billing: {
+        title: "Billing and access",
+        description:
+          "This surfaces the MVP2 Billing foundation for human review: current account entitlements, Free/Pro plan config, AI credit pack, and provider mapping boundaries.",
+        statusReady: "Reviewable",
+        statusNeedsReview: "Needs review",
+        errorTitle: "Billing service unavailable",
+        currentPlan: "Current account plan",
+        currentDescription:
+          "Without a trusted subscription fact, the account falls back to Free entitlements. Future Payment sandbox or real provider events update Billing facts on the server.",
+        entitlements: "Current entitlements",
+        recommended: "Recommended",
+        baseline: "Baseline",
+        enabled: "Enabled",
+        disabled: "Disabled",
+        creditPackTitle: "AI credit pack",
+        creditPackDescription:
+          "The one-time credit pack is reserved as a Billing/Pricing contract. Real checkout and credit grants belong to later Payment / AI tasks.",
+        sandboxOnly: "Sandbox reserved",
+        creditAmount: "Credit",
+        price: "Price",
+        providerMapping: "Provider mapping",
+        notMapped: "No real price id yet",
+        planNames: {
+          free: "Free",
+          pro: "Pro"
+        },
+        planDescriptions: {
+          free: "The default free plan for unpaid accounts, signup trials, and local review.",
+          pro: "The paid subscription template for sandbox checkout, real payment, and product validation.",
+        },
+        subscriptionStatuses: {
+          none: "No subscription",
+          trialing: "Trialing",
+          active: "Active",
+          past_due: "Past due",
+          canceled: "Canceled",
+          expired: "Expired",
+          refunded: "Refunded"
+        },
+        features: {
+          projects: "Projects",
+          pages: "Pages",
+          leads: "Leads",
+          ai_tokens: "AI tokens",
+          custom_domain: "Custom domain"
+        },
+        units: {
+          count: "count",
+          token: "tokens"
+        }
       }
     },
     errors: {

@@ -45,6 +45,7 @@ XWLC 是 XUMENG、WANGWEI、LIZUZHUANG、CHUYI 四位中年人在工作与家庭
 - 环境、部署和生产验收记录：`context/environment-matrix.md`、`context/deployment-status.md`
 - Provider matrix、配置验收与第三方接入约定：`integrations/provider-matrix.md`、`integrations/provider-config-checklist.md`、`integrations/`
 - Provider contract 与 adapter 目录约定：`packages/core/src/providers.ts`、`apps/web/lib/providers/`
+- Billing 领域模型、数据边界和权益 service：`specs/billing/`、`integrations/billing.md`、`packages/core/src/billing.ts`、`apps/web/lib/services/billing.ts`
 
 ## 启动方式
 

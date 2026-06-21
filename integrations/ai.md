@@ -36,6 +36,25 @@ UI action
 - MVP3 Product Validation Kit can use mock/no-op or a real provider contract for validation-page copy generation. Real AI provider product acceptance is a conditional follow-up under `MVP3-CP-08`, not a blocker for MVP3 core validation.
 - MVP4 owns overseas/china real dual-mode AI provider rollout, including domestic model providers, budget controls, rate limits, fallback behavior, auditing, and deployment differences.
 
+## Reviewer Surface
+
+AI work must expose a page-level path that a teammate can test without reading implementation details:
+
+```text
+AI entry
+-> prompt or input
+-> entitlement / quota gate
+-> provider mode
+-> mock/no-op or real result
+-> usage / credit / quota state
+```
+
+The UI must also show blocked and failure states: unauthenticated user, insufficient entitlement, quota exhausted, unavailable model, provider error, timeout, and retry or duplicate handling. Failed calls must not silently deduct credit.
+
+The dedicated Linear task for this surface is `GNE-199 AI-10 [APP/REVIEW][MVP2]`. Run it after the server-only AI service, provider adapter, service examples, usage/credit model, and entitlement gate are usable, and before final AI test/deploy closure.
+
+UI must follow the app-shell conventions instead of a marketing demo style. Frontend pages call service/API boundaries and never import model SDKs, expose provider secrets, bypass Billing entitlement checks, or log raw prompts/sensitive generated output to Analytics.
+
 ## Environment Variables
 
 ```text
@@ -70,6 +89,7 @@ GNE-148 MVP2 AI-00
 ├── GNE-152 AI-05 [DATA][MVP2] Build Token Usage measurement model
 ├── GNE-153 AI-06 [DEV][MVP2] Build Credit / Quota Ledger and subscription allowance link
 ├── GNE-154 AI-07 [DEV][MVP2] Build AI Entitlement Gate and model access limits
+├── GNE-199 AI-10 [APP/REVIEW][MVP2] Build AI demo and quota review page
 ├── GNE-155 AI-08 [TEST][MVP2] Verify key safety, token idempotency, and quota boundaries
 └── GNE-160 AI-09 [DEPLOY][MVP2] Provider secrets, budget limits, and production smoke test
 ```

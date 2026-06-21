@@ -34,7 +34,7 @@ Do not use `staging` as an app env value unless the shared TypeScript analytics 
 
 | Key | Purpose | Current MVP1 value | Future examples |
 | --- | --- | --- | --- |
-| `NEXT_PUBLIC_APP_NAME` / `app` | Product or starter instance identifier. | `ai-web-starter-kit` | `product-validation-kit`, real vertical product slug |
+| `NEXT_PUBLIC_APP_NAME` / `app` | Product or starter instance identifier. | `XWLC` | `product-validation-kit`, real vertical product slug |
 | `NEXT_PUBLIC_MVP_STAGE` / `mvp_stage` | Delivery stage identifier. | `mvp1` | `mvp2`, `mvp3`, `mvp4` |
 | `NEXT_PUBLIC_APP_MARKET` / `market` | Market mode. | `overseas` | `china` |
 | `NEXT_PUBLIC_APP_VERSION` / `version` | Product/template version label. | `v0.1` | release tag or product version |
@@ -104,7 +104,7 @@ module
 
 | Product line | `app` value | Stage | Notes |
 | --- | --- | --- | --- |
-| Starter kit | `ai-web-starter-kit` | MVP1 / MVP2 | Current reusable foundation. |
+| Starter kit | `XWLC` | MVP1 / MVP2 | Current reusable foundation and public site brand. |
 | Product Validation Kit | `product-validation-kit` or agreed slug | MVP3 | Future validation workspace. |
 | Overseas/china provider foundation | product-specific or shared provider mode slug | MVP4 | Real dual-mode provider rollout; see `GNE-193`. |
 | Real overseas vertical product | product slug | MVP5 | Should receive its own URL and provider isolation plan. |

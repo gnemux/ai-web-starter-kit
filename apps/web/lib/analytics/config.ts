@@ -1,6 +1,6 @@
 import type { AnalyticsBaseProperties } from "@starter/core";
 
-const DEFAULT_APP_NAME = "ai-web-starter-kit";
+const DEFAULT_APP_NAME = "XWLC";
 const DEFAULT_MVP_STAGE = "mvp1";
 const DEFAULT_MARKET = "overseas";
 const DEFAULT_VERSION = "v0.1";

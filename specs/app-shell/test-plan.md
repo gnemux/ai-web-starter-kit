@@ -30,6 +30,8 @@ If global `pnpm` is unavailable, use the local workspace binaries or `npx --yes 
 17. Open `/account` and confirm the page only shows current email, display name editing, and save feedback.
 18. Confirm empty, loading, and error handling render without overlap where applicable.
 19. Resize to mobile width and confirm navigation/content/footer/language switcher collapse safely.
+20. Inspect page metadata/source and confirm the browser title, application name, and favicon are branded as `XWLC`.
+21. Open `/icon.svg` and confirm the favicon renders a clear XWLC-compatible mark.
 
 ## Verification Record
 
@@ -61,6 +63,7 @@ If global `pnpm` is unavailable, use the local workspace binaries or `npx --yes 
 - 2026-06-20: `corepack pnpm typecheck` and `corepack pnpm lint` passed after fixing sign-out navigation; browser verified authenticated landing logout fully returns to `/` and the header falls back to Login.
 - 2026-06-20: `corepack pnpm typecheck` and `corepack pnpm lint` passed after moving successful logout navigation into the server action; reproduced the previous `/account` redirect to `/login?next=/account` before the fix and updated the action so protected pages share the same `/` logout destination.
 - 2026-06-20: `corepack pnpm typecheck` and `corepack pnpm lint` passed after fixing the landing login regression. HTTP checks returned 200 for `/` and `/login`, unauthenticated `/dashboard` returned 307 to `/login?next=/dashboard`, and the in-app browser verified the header Login link opens `/login` with the sign-in form visible.
+- 2026-06-21: `corepack pnpm typecheck`, `corepack pnpm lint`, and `corepack pnpm build` passed after updating the public app name defaults and favicon to XWLC. Local HTTP checks on `http://127.0.0.1:3005/` confirmed `<title>XWLC</title>`, `application-name=XWLC`, `apple-mobile-web-app-title=XWLC`, and `<link rel="icon" href="/icon.svg" type="image/svg+xml">`; `/icon.svg` returned 200 with `content-type: image/svg+xml`.
 - Note: local `npm run build` fails before project build because this machine does not expose a global `pnpm` binary. The fixed pnpm command is the current reliable verification path.
 
 ## Edge Cases

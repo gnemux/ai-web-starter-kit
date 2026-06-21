@@ -7,6 +7,7 @@
 ## Affected Areas
 
 - `apps/web/app/layout.tsx`
+- `apps/web/app/icon.svg`
 - `apps/web/app/page.tsx`
 - `apps/web/app/dashboard/page.tsx`
 - `apps/web/app/login/page.tsx`
@@ -34,6 +35,8 @@ Next.js route
 ```
 
 页面组合逻辑放在 `apps/web`。可复用 UI primitive 放在 `packages/ui`。真实业务契约和 provider-independent 类型放在 `packages/core`，避免页面内堆叠硬编码结构。文案字典暂放在 `apps/web/lib/i18n.ts`，因为它服务于当前 Web 应用路由；若后续出现多个 app，再迁移到共享 package。
+
+Root metadata must present the public app as `XWLC`. `apps/web/app/icon.svg` provides the App Router favicon and should be a compact XWLC lettermark that works at browser tab size. Runtime analytics defaults should also use `XWLC` unless an environment-specific `NEXT_PUBLIC_APP_NAME` override is intentionally configured.
 
 公开首页可以通过 `getCurrentAccountForPublicShell()` 读取当前 Supabase Auth 会话，但不得在未登录时重定向，也不得因为远程 Auth 校验慢或不可用而阻塞 `/` 或 `/login`。读取失败、超时或未登录时回退到普通登录入口；读取成功时 header 显示账户触发器。账户菜单由客户端组件负责展开/收起和退出提交，退出仍复用 `signOutAction`，不绕过服务层。
 

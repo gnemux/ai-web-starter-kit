@@ -24,10 +24,19 @@ Start with a no-op or mock storage adapter until a product workflow requires fil
 
 ## Environment Variables
 
-Names will be finalized by `GNE-182`. Until then, storage secrets are server-only placeholders and must not use `NEXT_PUBLIC_`.
+```text
+STORAGE_PROVIDER=noop
+STORAGE_ENDPOINT=
+STORAGE_BUCKET=
+STORAGE_ACCESS_KEY_ID=
+STORAGE_SECRET_ACCESS_KEY=
+```
+
+`STORAGE_PROVIDER` is a non-secret server-side selector. Storage access and signing credentials are server-only placeholders and must not use `NEXT_PUBLIC_`.
 
 ## Rules
 
 - Do not commit storage service keys, signing secrets, bucket credentials, private files, or customer uploads.
 - Signed URL creation must stay server-side.
 - Product code should call a local storage service/provider adapter instead of importing a provider SDK in pages or components.
+- Vercel Production and Preview entries must be configured separately. Redeploy after changing Storage env keys before verifying upload or signed URL behavior.

@@ -35,6 +35,7 @@ Do not use `staging` as an app env value unless the shared TypeScript analytics 
 | Key | Purpose | Current MVP1 value | Future examples |
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_APP_NAME` / `app` | Product or starter instance identifier. | `XWLC` | `product-validation-kit`, real vertical product slug |
+| `NEXT_PUBLIC_PRODUCT_ID` | Stable product slug for environment dashboards and future multi-product routing. | `xwlc` | `product-validation-kit`, real vertical product slug |
 | `NEXT_PUBLIC_MVP_STAGE` / `mvp_stage` | Delivery stage identifier. | `mvp1` | `mvp2`, `mvp3`, `mvp4` |
 | `NEXT_PUBLIC_APP_MARKET` / `market` | Market mode. | `overseas` | `china` |
 | `NEXT_PUBLIC_APP_VERSION` / `version` | Product/template version label. | `v0.1` | release tag or product version |
@@ -53,6 +54,62 @@ China mode is reserved for MVP4 or later. MVP1 only reserves naming and does not
 
 The MVP2 provider matrix lives in `integrations/provider-matrix.md`.
 
+## Provider Selectors
+
+Provider selector variables are non-secret. They choose the active provider family or mock/no-op/sandbox mode for a capability. Keep selectors server-side unless browser code needs to branch on the provider.
+
+| Capability | Selector | Current value | Runtime visibility | Notes |
+| --- | --- | --- | --- | --- |
+| Auth | `AUTH_PROVIDER` | `supabase` | Server-side config | Supabase remains the real Auth provider. Browser code still uses public Supabase URL/key only. |
+| Database/BaaS | `DATABASE_PROVIDER` | `supabase` | Server-side config | Supabase remains the real Database/BaaS provider. |
+| Analytics | `NEXT_PUBLIC_ANALYTICS_PROVIDER` | `posthog` | Public browser config | Browser analytics initialization may need to know the public analytics provider. |
+| Payment | `PAYMENT_PROVIDER` | `sandbox` | Server-side config | Real payment providers and webhook verification are later Payment issues. |
+| AI | `AI_PROVIDER` | `mock` | Server-side config | Real model providers and keys are later AI issues. |
+| Email | `EMAIL_PROVIDER` | `noop` | Server-side config | No real email provider is configured yet. |
+| Storage | `STORAGE_PROVIDER` | `noop` | Server-side config | No real product storage provider is configured yet. |
+| SMS | `SMS_PROVIDER` | `noop` | Server-side config | No real SMS provider is configured yet. |
+
+Allowed MVP2 selector values:
+
+```text
+AUTH_PROVIDER=supabase
+DATABASE_PROVIDER=supabase
+NEXT_PUBLIC_ANALYTICS_PROVIDER=posthog
+PAYMENT_PROVIDER=sandbox
+AI_PROVIDER=mock
+EMAIL_PROVIDER=noop
+STORAGE_PROVIDER=noop
+SMS_PROVIDER=noop
+```
+
+Future real provider values must be introduced by the owning Payment, AI, Email, Storage, SMS, Analytics, Auth, or Database issue and documented in the relevant integration file before use.
+
+## Public And Server-Only Provider Variables
+
+| Category | Public browser variables | Server-only variables |
+| --- | --- | --- |
+| App metadata | `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_PRODUCT_ID`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_APP_ENV`, `NEXT_PUBLIC_APP_MARKET`, `NEXT_PUBLIC_APP_VERSION`, `NEXT_PUBLIC_MVP_STAGE` | None |
+| Supabase Auth/Database | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `AUTH_PROVIDER`, `DATABASE_PROVIDER`, `SUPABASE_PROJECT_REF`, `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
+| Analytics | `NEXT_PUBLIC_ANALYTICS_PROVIDER`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`, `NEXT_PUBLIC_JIGUANG_APP_KEY` | None for current MVP2 analytics config |
+| Payment | None | `PAYMENT_PROVIDER`, `PAYMENT_SECRET_KEY`, `PAYMENT_WEBHOOK_SECRET` |
+| AI | None | `AI_PROVIDER`, `AI_MODEL`, `AI_PROVIDER_API_KEY`, `AI_BUDGET_LIMIT` |
+| Email | None | `EMAIL_PROVIDER`, `EMAIL_PROVIDER_API_KEY`, `EMAIL_FROM_ADDRESS` |
+| Storage | None | `STORAGE_PROVIDER`, `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY` |
+| SMS | None | `SMS_PROVIDER`, `SMS_PROVIDER_API_KEY`, `SMS_PROVIDER_SECRET`, `SMS_SENDER_ID` |
+
+Do not add `NEXT_PUBLIC_` to Payment, AI, Email, Storage, SMS, webhook, service-role, SMTP, signing, or private provider API key variables.
+
+## Local, Preview, And Production Placement
+
+| Key group | Local `.env.local` | Vercel Preview | Vercel Production |
+| --- | --- | --- | --- |
+| App metadata | Configure local values such as `NEXT_PUBLIC_APP_ENV=local`. | Configure Preview entries separately with `NEXT_PUBLIC_APP_ENV=preview`. | Configure Production entries separately with `NEXT_PUBLIC_APP_ENV=production`. |
+| Provider selectors | Configure defaults from `.env.example` unless testing a specific provider branch. | Configure Preview entries separately. Values may temporarily match Production. | Configure Production entries separately. Values may temporarily match Preview while one provider environment exists. |
+| Public provider keys | Local or shared staging public values only. | Preview public provider entries. Values may temporarily match Production. | Production public provider entries. |
+| Server-only secrets | Local ignored values only when needed. | Preview secrets in Vercel Dashboard only. | Production secrets in Vercel Dashboard only. |
+
+After changing any Vercel environment variable, redeploy the affected Preview or Production deployment before testing. Existing deployments do not automatically receive new env values.
+
 ## Vercel Matrix
 
 | Area | Current rule |
@@ -63,6 +120,12 @@ The MVP2 provider matrix lives in `integrations/provider-matrix.md`.
 | Preview env vars | Separate Vercel Preview entries. Values may temporarily equal Production while only one provider environment exists. |
 | Shared Preview URL | Optional. Use manual Vercel Preview URL and paste it into PR or Linear when needed. |
 | Merge gate | Vercel Preview is not a required GitHub merge gate in MVP1. |
+
+Vercel environment variables:
+
+- Configure Production and Preview entries separately even if the current values are temporarily identical.
+- Do not create empty Vercel entries for optional fallback keys; keep optional blanks in `.env.example`, not in the Vercel dashboard.
+- Redeploy after any environment variable change before using that deployment as evidence.
 
 ## Supabase Matrix
 

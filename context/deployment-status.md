@@ -29,6 +29,8 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 | Current blocked items | `ANALYTICS-06` still needs expanded PostHog event proof for shared properties: `app`, `mvp_stage`, `market`, `env`, `version`, `module`. |
 | Next owner action | Expand one production PostHog event and confirm shared properties, then continue or close `GNE-105 ANALYTICS-06`. |
 
+GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
+
 ## Status Values
 
 - `pass`: verified successfully with evidence.
@@ -67,7 +69,16 @@ Record configured/missing/unknown only. Do not record values.
 | Key or provider | Production | Preview | Notes |
 | --- | --- | --- | --- |
 | NEXT_PUBLIC_APP_ENV | configured / missing / unknown | configured / missing / unknown | production should use `production`; preview should use `preview`. |
+| NEXT_PUBLIC_PRODUCT_ID | configured / missing / unknown | configured / missing / unknown | Public product slug for future multi-product separation. |
 | NEXT_PUBLIC_APP_URL | configured / missing / unknown | configured / missing / unknown | URL may be temporary for Preview. |
+| AUTH_PROVIDER | configured / missing / unknown | configured / missing / unknown | Server-side selector; current value should be `supabase`. |
+| DATABASE_PROVIDER | configured / missing / unknown | configured / missing / unknown | Server-side selector; current value should be `supabase`. |
+| NEXT_PUBLIC_ANALYTICS_PROVIDER | configured / missing / unknown | configured / missing / unknown | Public selector; current value should be `posthog`. |
+| PAYMENT_PROVIDER | configured / missing / unknown | configured / missing / unknown | Server-side selector; current value should be `sandbox`. |
+| AI_PROVIDER | configured / missing / unknown | configured / missing / unknown | Server-side selector; current value should be `mock`. |
+| EMAIL_PROVIDER | configured / missing / unknown | configured / missing / unknown | Server-side selector; current value should be `noop`. |
+| STORAGE_PROVIDER | configured / missing / unknown | configured / missing / unknown | Server-side selector; current value should be `noop`. |
+| SMS_PROVIDER | configured / missing / unknown | configured / missing / unknown | Server-side selector; current value should be `noop`. |
 | NEXT_PUBLIC_SUPABASE_URL | configured / missing / unknown | configured / missing / unknown | Public URL only. |
 | NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY | configured / not_used / missing / unknown | configured / not_used / missing / unknown | Do not create an empty Vercel entry. |
 | NEXT_PUBLIC_SUPABASE_ANON_KEY | configured / not_used / missing / unknown | configured / not_used / missing / unknown | Legacy public browser key fallback. |
@@ -75,6 +86,13 @@ Record configured/missing/unknown only. Do not record values.
 | NEXT_PUBLIC_POSTHOG_HOST | configured / missing / unknown | configured / missing / unknown | Default US host unless project differs. |
 | SUPABASE_SECRET_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
 | SUPABASE_SERVICE_ROLE_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
+| PAYMENT_SECRET_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
+| PAYMENT_WEBHOOK_SECRET | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
+| AI_PROVIDER_API_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
+| EMAIL_PROVIDER_API_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
+| STORAGE_SECRET_ACCESS_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
+| SMS_PROVIDER_API_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
+| SMS_PROVIDER_SECRET | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
 
 ### Smoke Test Result
 

@@ -59,3 +59,22 @@ Expected:
 - PostHog SDK imports remain in `apps/web/lib/analytics/*`.
 - Client components do not import `apps/web/lib/providers/server.ts`.
 - Provider contract and adapter files do not introduce real Payment, AI, Email, Storage, or SMS SDKs.
+
+## GNE-182 Environment Checks
+
+Run:
+
+```bash
+rg -n "NEXT_PUBLIC_PRODUCT_ID|AUTH_PROVIDER|DATABASE_PROVIDER|NEXT_PUBLIC_ANALYTICS_PROVIDER|PAYMENT_PROVIDER|AI_PROVIDER|EMAIL_PROVIDER|STORAGE_PROVIDER|SMS_PROVIDER" .env.example context/environment-matrix.md integrations specs/integrations
+rg -n "^NEXT_PUBLIC_.*(SECRET|SERVICE_ROLE|WEBHOOK|PASSWORD)" .env.example context integrations specs
+rg -n "^NEXT_PUBLIC_.*(PAYMENT|AI|EMAIL|STORAGE|SMS).*(KEY|SECRET|TOKEN)" .env.example context integrations specs
+rg -n "nglilxhkuqzswbwitbdu|https://nglilxhkuqzswbwitbdu\\.supabase\\.co" .env.example
+rg -n "sk_|sb_secret_|service_role|webhook secret|api key|token|password|secret key" README.md context integrations specs .env.example
+```
+
+Expected:
+
+- Provider selectors are documented in `.env.example`, environment matrix, and integration specs.
+- No server-only secret variable uses `NEXT_PUBLIC_`.
+- `.env.example` does not contain the shared Supabase project ref or URL.
+- Secret keyword results are placeholder/rule text only, not real credentials.

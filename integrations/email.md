@@ -24,10 +24,17 @@ Start with a no-op adapter so product flows can be designed without requiring re
 
 ## Environment Variables
 
-Names will be finalized by `GNE-182`. Until then, email secrets are server-only placeholders and must not use `NEXT_PUBLIC_`.
+```text
+EMAIL_PROVIDER=noop
+EMAIL_PROVIDER_API_KEY=
+EMAIL_FROM_ADDRESS=
+```
+
+`EMAIL_PROVIDER` is a non-secret server-side selector. `EMAIL_PROVIDER_API_KEY` is a server-only placeholder and must not use `NEXT_PUBLIC_`.
 
 ## Rules
 
 - Do not commit email provider keys, SMTP credentials, sender verification secrets, customer email lists, or raw provider payloads.
 - Do not send real email from local tests unless the task explicitly requires it and uses safe test recipients.
 - Product code should call a local email service/provider adapter instead of importing a provider SDK in pages or components.
+- Vercel Production and Preview entries must be configured separately. Redeploy after changing Email env keys before verifying delivery behavior.

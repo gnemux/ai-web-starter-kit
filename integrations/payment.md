@@ -10,6 +10,12 @@ Planned for MVP2. The Linear execution source is `GNE-72 MVP2 PAYMENT-00 [PAYMEN
 
 Provider matrix and stage boundaries live in `integrations/provider-matrix.md`.
 
+Provider adapter boundary:
+
+- GNE-181 defines provider-neutral Payment contract types in `packages/core/src/providers.ts`.
+- The MVP2 sandbox adapter landing point is `apps/web/lib/providers/server.ts`.
+- No real payment SDK, webhook secret, or checkout provider credential is introduced by GNE-181.
+
 ## Strategy
 
 Start with a Sandbox Payment Provider to validate the internal business model before integrating a real provider. Payment does not own entitlement truth; it produces trusted server-side payment events that Billing consumes.
@@ -50,6 +56,7 @@ PAYMENT_WEBHOOK_SECRET=
 - Payment tests must include success, failure, duplicate event, and stale event cases.
 - Success or cancel pages record user navigation only. They must not directly grant entitlement.
 - Real provider secrets and webhook secrets must remain server-only and never use `NEXT_PUBLIC_`.
+- Product code should call a local Payment service/provider adapter instead of importing a real provider SDK in pages or components.
 
 ## Linear Execution Order
 

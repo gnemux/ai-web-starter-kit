@@ -27,6 +27,12 @@ Provider matrix:
 
 - MVP2 provider stage boundaries and mock/no-op rules live in `integrations/provider-matrix.md`.
 
+Provider adapter boundary:
+
+- GNE-181 keeps PostHog behind `apps/web/lib/analytics/*`.
+- `apps/web/lib/providers/analytics-client.ts` is a client-only facade for future provider convention alignment.
+- Do not move existing Auth analytics calls to a new provider layer unless a later Analytics issue explicitly requires it.
+
 ## Default Providers
 
 - PostHog for global-friendly product analytics.

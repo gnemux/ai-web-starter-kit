@@ -10,6 +10,8 @@ Reserved for future MVP2/MVP3 execution. No real storage provider is configured 
 
 The provider boundary and stage split are defined in `integrations/provider-matrix.md`.
 
+GNE-181 defines provider-neutral Storage contract types in `packages/core/src/providers.ts` and a no-op adapter landing point in `apps/web/lib/providers/server.ts`.
+
 ## Strategy
 
 Start with a no-op or mock storage adapter until a product workflow requires files. Candidate providers should be chosen after access rules, privacy requirements, public/private bucket behavior, and CDN needs are clear.

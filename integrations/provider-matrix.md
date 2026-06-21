@@ -38,6 +38,14 @@ Use it before implementing Billing, Payment, AI, Analytics, Email, Storage, SMS,
 - AI starts with mock/no-op or server-only adapter work in MVP2.
 - Email, Storage, and SMS remain no-op placeholders until a product task needs them.
 
+## GNE-181 Adapter Boundary
+
+- Provider-neutral contracts live in `packages/core/src/providers.ts`.
+- App-side provider descriptors and sandbox/mock/no-op adapters live in `apps/web/lib/providers`.
+- Supabase Auth and Database remain behind `apps/web/lib/services/*` and `apps/web/lib/supabase/*`; they are not deeply providerized in MVP2 foundation work.
+- PostHog remains behind `apps/web/lib/analytics/*`; `apps/web/lib/providers/analytics-client.ts` is only a facade for future convention alignment.
+- Payment, AI, Email, Storage, and SMS adapters in GNE-181 are contracts only. They do not install real provider SDKs or introduce secrets.
+
 ## Required Reading For Provider Work
 
 - Supabase: `integrations/supabase.md`

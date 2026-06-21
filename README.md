@@ -44,6 +44,7 @@ XWLC 是 XUMENG、WANGWEI、LIZUZHUANG、CHUYI 四位中年人在工作与家庭
 - 当前完成状态、风险和下一步：`context/status.md`
 - 环境、部署和生产验收记录：`context/environment-matrix.md`、`context/deployment-status.md`
 - Provider matrix 与第三方接入约定：`integrations/provider-matrix.md`、`integrations/`
+- Provider contract 与 adapter 目录约定：`packages/core/src/providers.ts`、`apps/web/lib/providers/`
 
 ## 启动方式
 

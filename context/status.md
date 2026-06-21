@@ -64,6 +64,7 @@ MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in 
 - Recorded PostHog production event evidence for `GNE-105`: PostHog Activity shows production Vercel URL events including `Pageview`, `Identify`, `login_started`, and `user_logged_in`; final Done still needs expanded shared property proof.
 - Updated public app branding defaults so metadata, favicon, `.env.example`, analytics default app name, and environment matrix use `XWLC` instead of the old `ai-web-starter-kit` display name.
 - Documented the Vercel Hobby / private repo merge-method rule: non-owner collaborator PRs should use `Create a merge commit` by default so the `main` deployment-triggering commit is owner-authored; already-reviewed blocked squash merges may be followed by an owner-authored no-op trigger commit.
+- Completed `GNE-180` by adding the MVP2 provider matrix, integrations spec entry, and placeholder integration docs for Email, Storage, and SMS.
 
 ## Done Issues
 
@@ -106,21 +107,22 @@ MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in 
 - `GNE-102` ANALYTICS-03
 - `GNE-103` ANALYTICS-04
 - `GNE-190` MVP2-KNOW-01
+- `GNE-180` MVP2-INT-01
 
 ## In Progress Issues
 
 - `GNE-73` MVP1-MVP3 ANALYTICS-00
 - `GNE-105` ANALYTICS-06
-- `GNE-180` MVP2-INT-01
+- `GNE-181` MVP2-INT-02
 
 ## In Progress
 
-MVP2/MVP3 planning and Analytics production verification are being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done. `ANALYTICS-06` is In Progress because production PostHog event reception is verified, but expanded shared property proof is still required. `GNE-180` is in progress to establish the MVP2 provider matrix and stage boundaries.
+MVP2/MVP3 planning and Analytics production verification are being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done. `ANALYTICS-06` is In Progress because production PostHog event reception is verified, but expanded shared property proof is still required. `GNE-181` is in progress to establish provider-independent contracts and app-side adapter directory conventions.
 
 ## Next Steps
 
 1. For `GNE-105 ANALYTICS-06`, expand one production PostHog event and confirm `app`, `mvp_stage`, `market`, `env`, `version`, and `module`; then mark the issue Done in Linear if the fields are present.
-2. Complete `GNE-180 MVP2-INT-01` by reviewing the provider matrix in `integrations/provider-matrix.md`; then continue GNE-167 with `GNE-181` provider interfaces and adapter directory conventions.
+2. Complete `GNE-181 MVP2-INT-02` by reviewing provider contracts in `packages/core/src/providers.ts` and adapter boundaries in `apps/web/lib/providers`; then continue GNE-167 with `GNE-182` environment naming and public/secret layering.
 3. Continue MVP2 Billing with `GNE-91` and `GNE-191` before implementing entitlement service, Payment, or AI credit logic.
 4. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
 5. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.

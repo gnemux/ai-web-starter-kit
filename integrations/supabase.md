@@ -25,6 +25,10 @@ Deployment and environment memory:
 - Environment separation rules: `context/environment-matrix.md`
 - Production monitoring checks: `context/production-monitoring.md`
 
+Provider matrix:
+
+- MVP2 provider stage boundaries and public/server-only rules live in `integrations/provider-matrix.md`.
+
 ## Initial Scope
 
 - Email or OAuth sign up and sign in.

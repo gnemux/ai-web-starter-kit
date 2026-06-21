@@ -8,6 +8,8 @@ Payment integration supports checkout, orders, subscriptions, entitlement, and c
 
 Planned for MVP2. The Linear execution source is `GNE-72 MVP2 PAYMENT-00 [PAYMENT] 支付 Provider 与结账闭环`.
 
+Provider matrix and stage boundaries live in `integrations/provider-matrix.md`.
+
 ## Strategy
 
 Start with a Sandbox Payment Provider to validate the internal business model before integrating a real provider. Payment does not own entitlement truth; it produces trusted server-side payment events that Billing consumes.

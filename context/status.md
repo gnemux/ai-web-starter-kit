@@ -111,15 +111,16 @@ MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in 
 
 - `GNE-73` MVP1-MVP3 ANALYTICS-00
 - `GNE-105` ANALYTICS-06
+- `GNE-180` MVP2-INT-01
 
 ## In Progress
 
-MVP2/MVP3 planning and Analytics production verification are being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done. `ANALYTICS-06` is In Progress because production PostHog event reception is verified, but expanded shared property proof is still required.
+MVP2/MVP3 planning and Analytics production verification are being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done. `ANALYTICS-06` is In Progress because production PostHog event reception is verified, but expanded shared property proof is still required. `GNE-180` is in progress to establish the MVP2 provider matrix and stage boundaries.
 
 ## Next Steps
 
 1. For `GNE-105 ANALYTICS-06`, expand one production PostHog event and confirm `app`, `mvp_stage`, `market`, `env`, `version`, and `module`; then mark the issue Done in Linear if the fields are present.
-2. Begin MVP2 implementation from `GNE-180 MVP2-INT-01` by defining the provider matrix, env naming, mock/no-op/sandbox strategy, and config checklist.
+2. Complete `GNE-180 MVP2-INT-01` by reviewing the provider matrix in `integrations/provider-matrix.md`; then continue GNE-167 with `GNE-181` provider interfaces and adapter directory conventions.
 3. Continue MVP2 Billing with `GNE-91` and `GNE-191` before implementing entitlement service, Payment, or AI credit logic.
 4. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
 5. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.

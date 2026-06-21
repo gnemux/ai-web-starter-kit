@@ -30,6 +30,10 @@ Operational memory:
 - Environment and product matrix: `context/environment-matrix.md`
 - AI automation rules: `specs/deploy/engineering-spec.md`
 
+Provider matrix:
+
+- MVP2 provider stage boundaries and Deploy/CDN provider notes live in `integrations/provider-matrix.md`.
+
 ## Rules
 
 - `vercel.json` disables automatic Git deployments for all non-`main` branches to avoid blocked collaborator Preview deployments on the current Hobby/private-repo setup.

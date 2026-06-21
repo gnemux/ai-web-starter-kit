@@ -23,6 +23,10 @@ Deployment and environment memory:
 - Environment and product separation rules live in `context/environment-matrix.md`.
 - Production monitoring checks live in `context/production-monitoring.md`.
 
+Provider matrix:
+
+- MVP2 provider stage boundaries and mock/no-op rules live in `integrations/provider-matrix.md`.
+
 ## Default Providers
 
 - PostHog for global-friendly product analytics.

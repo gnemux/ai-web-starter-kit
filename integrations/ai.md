@@ -8,6 +8,8 @@ AI integration supports provider-based model calls, token usage tracking, credit
 
 Planned for MVP2. The Linear execution source is `GNE-148 MVP2 AI-00 [AI] AI Provider、Usage、Credit 与 Entitlement 底座`.
 
+Provider matrix and stage boundaries live in `integrations/provider-matrix.md`.
+
 ## Strategy
 
 AI calls must go through a server-only service boundary and provider adapter. Pages and client components must not call model provider SDKs directly.

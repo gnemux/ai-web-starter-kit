@@ -51,6 +51,8 @@ China mode is reserved for MVP4 or later. MVP1 only reserves naming and does not
 
 `GNE-193 MVP4 INTEGRATIONS-00` owns the future real overseas/china dual-mode provider rollout. MVP2 only defines provider matrix, env naming, public/secret boundaries, and mock/no-op/sandbox behavior.
 
+The MVP2 provider matrix lives in `integrations/provider-matrix.md`.
+
 ## Vercel Matrix
 
 | Area | Current rule |

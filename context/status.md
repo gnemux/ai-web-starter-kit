@@ -2,7 +2,7 @@
 
 ## Phase
 
-MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in Linear and repository docs.
+MVP1 foundation complete; the MVP2 integrations provider foundation is complete in repository docs and Linear child issues.
 
 ## Completed
 
@@ -67,6 +67,8 @@ MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in 
 - Completed `GNE-180` by adding the MVP2 provider matrix, integrations spec entry, and placeholder integration docs for Email, Storage, and SMS.
 - Completed `GNE-181` by adding provider-neutral contracts in `packages/core`, app-side provider descriptors, and server-only sandbox/mock/no-op adapter landing points.
 - Completed `GNE-182` by standardizing provider selectors, public/server-only env naming, `.env.example` placeholders, environment matrix guidance, and related integration docs.
+- Completed `GNE-183` by adding the reusable provider configuration, no-op/mock/sandbox behavior, smoke path, and secret leakage checklist.
+- Completed `GNE-167` as the MVP2 integrations provider foundation: matrix, adapter/interface landing points, env/public-secret rules, and reusable verification checklist are all reachable from repository entry points.
 
 ## Done Issues
 
@@ -109,36 +111,36 @@ MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in 
 - `GNE-102` ANALYTICS-03
 - `GNE-103` ANALYTICS-04
 - `GNE-190` MVP2-KNOW-01
+- `GNE-167` MVP2 INTEGRATIONS-00
 - `GNE-180` MVP2-INT-01
 - `GNE-181` MVP2-INT-02
 - `GNE-182` MVP2-INT-03
+- `GNE-183` MVP2-INT-04
 
 ## In Progress Issues
 
 - `GNE-73` MVP1-MVP3 ANALYTICS-00
 - `GNE-105` ANALYTICS-06
-- `GNE-183` MVP2-INT-04
 
 ## In Progress
 
-MVP2/MVP3 planning and Analytics production verification are being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done. `ANALYTICS-06` is In Progress because production PostHog event reception is verified, but expanded shared property proof is still required. `GNE-183` is in progress to add the reusable provider configuration, no-op/mock/sandbox behavior, and secret leakage checklist that completes the GNE-167 provider foundation.
+MVP2/MVP3 planning and Analytics production verification are being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done. `ANALYTICS-06` is In Progress because production PostHog event reception is verified, but expanded shared property proof is still required.
 
 ## Next Steps
 
 1. For `GNE-105 ANALYTICS-06`, expand one production PostHog event and confirm `app`, `mvp_stage`, `market`, `env`, `version`, and `module`; then mark the issue Done in Linear if the fields are present.
-2. Complete `GNE-183 MVP2-INT-04` by reviewing `integrations/provider-config-checklist.md`, running the provider boundary and secret leakage checks, then finishing the GNE-167 parent issue review.
-3. Continue MVP2 Billing with `GNE-91` and `GNE-191` before implementing entitlement service, Payment, or AI credit logic.
-4. Continue MVP2 Payment from `GNE-192` and `GNE-96`, using the provider matrix and config checklist before adding any real checkout provider.
-5. Continue MVP2 AI from `GNE-149`, `GNE-156`, and `GNE-150`, using the provider matrix and config checklist before adding any real model provider.
-6. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
-7. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
-8. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
-9. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
-10. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-11. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
-12. For collaborator-authored PRs while Vercel remains on Hobby/private-repo constraints, the Repo Owner should use `Create a merge commit`; use `Squash and merge` only after confirming the resulting deployment commit author will pass Vercel checks.
-13. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
-14. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+2. Continue MVP2 Billing with `GNE-91` and `GNE-191` before implementing entitlement service, Payment, or AI credit logic.
+3. Continue MVP2 Payment from `GNE-192` and `GNE-96`, using the provider matrix and config checklist before adding any real checkout provider.
+4. Continue MVP2 AI from `GNE-149`, `GNE-156`, and `GNE-150`, using the provider matrix and config checklist before adding any real model provider.
+5. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
+6. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
+7. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
+8. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
+9. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+10. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
+11. For collaborator-authored PRs while Vercel remains on Hobby/private-repo constraints, the Repo Owner should use `Create a merge commit`; use `Squash and merge` only after confirming the resulting deployment commit author will pass Vercel checks.
+12. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
+13. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
 
 ## Risks
 

@@ -14,6 +14,7 @@
 - [x] 首页、登录、Dashboard、账户页面使用同一个 footer 内语言切换入口提供中文默认文案和英文切换能力。
 - [x] 全局 footer 包含品牌说明、产品入口、产品/工程点位和版权声明。
 - [x] Footer 中的链接只指向当前已存在的路由，不把未实现模块伪装成可点击功能。
+- [x] Browser metadata, default public app name, and favicon use `XWLC` rather than `ai-web-starter-kit`.
 
 ## GNE-84 APP-04
 
@@ -45,3 +46,4 @@
 - [x] Browser check: `/` default Chinese and English switch
 - [x] Browser check: `/login`
 - [x] Browser check: `/dashboard` unauthenticated redirect
+- [x] Browser/source check: favicon link resolves to an XWLC icon.

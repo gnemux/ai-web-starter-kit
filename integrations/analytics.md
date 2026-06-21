@@ -34,7 +34,7 @@ MVP1-MVP3 use one PostHog Project by default. Do not split projects just to make
 
 Separate products, environments, markets, and stages through shared event properties:
 
-- `app`: product or starter instance name, for example `ai-web-starter-kit`.
+- `app`: product or starter instance name, for example `XWLC`.
 - `mvp_stage`: `mvp1`, `mvp2`, `mvp3`, and later stage values.
 - `market`: `overseas` or `china`.
 - `env`: `local`, `preview`, or `production`.

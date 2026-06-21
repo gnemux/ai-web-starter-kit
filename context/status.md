@@ -62,6 +62,7 @@ MVP1 foundation complete; MVP2 expansion foundation planning is synchronized in 
 - Updated MVP3 Product Validation Kit planning so sandbox/mock/no-op Payment and AI remain the core path, while real Payment and real AI provider product acceptance are conditionally tracked through `GNE-194` and `GNE-195`.
 - Clarified Analytics stage status: `ANALYTICS-01..04` are MVP1 Done, while `ANALYTICS-05..11` cover MVP2/MVP3 production verification, dashboards, multi-env isolation, Payment conversion, and AI analytics.
 - Recorded PostHog production event evidence for `GNE-105`: PostHog Activity shows production Vercel URL events including `Pageview`, `Identify`, `login_started`, and `user_logged_in`; final Done still needs expanded shared property proof.
+- Updated public app branding defaults so metadata, favicon, `.env.example`, analytics default app name, and environment matrix use `XWLC` instead of the old `ai-web-starter-kit` display name.
 - Documented the Vercel Hobby / private repo merge-method rule: non-owner collaborator PRs should use `Create a merge commit` by default so the `main` deployment-triggering commit is owner-authored; already-reviewed blocked squash merges may be followed by an owner-authored no-op trigger commit.
 
 ## Done Issues

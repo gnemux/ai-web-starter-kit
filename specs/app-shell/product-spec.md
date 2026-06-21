@@ -17,6 +17,7 @@
 
 - 建立克制、现代、工程化的 SaaS / Web App 外壳。
 - 界面品牌名统一为 `XWLC`，副标题低调使用 `eXtensible Web Launch Core`。
+- 浏览器标题、应用 metadata、favicon 和默认公开 app name 统一使用 `XWLC`，避免线上页面或埋点继续显示旧的 `ai-web-starter-kit` 名称。
 - 提供 Dashboard 基础框架，只展示已经有真实功能或明确可操作的内容。
 - 账户页只展示当前身份信息与可保存的 profile 表单，不展示无独立功能的状态卡片。
 - 沉淀 loading、empty、error、long content 等边界状态。
@@ -61,6 +62,7 @@ open app
 - 所有新增界面文案必须通过项目内 i18n 字典提供中文和英文版本，默认语言为中文。
 - 语言切换应放在全局 footer 的合适位置，不应由每个页面单独重复渲染，并保持当前页面语境。
 - 中文和英文文案都应简短、工程化、少装饰，避免为了展示视觉效果而新增无功能实体。
+- 浏览器 favicon 应使用与 `XWLC` 品牌一致的简洁图形，支持在小尺寸标签页中清晰识别。
 
 ## Edge States
 

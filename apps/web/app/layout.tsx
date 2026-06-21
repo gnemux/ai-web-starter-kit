@@ -6,8 +6,15 @@ import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 
 export const metadata: Metadata = {
+  applicationName: "XWLC",
   title: "XWLC",
-  description: "eXtensible Web Launch Core."
+  description: "eXtensible Web Launch Core.",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }]
+  },
+  appleWebApp: {
+    title: "XWLC"
+  }
 };
 
 export default async function RootLayout({

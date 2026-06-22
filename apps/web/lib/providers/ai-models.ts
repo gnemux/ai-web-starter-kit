@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  getAiModelPreflightCredits,
   resolveAiModelConfig,
   type AiModelConfig,
   type ServiceResult
@@ -44,8 +45,8 @@ export const aiModelCatalog = [
     },
     costProfile: {
       unit: "credit",
-      requestCredits: 3000,
-      minimumCredits: 3000,
+      requestCredits: 10000,
+      minimumCredits: 10000,
       inputTokenCreditsPer1K: 0,
       outputTokenCreditsPer1K: 0
     },
@@ -139,6 +140,7 @@ export function resolveAiTextModelConfig(
 export type AiTextModelOption = {
   id: string;
   label: string;
+  requestedCredits: number;
 };
 
 export function listAiTextModelOptions(): AiTextModelOption[] {
@@ -150,7 +152,8 @@ export function listAiTextModelOptions(): AiTextModelOption[] {
     )
     .map((model) => ({
       id: model.id,
-      label: model.label
+      label: model.label,
+      requestedCredits: getAiModelPreflightCredits(model)
     }));
 }
 

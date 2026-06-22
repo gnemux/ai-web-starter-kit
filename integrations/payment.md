@@ -19,13 +19,15 @@ GNE-72 MVP2 PAYMENT-00
 ├── GNE-198 PAYMENT-04R [APP/REVIEW][MVP2] Sandbox checkout 与支付结果人工验收页
 ├── GNE-104 PAYMENT-05 [ANALYTICS][MVP2] 接入 PostHog 支付事件
 ├── GNE-202 PAYMENT-06 [DOC][MVP2] 补充 .env.example 和支付安全说明
-├── GNE-99 PAYMENT-07 [RESEARCH][MVP2 可选] 真实支付 Provider 人工验证清单
-└── GNE-100 PAYMENT-08 [SPIKE][MVP2 可选] 真实 Provider test mode 技术打样
+├── GNE-99 PAYMENT-07 [RESEARCH][MVP2 可选] 真实支付 Provider 人工验证清单（Done）
+└── GNE-100 PAYMENT-08 [SPIKE][MVP2] Creem test checkout 与 webhook 技术打样（In Progress）
 ```
 
-`PAYMENT-01..06` plus `PAYMENT-04R` are the MVP2 Payment mainline. `PAYMENT-07/08` are optional research/spike work and must not be treated as live payment implementation. Use `GNE-99` to manually verify a real Provider, `GNE-100` for a test-mode-only technical spike after that verification, `GNE-194` for MVP3 productized test-mode validation, and `GNE-201` for production payment readiness.
+`PAYMENT-01..06` plus `PAYMENT-04R` are the MVP2 Payment mainline. `PAYMENT-07/08` are optional research/spike work and must not be treated as live payment implementation. Creem has produced `Go test mode` under `GNE-99`, so `GNE-100` now proceeds as a Creem test-mode-only technical spike. Its MVP2 scope includes test checkout, test dashboard evidence, test webhook delivery, signature/idempotency/event-field verification, env boundary checks, and safe PostHog observability. Use `GNE-194` later for MVP3 productized test-mode validation and `GNE-201` for production payment readiness.
 
-For Creem manual verification under `GNE-99`, confirm: account eligibility for the team's person/company, product category and subscription/one-time price support, sandbox/test mode availability, webhook URL/secret/signature/event fields, server-only env requirements, payout method and settlement constraints, refund/chargeback/invoice/tax risks, and a final `Go test mode`, `Need more info`, or `No-go for now` decision. Never paste secrets, identity documents, bank details, or full sensitive dashboard screenshots into Linear, Git, README, or browser-visible code.
+For Creem manual verification under `GNE-99`, use `integrations/payment-creem-research.md` as the Chinese research record. Creem is currently approved only for `Go test mode`: test API key, test checkout, and test webhook mapping are allowed; production KYC/live payment remains blocked until a real vertical product, policy pages, support/refund terms, and production-payment readiness are defined. Never paste secrets, identity documents, bank details, or full sensitive dashboard screenshots into Linear, Git, README, or browser-visible code.
+
+For the `GNE-100` Creem test-mode spike, set local ignored env to `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, and `PAYMENT_LIVE_ENABLED=false`. Creem is integrated as a replaceable PaymentProvider adapter, not as a replacement for Billing or trusted entitlement facts. Use `pnpm payment:creem:test-checkout` or the app checkout entry to create a Creem test checkout. The adapter requires a server-only Creem test key, `CREEM_PRO_MONTHLY_PRODUCT_ID`, and an HTTPS `CREEM_CHECKOUT_SUCCESS_URL`, and prints only a redacted checkout summary. The acceptance target is not just an API response: the returned checkout URL must open, a test card payment must complete, and Creem test mode dashboard must show the corresponding test payment / checkout / subscription record. Webhook test scenes are also in scope for `GNE-100`: configure a public HTTPS test endpoint or controlled preview/ngrok endpoint, validate signature and event id/idempotency, record safe event fields, and confirm duplicate/failed events do not grant entitlement.
 
 Provider matrix and stage boundaries live in `integrations/provider-matrix.md`.
 
@@ -141,7 +143,7 @@ GNE-72 MVP2 PAYMENT-00
 ├── GNE-104 PAYMENT-05 [ANALYTICS][MVP2] PostHog payment events
 ├── GNE-202 PAYMENT-06 [DOC][MVP2] .env.example and payment security notes
 ├── GNE-99 PAYMENT-07 [RESEARCH][MVP2 optional] real Provider manual verification
-└── GNE-100 PAYMENT-08 [SPIKE][MVP2 optional] real Provider test-mode technical spike
+└── GNE-100 PAYMENT-08 [SPIKE][MVP2] Creem test checkout and webhook technical spike
 ```
 
 MVP3 follow-ups:
@@ -150,6 +152,8 @@ MVP3 follow-ups:
 GNE-194 MVP3-CP-07 [PAYMENT][TEST MODE] real Provider test-mode adapter validation
 GNE-158 MVP3-CP-09 [PAYMENT/AI] AI credit pack sandbox validation
 ```
+
+Do not merge `GNE-100` and `GNE-194`. `GNE-100` is the MVP2 technical spike for Creem checkout/webhook feasibility. `GNE-194` is the later MVP3 productized validation that consumes the technical evidence inside Product Validation Kit. Missing low-level adapter/webhook evidence belongs back in `GNE-100`.
 
 MVP5 production gate:
 

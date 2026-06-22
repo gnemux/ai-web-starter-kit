@@ -118,6 +118,19 @@ NEXT_PUBLIC_JIGUANG_APP_KEY=
 - Never send prompt text, generated text, provider secrets, payment card data, webhook raw payloads, or personal secrets to PostHog.
 - Map auth failures into safe categories such as `validation_error`, `provider_error`, and `rate_limited`.
 
+## Event Implementation Contract
+
+New instrumentation must follow this contract before a reviewer treats it as valid evidence:
+
+- Client-side UI events should use `apps/web/lib/analytics/client.ts`; server-side business facts should use `apps/web/lib/analytics/server.ts`.
+- Server-side conversion events should be emitted only after the trusted service boundary has made the decision. For example, `payment_succeeded` and `entitlement_granted` happen after Billing facts are written, not because a success URL loaded.
+- `quota_limit_reached` must come from a server-side entitlement or quota block decision. Do not emit it from a disabled button, pricing-page click, static route load, or other client-only inference.
+- All events must include the shared factory properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
+- Server-side events should also include safe runtime context such as `$lib=server`, `current_url` / `$current_url`, and `host` when available, so PostHog Activity rows do not look like incomplete browser-only events.
+- Event-specific properties must be minimal and decision-relevant. Examples: `plan`, `price_id`, `provider`, `payment_mode`, `result`, `feature_key`, `requested_credit`, `remaining_credit`, `model`, and `provider_mode`.
+- Analytics events may observe Auth, Payment, Billing, AI, and quota behavior, but these systems must keep their own trusted facts in services and database tables.
+- Reviewers should expand a fresh PostHog event and verify both shared properties and event-specific properties. A row appearing in Activity is not enough if the properties are missing.
+
 ## Linear Execution Order
 
 ```text

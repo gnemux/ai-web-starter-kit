@@ -14,6 +14,8 @@
 - [x] Includes owner/user association, provider external IDs, status fields, time windows, idempotency keys, and audit timestamps.
 - [x] Enables RLS on all exposed Billing tables.
 - [x] Keeps writes service-only and user reads owner-only.
+- [x] Documents when `billing_credit_ledger.entitlement_id` may be `NULL` and when a fresh grant row should reference an entitlement.
+- [x] Documents how reviewers should interpret `billing_usage_ledger.related_credit_ledger_id`.
 
 ## GNE-92 Service Boundary
 

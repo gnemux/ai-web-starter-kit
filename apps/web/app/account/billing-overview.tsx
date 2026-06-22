@@ -6,6 +6,7 @@ import {
   SectionHeader
 } from "@starter/ui";
 import {
+  compareBillingPlans,
   defaultBillingPlans,
   defaultBillingPrices,
   getBillingPlan,
@@ -19,7 +20,6 @@ import {
 
 import type { Dictionary } from "@/lib/i18n";
 import type { BillingActivity } from "@/lib/services/billing";
-import { switchToFreePlanAction } from "./actions";
 
 const featureOrder: BillingFeatureKey[] = [
   "projects",
@@ -216,6 +216,9 @@ function PlanReviewCard({
 }) {
   const currentPlanId = currentSnapshot?.planId;
   const isCurrentPlan = currentPlanId === plan.id;
+  const isIncludedLowerPlan =
+    currentPlanId !== undefined &&
+    compareBillingPlans(plan.id, currentPlanId) < 0;
   const badgeTone = isCurrentPlan
     ? "in-progress"
     : plan.featured
@@ -287,12 +290,10 @@ function PlanReviewCard({
               value={formatRenewalDate(currentSnapshot.currentPeriodEnd, labels)}
             />
           </div>
-        ) : plan.id === "free" ? (
-          <form action={switchToFreePlanAction}>
-            <Button type="submit" variant="secondary">
-              {labels.switchToFree}
-            </Button>
-          </form>
+        ) : isIncludedLowerPlan || plan.id === "free" ? (
+          <p className="border-t border-slate-100 pt-4 text-sm font-medium text-slate-500">
+            {labels.includedInCurrentPlan}
+          </p>
         ) : price ? (
           <Button
             href={`/account/payment/checkout?price_id=${price.id}&return_to=${returnTo}`}

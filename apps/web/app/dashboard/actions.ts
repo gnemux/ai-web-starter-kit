@@ -12,8 +12,13 @@ import { generateAiTextFromFormData } from "@/lib/services/ai";
 import { createDemoItemFromFormData } from "@/lib/services/demo-items";
 
 export type DemoItemActionState = ServiceResult<DemoItem> | null;
-export type WorkspaceAiActionState =
-  ServiceResult<AiGenerateTextResponse> | null;
+export type WorkspaceAiActionState = {
+  result: ServiceResult<AiGenerateTextResponse>;
+  values: {
+    model: string;
+    prompt: string;
+  };
+} | null;
 
 export async function createDemoItemAction(
   _previousState: DemoItemActionState,
@@ -32,5 +37,11 @@ export async function runWorkspaceAiAction(
   _previousState: WorkspaceAiActionState,
   formData: FormData
 ): Promise<WorkspaceAiActionState> {
-  return generateAiTextFromFormData(formData);
+  return {
+    result: await generateAiTextFromFormData(formData),
+    values: {
+      model: String(formData.get("model") ?? ""),
+      prompt: String(formData.get("prompt") ?? "")
+    }
+  };
 }

@@ -47,6 +47,16 @@ These live in `packages/core/src/billing.ts` so pricing UI, checkout, and entitl
 - `billing_credit_ledger`: credit/allowance grants, consumption, refunds, expirations, and adjustments.
 - `billing_usage_ledger`: usage measurement records with idempotency keys.
 
+### Ledger Null Semantics
+
+`billing_credit_ledger.entitlement_id` is nullable by design. A reviewer should interpret it by event type and source:
+
+- `grant` rows from a credit pack or explicit entitlement grant should normally reference `billing_entitlements.id`.
+- `consume` rows may have `entitlement_id = null` when Credit is consumed from the account-level allowance or aggregated balance rather than from one specific entitlement row.
+- Historical rows may also become `null` if their referenced entitlement was deleted, because the foreign key uses `on delete set null`.
+- `billing_usage_ledger.related_credit_ledger_id` should be present when committed AI usage writes a matching Credit ledger row, but it may be `null` for older demo rows, reserved/released/failed attempts, or usage records that are not Credit-backed.
+- Reviewers should not manually edit these rows in Supabase. The trusted path is service code writing through Payment, Billing, or AI boundaries.
+
 ## RLS And Permissions
 
 - All Billing tables in `public` must enable RLS.

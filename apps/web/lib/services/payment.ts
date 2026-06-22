@@ -3,6 +3,7 @@ import {
   getBillingPrice,
   getCheckoutOption,
   isBillingCheckoutPriceId,
+  isBillingPlanUpgrade,
   listCheckoutOptions,
   normalizePaymentWebhookEvent,
   serviceError,
@@ -21,7 +22,10 @@ import {
 import { randomUUID } from "crypto";
 
 import { trackServerEvent } from "@/lib/analytics/server";
-import { createSandboxPaymentProvider } from "@/lib/providers/server";
+import {
+  createPaymentProvider,
+  createSandboxPaymentProvider
+} from "@/lib/providers/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 import { getCurrentAccount } from "./auth";
@@ -81,7 +85,7 @@ export async function getPaymentPageState(): Promise<
     return accountResult;
   }
 
-  const provider = createSandboxPaymentProvider();
+  const provider = createPaymentProvider();
   const billing = await getCurrentBillingEntitlements();
 
   return serviceOk({
@@ -128,7 +132,26 @@ export async function createPaymentCheckout(
   }
 
   const price = optionResult.data.price;
-  const provider = createSandboxPaymentProvider();
+
+  if (price.planId) {
+    const billingResult = await getCurrentBillingEntitlements();
+
+    if (!billingResult.ok) {
+      return billingResult;
+    }
+
+    if (!isBillingPlanUpgrade(billingResult.data.planId, price.planId)) {
+      return serviceError(
+        "validation_error",
+        "Choose a plan above the current subscription."
+      );
+    }
+  }
+
+  const provider =
+    price.type === "one_time"
+      ? createSandboxPaymentProvider()
+      : createPaymentProvider();
   const returnTo = normalizeReturnTo(options.returnTo, "/account/payment");
   const result = await provider.createCheckoutSession({
     userId: accountResult.data.user.id,
@@ -285,7 +308,7 @@ export async function processSandboxCheckoutResult(input: {
     return orderResult;
   }
 
-  const provider = createSandboxPaymentProvider();
+  const provider = createPaymentProvider();
   const analyticsProperties = buildPaymentAnalyticsProperties({
     checkoutKind: optionResult.data.checkoutKind,
     checkoutSessionId,
@@ -379,7 +402,7 @@ export async function reviewPaymentQuotaLimit(): Promise<
         feature_key: featureKey,
         payment_mode: normalizePaymentAnalyticsMode(process.env.PAYMENT_MODE),
         plan: billingResult.data.planId,
-        provider: createSandboxPaymentProvider().descriptor.provider,
+        provider: createPaymentProvider().descriptor.provider,
         quota_reason: normalizeQuotaReason(decisionResult.data.reason),
         remaining_units: decisionResult.data.remaining,
         requested_units: requestedQuantity,
@@ -431,7 +454,7 @@ export async function consumePaymentReviewAiUsage(): Promise<
         feature_key: featureKey,
         payment_mode: normalizePaymentAnalyticsMode(process.env.PAYMENT_MODE),
         plan: billingResult.data.planId,
-        provider: createSandboxPaymentProvider().descriptor.provider,
+        provider: createPaymentProvider().descriptor.provider,
         quota_reason: normalizeQuotaReason(decisionResult.data.reason),
         remaining_units: decisionResult.data.remaining,
         requested_units: paymentReviewAiCreditCost,

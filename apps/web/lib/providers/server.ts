@@ -18,6 +18,16 @@ import {
 
 import { getProviderDescriptor } from "./catalog";
 
+const creemTestCheckoutEndpoint = "https://test-api.creem.io/v1/checkouts";
+
+export function createPaymentProvider(): PaymentProvider {
+  if (process.env.PAYMENT_PROVIDER === "creem") {
+    return createCreemTestPaymentProvider();
+  }
+
+  return createSandboxPaymentProvider();
+}
+
 export function createSandboxPaymentProvider(): PaymentProvider {
   const descriptor = requireProviderDescriptor("payment");
 
@@ -41,6 +51,94 @@ export function createSandboxPaymentProvider(): PaymentProvider {
         mode: descriptor.mode,
         status: "created",
         url: `${input.checkoutUrl}?${urlSearchParams.toString()}`,
+        priceId: input.priceId
+      });
+    }
+  };
+}
+
+export function createCreemTestPaymentProvider(): PaymentProvider {
+  const descriptor: ProviderDescriptor = {
+    capability: "payment",
+    provider: "creem",
+    mode: "real",
+    runtime: "server",
+    configStatus: process.env.PAYMENT_PROVIDER_SECRET
+      ? "configured"
+      : "missing_required",
+    serverOnly: true,
+    publicEnv: [],
+    serverEnv: [
+      "PAYMENT_PROVIDER",
+      "PAYMENT_MODE",
+      "PAYMENT_LIVE_ENABLED",
+      "PAYMENT_PROVIDER_SECRET",
+      "PAYMENT_WEBHOOK_SECRET",
+      "CREEM_PRO_MONTHLY_PRODUCT_ID",
+      "CREEM_CHECKOUT_SUCCESS_URL"
+    ],
+    notes:
+      "Creem test-mode checkout adapter only. Live payment remains disabled."
+  };
+
+  return {
+    descriptor,
+    async createCheckoutSession(input) {
+      const safetyResult = validateCreemTestModeConfig();
+
+      if (!safetyResult.ok) {
+        return safetyResult;
+      }
+
+      const productIdResult = resolveCreemProductId(input.priceId);
+
+      if (!productIdResult.ok) {
+        return productIdResult;
+      }
+
+      const successUrlResult = resolveCreemSuccessUrl(input.successUrl);
+
+      if (!successUrlResult.ok) {
+        return successUrlResult;
+      }
+
+      const response = await fetch(creemTestCheckoutEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": safetyResult.data.apiKey
+        },
+        body: JSON.stringify({
+          product_id: productIdResult.data,
+          success_url: successUrlResult.data
+        })
+      });
+
+      const text = await response.text();
+      const payload = parseJsonObject(text);
+
+      if (!response.ok) {
+        return serviceError(
+          "system_error",
+          "Creem test checkout could not be created."
+        );
+      }
+
+      const checkout = readCheckoutPayload(payload);
+
+      if (!checkout.url) {
+        return serviceError(
+          "system_error",
+          "Creem did not return a checkout URL."
+        );
+      }
+
+      return serviceOk({
+        id: checkout.id ?? `creem-checkout-${randomUUID()}`,
+        provider: descriptor.provider,
+        mode: descriptor.mode,
+        status: "created",
+        url: checkout.url,
         priceId: input.priceId
       });
     }
@@ -182,4 +280,114 @@ function requireProviderDescriptor(
   }
 
   return descriptor;
+}
+
+function validateCreemTestModeConfig() {
+  if (process.env.PAYMENT_MODE !== "test") {
+    return serviceError(
+      "configuration_error",
+      "Creem checkout requires PAYMENT_MODE=test."
+    );
+  }
+
+  if (process.env.PAYMENT_LIVE_ENABLED !== "false") {
+    return serviceError(
+      "configuration_error",
+      "Creem test checkout requires PAYMENT_LIVE_ENABLED=false."
+    );
+  }
+
+  const apiKey = process.env.PAYMENT_PROVIDER_SECRET?.trim();
+
+  if (!apiKey) {
+    return serviceError(
+      "configuration_error",
+      "Creem test checkout requires PAYMENT_PROVIDER_SECRET."
+    );
+  }
+
+  return serviceOk({ apiKey });
+}
+
+function resolveCreemProductId(priceId: string) {
+  if (priceId === "pro_monthly") {
+    const productId = process.env.CREEM_PRO_MONTHLY_PRODUCT_ID?.trim();
+
+    if (!productId) {
+      return serviceError(
+        "configuration_error",
+        "Creem test checkout requires CREEM_PRO_MONTHLY_PRODUCT_ID."
+      );
+    }
+
+    return serviceOk(productId);
+  }
+
+  return serviceError(
+    "configuration_error",
+    "Creem test checkout is only configured for pro_monthly."
+  );
+}
+
+function resolveCreemSuccessUrl(fallbackPath: string) {
+  const configuredUrl = process.env.CREEM_CHECKOUT_SUCCESS_URL?.trim();
+
+  if (configuredUrl) {
+    return validateHttpsUrl(configuredUrl);
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+
+  if (!appUrl) {
+    return serviceError(
+      "configuration_error",
+      "Creem test checkout requires CREEM_CHECKOUT_SUCCESS_URL or NEXT_PUBLIC_APP_URL."
+    );
+  }
+
+  return validateHttpsUrl(`${appUrl}${fallbackPath}`);
+}
+
+function validateHttpsUrl(url: string) {
+  if (!url.startsWith("https://")) {
+    return serviceError(
+      "configuration_error",
+      "Creem checkout URLs must be HTTPS."
+    );
+  }
+
+  return serviceOk(url);
+}
+
+function parseJsonObject(text: string): Record<string, unknown> {
+  try {
+    const value = JSON.parse(text) as unknown;
+
+    return value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function readCheckoutPayload(payload: Record<string, unknown>) {
+  const checkout =
+    payload.checkout && typeof payload.checkout === "object"
+      ? (payload.checkout as Record<string, unknown>)
+      : payload;
+
+  return {
+    id: readString(checkout.id) ?? readString(payload.id),
+    url:
+      readString(checkout.checkoutUrl) ??
+      readString(checkout.checkout_url) ??
+      readString(checkout.url) ??
+      readString(payload.checkoutUrl) ??
+      readString(payload.checkout_url)
+  };
+}
+
+function readString(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 
 import { Badge, Button } from "@starter/ui";
 
@@ -13,6 +13,9 @@ import {
 
 const initialState: WorkspaceAiActionState = null;
 
+type AiWorkflowResultState =
+  NonNullable<WorkspaceAiActionState>["result"] | null;
+
 type AiWorkflowLabels = {
   blocked: string;
   creditOutcome: string;
@@ -23,6 +26,7 @@ type AiWorkflowLabels = {
   gateBlocked: string;
   model: string;
   modelSelectLabel: string;
+  selectedModelCredit: string;
   noResult: string;
   promptLabel: string;
   promptPlaceholder: string;
@@ -41,6 +45,7 @@ type AiWorkflowLabels = {
 type AiWorkflowModelOption = {
   id: string;
   label: string;
+  requestedCredits: number;
 };
 
 type AiErrorLabels = {
@@ -63,7 +68,28 @@ export function AiWorkflowForm({
     runWorkspaceAiAction,
     initialState
   );
-  const fieldErrors = !state?.ok ? state?.error.fields : undefined;
+  const [selectedModelId, setSelectedModelId] = useState(
+    state?.result.ok ? state.result.data.model : state?.values.model || model
+  );
+  const [prompt, setPrompt] = useState(state?.values.prompt ?? "");
+  const selectedModel = useMemo(
+    () =>
+      modelOptions.find((option) => option.id === selectedModelId) ??
+      modelOptions[0],
+    [modelOptions, selectedModelId]
+  );
+  const resultState = state?.result ?? null;
+  const fieldErrors =
+    resultState && !resultState.ok ? resultState.error.fields : undefined;
+  const promptHasBeenCorrected =
+    Boolean(fieldErrors?.prompt) && prompt.trim().length >= 3;
+  const visibleState = promptHasBeenCorrected ? null : resultState;
+
+  useEffect(() => {
+    if (state?.result.ok) {
+      setSelectedModelId(state.result.data.model);
+    }
+  }, [state]);
 
   return (
     <form action={formAction} className="mt-5 grid gap-4 border-t border-slate-200 pt-5">
@@ -78,9 +104,11 @@ export function AiWorkflowForm({
             className="min-h-28 resize-y rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
             maxLength={4000}
             name="prompt"
+            onChange={(event) => setPrompt(event.target.value)}
             placeholder={labels.promptPlaceholder}
+            value={prompt}
           />
-          {fieldErrors?.prompt ? (
+          {fieldErrors?.prompt && !promptHasBeenCorrected ? (
             <span className="text-xs font-medium text-rose-600">
               {errorLabels.prompt}
             </span>
@@ -93,20 +121,35 @@ export function AiWorkflowForm({
           </span>
           <select
             className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-950 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-            defaultValue={model}
             name="model"
+            onChange={(event) => setSelectedModelId(event.target.value)}
+            value={selectedModelId}
           >
             {modelOptions.map((option) => (
               <option key={option.id} value={option.id}>
-                {option.label}
+                {option.label} · {option.requestedCredits.toLocaleString()}{" "}
+                {labels.creditUnit}
               </option>
             ))}
           </select>
+          {selectedModel ? (
+            <p className="text-xs leading-5 text-slate-500">
+              {labels.selectedModelCredit}:{" "}
+              <span className="font-semibold text-slate-700">
+                {selectedModel.requestedCredits.toLocaleString()}{" "}
+                {labels.creditUnit}
+              </span>
+            </p>
+          ) : null}
         </label>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <ResultMessage errorLabels={errorLabels} labels={labels} state={state} />
+        <ResultMessage
+          errorLabels={errorLabels}
+          labels={labels}
+          state={visibleState}
+        />
         <Button
           disabled={pending}
           icon={<UsageIcon className="h-4 w-4" />}
@@ -116,7 +159,11 @@ export function AiWorkflowForm({
         </Button>
       </div>
 
-      <AiResult labels={labels} modelOptions={modelOptions} state={state} />
+      <AiResult
+        labels={labels}
+        modelOptions={modelOptions}
+        state={visibleState}
+      />
     </form>
   );
 }
@@ -128,7 +175,7 @@ function ResultMessage({
 }: {
   errorLabels: AiErrorLabels;
   labels: AiWorkflowLabels;
-  state: WorkspaceAiActionState;
+  state: AiWorkflowResultState;
 }) {
   if (!state) {
     return (
@@ -174,7 +221,7 @@ function AiResult({
 }: {
   labels: AiWorkflowLabels;
   modelOptions: AiWorkflowModelOption[];
-  state: WorkspaceAiActionState;
+  state: AiWorkflowResultState;
 }) {
   if (!state?.ok) {
     return null;

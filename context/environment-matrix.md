@@ -78,7 +78,7 @@ Provider selector variables are non-secret. They choose the active provider fami
 | Auth | `AUTH_PROVIDER` | `supabase` | Server-side config | Supabase remains the real Auth provider. Browser code still uses public Supabase URL/key only. |
 | Database/BaaS | `DATABASE_PROVIDER` | `supabase` | Server-side config | Supabase remains the real Database/BaaS provider. |
 | Analytics | `NEXT_PUBLIC_ANALYTICS_PROVIDER` | `posthog` | Public browser config | Browser analytics initialization may need to know the public analytics provider. |
-| Payment | `PAYMENT_PROVIDER` | `sandbox` | Server-side config | Real payment providers and webhook verification are later Payment issues. |
+| Payment | `PAYMENT_PROVIDER` | `sandbox` by default; `creem` only for `GNE-100` test-mode spike | Server-side config | Real payment production and webhook writes are later Payment issues. Creem is allowed only with `PAYMENT_MODE=test` and `PAYMENT_LIVE_ENABLED=false`. |
 | AI | `AI_PROVIDER` | `mock` | Server-side config | Real model providers and keys are later AI issues. |
 | Email | `EMAIL_PROVIDER` | `noop` | Server-side config | No real email provider is configured yet. |
 | Storage | `STORAGE_PROVIDER` | `noop` | Server-side config | No real product storage provider is configured yet. |
@@ -91,6 +91,7 @@ AUTH_PROVIDER=supabase
 DATABASE_PROVIDER=supabase
 NEXT_PUBLIC_ANALYTICS_PROVIDER=posthog
 PAYMENT_PROVIDER=sandbox
+# PAYMENT_PROVIDER=creem is allowed only for GNE-100 local/controlled test-mode verification.
 AI_PROVIDER=mock
 EMAIL_PROVIDER=noop
 STORAGE_PROVIDER=noop
@@ -106,7 +107,7 @@ Future real provider values must be introduced by the owning Payment, AI, Email,
 | App metadata | `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_PRODUCT_ID`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_APP_ENV`, `NEXT_PUBLIC_APP_MARKET`, `NEXT_PUBLIC_APP_VERSION`, `NEXT_PUBLIC_MVP_STAGE` | None |
 | Supabase Auth/Database | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `AUTH_PROVIDER`, `DATABASE_PROVIDER`, `SUPABASE_PROJECT_REF`, `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
 | Analytics | `NEXT_PUBLIC_ANALYTICS_PROVIDER`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`, `NEXT_PUBLIC_JIGUANG_APP_KEY` | None for current MVP2 analytics config |
-| Payment | None | `PAYMENT_PROVIDER`, `PAYMENT_SECRET_KEY`, `PAYMENT_WEBHOOK_SECRET` |
+| Payment | None | `PAYMENT_PROVIDER`, `PAYMENT_MODE`, `PAYMENT_LIVE_ENABLED`, `PAYMENT_SECRET_KEY`, `PAYMENT_PROVIDER_SECRET`, `PAYMENT_WEBHOOK_SECRET`, `CREEM_PRO_MONTHLY_PRODUCT_ID`, `CREEM_CHECKOUT_SUCCESS_URL` |
 | AI | None | `AI_PROVIDER`, `AI_MODEL`, `AI_PROVIDER_API_KEY`, `AI_BUDGET_LIMIT` |
 | Email | None | `EMAIL_PROVIDER`, `EMAIL_PROVIDER_API_KEY`, `EMAIL_FROM_ADDRESS` |
 | Storage | None | `STORAGE_PROVIDER`, `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY` |
@@ -126,6 +127,16 @@ user's visible balance, plan allowance, or browser-visible configuration.
 | Provider selectors | Configure defaults from `.env.example` unless testing a specific provider branch. | Configure Preview entries separately. Values may temporarily match Production. | Configure Production entries separately. Values may temporarily match Preview while one provider environment exists. |
 | Public provider keys | Local or shared staging public values only. | Preview public provider entries. Values may temporarily match Production. | Production public provider entries. |
 | Server-only secrets | Local ignored values only when needed. | Preview secrets in Vercel Dashboard only. | Production secrets in Vercel Dashboard only. |
+
+For `GNE-100 PAYMENT-08`, local ignored env may persistently use:
+
+```text
+PAYMENT_PROVIDER=creem
+PAYMENT_MODE=test
+PAYMENT_LIVE_ENABLED=false
+```
+
+The Creem test API key must stay in local ignored env or a controlled secret manager as `PAYMENT_PROVIDER_SECRET`. Do not put it in `.env.example`, Git, Linear, screenshots, browser-visible code, or public PR text. Vercel Production should stay on `PAYMENT_PROVIDER=sandbox` until the MVP5 production-payment gate.
 
 After changing any Vercel environment variable, redeploy the affected Preview or Production deployment before testing. Existing deployments do not automatically receive new env values.
 

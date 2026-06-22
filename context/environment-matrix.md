@@ -4,7 +4,22 @@
 
 This file defines naming and isolation rules for environments, products, markets, and provider configuration. It prevents future MVPs from mixing Preview and Production data or confusing starter-kit events with real product events.
 
-## Current MVP1 Rule
+## Environment Template Rule
+
+`.env.example` is the product-base configuration contract. It should remain
+copyable, placeholder-only, and safe for Git.
+
+- If `.env.local` changes because the shared product-base contract changed, update
+  `.env.example` and this matrix in the same work item.
+- If `.env.local` changes only because one developer uses a different port, local
+  provider key, or temporary provider value, do not copy that private value into
+  `.env.example`.
+- Every new environment variable must state whether it is browser-visible
+  `NEXT_PUBLIC`, server-only, required now, or reserved for a later MVP/provider.
+- Vercel Production and Preview values are configured in the Vercel dashboard, not
+  copied from local ignored files.
+
+## Current MVP2 Rule
 
 The Vercel Production and Preview environment variable entries must be configured separately.
 
@@ -32,11 +47,11 @@ Do not use `staging` as an app env value unless the shared TypeScript analytics 
 
 ## Product And Market Identifiers
 
-| Key | Purpose | Current MVP1 value | Future examples |
+| Key | Purpose | Current MVP2 value | Future examples |
 | --- | --- | --- | --- |
 | `NEXT_PUBLIC_APP_NAME` / `app` | Product or starter instance identifier. | `XWLC` | `product-validation-kit`, real vertical product slug |
 | `NEXT_PUBLIC_PRODUCT_ID` | Stable product slug for environment dashboards and future multi-product routing. | `xwlc` | `product-validation-kit`, real vertical product slug |
-| `NEXT_PUBLIC_MVP_STAGE` / `mvp_stage` | Delivery stage identifier. | `mvp1` | `mvp2`, `mvp3`, `mvp4` |
+| `NEXT_PUBLIC_MVP_STAGE` / `mvp_stage` | Delivery stage identifier. | `mvp2` | `mvp3`, `mvp4`, real product stage |
 | `NEXT_PUBLIC_APP_MARKET` / `market` | Market mode. | `overseas` | `china` |
 | `NEXT_PUBLIC_APP_VERSION` / `version` | Product/template version label. | `v0.1` | release tag or product version |
 | `module` | Event or capability module. | Set by code per module. | `auth`, `core`, `billing`, `payment`, `ai`, `growth` |

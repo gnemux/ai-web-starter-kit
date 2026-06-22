@@ -69,6 +69,7 @@ Split into multiple PostHog Projects only when there is a clear reason such as e
 - `checkout_started`
 - `payment_succeeded`
 - `payment_failed`
+- `payment_canceled`
 - `entitlement_granted`
 - `subscription_status_changed`
 - `feedback_submitted`

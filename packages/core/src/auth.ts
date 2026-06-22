@@ -47,7 +47,7 @@ export type AnalyticsBaseProperties = {
   market: "overseas" | "china";
   env: "local" | "preview" | "production";
   version: string;
-  module: "auth";
+  module: "auth" | "payment" | "billing" | "ai" | "core";
 };
 
 export type AuthAnalyticsProperties = {

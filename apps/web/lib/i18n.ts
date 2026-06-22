@@ -204,6 +204,8 @@ export const dictionaries = {
         currentPlan: "当前账户计划",
         currentDescription:
           "未产生可信订阅事实时，账户默认回退到 Free 权益；后续 Payment sandbox 或真实 provider 会通过服务端事件更新 Billing facts。",
+        currentProDescription:
+          "当前账户已读取到服务端 active Pro subscription，权益由 Billing service 统一判断。",
         entitlements: "当前权益",
         recommended: "推荐",
         baseline: "基础",
@@ -211,8 +213,23 @@ export const dictionaries = {
         disabled: "未启用",
         creditPackTitle: "AI 额度包",
         creditPackDescription:
-          "一次性额度包先保留为 Billing/Pricing contract，真实 checkout 与发放会由后续 Payment / AI 任务接入。",
+          "一次性购买 100,000 AI tokens，用于验证额度包购买和权益发放链路。",
         sandboxOnly: "Sandbox 预留",
+        upgradePro: "升级 Pro",
+        buyCreditPack: "购买额度包",
+        usageDemoTitle: "模拟 AI 使用",
+        usageDemoDescription:
+          "先使用一次模拟 AI 生成功能，由后端检查 AI token 权益并写入 usage ledger。额度不足时才提示升级 Pro 或购买 AI 额度包。",
+        usageDemoRun: "模拟生成一次",
+        usageDemoReady: "可使用",
+        usageDemoBlocked: "需升级",
+        usageDemoCost: 10000,
+        usageDemoCostLabel: "本次消耗",
+        usageDemoRemaining: "剩余 AI tokens",
+        usageDemoLastResult: "上次结果",
+        usageDemoNoResult: "尚未使用",
+        usageDemoConsumed: "已消耗",
+        usageDemoLimitReached: "已触发额度限制",
         creditAmount: "额度",
         price: "价格",
         providerMapping: "Provider 映射",
@@ -223,7 +240,7 @@ export const dictionaries = {
         },
         planDescriptions: {
           free: "默认免费计划，用于未付费账户、注册后试用和本地验收。",
-          pro: "付费订阅计划模板，用于后续 sandbox checkout、真实支付和产品验证。"
+          pro: "升级后获得更多项目、页面、线索额度、AI tokens 和自定义域名能力。"
         },
         subscriptionStatuses: {
           none: "无订阅",
@@ -245,6 +262,89 @@ export const dictionaries = {
           count: "次",
           token: "tokens"
         }
+      },
+      payment: {
+        eyebrow: "MVP2 Payment",
+        title: "升级与支付",
+        description:
+          "选择套餐或额度包，确认费用后完成支付。当前本地环境使用 Sandbox 支付，不会真实扣款。",
+        statusReady: "可验收",
+        statusNeedsReview: "需检查",
+        errorTitle: "Payment service 暂不可用",
+        providerTitle: "Provider 状态",
+        providerDescription:
+          "本地使用 Sandbox 支付方式。确认支付后由后端 Server Action 写入 Billing facts，前端页面本身不授予权益。",
+        provider: "Provider",
+        mode: "模式",
+        entitlementSource: "权益来源",
+        billingFacts: "Billing 服务端事实",
+        currentBillingTitle: "当前 Billing 状态",
+        currentBillingDescription:
+          "当前计划与额度始终从 Billing service 读取。",
+        quotaGateTitle: "Quota gate 验收",
+        quotaGateDescription:
+          "通过服务端 Billing entitlement 检查当前项目额度上限 +1。若被拦截，PostHog 会从服务端 decision 上报 quota_limit_reached。",
+        quotaGateReady: "可检查",
+        quotaGateChecked: "已检查",
+        runQuotaGate: "运行 quota gate",
+        featureKey: "能力",
+        quotaRequested: "请求数量",
+        quotaDecision: "判断结果",
+        quotaAllowed: "允许",
+        quotaBlocked: "拦截",
+        quotaReason: "原因",
+        quotaRemaining: "剩余额度",
+        subscription: "订阅",
+        creditPack: "额度包",
+        creditPackName: "AI 额度包",
+        subscriptionDescription:
+          "解锁更多项目、页面、线索额度、AI tokens 和自定义域名能力。",
+        creditPackDescription:
+          "一次性增加 AI tokens 额度。",
+        priceId: "Price ID",
+        price: "价格",
+        providerMapping: "Provider 映射",
+        sandboxOnly: "sandbox",
+        startCheckout: "进入 Sandbox 支付",
+        currentPlanSelected: "当前已是此套餐",
+        sandboxEyebrow: "支付确认",
+        proCheckoutTitle: "确认升级 Pro",
+        creditCheckoutTitle: "购买 AI 额度包",
+        sandboxTitle: "确认支付",
+        sandboxDescription:
+          "请确认本次支付信息。当前为本地 Sandbox 支付，不会产生真实扣款。",
+        sandboxMode: "本地 Sandbox",
+        sandboxActionTitle: "支付信息",
+        sandboxActionDescription:
+          "点击确认支付后，后端会验证当前登录用户和 checkout session，并写入 Billing facts。",
+        checkoutSession: "Checkout Session",
+        confirmPayment: "确认支付",
+        chooseSuccess: "确认支付",
+        chooseCancel: "取消支付",
+        chooseFailure: "模拟失败",
+        resultEyebrow: "Payment Result",
+        resultTitles: {
+          success: "支付成功",
+          cancel: "支付已取消",
+          failure: "支付失败"
+        },
+        resultDescriptions: {
+          success:
+            "后端已处理本次 Sandbox 支付，当前账户权益以 Billing 服务端状态为准。",
+          cancel: "你取消了本次支付，Billing 状态不会升级。",
+          failure: "支付失败，Billing 状态不会升级。"
+        },
+        resultLabels: {
+          success: "成功",
+          cancel: "取消",
+          failure: "失败"
+        },
+        resultBoundaryTitle: "Result 与 Billing 边界",
+        resultBoundaryDescription:
+          "套餐和额度来自后端 Billing facts，不由浏览器 URL 直接决定。",
+        resultNoGrant: "后端 Billing facts",
+        returnToAccount: "返回账户查看权益",
+        billingUnavailable: "Billing 不可用"
       }
     },
     errors: {
@@ -454,6 +554,8 @@ export const dictionaries = {
         currentPlan: "Current account plan",
         currentDescription:
           "Without a trusted subscription fact, the account falls back to Free entitlements. Future Payment sandbox or real provider events update Billing facts on the server.",
+        currentProDescription:
+          "This account has an active Pro subscription from server-side Billing facts.",
         entitlements: "Current entitlements",
         recommended: "Recommended",
         baseline: "Baseline",
@@ -461,8 +563,23 @@ export const dictionaries = {
         disabled: "Disabled",
         creditPackTitle: "AI credit pack",
         creditPackDescription:
-          "The one-time credit pack is reserved as a Billing/Pricing contract. Real checkout and credit grants belong to later Payment / AI tasks.",
+          "Buy 100,000 AI tokens once to verify credit-pack purchase and entitlement grants.",
         sandboxOnly: "Sandbox reserved",
+        upgradePro: "Upgrade to Pro",
+        buyCreditPack: "Buy credit pack",
+        usageDemoTitle: "Simulate AI usage",
+        usageDemoDescription:
+          "Use one simulated AI generation first. The backend checks AI token access and writes usage ledger rows. Upgrade to Pro or buy an AI credit pack only when quota is blocked.",
+        usageDemoRun: "Generate once",
+        usageDemoReady: "Available",
+        usageDemoBlocked: "Upgrade needed",
+        usageDemoCost: 10000,
+        usageDemoCostLabel: "This use costs",
+        usageDemoRemaining: "Remaining AI tokens",
+        usageDemoLastResult: "Last result",
+        usageDemoNoResult: "Not used yet",
+        usageDemoConsumed: "Consumed",
+        usageDemoLimitReached: "Quota limit reached",
         creditAmount: "Credit",
         price: "Price",
         providerMapping: "Provider mapping",
@@ -473,7 +590,7 @@ export const dictionaries = {
         },
         planDescriptions: {
           free: "The default free plan for unpaid accounts, signup trials, and local review.",
-          pro: "The paid subscription template for sandbox checkout, real payment, and product validation.",
+          pro: "Upgrade for higher project, page, lead, AI token, and custom-domain limits.",
         },
         subscriptionStatuses: {
           none: "No subscription",
@@ -495,6 +612,90 @@ export const dictionaries = {
           count: "count",
           token: "tokens"
         }
+      },
+      payment: {
+        eyebrow: "MVP2 Payment",
+        title: "Upgrade and payment",
+        description:
+          "Choose a plan or credit pack, review the price, and confirm payment. The local environment uses Sandbox payments and never creates a real charge.",
+        statusReady: "Reviewable",
+        statusNeedsReview: "Needs review",
+        errorTitle: "Payment service unavailable",
+        providerTitle: "Provider status",
+        providerDescription:
+          "The local environment uses Sandbox payments. Confirming payment writes Billing facts through a backend Server Action; the frontend page itself does not grant entitlement.",
+        provider: "Provider",
+        mode: "Mode",
+        entitlementSource: "Entitlement source",
+        billingFacts: "Billing server facts",
+        currentBillingTitle: "Current Billing status",
+        currentBillingDescription:
+          "Current plan and credits always come from the Billing service.",
+        quotaGateTitle: "Quota gate review",
+        quotaGateDescription:
+          "Runs a server-side Billing entitlement check with one unit above the current project limit. When blocked, PostHog receives quota_limit_reached from the service decision.",
+        quotaGateReady: "Ready",
+        quotaGateChecked: "Checked",
+        runQuotaGate: "Run quota gate",
+        featureKey: "Feature",
+        quotaRequested: "Requested units",
+        quotaDecision: "Decision",
+        quotaAllowed: "Allowed",
+        quotaBlocked: "Blocked",
+        quotaReason: "Reason",
+        quotaRemaining: "Remaining",
+        subscription: "Subscription",
+        creditPack: "Credit pack",
+        creditPackName: "AI credit pack",
+        subscriptionDescription:
+          "Unlock higher project, page, lead, AI token, and custom-domain limits.",
+        creditPackDescription:
+          "Add a one-time AI token allowance.",
+        priceId: "Price ID",
+        price: "Price",
+        providerMapping: "Provider mapping",
+        sandboxOnly: "sandbox",
+        startCheckout: "Open Sandbox payment",
+        currentPlanSelected: "Current plan",
+        sandboxEyebrow: "Payment confirmation",
+        proCheckoutTitle: "Confirm Pro upgrade",
+        creditCheckoutTitle: "Buy AI credit pack",
+        sandboxTitle: "Confirm payment",
+        sandboxDescription:
+          "Review this payment. The local Sandbox payment method does not create a real charge.",
+        sandboxMode: "Local Sandbox",
+        sandboxActionTitle: "Payment details",
+        sandboxActionDescription:
+          "Confirming payment lets the backend verify the signed-in user and checkout session before writing Billing facts.",
+        checkoutSession: "Checkout session",
+        confirmPayment: "Confirm payment",
+        chooseSuccess: "Confirm payment",
+        chooseCancel: "Cancel payment",
+        chooseFailure: "Simulate failure",
+        resultEyebrow: "Payment Result",
+        resultTitles: {
+          success: "Payment succeeded",
+          cancel: "Payment canceled",
+          failure: "Payment failed"
+        },
+        resultDescriptions: {
+          success:
+            "The backend processed this Sandbox payment. Current account access follows the server-side Billing state.",
+          cancel:
+            "This payment was canceled. Billing status should not upgrade.",
+          failure: "Payment failed. Billing status should not upgrade."
+        },
+        resultLabels: {
+          success: "Success",
+          cancel: "Canceled",
+          failure: "Failed"
+        },
+        resultBoundaryTitle: "Result and Billing boundary",
+        resultBoundaryDescription:
+          "Plans and credits come from backend Billing facts, not directly from the browser URL.",
+        resultNoGrant: "Backend Billing facts",
+        returnToAccount: "Return to account",
+        billingUnavailable: "Billing unavailable"
       }
     },
     errors: {

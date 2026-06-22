@@ -58,8 +58,11 @@ export type AnalyticsProvider<
 export type PaymentCheckoutRequest = {
   userId: string;
   planId: string;
+  priceId: string;
+  checkoutUrl: string;
   successUrl: string;
   cancelUrl: string;
+  failureUrl: string;
   metadata?: ProviderMetadata;
 };
 
@@ -69,6 +72,7 @@ export type PaymentCheckoutSession = {
   mode: ProviderMode;
   status: "created" | "noop";
   url: string | null;
+  priceId: string;
 };
 
 export type PaymentProvider = {

@@ -66,6 +66,8 @@ AUTH_PROVIDER=supabase
 DATABASE_PROVIDER=supabase
 NEXT_PUBLIC_ANALYTICS_PROVIDER=posthog
 PAYMENT_PROVIDER=sandbox
+PAYMENT_MODE=sandbox
+PAYMENT_LIVE_ENABLED=false
 AI_PROVIDER=mock
 EMAIL_PROVIDER=noop
 STORAGE_PROVIDER=noop
@@ -76,7 +78,7 @@ Public browser variables are limited to app/product metadata, analytics public c
 
 GNE-182 standardizes server-only placeholders for future providers:
 
-- Payment: `PAYMENT_SECRET_KEY`, `PAYMENT_WEBHOOK_SECRET`
+- Payment: `PAYMENT_PROVIDER_SECRET`, `PAYMENT_SECRET_KEY`, `PAYMENT_WEBHOOK_SECRET`
 - AI: `AI_PROVIDER_API_KEY`, `AI_BUDGET_LIMIT`
 - Email: `EMAIL_PROVIDER_API_KEY`
 - Storage: `STORAGE_SECRET_ACCESS_KEY`

@@ -65,7 +65,7 @@ Expected:
 Run:
 
 ```bash
-rg -n "NEXT_PUBLIC_PRODUCT_ID|AUTH_PROVIDER|DATABASE_PROVIDER|NEXT_PUBLIC_ANALYTICS_PROVIDER|PAYMENT_PROVIDER|AI_PROVIDER|EMAIL_PROVIDER|STORAGE_PROVIDER|SMS_PROVIDER" .env.example context/environment-matrix.md integrations specs/integrations
+rg -n "NEXT_PUBLIC_PRODUCT_ID|AUTH_PROVIDER|DATABASE_PROVIDER|NEXT_PUBLIC_ANALYTICS_PROVIDER|PAYMENT_PROVIDER|PAYMENT_MODE|PAYMENT_LIVE_ENABLED|AI_PROVIDER|EMAIL_PROVIDER|STORAGE_PROVIDER|SMS_PROVIDER" .env.example context/environment-matrix.md integrations specs/integrations
 rg -n "^NEXT_PUBLIC_.*(SECRET|SERVICE_ROLE|WEBHOOK|PASSWORD)" .env.example context integrations specs
 rg -n "^NEXT_PUBLIC_.*(PAYMENT|AI|EMAIL|STORAGE|SMS).*(KEY|SECRET|TOKEN)" .env.example context integrations specs
 rg -n "nglilxhkuqzswbwitbdu|https://nglilxhkuqzswbwitbdu\\.supabase\\.co" .env.example
@@ -91,13 +91,13 @@ rg -n "provider-config-checklist|Provider Configuration" README.md integrations 
 rg -n "Auth|Database/BaaS|Analytics|Payment|AI|Email|Storage|SMS|Deploy/CDN" integrations/provider-matrix.md integrations/provider-config-checklist.md
 rg -n "^NEXT_PUBLIC_.*(SECRET|SERVICE_ROLE|WEBHOOK|PASSWORD)" .env.example context integrations specs apps packages
 rg -n "^NEXT_PUBLIC_.*(PAYMENT|AI|EMAIL|STORAGE|SMS).*(KEY|SECRET|TOKEN)" .env.example context integrations specs apps packages
-rg -n "NEXT_PUBLIC_ANALYTICS_PROVIDER|AUTH_PROVIDER|DATABASE_PROVIDER|PAYMENT_PROVIDER|AI_PROVIDER|EMAIL_PROVIDER|STORAGE_PROVIDER|SMS_PROVIDER" .env.example context/environment-matrix.md integrations specs apps/web/lib/providers
+rg -n "NEXT_PUBLIC_ANALYTICS_PROVIDER|AUTH_PROVIDER|DATABASE_PROVIDER|PAYMENT_PROVIDER|PAYMENT_MODE|PAYMENT_LIVE_ENABLED|AI_PROVIDER|EMAIL_PROVIDER|STORAGE_PROVIDER|SMS_PROVIDER" .env.example context/environment-matrix.md integrations specs apps/web/lib/providers
 rg -n "@/lib/providers/server|lib/providers/server|from \"\\.\\/providers\\/server\"|from \"\\.\\.\\/providers\\/server\"" apps/web/app apps/web/components apps/web/lib
 rg -n "@supabase/(ssr|supabase-js)|posthog-js" apps/web/app apps/web/components apps/web/lib packages
 rg -n "stripe|paddle|creem|dodo|openai|anthropic|resend|twilio|aliyun|alipay|wechat" packages/core/src apps/web/lib/providers
 rg -n "sk_|sb_secret_|service_role|webhook secret|api key|token|password|secret key" README.md context integrations specs .env.example apps/web/lib/providers
 rg -n "nglilxhkuqzswbwitbdu|https://nglilxhkuqzswbwitbdu\\.supabase\\.co" .env.example
-rg -n "SUPABASE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY|PAYMENT_SECRET_KEY|PAYMENT_WEBHOOK_SECRET|AI_PROVIDER_API_KEY|EMAIL_PROVIDER_API_KEY|STORAGE_SECRET_ACCESS_KEY|SMS_PROVIDER_API_KEY|SMS_PROVIDER_SECRET" apps/web/.next/static
+rg -n "SUPABASE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY|PAYMENT_PROVIDER_SECRET|PAYMENT_SECRET_KEY|PAYMENT_WEBHOOK_SECRET|AI_PROVIDER_API_KEY|EMAIL_PROVIDER_API_KEY|STORAGE_SECRET_ACCESS_KEY|SMS_PROVIDER_API_KEY|SMS_PROVIDER_SECRET" apps/web/.next/static
 ```
 
 Expected:

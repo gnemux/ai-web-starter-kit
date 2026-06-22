@@ -6,6 +6,7 @@ import {
   createBillingSnapshot,
   serviceError,
   serviceOk,
+  type BillingAllowance,
   type BillingEntitlement,
   type BillingEntitlementDecision,
   type BillingEntitlementSnapshot,
@@ -26,6 +27,10 @@ type BillingEntitlementRow =
   Database["public"]["Tables"]["billing_entitlements"]["Row"];
 type BillingSubscriptionRow =
   Database["public"]["Tables"]["billing_subscriptions"]["Row"];
+type BillingUsageRow = Pick<
+  Database["public"]["Tables"]["billing_usage_ledger"]["Row"],
+  "feature_key" | "units"
+>;
 
 export async function getCurrentBillingEntitlements(): Promise<
   ServiceResult<BillingEntitlementSnapshot>
@@ -60,17 +65,22 @@ export async function getCurrentBillingEntitlements(): Promise<
     return entitlementsResult;
   }
 
-  const subscription = subscriptionResult.data;
+  const usageResult = await listCommittedUsage(clientResult.data, userIdResult.data);
 
-  return serviceOk(
-    createBillingSnapshot({
-      ownerId: userIdResult.data,
-      planId: subscription?.planId ?? "free",
-      subscriptionStatus: subscription?.status ?? "none",
-      currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
-      entitlements: entitlementsResult.data
-    })
-  );
+  if (!usageResult.ok) {
+    return usageResult;
+  }
+
+  const subscription = subscriptionResult.data;
+  const snapshot = createBillingSnapshot({
+    ownerId: userIdResult.data,
+    planId: subscription?.planId ?? "free",
+    subscriptionStatus: subscription?.status ?? "none",
+    currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
+    entitlements: entitlementsResult.data
+  });
+
+  return serviceOk(applyUsageToSnapshot(snapshot, usageResult.data));
 }
 
 export async function assertCurrentBillingEntitlement(
@@ -164,6 +174,65 @@ async function listActiveEntitlements(
       .map(mapBillingEntitlement)
       .filter((row): row is BillingEntitlement => Boolean(row))
   );
+}
+
+async function listCommittedUsage(
+  supabase: AppSupabaseClient,
+  ownerId: string
+): Promise<ServiceResult<Partial<Record<BillingFeatureKey, number>>>> {
+  const { data, error } = await supabase
+    .from("billing_usage_ledger")
+    .select("feature_key, units")
+    .eq("owner_id", ownerId)
+    .eq("status", "committed");
+
+  if (error) {
+    return mapSupabaseError(error);
+  }
+
+  const totals: Partial<Record<BillingFeatureKey, number>> = {};
+
+  for (const row of (data ?? []) as BillingUsageRow[]) {
+    if (!isBillingFeatureKey(row.feature_key)) {
+      continue;
+    }
+
+    totals[row.feature_key] = (totals[row.feature_key] ?? 0) + row.units;
+  }
+
+  return serviceOk(totals);
+}
+
+function applyUsageToSnapshot(
+  snapshot: BillingEntitlementSnapshot,
+  usageTotals: Partial<Record<BillingFeatureKey, number>>
+): BillingEntitlementSnapshot {
+  return {
+    ...snapshot,
+    entitlements: Object.fromEntries(
+      Object.entries(snapshot.entitlements).map(([featureKey, allowance]) => [
+        featureKey,
+        applyUsageToAllowance(
+          allowance,
+          usageTotals[featureKey as BillingFeatureKey] ?? 0
+        )
+      ])
+    ) as BillingEntitlementSnapshot["entitlements"]
+  };
+}
+
+function applyUsageToAllowance(
+  allowance: BillingAllowance,
+  used: number
+): BillingAllowance {
+  if (allowance.kind === "boolean") {
+    return allowance;
+  }
+
+  return {
+    ...allowance,
+    used: (allowance.used ?? 0) + used
+  };
 }
 
 function mapBillingSubscription(

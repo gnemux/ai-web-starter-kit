@@ -1,7 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import {
   localeCookieName,
   locales,
@@ -22,11 +20,13 @@ export function LanguageSwitcher({
   labels: LanguageSwitcherLabels;
   locale: Locale;
 }) {
-  const router = useRouter();
-
   function selectLocale(nextLocale: Locale) {
+    if (nextLocale === locale) {
+      return;
+    }
+
     document.cookie = `${localeCookieName}=${nextLocale}; path=/; max-age=31536000; SameSite=Lax`;
-    router.refresh();
+    window.location.reload();
   }
 
   return (

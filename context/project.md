@@ -59,7 +59,7 @@ Commercial and AI work must not remain invisible infrastructure only. Billing, P
 
 ```text
 Billing
--> current plan, Free/Pro differences, entitlement or credit state
+-> current plan, Free/Plus/Pro differences, entitlement or credit state
 
 Payment
 -> pricing/billing entry, checkout start, success/cancel/failure result, order/subscription/entitlement status
@@ -68,7 +68,7 @@ AI
 -> AI entry, prompt/input, entitlement gate, provider mode, result, usage/credit/quota state
 
 MVP3 Product Validation Kit
--> login/signup, project creation, public page, lead submission, owner dashboard, Free/Pro gating, sandbox checkout, AI generation, analytics funnel
+-> login/signup, project creation, public page, lead submission, owner dashboard, Free/Plus/Pro gating, sandbox checkout, AI generation, analytics funnel
 ```
 
 If an execution issue only changes code, SQL, or docs and gives no page, status view, event proof, or reviewer checklist, it is not ready for human acceptance unless the parent issue explicitly marks it as a pure internal contract task.

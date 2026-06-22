@@ -16,22 +16,24 @@ If global `pnpm` is unavailable, use the local workspace binaries or `npx --yes 
 3. Confirm landing content reads as a restrained, product-style first screen and does not show `当前已具备` or `Available now`.
 4. Confirm unauthenticated landing header shows the login entry.
 5. With a signed-in Supabase Auth session, reopen `/` and confirm the header shows an account trigger instead of Login.
-6. Open the account menu and confirm it only shows Dashboard, Account settings, and Sign out.
+6. Open the account menu and confirm it only shows Dashboard, Profile, Plans, AI, and Sign out.
 7. Confirm sign out returns to `/` and the landing header returns to Login.
 8. Confirm `Built in`, `Flow`, and public `Open dashboard` navigation/CTA labels are not visible.
 9. Confirm the global footer contains brand copy, product links, product/engineering slot columns, copyright text, and the language switcher.
 10. Switch language from the footer control to English, then back to Chinese; confirm the current route updates without losing layout.
 11. Open `/login` and confirm sign in/sign up labels are localized.
 12. Open `/dashboard`.
-13. Confirm app shell primary navigation is visible and contains only Dashboard and Account.
+13. Confirm app shell primary navigation is visible and contains Dashboard, Profile, Plans, and AI as first-level entries.
 14. Confirm the top header does not show Start, Data, Profile, Home, or another route-level nav group.
 15. Confirm Dashboard focuses on demo data service functionality rather than milestone sample cards or status metric cards.
 16. Confirm Dashboard does not show implementation-boundary explanation panels in the primary user workflow.
-17. Open `/account` and confirm the page only shows current email, display name editing, and save feedback.
-18. Confirm empty, loading, and error handling render without overlap where applicable.
-19. Resize to mobile width and confirm navigation/content/footer/language switcher collapse safely.
-20. Inspect page metadata/source and confirm the browser title, application name, and favicon are branded as `XWLC`.
-21. Open `/icon.svg` and confirm the favicon renders a clear XWLC-compatible mark.
+17. Open `/account` and confirm the profile page only shows current email, display name editing, and save feedback.
+18. Open `/account/billing` and `/account/usage`; confirm the primary app shell menu highlights the current route and exposes the other first-level entries without a nested account submenu.
+19. Confirm empty, loading, and error handling render without overlap where applicable.
+20. Confirm compact labels and badges stay single-line in Chinese and English; examples include `基础`, `推荐`, `当前套餐`, Credit status labels, and their English equivalents.
+21. Resize to mobile width and confirm navigation/content/footer/language switcher collapse safely.
+22. Inspect page metadata/source and confirm the browser title, application name, and favicon are branded as `XWLC`.
+23. Open `/icon.svg` and confirm the favicon renders a clear XWLC-compatible mark.
 
 ## Verification Record
 
@@ -69,7 +71,7 @@ If global `pnpm` is unavailable, use the local workspace binaries or `npx --yes 
 ## Edge Cases
 
 - Long capability descriptions wrap inside their container.
-- Status badges do not resize parent layout unexpectedly.
+- Status badges stay on one line and do not resize parent layout unexpectedly.
 - Loading state keeps stable row dimensions.
 - Error state provides a visible recovery action.
 - Mobile layout avoids horizontal overflow.

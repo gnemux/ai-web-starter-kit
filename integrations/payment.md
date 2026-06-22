@@ -52,7 +52,7 @@ Checkout
 ## MVP Boundaries
 
 - MVP2 defines the Payment provider contract, SandboxProvider, checkout demo flow, webhook/event idempotency, PostHog payment events, env placeholders, and payment security notes. MVP2 does **not** do live payment, production secrets, real user payments, real refunds, reconciliation, invoices, split payments, taxes, or production merchant settlement.
-- MVP3 Product Validation Kit uses the SandboxProvider first for the Free/Pro entitlement loop. `GNE-194` can validate a real Provider adapter in test mode only, with live payment disabled.
+- MVP3 Product Validation Kit uses the SandboxProvider first for the Free/Plus/Pro entitlement loop. `GNE-194` can validate a real Provider adapter in test mode only, with live payment disabled.
 - MVP4 owns overseas/china adapter, env template, mock/test-mode strategy, and launch checklist planning. MVP4 is not the production payment go-live stage.
 - MVP5 or a real vertical product owns production payment readiness through `GNE-201 MVP5 PAYMENT-00 [PAYMENT] 真实垂直产品生产支付准入`.
 
@@ -64,13 +64,13 @@ Payment work must expose a page-level path that a teammate can test without read
 account usage entry
 -> use a gated product action
 -> quota decision
--> upgrade or credit-pack prompt
+-> plan switch or credit-pack prompt
 -> checkout started
 -> success / cancel / failure result
 -> order / subscription / entitlement status
 ```
 
-The reviewer should not have to discover payment through a standalone manual checkout page. `/account` must expose a product-like usage gate: simulate one AI generation, consume Billing usage through the server, show remaining AI tokens, and only prompt upgrade or credit-pack purchase when the Billing decision blocks usage. The Payment review page remains available for inspecting provider mode and sellable sandbox prices, but it is not the primary product logic.
+The reviewer should not have to discover payment through a standalone manual checkout page. `/account/billing` exposes the product-like plan path: choose Free/Plus/Pro, review the current plan state, and inspect recent plan purchase records. `/account/usage` groups AI-related payment paths: show available Credit, show how much remaining Credit comes from the plan versus credit packs, top up an AI credit pack, and inspect top-up and Credit consumption records. The Payment review page remains available for inspecting provider mode and sellable sandbox prices, but it is not the primary product logic.
 
 The result page is a status surface only. It must not grant entitlement directly from query params, route state, or client-only state. Entitlement changes must come from trusted server-side Payment/Billing facts. In the MVP2 sandbox flow, the trusted write happens in a protected server action before redirecting to the result page.
 
@@ -82,7 +82,9 @@ Current MVP2 routes:
 
 | Route | Purpose | Entitlement behavior |
 | --- | --- | --- |
-| `/account` | Billing and usage-gate entry point. | Reads current Billing facts, writes usage through a protected server action, and prompts payment only after quota is blocked. |
+| `/account` | Profile settings entry point. | Shows and updates the signed-in user's account profile; it does not grant Billing entitlement. |
+| `/account/billing` | Product-like Plans entry point. | Reads current Billing facts, switches to Free through a protected action, starts paid-plan checkout through the Payment service, and shows recent plan records. |
+| `/account/usage` | Product-like AI usage and credit entry point. | Reads current Billing facts, writes usage through a protected server action, offers AI credit-pack checkout, and prompts payment only after quota is blocked. |
 | `/account/payment` | Protected Payment review page with sellable sandbox prices. | Starts checkout through `apps/web/lib/services/payment.ts`. |
 | `/account/payment/sandbox` | In-app Sandbox Provider surface. | Lets reviewers submit success, cancel, or failure through a server action. |
 | `/account/payment/result` | Result status page. | Shows result status and current Billing facts; URL state never grants entitlement directly. |
@@ -118,7 +120,7 @@ PAYMENT_WEBHOOK_SECRET=
 - Analytics events are not a payment source of truth.
 - Payment tests must include success, failure, duplicate event, and stale event cases.
 - Success or cancel pages record user navigation only. They must not directly grant entitlement.
-- Sandbox success must update Billing through the protected server action so reviewers can verify Pro upgrade locally.
+- Sandbox success must update Billing through the protected server action so reviewers can verify paid-plan changes locally.
 - The sandbox webhook route is no-side-effect and only acknowledges the MVP2 event model.
 - PostHog payment events must include shared properties such as `app`, `mvp_stage`, `market`, `env`, `module`, `plan`, and `provider`; analytics is not a payment source of truth.
 - `checkout_started`, `payment_succeeded`, `payment_failed`, `payment_canceled`, `entitlement_granted`, and `quota_limit_reached` are emitted from server-side Payment service boundaries in MVP2. The quota event must come from the Billing entitlement decision path behind a gated usage action, not from a generic checkout button.

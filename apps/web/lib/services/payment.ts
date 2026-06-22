@@ -61,7 +61,7 @@ export type PaymentQuotaGateResult = {
   requestedQuantity: number;
 };
 
-export const paymentReviewAiTokenCost = 10000;
+export const paymentReviewAiCreditCost = 10000;
 
 export type PaymentReviewUsageResult = {
   allowed: boolean;
@@ -315,7 +315,11 @@ export async function processSandboxCheckoutResult(input: {
     });
 
     return serviceOk({
-      redirectTo: "/account?payment_result=success"
+      redirectTo: withPaymentResult(
+        normalizeReturnTo(input.returnTo, "/account/billing"),
+        input.status,
+        input.priceId
+      )
     });
   }
 
@@ -329,7 +333,7 @@ export async function processSandboxCheckoutResult(input: {
     redirectTo:
       input.status === "cancel"
         ? withPaymentResult(
-            normalizeReturnTo(input.returnTo, "/account"),
+            normalizeReturnTo(input.returnTo, "/account/billing"),
             input.status,
             input.priceId
           )
@@ -356,11 +360,8 @@ export async function reviewPaymentQuotaLimit(): Promise<
     return billingResult;
   }
 
-  const featureKey: BillingFeatureKey = "projects";
-  const requestedQuantity =
-    (billingResult.data.entitlements.projects.kind === "quantity"
-      ? billingResult.data.entitlements.projects.quantity
-      : 1) + 1;
+  const featureKey: BillingFeatureKey = "leads";
+  const requestedQuantity = 1;
   const decisionResult = await assertCurrentBillingEntitlement(
     featureKey,
     requestedQuantity
@@ -415,7 +416,7 @@ export async function consumePaymentReviewAiUsage(): Promise<
   const featureKey: BillingFeatureKey = "ai_tokens";
   const decisionResult = await assertCurrentBillingEntitlement(
     featureKey,
-    paymentReviewAiTokenCost
+    paymentReviewAiCreditCost
   );
 
   if (!decisionResult.ok) {
@@ -433,7 +434,7 @@ export async function consumePaymentReviewAiUsage(): Promise<
         provider: createSandboxPaymentProvider().descriptor.provider,
         quota_reason: normalizeQuotaReason(decisionResult.data.reason),
         remaining_units: decisionResult.data.remaining,
-        requested_units: paymentReviewAiTokenCost,
+        requested_units: paymentReviewAiCreditCost,
         source: "account_ai_usage_demo"
       }
     });
@@ -458,8 +459,8 @@ export async function consumePaymentReviewAiUsage(): Promise<
   const usageResult = await adminResult.data.from("billing_usage_ledger").insert({
     owner_id: accountResult.data.user.id,
     feature_key: featureKey,
-    units: paymentReviewAiTokenCost,
-    unit: "token",
+    units: paymentReviewAiCreditCost,
+    unit: "credit",
     status: "committed",
     idempotency_key: `account_ai_usage_demo:${usageId}`,
     metadata: {
@@ -473,14 +474,14 @@ export async function consumePaymentReviewAiUsage(): Promise<
 
   return serviceOk({
     allowed: true,
-    consumedUnits: paymentReviewAiTokenCost,
+    consumedUnits: paymentReviewAiCreditCost,
     featureKey,
     planId: billingResult.data.planId,
     reason: decisionResult.data.reason,
     remaining:
       decisionResult.data.remaining === undefined
         ? null
-        : Math.max(decisionResult.data.remaining - paymentReviewAiTokenCost, 0)
+        : Math.max(decisionResult.data.remaining - paymentReviewAiCreditCost, 0)
   });
 }
 
@@ -568,7 +569,24 @@ async function recordSandboxBillingFacts(input: {
     return serviceOk({ orderStatus });
   }
 
-  if (input.checkoutKind === "subscription" && input.planId === "pro") {
+  if (input.checkoutKind === "subscription" && input.planId !== "credit_pack") {
+    const now = new Date();
+    const cancelResult = await adminResult.data
+      .from("billing_subscriptions")
+      .update({
+        cancel_at_period_end: false,
+        canceled_at: now.toISOString(),
+        current_period_end: now.toISOString(),
+        status: "canceled"
+      })
+      .eq("owner_id", input.ownerId)
+      .neq("plan_id", input.planId)
+      .in("status", ["trialing", "active", "past_due"]);
+
+    if (cancelResult.error) {
+      return mapSupabasePaymentError(cancelResult.error);
+    }
+
     const subscriptionResult = await adminResult.data
       .from("billing_subscriptions")
       .insert({
@@ -578,8 +596,8 @@ async function recordSandboxBillingFacts(input: {
         plan_id: input.planId,
         price_id: input.priceId,
         status: "active",
-        current_period_start: new Date().toISOString(),
-        current_period_end: addMonths(new Date(), 1).toISOString(),
+        current_period_start: now.toISOString(),
+        current_period_end: addMonths(now, 1).toISOString(),
         metadata: {
           order_id: orderResult.data.id,
           source: "sandbox_payment_result"
@@ -610,7 +628,7 @@ async function recordSandboxBillingFacts(input: {
         feature_key: "ai_tokens",
         allowance_kind: "quantity",
         quantity: 100000,
-        unit: "token",
+        unit: "credit",
         status: "active",
         metadata: {
           order_id: orderResult.data.id,
@@ -634,7 +652,7 @@ async function recordSandboxBillingFacts(input: {
           entitlement_id: entitlementResult.data?.id ?? null,
           event_type: "grant",
           amount: 100000,
-          unit: "token",
+          unit: "credit",
           idempotency_key: `${idempotencyKey}:credit_grant`,
           source_type: "credit_pack",
           source_id: orderResult.data.id,

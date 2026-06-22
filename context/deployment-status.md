@@ -26,8 +26,8 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. |
-| Next owner action | Continue MVP2 Billing / Payment / AI work from the provider matrix and checklist; run full Production Smoke Path separately when needed. |
+| Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. AI production smoke is `not_run` until a real provider is configured and deployed. |
+| Next owner action | Continue MVP2 Billing / Payment / AI work from the provider matrix and checklist; run full Production Smoke Path and AI provider smoke separately when needed. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -89,6 +89,7 @@ Record configured/missing/unknown only. Do not record values.
 | PAYMENT_SECRET_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
 | PAYMENT_WEBHOOK_SECRET | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
 | AI_PROVIDER_API_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
+| AI_BUDGET_LIMIT | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Record status only, not value. |
 | EMAIL_PROVIDER_API_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
 | STORAGE_SECRET_ACCESS_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
 | SMS_PROVIDER_API_KEY | not_required / configured / missing / unknown | not_required / configured / missing / unknown | Server-only. Do not record value. |
@@ -142,7 +143,9 @@ No Preview deployment result has been recorded in this file yet.
 
 ## Production Smoke Path
 
-No full Production Smoke Path has been recorded in this file yet.
+No full Production Smoke Path has been recorded in this file yet. AI production
+smoke is also not recorded as passed; GNE-160 defines the repository-level
+checklist and budget guard only.
 
 ## 2026-06-20 19:58 CST - production PostHog event verification
 
@@ -217,6 +220,47 @@ Record configured/missing/unknown only. Do not record values.
 | PostHog production pageview | pass | PostHog Activity shows a recent `Pageview` for `https://ai-web-starter-kit-web.vercel.app/account`. | None for `ANALYTICS-06`; full smoke path remains separate. |
 | PostHog shared properties | pass | Visual checks across expanded production events show `app`, `mvp_stage`, `market`, `module`, version label, and the corrected `env=production`. | Use the same shared property checks for future Preview / Production events. |
 | Full Production Smoke Path | not_run | This entry only records PostHog production analytics evidence. | Run full smoke path separately under `GNE-109` when needed. |
+
+## 2026-06-22 21:59 CST - AI deploy-readiness checklist
+
+### Deployment Metadata
+
+| Field | Value |
+| --- | --- |
+| Linear issue | `GNE-160` / `AI-09` |
+| Environment | production |
+| Deployment type | smoke-test update |
+| Trigger | Repository-level AI deploy readiness implemented locally |
+| Branch | `codex/split-account-billing-usage` |
+| Commit | unknown |
+| Vercel URL | `https://ai-web-starter-kit-web.vercel.app` |
+| Actor | Codex |
+| Verifier | Codex local checks only |
+| Provider values | unknown |
+| Notes | Real provider is not configured. No secrets recorded. Production smoke remains `not_run`. |
+
+### Provider Configuration Status
+
+Record configured/missing/unknown only. Do not record values.
+
+| Key or provider | Production | Preview | Notes |
+| --- | --- | --- | --- |
+| AI_PROVIDER | unknown | unknown | Production can stay `mock`/`noop` until a real provider issue changes the boundary. |
+| AI_MODEL | unknown | unknown | Server-only model selector. |
+| AI_PROVIDER_API_KEY | not_required | not_required | Not required for MVP2 mock/no-op. Future real provider values must stay server-only. |
+| AI_BUDGET_LIMIT | unknown | unknown | Optional server-only single-request Credit cap; configure before real provider smoke. |
+
+### Smoke Test Result
+
+| Check | Status | Evidence | Next action |
+| --- | --- | --- | --- |
+| AI env key inventory | pass | `.env.example`, `context/environment-matrix.md`, and `integrations/ai.md` list AI server-only key names without values. | Configure Vercel entries by key name when a real provider is selected. |
+| AI provider secret exposure | pass | Repository checks keep AI provider secret names server-only and placeholders empty. | Re-run `npm run test:ai-safety` before PR handoff. |
+| AI budget guard | pass | Server AI service now blocks above `AI_BUDGET_LIMIT` before provider creation or Credit ledger writes. | Set a numeric cap before real provider smoke. |
+| Workspace AI low-cost request | not_run | No deployed real-provider AI request was run. | After provider configuration and redeploy, sign in and submit one low-cost `/dashboard` AI request. |
+| AI Credit record | not_run | No deployed real-provider AI request was run. | Verify `/account/usage` after the deployed request. |
+| AI analytics event | not_run | No deployed real-provider AI request was run. | Verify safe `ai_request_*` event properties in analytics. |
+| Rollback readiness | pass | Default rollback plan remains Vercel rollback/redeploy plus env restore; no schema change in GNE-160. | Record target deployment if a real smoke fails. |
 
 ## Known Issues
 

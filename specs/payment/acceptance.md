@@ -24,22 +24,22 @@
 ## GNE-97 Checkout Demo Flow
 
 - [ ] A signed-in reviewer can open `/account/payment`.
-- [ ] A signed-in reviewer can start sandbox checkout for Pro monthly.
+- [ ] A signed-in reviewer can start sandbox checkout for Plus monthly and Pro monthly.
 - [ ] A signed-in reviewer can start sandbox checkout for the AI credit pack.
 - [ ] The sandbox page can route to success, cancel, and failure result states.
 
 ## GNE-198 Page-Level Reviewer Surface
 
-- [ ] `/account` exposes a product-like usage gate before payment: a reviewer can simulate one AI generation, consume Billing usage through the server, and see remaining AI tokens change.
-- [ ] When the simulated AI usage exceeds the current AI token allowance, the UI blocks the action and offers the correct next step: upgrade Pro for a Free account or buy an AI credit pack for an account that needs more AI tokens.
-- [ ] `/account` links to the Payment review surface without making the review page the only way to discover payment.
+- [ ] `/account/usage` exposes a product-like AI Credit surface: a reviewer can see available Credit, the plan-vs-credit-pack source split, top-up entry, top-up records, and Credit consumption records.
+- [ ] When AI usage exceeds the current Credit allowance, the product flow blocks the action and offers the correct next step: upgrade to the next paid plan when one exists, or top up an AI credit pack when plan upgrade is no longer the right path.
+- [ ] `/account/billing` and `/account/usage` link to the Payment review surface without making the review page the only way to discover payment.
 - [ ] `/account/payment` shows provider mode, sellable prices, and current Billing status.
 - [ ] `/account/payment/sandbox` clearly shows this is a sandbox provider surface.
 - [ ] `/account/payment/result` shows success, cancel, and failure status while current Billing facts reflect only server-side processing.
-- [ ] Pro sandbox success upgrades the current Billing plan to Pro on `/account` after refresh.
+- [ ] Paid-plan sandbox success updates the current Billing plan on `/account/billing` after refresh.
 - [ ] Cancel returns to the page that started checkout, records a canceled sandbox payment through the backend path, and does not upgrade the current Billing plan.
 - [ ] Failure does not upgrade the current Billing plan.
-- [ ] Once the current account is already Pro, the Pro checkout action is no longer presented as a repeat upgrade.
+- [ ] Once the current account is already on a plan, that same plan is no longer presented as a repeat checkout action.
 - [ ] The page copy is available in both Chinese and English.
 
 ## GNE-104 PostHog Payment Events

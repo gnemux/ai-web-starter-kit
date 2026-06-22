@@ -11,12 +11,17 @@ import {
 import { redirect } from "next/navigation";
 
 import { AccountMenu } from "@/components/account-menu";
+import { getWorkspaceNavItems } from "@/components/workspace-nav";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
+import {
+  getAiTextReviewState,
+  type AiTextReviewState
+} from "@/lib/services/ai";
 import { listDemoItems } from "@/lib/services/demo-items";
 
-import { AccountIcon, DashboardIcon } from "../../components/app-icons";
+import { AiWorkflowForm } from "./ai-workflow-form";
 import { DemoItemForm } from "./demo-item-form";
 
 export default async function DashboardPage() {
@@ -28,24 +33,11 @@ export default async function DashboardPage() {
     redirect("/login?next=/dashboard");
   }
 
+  const aiReviewResult = getAiTextReviewState();
   const demoItemsResult = await listDemoItems();
   const displayName = accountResult.data.profile?.displayName;
   const userLabel =
     displayName || accountResult.data.user.email || copy.dashboard.eyebrow;
-  const navItems = [
-    {
-      href: "/dashboard",
-      label: copy.common.nav.dashboard,
-      active: true,
-      icon: <DashboardIcon />
-    },
-    {
-      href: "/account",
-      label: copy.common.nav.account,
-      icon: <AccountIcon />
-    }
-  ];
-
   return (
     <AppShell
       action={
@@ -57,7 +49,7 @@ export default async function DashboardPage() {
         />
       }
       brand={<BrandMark subtitle={copy.dashboard.shellSubtitle} />}
-      navItems={navItems}
+      navItems={getWorkspaceNavItems(copy, "dashboard")}
       user={{
         name: userLabel,
         role: accountResult.data.user.email
@@ -77,6 +69,46 @@ export default async function DashboardPage() {
             </p>
           </div>
         </section>
+
+        <Panel id="ai-workflow">
+          <SectionHeader
+            action={
+              <StatusBadge
+                label={
+                  aiReviewResult.ok
+                    ? copy.dashboard.ai.statusReady
+                    : copy.dashboard.ai.statusError
+                }
+                status={aiReviewResult.ok ? "ready" : "risk"}
+              />
+            }
+            description={copy.dashboard.ai.description}
+            title={copy.dashboard.ai.title}
+          />
+
+          {aiReviewResult.ok ? (
+            <>
+              <AiWorkflowFacts
+                labels={copy.dashboard.ai}
+                state={aiReviewResult.data}
+              />
+              <AiWorkflowForm
+                errorLabels={copy.errors.ai}
+                labels={copy.dashboard.ai}
+                model={aiReviewResult.data.model}
+                modelOptions={aiReviewResult.data.modelOptions}
+              />
+            </>
+          ) : (
+            <div className="mt-5">
+              <ErrorState
+                badgeLabel={copy.common.status.risk}
+                description={`${aiReviewResult.error.code}: ${aiReviewResult.error.message}`}
+                title={copy.dashboard.ai.serviceErrorTitle}
+              />
+            </div>
+          )}
+        </Panel>
 
         <Panel id="demo-data">
           <SectionHeader
@@ -114,6 +146,48 @@ export default async function DashboardPage() {
         </Panel>
       </div>
     </AppShell>
+  );
+}
+
+function AiWorkflowFacts({
+  labels,
+  state
+}: {
+  labels: {
+    providerMode: string;
+    model: string;
+    usageRecordPending: string;
+    modelSelectLabel: string;
+    reasons: Record<string, string>;
+    creditRequested: string;
+    usageRecord: string;
+    usageRecordDeferred: string;
+    usageRecordRecorded: string;
+    creditUnit: string;
+  };
+  state: AiTextReviewState;
+}) {
+  return (
+    <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <AiFact label={labels.providerMode} value={state.mode} />
+      <AiFact label={labels.model} value={state.modelLabel} />
+      <AiFact
+        label={labels.creditRequested}
+        value={`${state.requestedCredits.toLocaleString()} ${labels.creditUnit}`}
+      />
+      <AiFact label={labels.usageRecord} value={labels.usageRecordPending} />
+    </dl>
+  );
+}
+
+function AiFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+      <dt className="text-xs font-medium text-slate-500">{label}</dt>
+      <dd className="mt-1 truncate text-sm font-semibold text-slate-950">
+        {value}
+      </dd>
+    </div>
   );
 }
 

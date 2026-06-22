@@ -9,6 +9,7 @@ Billing is the internal commercial source of truth for plans, subscriptions, ent
 MVP2 foundation is implemented as a provider-agnostic model:
 
 - Static pricing and entitlement config lives in `packages/core/src/billing.ts`.
+- The current template config includes Free, Plus, Pro, and an AI credit pack.
 - Billing fact tables live in Supabase migrations.
 - App access goes through `apps/web/lib/services/billing.ts`.
 - No real payment provider SDK, webhook secret, or AI provider key is introduced.
@@ -36,6 +37,7 @@ PAYMENT_PROVIDER_SECRET=
 PAYMENT_WEBHOOK_SECRET=
 AI_PROVIDER=
 AI_PROVIDER_API_KEY=
+AI_BUDGET_LIMIT=
 ```
 
 ## Supabase

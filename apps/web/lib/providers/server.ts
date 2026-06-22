@@ -3,12 +3,15 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 
 import {
+  serviceError,
   serviceOk,
   type AiProvider,
+  type AiModelConfig,
   type EmailProvider,
   type PaymentProvider,
   type ProviderCapability,
   type ProviderDescriptor,
+  type ServiceResult,
   type SmsProvider,
   type StorageProvider
 } from "@starter/core";
@@ -44,18 +47,68 @@ export function createSandboxPaymentProvider(): PaymentProvider {
   };
 }
 
-export function createMockAiProvider(): AiProvider {
-  const descriptor = requireProviderDescriptor("ai");
+export function createConfiguredAiProvider(
+  modelConfig: AiModelConfig
+): ServiceResult<AiProvider> {
+  if (modelConfig.provider === "mock") {
+    return serviceOk(createMockAiProvider(modelConfig));
+  }
+
+  if (modelConfig.provider === "noop") {
+    return serviceOk(createNoopAiProvider(modelConfig));
+  }
+
+  return serviceError(
+    "configuration_error",
+    "The selected AI provider is not configured."
+  );
+}
+
+export function createMockAiProvider(modelConfig?: AiModelConfig): AiProvider {
+  const descriptor = requireProviderDescriptor("ai", "mock");
+  const modelId = modelConfig?.id ?? "mock-text";
+  const providerModelId = modelConfig?.providerModelId ?? "mock-text";
+
+  return {
+    descriptor,
+    async generateText(input) {
+      const promptPreview = input.prompt.replace(/\s+/g, " ").trim().slice(0, 72);
+
+      return serviceOk({
+        id: `mock-ai-${input.purpose}`,
+        provider: descriptor.provider,
+        mode: descriptor.mode,
+        model: modelId,
+        providerModelId,
+        text: `示例草稿：围绕“${promptPreview}”生成一段可替换的产品文案。`,
+        finishReason: "stop",
+        usage: {
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0
+        }
+      });
+    }
+  };
+}
+
+export function createNoopAiProvider(modelConfig?: AiModelConfig): AiProvider {
+  const descriptor = requireProviderDescriptor("ai", "noop");
+  const modelId = modelConfig?.id ?? "noop-text";
+  const providerModelId = modelConfig?.providerModelId ?? "noop-text";
 
   return {
     descriptor,
     async generateText(input) {
       return serviceOk({
-        id: `mock-ai-${input.purpose}`,
+        id: `noop-ai-${input.purpose}`,
         provider: descriptor.provider,
         mode: descriptor.mode,
+        model: modelId,
+        providerModelId,
         text:
-          "Mock AI response. Replace this adapter in the AI service issue before calling a real model provider.",
+          "No-op AI response. Configure an AI provider when this workflow is ready for real model output.",
+        finishReason: "noop",
         usage: {
           inputTokens: 0,
           outputTokens: 0,
@@ -117,12 +170,15 @@ export function createNoopSmsProvider(): SmsProvider {
 }
 
 function requireProviderDescriptor(
-  capability: ProviderCapability
+  capability: ProviderCapability,
+  provider?: string
 ): ProviderDescriptor {
-  const descriptor = getProviderDescriptor(capability);
+  const descriptor = getProviderDescriptor(capability, provider);
 
   if (!descriptor) {
-    throw new Error(`Provider descriptor is not registered for ${capability}.`);
+    throw new Error(
+      `Provider descriptor is not registered for ${capability}.`
+    );
   }
 
   return descriptor;

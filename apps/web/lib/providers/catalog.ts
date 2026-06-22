@@ -105,7 +105,24 @@ export const providerCatalog = [
       "AI_BUDGET_LIMIT"
     ],
     notes:
-      "Mock text generation contract only; real model SDKs and keys are outside GNE-181."
+      "Mock text generation contract only; real model SDKs and keys remain out of scope, and AI_BUDGET_LIMIT can cap high-cost requests before provider creation."
+  },
+  {
+    capability: "ai",
+    provider: "noop",
+    mode: "noop",
+    runtime: "server",
+    configStatus: "configured",
+    serverOnly: true,
+    publicEnv: [],
+    serverEnv: [
+      "AI_PROVIDER",
+      "AI_MODEL",
+      "AI_PROVIDER_API_KEY",
+      "AI_BUDGET_LIMIT"
+    ],
+    notes:
+      "No-op AI contract for environments where AI workflows should render without provider behavior."
   },
   {
     capability: "email",
@@ -181,9 +198,12 @@ export const providerCatalog = [
 ] as const satisfies readonly ProviderDescriptor[];
 
 export function getProviderDescriptor(
-  capability: ProviderCapability
+  capability: ProviderCapability,
+  provider?: string
 ): ProviderDescriptor | undefined {
   return providerCatalog.find(
-    (descriptor) => descriptor.capability === capability
+    (descriptor) =>
+      descriptor.capability === capability &&
+      (!provider || descriptor.provider === provider)
   );
 }

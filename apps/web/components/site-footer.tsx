@@ -14,6 +14,8 @@ type SiteFooterLabels = {
     login: string;
     dashboard: string;
     account: string;
+    billing: string;
+    usage: string;
   };
   capabilitiesTitle: string;
   capabilities: readonly string[];
@@ -46,7 +48,9 @@ export function SiteFooter({
     { href: "/login?mode=signup", label: labels.productLinks.signUp },
     { href: "/login", label: labels.productLinks.login },
     { href: "/dashboard", label: labels.productLinks.dashboard },
-    { href: "/account", label: labels.productLinks.account }
+    { href: "/account", label: labels.productLinks.account },
+    { href: "/account/billing", label: labels.productLinks.billing },
+    { href: "/account/usage", label: labels.productLinks.usage }
   ];
 
   return (

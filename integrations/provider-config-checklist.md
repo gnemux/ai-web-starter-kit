@@ -22,7 +22,7 @@ Run it when a change touches:
 | Database/BaaS | Yes for protected data flows | Supabase real provider | Server services keep Supabase behind helpers and RLS. Service-role keys never enter browser code. |
 | Analytics | Optional for local app load | PostHog real provider with no-op fallback | Missing PostHog public config must not break page load or Auth flows. Browser blockers may stop analytics only. |
 | Payment | No real provider required in GNE-167 | Sandbox provider | Sandbox checkout adapter returns a deterministic no-op session. No real payment SDK or webhook secret is required. |
-| AI | No real provider required in GNE-167 | Mock provider | Mock adapter returns deterministic text and zero token usage. No real model key is required. |
+| AI | No real provider required in GNE-167 | Mock provider | Mock adapter returns deterministic text and zero token usage. No real model key is required; `AI_BUDGET_LIMIT` can block high-cost requests before provider creation. |
 | Email | No real provider required in GNE-167 | No-op provider | No-op adapter returns a deterministic no-op delivery. No email is sent. |
 | Storage | No real provider required in GNE-167 | No-op provider | No-op adapter returns a deterministic no-op upload target. No signed URL or object write is created. |
 | SMS | No real provider required in GNE-167 | No-op provider | No-op adapter returns a deterministic no-op delivery. No SMS is sent. |
@@ -111,6 +111,8 @@ Open the app in the in-app browser or a local browser:
 | `/login` | Login/signup form and language switcher load. |
 | `/dashboard` | Keeps the existing protected-route behavior and redirects to login when signed out. |
 | `/account` | Keeps the existing protected-route behavior and redirects to login when signed out. |
+| `/account/billing` | Keeps the existing protected-route behavior and redirects to login when signed out. |
+| `/account/usage` | Keeps the existing protected-route behavior and redirects to login when signed out. |
 
 Record:
 
@@ -126,7 +128,7 @@ Record:
 | --- | --- | --- |
 | Analytics | Browser page load plus existing PostHog no-op fallback. | Missing analytics public key does not break UI; events must not include passwords, tokens, payment payloads, prompts, or provider secrets. |
 | Payment | `/account/payment` -> `/account/payment/sandbox` -> `/account/payment/result`, plus `createSandboxPaymentProvider().createCheckoutSession(...)` through the Payment service. | Returns a sandbox checkout session with a local review URL; success/cancel/failure result pages do not require a real SDK, and entitlement changes come only from the protected server action using server-only Supabase admin config. |
-| AI | `createMockAiProvider().generateText(...)` through a future server test or service call. | Returns deterministic mock text and zero token usage; does not require `AI_PROVIDER_API_KEY`. |
+| AI | `createMockAiProvider().generateText(...)` through the server AI service, plus the `AI_BUDGET_LIMIT` guard. | Returns deterministic mock text and zero token usage; does not require `AI_PROVIDER_API_KEY`; requests above a configured budget cap return `budget_limited` with `0 Credit`. |
 | Email | `createNoopEmailProvider().sendEmail(...)` through a future server test or service call. | Returns `noop`; sends no email and needs no provider key. |
 | Storage | `createNoopStorageProvider().createUploadTarget(...)` through a future server test or service call. | Returns `noop`, `method: "noop"`, and `url: null`; creates no signed URL or object. |
 | SMS | `createNoopSmsProvider().sendSms(...)` through a future server test or service call. | Returns `noop`; sends no SMS and needs no provider key. |

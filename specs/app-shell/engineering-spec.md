@@ -11,7 +11,10 @@
 - `apps/web/app/page.tsx`
 - `apps/web/app/dashboard/page.tsx`
 - `apps/web/app/login/page.tsx`
+- `apps/web/app/account/account-shell.tsx`
 - `apps/web/app/account/page.tsx`
+- `apps/web/app/account/billing/page.tsx`
+- `apps/web/app/account/usage/page.tsx`
 - `apps/web/app/globals.css`
 - `apps/web/components/account-menu.tsx`
 - `apps/web/components/site-footer.tsx`
@@ -46,7 +49,7 @@ Root metadata must present the public app as `XWLC`. `apps/web/app/icon.svg` pro
 
 - `navItems` 是唯一的 route-level 主导航来源，桌面左侧导航和移动端横向导航使用同一组 items。
 - 顶部 header 只承载品牌在移动端的显示和账户菜单等用户级动作，不再根据 `navItems` 生成 secondary nav。
-- 当前已实现的工作区主导航只包含 `/dashboard` 和 `/account`。Public `/` 由品牌链接和 footer product link 承载，不进入工作区主导航。
+- 当前已实现的工作区主导航是一级菜单：`/dashboard`、`/account`、`/account/billing`、`/account/usage`。Public `/` 由品牌链接和 footer product link 承载，不进入工作区主导航。
 
 ## I18n
 
@@ -62,7 +65,7 @@ Root metadata must present the public app as `XWLC`. `apps/web/app/icon.svg` pro
 ## Footer
 
 - Footer composition belongs in `apps/web/components/site-footer.tsx` because it is product shell structure, not a shared UI primitive.
-- Footer links may point only to implemented routes: `/`, `/login`, `/login?mode=signup`, `/dashboard`, and `/account`.
+- Footer links may point only to implemented routes: `/`, `/login`, `/login?mode=signup`, `/dashboard`, `/account`, `/account/billing`, and `/account/usage`.
 - Footer may include product and engineering slot columns for teams to adapt when the starter is applied to a real product; these entries stay as text and must not present unimplemented modules as working navigation.
 - Copyright text should use the current calendar year from the server render and remain localized.
 
@@ -79,11 +82,17 @@ Root metadata must present the public app as `XWLC`. `apps/web/app/icon.svg` pro
 
 ## UI States
 
-- Default: Landing header 根据登录态显示 Login 或账户菜单；Dashboard 展示 demo business data 列表和创建表单；Account 展示当前邮箱和 profile 保存表单；登录后 shell 只显示工作台和账户两项主导航。
+- Default: Landing header 根据登录态显示 Login 或账户菜单；Dashboard 展示 demo business data 列表和创建表单；Account 资料页展示当前邮箱和 profile 保存表单，Plans 页展示套餐选择和套餐记录，AI 页展示可用 Credit、额度包充值和 Credit 消耗记录；登录后 shell 用一级菜单展示工作台、个人资料、套餐和 AI。
 - Empty: `EmptyState` 组件用于无数据或未配置状态。
 - Loading: `LoadingState` 组件使用稳定 skeleton rows。
 - Error: `ErrorState` 组件显示恢复动作。
 - Success: 仅在有真实服务结果支撑时显示轻量状态提示；不得使用 readiness cards 代表尚未形成独立功能的模块、事件或指标。
+
+## Compact Label Rules
+
+- 短标签、状态徽标、一级菜单标签和紧凑按钮文案必须在中文和英文下都保持稳定、克制、可扫描。
+- Badge / status pill 这类短标签必须保持单行显示，不得出现中文单字拆行，例如把 `基础` 拆成上下两行。
+- 如果紧凑标签在移动端或窄容器内放不下，应缩短标签，并把解释性内容放到正文、说明或记录项中，而不是依赖任意换行。
 
 ## External Providers
 

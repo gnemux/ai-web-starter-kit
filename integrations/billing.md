@@ -48,6 +48,16 @@ Billing tables are exposed in `public`, so RLS is enabled on every table.
 - Users cannot directly write Billing fact tables.
 - Service-only code handles grants, consumption, subscription state changes, and provider event ingestion.
 
+## Ledger Review Semantics
+
+Supabase table screenshots are useful reviewer evidence, but the meaning of empty cells depends on the ledger event:
+
+- `billing_credit_ledger.entitlement_id` is allowed to be `NULL`.
+- For `event_type=consume`, `NULL` is expected when the app consumes account-level AI Credit instead of allocating the deduction to one specific entitlement row.
+- For `event_type=grant` from a credit pack, `entitlement_id` should normally point to the entitlement that was granted. If a fresh credit-pack grant has `NULL`, inspect the Payment/Billing service logs and the matching `billing_entitlements` row.
+- `billing_usage_ledger.related_credit_ledger_id` should link committed AI usage to the Credit ledger row when a Credit deduction is recorded. It can remain `NULL` for non-Credit usage, older demo records, or failed/reserved/released attempts.
+- These tables are audit facts. Correct data by fixing the service path or migration, not by editing production rows in the dashboard.
+
 ## MVP Boundaries
 
 - MVP2 owns the Billing model, minimal database facts, service contract, pricing config, lifecycle rules, AI credit model, and review checklist.

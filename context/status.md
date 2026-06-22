@@ -88,6 +88,7 @@ MVP1 foundation complete; the MVP2 integrations provider foundation, MVP2 Billin
 - Completed `GNE-155 AI-08`: AI safety verification now has a repeatable local script, AI Credit ledger commits use insert-first duplicate detection, repeated idempotency keys return `duplicate` with `0 Credit`, and AI service analytics emits only safe server-side started/completed/failed/quota summary events.
 - Completed `GNE-160 AI-09`: AI deploy-readiness now has server-only env documentation, a server-side `AI_BUDGET_LIMIT` single-request Credit cap, production smoke pass criteria, deployment memory writeback, and extended `npm run test:ai-safety` coverage. Real-provider production smoke is documented as `not_run`.
 - Completed `GNE-148 MVP2 AI-00`: all AI child issues are Done in repo and Linear; `/dashboard`, `/account/usage`, and `/account/billing` form the reviewer-facing AI workflow and commercial boundary; local AI safety, type, lint, browser, and secret checks passed while keeping real-provider production smoke explicitly outside the verified facts.
+- Added reviewer-facing rules for Analytics, UI validation recovery, and Billing ledger interpretation: new instrumentation must use the local analytics wrappers and carry shared properties, correctable UI errors must recover from current input without refresh, and nullable Billing ledger links such as `billing_credit_ledger.entitlement_id` must be interpreted by event type and source.
 
 ## Done Issues
 

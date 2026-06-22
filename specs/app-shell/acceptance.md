@@ -33,6 +33,9 @@
 - [x] Dashboard 中能看到与当前真实功能相关的 empty / error / long content 处理。
 - [x] 长文案不会溢出容器。
 - [x] loading / empty / error 保持稳定布局，不导致明显跳动。
+- [x] 可修正字段的错误状态会随当前输入自动恢复，例如长度从不合格变成合格后不需要刷新页面。
+- [x] Server Action 后保留用户当前选择和输入，不因提交成功、失败或校验错误自动回到默认模型、套餐、provider、语言或模式。
+- [x] 业务限制触发的升级/支付入口取消后返回触发前上下文，不把普通套餐入口误标记成 quota blocked 状态。
 
 ## Verification
 

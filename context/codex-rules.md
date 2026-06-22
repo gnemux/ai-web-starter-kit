@@ -84,6 +84,79 @@ or sandbox review pages.
 - Preserve only safe, app-local paths. Reject external URLs, protocol-relative URLs,
   or arbitrary provider-controlled redirect targets.
 
+## Analytics Capture Contract
+
+When adding or changing analytics instrumentation, read `integrations/analytics.md`
+first and treat it as the event contract.
+
+- Use the local analytics wrappers, such as `trackEvent` and `trackServerEvent`.
+  Do not scatter provider SDK calls through pages, components, or services.
+- Every product event must include the shared MVP factory properties:
+  `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
+- Server-side events should include safe request context when available, such as
+  `$lib=server`, `current_url` / `$current_url`, and `host`.
+- Emit conversion and entitlement events from the trusted service boundary that
+  owns the fact. For example, emit payment success after server-side Billing facts
+  are written, not from a success URL or button click.
+- Emit `quota_limit_reached` only from a server-side entitlement or quota decision
+  that blocks a real gated action. Do not emit it from a generic pricing button,
+  static disabled state, or page render alone.
+- Analytics is observational. It must never become the source of truth for Auth,
+  Payment, Billing, Entitlement, AI usage, Credit, quota, or provider status.
+- Do not send raw prompts, generated text, passwords, OTPs, cookies, tokens,
+  payment card data, service-role keys, provider secrets, raw webhook payloads,
+  identity documents, or private customer data.
+- Use safe categories and identifiers instead of raw error/provider payloads.
+- Verification must expand at least one fresh event in PostHog Activity and check
+  the shared properties plus the event-specific properties. If required fields are
+  missing, fix instrumentation or environment variables before marking the task
+  complete.
+
+## UI Validation And Recovery Contract
+
+Form and workflow UI should be understandable from the page, not only from code.
+
+- If a field can fail validation and then be corrected in place, keep it controlled
+  or otherwise synchronize UI state so the error clears as soon as the current
+  input satisfies the visible rule.
+- Server Action submissions must preserve the user's relevant selections and
+  entered values after success, failure, or validation errors. Do not reset a model,
+  plan, provider, language, or mode selector unless the reset is the explicit user
+  action.
+- Field-level errors should sit near the field, use stable spacing, and avoid
+  layout jumps. Page-level failures should use the shared error state pattern.
+- Recovery actions should be the next natural product action, not a hidden manual
+  test page. Reviewer-only pages may exist, but the primary path should start from
+  the user-facing product surface.
+- Compact labels, badges, and buttons must remain readable in Chinese and English;
+  shorten labels before allowing awkward wrapping or clipped text.
+- A UI state may summarize service facts, but it must not invent business truth
+  from URL params, client-only state, or analytics events.
+
+## Billing Ledger Review Contract
+
+Billing ledger rows are audit facts. Empty columns can be valid when the schema and
+event semantics allow them.
+
+- `billing_credit_ledger.entitlement_id` is nullable by design. It may be `NULL`
+  for aggregate Credit consumption, plan-derived usage, historical rows whose
+  entitlement was deleted, or MVP2 flows that do not allocate consumption against a
+  specific entitlement row.
+- Credit-pack or manual grant rows should normally point to the entitlement they
+  created or changed. A grant row with `source_type=credit_pack` and
+  `entitlement_id=NULL` needs investigation unless it is a known historical or
+  duplicate-recovery row.
+- Consumption rows must still carry trusted audit fields: `owner_id`, `event_type`,
+  signed `amount`, `unit`, unique `idempotency_key`, `source_type`, and safe
+  metadata.
+- `billing_usage_ledger.related_credit_ledger_id` should be present for committed
+  AI usage that writes a matching credit ledger entry. It may be `NULL` for older
+  demo-only rows, reserved/released/failed rows, or non-credit usage that does not
+  create a credit ledger event.
+- Screenshots of Supabase tables are reviewer evidence only. The app must read and
+  write Billing through service boundaries and migrations, not through manual
+  dashboard edits.
+
 ## Verification
 
 At minimum:

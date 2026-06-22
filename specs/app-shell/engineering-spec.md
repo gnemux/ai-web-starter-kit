@@ -94,6 +94,15 @@ Root metadata must present the public app as `XWLC`. `apps/web/app/icon.svg` pro
 - Badge / status pill 这类短标签必须保持单行显示，不得出现中文单字拆行，例如把 `基础` 拆成上下两行。
 - 如果紧凑标签在移动端或窄容器内放不下，应缩短标签，并把解释性内容放到正文、说明或记录项中，而不是依赖任意换行。
 
+## Form Validation And Recovery Rules
+
+- 可被用户立刻修正的字段校验必须跟随当前输入状态更新。比如输入长度从 2 个字符变成 3 个字符后，错误提示和不可提交状态应自动恢复，不需要刷新页面或重新进入流程。
+- Server Action 提交成功、失败或返回校验错误后，应保留用户当前选择和输入内容，例如模型、套餐、provider、语言和模式。除非用户明确切换，不应自动回到默认选项。
+- 字段级错误应出现在字段附近，并预留稳定空间，避免错误出现/消失导致页面明显跳动。
+- 页面级错误继续使用共享 `ErrorState`，并提供自然恢复动作，例如重试当前操作或返回上一层业务入口。
+- 从业务限制触发的付费/升级入口，取消后应回到触发前的上下文；如果是从普通套餐页进入，则回普通套餐页，不应伪造业务 blocked 状态。
+- UI 可以展示服务层返回的事实摘要，但不得根据 URL 参数、客户端状态或 Analytics 事件自行制造 Auth、Payment、Billing、Entitlement、AI、Credit 或 quota 的可信事实。
+
 ## External Providers
 
 当前 app shell 通过已有 Auth 服务读取 Supabase 会话。除此之外不新增 Payment、Analytics、Vercel API 或其他 provider UI。

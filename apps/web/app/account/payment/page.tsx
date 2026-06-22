@@ -78,6 +78,11 @@ export default async function PaymentPage() {
             <div className="grid gap-4 lg:grid-cols-2">
               {stateResult.data.checkoutOptions.map((option) => (
                 <CheckoutOptionCard
+                  currentPlanId={
+                    stateResult.data.billing.ok
+                      ? stateResult.data.billing.data.planId
+                      : undefined
+                  }
                   key={option.price.id}
                   labels={copy.account.payment}
                   option={option}
@@ -126,15 +131,20 @@ export default async function PaymentPage() {
 }
 
 function CheckoutOptionCard({
+  currentPlanId,
   labels,
   option
 }: {
+  currentPlanId?: string;
   labels: Dictionary["account"]["payment"];
   option: PaymentCheckoutOption;
 }) {
   const plan = option.price.planId
     ? defaultBillingPlans.find((item) => item.id === option.price.planId)
     : null;
+  const isCurrentPlan =
+    option.checkoutKind === "subscription" &&
+    option.price.planId === currentPlanId;
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/[0.03]">
@@ -165,10 +175,17 @@ function CheckoutOptionCard({
         />
       </dl>
 
-      <form action={startPaymentCheckoutAction} className="mt-4">
-        <input name="priceId" type="hidden" value={option.price.id} />
-        <Button type="submit">{labels.startCheckout}</Button>
-      </form>
+      {isCurrentPlan ? (
+        <div className="mt-4">
+          <StatusBadge label={labels.currentPlanSelected} status="ready" />
+        </div>
+      ) : (
+        <form action={startPaymentCheckoutAction} className="mt-4">
+          <input name="priceId" type="hidden" value={option.price.id} />
+          <input name="returnTo" type="hidden" value="/account/payment" />
+          <Button type="submit">{labels.startCheckout}</Button>
+        </form>
+      )}
     </section>
   );
 }

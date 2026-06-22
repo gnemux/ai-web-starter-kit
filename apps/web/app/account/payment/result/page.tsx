@@ -1,4 +1,11 @@
-import { Badge, ErrorState, Panel, SectionHeader, StatusBadge } from "@starter/ui";
+import {
+  Badge,
+  Button,
+  ErrorState,
+  Panel,
+  SectionHeader,
+  StatusBadge
+} from "@starter/ui";
 
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
@@ -89,6 +96,11 @@ export default async function PaymentResultPage({
                   }
                 />
               </dl>
+              <div className="mt-5">
+                <Button href="/account">
+                  {copy.account.payment.returnToAccount}
+                </Button>
+              </div>
             </Panel>
           </>
         )}

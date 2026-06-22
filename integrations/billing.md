@@ -29,7 +29,10 @@ Related provider variables remain server-side unless explicitly documented elsew
 
 ```text
 PAYMENT_PROVIDER=sandbox
+PAYMENT_MODE=sandbox
+PAYMENT_LIVE_ENABLED=false
 PAYMENT_SECRET_KEY=
+PAYMENT_PROVIDER_SECRET=
 PAYMENT_WEBHOOK_SECRET=
 AI_PROVIDER=
 AI_PROVIDER_API_KEY=

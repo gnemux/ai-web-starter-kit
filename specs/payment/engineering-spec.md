@@ -4,9 +4,10 @@
 
 - Linear milestone: `MVP2 扩展底座`
 - Parent issue: `GNE-72`
-- Child issues: `GNE-192`, `GNE-96`, `GNE-97`, `GNE-98`, `GNE-198`
+- Mainline child issues: `GNE-192`, `GNE-98`, `GNE-96`, `GNE-97`, `GNE-198`, `GNE-104`, `GNE-202`
+- Optional research/spike issues: `GNE-99`, `GNE-100`
 
-Real provider decision and validation remain later Payment issues: `GNE-99` and `GNE-100`. AI token package commercialization continues through `GNE-158` after the generic sandbox checkout path exists.
+`GNE-99 PAYMENT-07` is a human research checklist, not a code task: verify whether a real Provider such as Creem can support the team's account, product, test mode, webhook, payout, and risk requirements. `GNE-100 PAYMENT-08` is a test-mode-only technical spike after `GNE-99` outputs `Go test mode`. Neither issue permits live payment, production keys, or real user charges. Use `GNE-194` only when MVP3 needs productized test-mode validation, and use `GNE-201` for production payment readiness. AI credit-pack commercialization moved to `GNE-158 MVP3-CP-09` and must use SandboxProvider unless a later production-payment gate is satisfied.
 
 ## Affected Areas
 
@@ -30,21 +31,25 @@ Billing price config in packages/core
 -> Sandbox Payment Provider in apps/web/lib/providers/server.ts
 -> protected review pages under /account/payment
 -> result/status surface
--> future trusted webhook/payment facts consumed by Billing
+-> sandbox server action or future webhook writes trusted Billing facts
 ```
 
 Pages must call the service boundary. Pages and components must not import a real payment SDK, write Billing tables directly, or infer entitlement from URL state.
+
+MVP2 must not introduce live payment, production provider secrets, real user payments, real refunds, reconciliation, invoices, split payments, taxes, or production merchant settlement. Production payment readiness belongs to `GNE-201 MVP5 PAYMENT-00`.
 
 ## Sandbox Provider Contract
 
 The sandbox provider:
 
 - uses `PAYMENT_PROVIDER=sandbox`;
+- uses `PAYMENT_MODE=sandbox`;
+- keeps `PAYMENT_LIVE_ENABLED=false`;
 - requires no `PAYMENT_SECRET_KEY` and no `PAYMENT_WEBHOOK_SECRET`;
 - creates a reviewable checkout session URL under the local app;
 - supports success, cancel, and failure result navigation;
 - never collects payment data;
-- never grants entitlements directly.
+- never grants entitlements from URL state or client-only state.
 
 `PaymentCheckoutSession.status=created` means the checkout session route exists. It does not mean payment succeeded.
 
@@ -55,8 +60,9 @@ POST server action from /account/payment
 -> validate signed-in user and Billing price ID
 -> create sandbox checkout session
 -> redirect to /account/payment/sandbox
--> reviewer selects success, cancel, or failure
--> /account/payment/result shows navigation status and current Billing facts
+-> reviewer submits success, cancel, or failure
+-> server action records sandbox Billing facts
+-> /account/payment/result shows result status and current Billing facts
 ```
 
 The service validates sellable prices using `packages/core/src/billing.ts`. Free prices cannot create checkout sessions.
@@ -83,11 +89,11 @@ payment:<provider>:<eventId>
 
 Duplicate events must return an already-processed or ignored result and must not grant duplicate subscriptions, orders, entitlements, or credits. Stale events must not overwrite newer trusted subscription facts.
 
-The sandbox webhook route may acknowledge well-formed sandbox events, but it must not write Billing facts. Real provider webhook writes require a later issue, service-role review, signature verification, and tests.
+The sandbox UI result action may write Billing facts through a server-only admin client so reviewers can verify Pro upgrades and AI credit-pack grants locally. The sandbox webhook route remains no-side-effect and only acknowledges the event model. Real provider webhook writes require a later issue, real signature verification, provider-specific tests, and deployment-secret review.
 
 ## Data And Billing Boundary
 
-Payment owns checkout sessions and payment events. Billing owns order, subscription, entitlement, credit ledger, and usage ledger facts. A success URL can show a successful navigation state only; Billing changes require trusted server-side processing.
+Payment owns checkout sessions and payment events. Billing owns order, subscription, entitlement, credit ledger, and usage ledger facts. A success URL can show a successful navigation state only; Billing changes require trusted server-side processing. In MVP2 sandbox, the trusted processing path is the protected sandbox server action, not the result URL.
 
 ## Security
 
@@ -95,6 +101,37 @@ Payment owns checkout sessions and payment events. Billing owns order, subscript
 - No real payment key, webhook secret, account identifier, card data, raw webhook payload, or customer data is committed.
 - Payment secrets remain server-only and never use `NEXT_PUBLIC_`.
 - Sandbox session IDs and result URLs are not authentication or entitlement proofs.
+- `.env.example` may contain payment placeholders only; real provider keys, webhook secrets, service-role keys, and screenshots containing secrets must not enter Git, Linear, README, PR text, or browser-visible code.
+- Real provider adapters before MVP5 are test-mode only and must keep live payment disabled.
+- `PAYMENT_PROVIDER=sandbox`, `PAYMENT_MODE=sandbox`, and `PAYMENT_LIVE_ENABLED=false` are the default MVP2/MVP3 posture.
+- `PAYMENT_PROVIDER_SECRET`, `PAYMENT_SECRET_KEY`, and `PAYMENT_WEBHOOK_SECRET` are server-only placeholders. They must never use `NEXT_PUBLIC_`.
+
+## Analytics Events
+
+Payment event implementation is tracked by `GNE-104 PAYMENT-05`.
+
+Minimum events:
+
+- `checkout_started`: emitted after the Payment service successfully creates a sandbox checkout session.
+- `payment_succeeded`: emitted after the protected sandbox server action writes trusted Billing facts for a success result.
+- `payment_failed`: emitted after the protected sandbox server action writes trusted Billing facts for a failure result.
+- `payment_canceled`: emitted after the protected sandbox server action writes trusted Billing facts for a cancel result.
+- `entitlement_granted`: emitted after the protected sandbox server action processes a success result for a subscription or credit-pack entitlement.
+- `quota_limit_reached`: emitted from the Payment review quota gate after a server-side Billing entitlement decision blocks a request above the current project limit. Do not emit it from a checkout button alone.
+
+Minimum shared properties:
+
+- `app`
+- `mvp_stage`
+- `market`
+- `env`
+- `module`
+- `plan`
+- `provider`
+
+Analytics events observe the funnel only. They are not order, subscription, entitlement, quota, or payment-status facts.
+
+Server-side analytics uses the public PostHog project key and safe product/payment properties only. Capture failures must not block checkout, Billing updates, or entitlement processing.
 
 ## UI Requirements
 

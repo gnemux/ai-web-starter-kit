@@ -5,7 +5,9 @@ const DEFAULT_MVP_STAGE = "mvp1";
 const DEFAULT_MARKET = "overseas";
 const DEFAULT_VERSION = "v0.1";
 
-export function getAnalyticsBaseProperties(): AnalyticsBaseProperties {
+export function getAnalyticsBaseProperties(
+  module: AnalyticsBaseProperties["module"] = "auth"
+): AnalyticsBaseProperties {
   return {
     app: readOptionalPublicEnv(process.env.NEXT_PUBLIC_APP_NAME) ?? DEFAULT_APP_NAME,
     mvp_stage:
@@ -14,7 +16,7 @@ export function getAnalyticsBaseProperties(): AnalyticsBaseProperties {
     env: normalizeEnv(readOptionalPublicEnv(process.env.NEXT_PUBLIC_APP_ENV)),
     version:
       readOptionalPublicEnv(process.env.NEXT_PUBLIC_APP_VERSION) ?? DEFAULT_VERSION,
-    module: "auth"
+    module
   };
 }
 

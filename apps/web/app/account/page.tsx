@@ -17,7 +17,12 @@ import { getCurrentBillingEntitlements } from "@/lib/services/billing";
 import { BillingOverview } from "./billing-overview";
 import { ProfileForm } from "./profile-form";
 
-export default async function AccountPage() {
+type AccountPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function AccountPage({ searchParams }: AccountPageProps) {
+  const params = await searchParams;
   const locale = await getRequestLocale();
   const copy = getDictionary(locale);
   const accountResult = await getCurrentAccount();
@@ -99,8 +104,32 @@ export default async function AccountPage() {
         <BillingOverview
           billingResult={billingResult}
           labels={copy.account.billing}
+          usageReview={getUsageReviewState(params)}
         />
       </div>
     </AppShell>
   );
+}
+
+function getUsageReviewState(
+  params: Record<string, string | string[] | undefined>
+) {
+  const result = getParam(params.usage_result);
+
+  if (!result) {
+    return null;
+  }
+
+  return {
+    consumed: getParam(params.consumed) ?? "0",
+    featureKey: getParam(params.feature_key) ?? "ai_tokens",
+    plan: getParam(params.plan) ?? "unknown",
+    reason: getParam(params.reason) ?? "unknown",
+    remaining: getParam(params.remaining) ?? "unknown",
+    result
+  };
+}
+
+function getParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
 }

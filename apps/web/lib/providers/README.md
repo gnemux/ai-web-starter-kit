@@ -22,7 +22,7 @@ Server-only provider adapters must not be imported by client components. Client 
 
 GNE-182 provider selector names are documented in `.env.example` and `context/environment-matrix.md`.
 
-- Server-side selectors: `AUTH_PROVIDER`, `DATABASE_PROVIDER`, `PAYMENT_PROVIDER`, `AI_PROVIDER`, `EMAIL_PROVIDER`, `STORAGE_PROVIDER`, `SMS_PROVIDER`
+- Server-side selectors: `AUTH_PROVIDER`, `DATABASE_PROVIDER`, `PAYMENT_PROVIDER`, `PAYMENT_MODE`, `PAYMENT_LIVE_ENABLED`, `AI_PROVIDER`, `EMAIL_PROVIDER`, `STORAGE_PROVIDER`, `SMS_PROVIDER`
 - Browser-visible selector: `NEXT_PUBLIC_ANALYTICS_PROVIDER`
 
 Server-only provider secrets must not use `NEXT_PUBLIC_`.

@@ -2,6 +2,8 @@ import { serviceError, serviceOk, type ServiceResult } from "./api";
 import {
   billingPriceIds,
   getBillingPrice,
+  type BillingFeatureKey,
+  type BillingOrderStatus,
   type BillingPrice,
   type BillingPriceId
 } from "./billing";
@@ -49,6 +51,34 @@ export type PaymentWebhookAcknowledgement = {
   accepted: boolean;
   idempotencyKey: string;
   message: string;
+};
+
+export type PaymentAnalyticsEvent =
+  | "checkout_started"
+  | "payment_succeeded"
+  | "payment_failed"
+  | "payment_canceled"
+  | "quota_limit_reached"
+  | "entitlement_granted";
+
+export type PaymentAnalyticsProperties = {
+  amount_cents?: number;
+  billing_period?: BillingPrice["interval"] | "one_time";
+  checkout_kind?: PaymentCheckoutOption["checkoutKind"];
+  checkout_session_id?: string;
+  currency?: BillingPrice["currency"];
+  entitlement_type?: "subscription" | "credit_pack";
+  feature_key?: BillingFeatureKey;
+  quota_reason?: "not_enabled" | "quota_exceeded" | "subscription_inactive";
+  requested_units?: number;
+  order_status?: BillingOrderStatus;
+  payment_mode: "sandbox" | "test" | "live";
+  plan: string;
+  price_id?: BillingPriceId;
+  provider: string;
+  remaining_units?: number;
+  result?: "success" | "failure" | "cancel";
+  source?: string;
 };
 
 export function getCheckoutOption(

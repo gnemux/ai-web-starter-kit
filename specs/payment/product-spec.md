@@ -2,7 +2,7 @@
 
 ## Summary
 
-MVP2 Payment establishes a reviewable sandbox checkout path for paid plans and credit packs before any real payment provider is selected. It proves where checkout starts, how result states are surfaced, and how Payment hands trusted facts to Billing without letting query params or client state grant entitlement.
+MVP2 Payment establishes a reviewable sandbox checkout path before any real payment provider is selected. It proves where checkout starts, how result states are surfaced, how Payment hands trusted facts to Billing, and how payment analytics and env safety are documented without letting query params or client state grant entitlement.
 
 ## User
 
@@ -16,14 +16,15 @@ Billing defines Free, Pro, and credit-pack contracts, but reviewers need a visib
 ## Goals
 
 - Provide a page-level checkout review path from Account or Billing into Payment.
-- Implement a Sandbox Payment Provider that requires no real SDK, key, or webhook secret.
+- Implement a Sandbox Payment Provider that requires no real SDK, key, live payment mode, or webhook secret.
 - Show success, cancel, and failure result states without granting entitlement from route params.
 - Keep Payment logic behind service/provider boundaries instead of scattering checkout behavior across pages.
-- Document webhook signature, idempotency, and event deduplication rules before a real provider is added.
+- Document webhook signature, idempotency, event deduplication, PostHog payment events, and env/secret safety rules before a real provider is added.
 
 ## Non-goals
 
 - Do not integrate Stripe, Paddle, Creem, Dodo Payments, Alipay, WeChat Pay, or another real provider.
+- Do not enable live payment, production provider secrets, real user payments, real refunds, reconciliation, invoices, split payments, taxes, or production merchant settlement.
 - Do not collect card data, tax data, invoices, refunds, reconciliation, or settlement records.
 - Do not grant Pro entitlement or AI credits directly from the sandbox success URL.
 - Do not add payment secrets to `.env.example`, Git, Linear, screenshots, or browser code.
@@ -47,6 +48,9 @@ Billing defines Free, Pro, and credit-pack contracts, but reviewers need a visib
 - The result page must clearly state that the result URL is navigation evidence only.
 - Billing status shown after checkout must still come from `apps/web/lib/services/billing.ts`.
 - Webhook and idempotency rules must name event IDs, provider IDs, signature boundaries, and duplicate-event behavior.
+- PostHog payment events must include shared properties such as `app`, `mvp_stage`, `market`, `env`, `module`, `plan`, and `provider`.
+- Payment environment docs must default to `PAYMENT_PROVIDER=sandbox`, `PAYMENT_MODE=sandbox`, and `PAYMENT_LIVE_ENABLED=false`.
+- Real provider research/test-mode work is non-blocking and must not be treated as MVP2 production payment.
 
 ## Edge States
 
@@ -62,3 +66,10 @@ Billing defines Free, Pro, and credit-pack contracts, but reviewers need a visib
 - Retention: Payment contract is reusable by MVP3 Product Validation Kit.
 - Conversion: future Analytics can attach `checkout_started`, `payment_succeeded`, and failure events to this service path.
 - Quality: no client-only result grants entitlement; no payment secret appears in browser code or Git.
+
+## Stage Boundary
+
+- MVP2: Payment foundation, SandboxProvider, payment events, analytics events, env placeholders, and security notes.
+- MVP3: Product Validation Kit can validate Free/Pro SaaS flow with SandboxProvider. A real Provider adapter may be tested only in test mode with live payment disabled.
+- MVP4: overseas/china adapter, env template, mock/test-mode strategy, and launch checklist planning.
+- MVP5: production payment readiness for a real vertical product through `GNE-201`.

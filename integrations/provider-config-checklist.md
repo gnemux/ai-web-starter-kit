@@ -61,7 +61,7 @@ Public/server-only env boundary:
 ```bash
 rg -n "^NEXT_PUBLIC_.*(SECRET|SERVICE_ROLE|WEBHOOK|PASSWORD)" .env.example context integrations specs apps packages
 rg -n "^NEXT_PUBLIC_.*(PAYMENT|AI|EMAIL|STORAGE|SMS).*(KEY|SECRET|TOKEN)" .env.example context integrations specs apps packages
-rg -n "NEXT_PUBLIC_ANALYTICS_PROVIDER|AUTH_PROVIDER|DATABASE_PROVIDER|PAYMENT_PROVIDER|AI_PROVIDER|EMAIL_PROVIDER|STORAGE_PROVIDER|SMS_PROVIDER" .env.example context/environment-matrix.md integrations specs apps/web/lib/providers
+rg -n "NEXT_PUBLIC_ANALYTICS_PROVIDER|AUTH_PROVIDER|DATABASE_PROVIDER|PAYMENT_PROVIDER|PAYMENT_MODE|PAYMENT_LIVE_ENABLED|AI_PROVIDER|EMAIL_PROVIDER|STORAGE_PROVIDER|SMS_PROVIDER" .env.example context/environment-matrix.md integrations specs apps/web/lib/providers
 ```
 
 Provider SDK and server-only adapter boundary:
@@ -125,7 +125,7 @@ Record:
 | Capability | Minimum GNE-167 path | What to verify |
 | --- | --- | --- |
 | Analytics | Browser page load plus existing PostHog no-op fallback. | Missing analytics public key does not break UI; events must not include passwords, tokens, payment payloads, prompts, or provider secrets. |
-| Payment | `/account/payment` -> `/account/payment/sandbox` -> `/account/payment/result`, plus `createSandboxPaymentProvider().createCheckoutSession(...)` through the Payment service. | Returns a sandbox checkout session with a local review URL; success/cancel/failure result pages do not require `PAYMENT_SECRET_KEY`, a webhook secret, or a real SDK, and do not grant entitlement directly. |
+| Payment | `/account/payment` -> `/account/payment/sandbox` -> `/account/payment/result`, plus `createSandboxPaymentProvider().createCheckoutSession(...)` through the Payment service. | Returns a sandbox checkout session with a local review URL; success/cancel/failure result pages do not require a real SDK, and entitlement changes come only from the protected server action using server-only Supabase admin config. |
 | AI | `createMockAiProvider().generateText(...)` through a future server test or service call. | Returns deterministic mock text and zero token usage; does not require `AI_PROVIDER_API_KEY`. |
 | Email | `createNoopEmailProvider().sendEmail(...)` through a future server test or service call. | Returns `noop`; sends no email and needs no provider key. |
 | Storage | `createNoopStorageProvider().createUploadTarget(...)` through a future server test or service call. | Returns `noop`, `method: "noop"`, and `url: null`; creates no signed URL or object. |
@@ -148,7 +148,7 @@ Before handoff, inspect these surfaces:
 Client bundle check after build:
 
 ```bash
-rg -n "SUPABASE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY|PAYMENT_SECRET_KEY|PAYMENT_WEBHOOK_SECRET|AI_PROVIDER_API_KEY|EMAIL_PROVIDER_API_KEY|STORAGE_SECRET_ACCESS_KEY|SMS_PROVIDER_API_KEY|SMS_PROVIDER_SECRET" apps/web/.next/static
+rg -n "SUPABASE_SECRET_KEY|SUPABASE_SERVICE_ROLE_KEY|PAYMENT_PROVIDER_SECRET|PAYMENT_SECRET_KEY|PAYMENT_WEBHOOK_SECRET|AI_PROVIDER_API_KEY|EMAIL_PROVIDER_API_KEY|STORAGE_SECRET_ACCESS_KEY|SMS_PROVIDER_API_KEY|SMS_PROVIDER_SECRET" apps/web/.next/static
 ```
 
 Expected result:

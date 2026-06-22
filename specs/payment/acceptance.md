@@ -6,12 +6,20 @@
 - [ ] Payment remains provider-neutral and names sandbox, real provider, and MVP4 dual-mode boundaries.
 - [ ] Payment does not own final entitlement truth; Billing remains the source for subscription and entitlement status.
 
+## GNE-98 Payment Data Model And Idempotency Boundary
+
+- [ ] Payment data model aligns with Billing plans, prices, orders, subscriptions, and entitlements without making Payment the entitlement source of truth.
+- [ ] `payment_events` can represent provider, event ID, event type, raw payload boundary, processed timestamp, and status.
+- [ ] Duplicate webhook or event processing cannot create duplicate orders, duplicate entitlements, or duplicate credit grants.
+- [ ] Signature failure, parse failure, replay, stale event, and out-of-order event behavior is documented before any real provider adapter is enabled.
+
 ## GNE-96 Sandbox Payment Provider
 
 - [ ] The sandbox provider creates a checkout session without a real SDK or secret.
 - [ ] The provider descriptor reports `capability=payment`, `provider=sandbox`, and `mode=sandbox`.
 - [ ] The sandbox provider returns a route-local review URL rather than a real hosted checkout URL.
 - [ ] Invalid prices and free prices fail at the service boundary.
+- [ ] Sandbox success is processed by a server action before Billing facts change.
 
 ## GNE-97 Checkout Demo Flow
 
@@ -20,20 +28,36 @@
 - [ ] A signed-in reviewer can start sandbox checkout for the AI credit pack.
 - [ ] The sandbox page can route to success, cancel, and failure result states.
 
-## GNE-98 Webhook, Signature, And Idempotency
-
-- [ ] Event identity and idempotency key rules are documented.
-- [ ] Sandbox webhook behavior is no-side-effect and cannot grant Billing facts.
-- [ ] Real provider webhook writes are explicitly reserved for later signature-verified work.
-- [ ] Duplicate and stale event behavior is described before real provider implementation.
-
 ## GNE-198 Page-Level Reviewer Surface
 
-- [ ] `/account` links to the Payment review surface.
+- [ ] `/account` exposes a product-like usage gate before payment: a reviewer can simulate one AI generation, consume Billing usage through the server, and see remaining AI tokens change.
+- [ ] When the simulated AI usage exceeds the current AI token allowance, the UI blocks the action and offers the correct next step: upgrade Pro for a Free account or buy an AI credit pack for an account that needs more AI tokens.
+- [ ] `/account` links to the Payment review surface without making the review page the only way to discover payment.
 - [ ] `/account/payment` shows provider mode, sellable prices, and current Billing status.
 - [ ] `/account/payment/sandbox` clearly shows this is a sandbox provider surface.
-- [ ] `/account/payment/result` shows success, cancel, and failure status without granting entitlement.
+- [ ] `/account/payment/result` shows success, cancel, and failure status while current Billing facts reflect only server-side processing.
+- [ ] Pro sandbox success upgrades the current Billing plan to Pro on `/account` after refresh.
+- [ ] Cancel returns to the page that started checkout, records a canceled sandbox payment through the backend path, and does not upgrade the current Billing plan.
+- [ ] Failure does not upgrade the current Billing plan.
+- [ ] Once the current account is already Pro, the Pro checkout action is no longer presented as a repeat upgrade.
 - [ ] The page copy is available in both Chinese and English.
+
+## GNE-104 PostHog Payment Events
+
+- [ ] `checkout_started`, `payment_succeeded`, `payment_failed`, `payment_canceled`, and `entitlement_granted` are emitted at the trusted Payment service boundary.
+- [ ] `quota_limit_reached` is emitted from a server-side Billing entitlement decision triggered by the usage gate, not faked from a checkout button alone.
+- [ ] Payment events include `app`, `mvp_stage`, `market`, `env`, `module`, `plan`, and `provider`.
+- [ ] Payment success/failure events come from trusted server-side state or webhook processing, not only from frontend clicks.
+- [ ] Analytics is not used as a payment, order, subscription, entitlement, or quota source of truth.
+- [ ] No card data, provider secret, raw webhook payload, or sensitive payment account data is sent to PostHog.
+
+## GNE-202 Payment Environment And Secret Safety
+
+- [ ] `.env.example` or project docs include payment placeholders without real keys.
+- [ ] `PAYMENT_PROVIDER=sandbox`, `PAYMENT_MODE=sandbox`, and `PAYMENT_LIVE_ENABLED=false` are the default MVP2/MVP3 posture.
+- [ ] `PAYMENT_PROVIDER_SECRET`, `PAYMENT_SECRET_KEY`, and `PAYMENT_WEBHOOK_SECRET` are server-only and never use `NEXT_PUBLIC_`.
+- [ ] Real provider test mode uses test keys only.
+- [ ] Live payment is documented as an MVP5/real-vertical-product production gate, not MVP2 work.
 
 ## Security Acceptance
 
@@ -41,3 +65,4 @@
 - [ ] No real payment SDK is installed.
 - [ ] No real provider key, webhook secret, card data, raw webhook payload, or customer account data is committed.
 - [ ] Client code does not import `apps/web/lib/providers/server.ts`.
+- [ ] No live payment, production merchant account, real refund, reconciliation, invoice, split-payment, tax, or settlement behavior is introduced by MVP2.

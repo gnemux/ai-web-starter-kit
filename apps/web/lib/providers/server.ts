@@ -28,6 +28,7 @@ export function createSandboxPaymentProvider(): PaymentProvider {
         failure_url: input.failureUrl,
         plan_id: input.planId,
         price_id: input.priceId,
+        return_url: input.metadata?.return_url ?? "",
         success_url: input.successUrl
       });
 

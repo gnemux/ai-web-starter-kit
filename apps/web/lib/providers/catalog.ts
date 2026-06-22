@@ -81,11 +81,14 @@ export const providerCatalog = [
     publicEnv: [],
     serverEnv: [
       "PAYMENT_PROVIDER",
+      "PAYMENT_MODE",
+      "PAYMENT_LIVE_ENABLED",
       "PAYMENT_SECRET_KEY",
+      "PAYMENT_PROVIDER_SECRET",
       "PAYMENT_WEBHOOK_SECRET"
     ],
     notes:
-      "Sandbox checkout contract only; real provider SDKs and webhook secrets are outside GNE-181."
+      "Sandbox checkout contract only; live payment and production provider secrets are outside MVP2."
   },
   {
     capability: "ai",

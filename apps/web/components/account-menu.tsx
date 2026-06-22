@@ -11,19 +11,23 @@ import {
 
 import {
   AccountIcon,
+  BillingIcon,
   ChevronDownIcon,
   DashboardIcon,
-  SignOutIcon
+  SignOutIcon,
+  UsageIcon
 } from "@/components/app-icons";
 import { resetAnalytics, trackEvent } from "@/lib/analytics/client";
 import { signOutAction, type SignOutState } from "@/app/account/actions";
 
 type AccountMenuLabels = {
   account: string;
+  billing: string;
   dashboard: string;
   label: string;
   signedIn: string;
   signOut: string;
+  usage: string;
   working: string;
 };
 
@@ -133,6 +137,16 @@ export function AccountMenu({
               href="/account"
               icon={<AccountIcon />}
               label={labels.account}
+            />
+            <AccountMenuLink
+              href="/account/billing"
+              icon={<BillingIcon />}
+              label={labels.billing}
+            />
+            <AccountMenuLink
+              href="/account/usage"
+              icon={<UsageIcon />}
+              label={labels.usage}
             />
             <form action={formAction} onSubmit={handleSignOutSubmit}>
               <button

@@ -82,6 +82,20 @@ export type PaymentProvider = {
   ): Promise<ServiceResult<PaymentCheckoutSession>>;
 };
 
+export type AiProviderUsage = {
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+};
+
+export type AiProviderFinishReason =
+  | "stop"
+  | "length"
+  | "content_filter"
+  | "tool_call"
+  | "noop"
+  | "error";
+
 export type AiTextRequest = {
   userId: string;
   purpose: string;
@@ -94,17 +108,99 @@ export type AiTextResponse = {
   id: string;
   provider: string;
   mode: ProviderMode;
+  model: string;
+  providerModelId: string;
   text: string;
-  usage?: {
-    inputTokens?: number;
-    outputTokens?: number;
-    totalTokens?: number;
-  };
+  finishReason: AiProviderFinishReason;
+  usage?: AiProviderUsage;
+};
+
+export type AiChatMessage = {
+  role: "system" | "user" | "assistant" | "tool";
+  content: string;
+};
+
+export type AiChatRequest = {
+  userId: string;
+  purpose: string;
+  messages: AiChatMessage[];
+  model?: string;
+  metadata?: ProviderMetadata;
+};
+
+export type AiChatResponse = {
+  id: string;
+  provider: string;
+  mode: ProviderMode;
+  model: string;
+  providerModelId: string;
+  message: AiChatMessage;
+  finishReason: AiProviderFinishReason;
+  usage?: AiProviderUsage;
+};
+
+export type AiEmbeddingRequest = {
+  userId: string;
+  purpose: string;
+  input: string;
+  model?: string;
+  metadata?: ProviderMetadata;
+};
+
+export type AiEmbeddingResponse = {
+  id: string;
+  provider: string;
+  mode: ProviderMode;
+  model: string;
+  providerModelId: string;
+  dimensions: number;
+  usage?: AiProviderUsage;
+};
+
+export type AiModerationRequest = {
+  userId: string;
+  purpose: string;
+  input: string;
+  model?: string;
+  metadata?: ProviderMetadata;
+};
+
+export type AiModerationResponse = {
+  id: string;
+  provider: string;
+  mode: ProviderMode;
+  model: string;
+  providerModelId: string;
+  flagged: boolean;
+  categories: Record<string, boolean>;
+  usage?: AiProviderUsage;
+};
+
+export type AiProviderErrorCode =
+  | "provider_unconfigured"
+  | "model_unavailable"
+  | "provider_failed"
+  | "timeout"
+  | "rate_limited"
+  | "content_filter";
+
+export type AiProviderError = {
+  code: AiProviderErrorCode;
+  message: string;
+  retryable: boolean;
 };
 
 export type AiProvider = {
   descriptor: ProviderDescriptor;
   generateText(input: AiTextRequest): Promise<ServiceResult<AiTextResponse>>;
+  chat?(input: AiChatRequest): Promise<ServiceResult<AiChatResponse>>;
+  createEmbedding?(
+    input: AiEmbeddingRequest
+  ): Promise<ServiceResult<AiEmbeddingResponse>>;
+  moderate?(
+    input: AiModerationRequest
+  ): Promise<ServiceResult<AiModerationResponse>>;
+  mapError?(error: unknown): AiProviderError;
 };
 
 export type EmailMessage = {

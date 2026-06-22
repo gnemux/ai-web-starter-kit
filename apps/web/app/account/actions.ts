@@ -9,6 +9,7 @@ import {
   signOutCurrentUser,
   updateCurrentUserProfileFromFormData
 } from "@/lib/services/auth";
+import { switchCurrentBillingPlanToFree } from "@/lib/services/billing";
 import { consumePaymentReviewAiUsage } from "@/lib/services/payment";
 
 export type ProfileFormState = ServiceResult<UserProfile> | null;
@@ -46,7 +47,7 @@ export async function consumeAiUsageDemoAction() {
   const result = await consumePaymentReviewAiUsage();
 
   if (!result.ok) {
-    redirect("/account?usage_result=error");
+    redirect("/account/usage?usage_result=error");
   }
 
   const params = new URLSearchParams({
@@ -59,5 +60,18 @@ export async function consumeAiUsageDemoAction() {
     usage_result: result.data.allowed ? "consumed" : "blocked"
   });
 
-  redirect(`/account?${params.toString()}`);
+  redirect(`/account/usage?${params.toString()}`);
+}
+
+export async function switchToFreePlanAction() {
+  const result = await switchCurrentBillingPlanToFree();
+
+  revalidatePath("/account/billing");
+  revalidatePath("/account/usage");
+
+  if (!result.ok) {
+    redirect("/account/billing?plan_result=error");
+  }
+
+  redirect("/account/billing?plan_result=free");
 }

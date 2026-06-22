@@ -65,10 +65,34 @@ export function AccountIcon({ className = "h-4 w-4" }: IconProps) {
   );
 }
 
+export function BillingIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M4.5 7.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9a1.5 1.5 0 0 1 1.5-1.5z" />
+      <path d="M3 11h18" />
+      <path d="M7 16h4" />
+      <path d="M17 4.5v3" />
+      <path d="M7 4.5v3" />
+    </svg>
+  );
+}
+
 export function ChevronDownIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg className={className} {...iconProps}>
       <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+export function UsageIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M4.5 15.5a7.5 7.5 0 1 1 15 0" />
+      <path d="M12 15.5l3.5-5" />
+      <path d="M7.5 19.5h9" />
+      <path d="M8 13.5h.01" />
+      <path d="M16 13.5h.01" />
     </svg>
   );
 }

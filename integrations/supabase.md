@@ -190,7 +190,7 @@ The Auth template is tracked by Linear `GNE-5`.
 Implemented boundaries:
 
 - Supabase Auth is the identity and session source of truth.
-- `apps/web/proxy.ts` refreshes Auth cookies and protects `/dashboard` and `/account`.
+- `apps/web/proxy.ts` refreshes Auth cookies and protects `/dashboard`, `/account`, and account subroutes.
 - Protected server code validates sessions with `supabase.auth.getClaims()`.
 - Auth use cases live in `apps/web/lib/services/auth.ts`.
 - Login, signup, logout, confirmation exchange, current account, and profile update flows return `ServiceResult<T>`.
@@ -202,6 +202,8 @@ Routes:
 - `/auth/confirm`: Supabase email confirmation code exchange.
 - `/dashboard`: protected product workspace.
 - `/account`: protected profile settings page.
+- `/account/billing`: protected Plans page for plan choice, Billing entitlement state, and plan records.
+- `/account/usage`: protected AI page for available Credit, credit-pack top-up, top-up records, and Credit consumption records.
 
 Operational notes:
 

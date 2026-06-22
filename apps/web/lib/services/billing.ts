@@ -3,6 +3,8 @@ import {
   billingFeatureKeys,
   billingPlanIds,
   billingPriceIds,
+  buildCreditLedgerEntry,
+  buildUsageLedgerEntry,
   createBillingSnapshot,
   serviceError,
   serviceOk,
@@ -13,15 +15,19 @@ import {
   type BillingFeatureKey,
   type BillingPlanId,
   type BillingPriceId,
+  type BillingUsageLedgerEntry,
   type BillingSubscription,
   type ServiceResult
 } from "@starter/core";
+import { randomUUID } from "crypto";
 
 import {
+  createSupabaseAdminClient,
   createSupabaseServerClient,
   type AppSupabaseClient
 } from "../supabase/server";
 import type { Database } from "../supabase/database.types";
+import type { Json } from "../supabase/database.types";
 
 type BillingEntitlementRow =
   Database["public"]["Tables"]["billing_entitlements"]["Row"];
@@ -31,6 +37,54 @@ type BillingUsageRow = Pick<
   Database["public"]["Tables"]["billing_usage_ledger"]["Row"],
   "feature_key" | "units"
 >;
+type BillingOrderRecordRow = Pick<
+  Database["public"]["Tables"]["billing_orders"]["Row"],
+  "id" | "plan_id" | "price_id" | "status" | "currency" | "amount_cents" | "occurred_at"
+>;
+type BillingUsageRecordRow = Pick<
+  Database["public"]["Tables"]["billing_usage_ledger"]["Row"],
+  "id" | "feature_key" | "units" | "unit" | "status" | "created_at"
+>;
+type BillingCreditLedgerIdRow = Pick<
+  Database["public"]["Tables"]["billing_credit_ledger"]["Row"],
+  "id"
+>;
+type BillingUsageLedgerIdRow = Pick<
+  Database["public"]["Tables"]["billing_usage_ledger"]["Row"],
+  "id" | "related_credit_ledger_id" | "status"
+>;
+
+export type BillingPaymentRecord = {
+  amountCents: number;
+  currency: string;
+  id: string;
+  occurredAt: string;
+  planId: string;
+  priceId: string;
+  status: BillingOrderRecordRow["status"];
+};
+
+export type BillingUsageRecord = {
+  createdAt: string;
+  featureKey: BillingFeatureKey;
+  id: string;
+  status: BillingUsageRecordRow["status"];
+  unit: string;
+  units: number;
+};
+
+export type BillingActivity = {
+  paymentRecords: BillingPaymentRecord[];
+  usageRecords: BillingUsageRecord[];
+};
+
+export type BillingAiCreditUsageCommit = {
+  consumedCredits: number;
+  creditLedgerId: string | null;
+  deduplicated: boolean;
+  usageLedgerId: string;
+  usageStatus: BillingUsageLedgerEntry["status"];
+};
 
 export async function getCurrentBillingEntitlements(): Promise<
   ServiceResult<BillingEntitlementSnapshot>
@@ -100,6 +154,361 @@ export async function assertCurrentBillingEntitlement(
       requiredQuantity
     )
   );
+}
+
+export async function getCurrentBillingActivity(): Promise<
+  ServiceResult<BillingActivity>
+> {
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const userIdResult = await getAuthenticatedUserId(clientResult.data);
+
+  if (!userIdResult.ok) {
+    return userIdResult;
+  }
+
+  const paymentResult = await listPaymentRecords(
+    clientResult.data,
+    userIdResult.data
+  );
+
+  if (!paymentResult.ok) {
+    return paymentResult;
+  }
+
+  const usageResult = await listUsageRecords(
+    clientResult.data,
+    userIdResult.data
+  );
+
+  if (!usageResult.ok) {
+    return usageResult;
+  }
+
+  return serviceOk({
+    paymentRecords: paymentResult.data,
+    usageRecords: usageResult.data
+  });
+}
+
+export async function switchCurrentBillingPlanToFree(): Promise<
+  ServiceResult<{ planId: "free" }>
+> {
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const userIdResult = await getAuthenticatedUserId(clientResult.data);
+
+  if (!userIdResult.ok) {
+    return userIdResult;
+  }
+
+  const adminResult = createSupabaseAdminClient();
+
+  if (!adminResult.ok) {
+    return adminResult;
+  }
+
+  const now = new Date().toISOString();
+  const eventId = randomUUID();
+  const idempotencyKey = `billing:plan_switch:${userIdResult.data}:free:${eventId}`;
+
+  const cancelResult = await adminResult.data
+    .from("billing_subscriptions")
+    .update({
+      cancel_at_period_end: false,
+      canceled_at: now,
+      current_period_end: now,
+      status: "canceled"
+    })
+    .eq("owner_id", userIdResult.data)
+    .neq("plan_id", "free")
+    .in("status", ["trialing", "active", "past_due"]);
+
+  if (cancelResult.error) {
+    return mapSupabaseError(cancelResult.error);
+  }
+
+  const orderResult = await adminResult.data
+    .from("billing_orders")
+    .insert({
+      owner_id: userIdResult.data,
+      provider: "sandbox",
+      provider_order_id: `sandbox-plan-change-${eventId}`,
+      idempotency_key: idempotencyKey,
+      plan_id: "free",
+      price_id: "free",
+      status: "paid",
+      currency: "usd",
+      amount_cents: 0,
+      metadata: {
+        source: "account_plan_switch",
+        target_plan: "free"
+      },
+      occurred_at: now
+    })
+    .select("id")
+    .single();
+
+  if (orderResult.error || !orderResult.data) {
+    return mapSupabaseError(orderResult.error ?? {});
+  }
+
+  const subscriptionResult = await adminResult.data
+    .from("billing_subscriptions")
+    .insert({
+      owner_id: userIdResult.data,
+      provider: "sandbox",
+      provider_subscription_id: `sandbox-free-plan-${eventId}`,
+      plan_id: "free",
+      price_id: "free",
+      status: "active",
+      current_period_start: now,
+      current_period_end: null,
+      metadata: {
+        order_id: orderResult.data.id,
+        source: "account_plan_switch"
+      }
+    });
+
+  if (subscriptionResult.error) {
+    return mapSupabaseError(subscriptionResult.error);
+  }
+
+  return serviceOk({ planId: "free" });
+}
+
+export async function commitAiCreditUsage(input: {
+  credits: number;
+  featureKey: Extract<BillingFeatureKey, "ai_tokens">;
+  idempotencyKey: string;
+  metadata: Json;
+  ownerId: string;
+  reason: string;
+  sourceId: string;
+}): Promise<ServiceResult<BillingAiCreditUsageCommit>> {
+  const creditEntryResult = buildCreditLedgerEntry({
+    ownerId: input.ownerId,
+    entitlementId: null,
+    eventType: "consume",
+    amount: -input.credits,
+    unit: "credit",
+    idempotencyKey: `${input.idempotencyKey}:credit_consume`,
+    sourceType: "ai_usage",
+    sourceId: input.sourceId,
+    reason: input.reason
+  });
+
+  if (!creditEntryResult.ok) {
+    return creditEntryResult;
+  }
+
+  const usageEntryResult = buildUsageLedgerEntry({
+    ownerId: input.ownerId,
+    featureKey: input.featureKey,
+    units: input.credits,
+    unit: "credit",
+    status: "committed",
+    idempotencyKey: `${input.idempotencyKey}:usage`
+  });
+
+  if (!usageEntryResult.ok) {
+    return usageEntryResult;
+  }
+
+  const adminResult = createSupabaseAdminClient();
+
+  if (!adminResult.ok) {
+    return adminResult;
+  }
+
+  const creditResult = await adminResult.data
+    .from("billing_credit_ledger")
+    .insert({
+      owner_id: creditEntryResult.data.ownerId,
+      entitlement_id: creditEntryResult.data.entitlementId,
+      event_type: creditEntryResult.data.eventType,
+      amount: creditEntryResult.data.amount,
+      unit: creditEntryResult.data.unit,
+      idempotency_key: creditEntryResult.data.idempotencyKey,
+      source_type: creditEntryResult.data.sourceType,
+      source_id: creditEntryResult.data.sourceId ?? null,
+      reason: creditEntryResult.data.reason ?? null,
+      metadata: input.metadata
+    })
+    .select("id")
+    .single();
+
+  if (creditResult.error || !creditResult.data) {
+    if (isUniqueViolation(creditResult.error)) {
+      return getDuplicateAiCreditUsageCommit(adminResult.data, {
+        creditIdempotencyKey: creditEntryResult.data.idempotencyKey,
+        ownerId: input.ownerId,
+        usageEntry: usageEntryResult.data,
+        metadata: input.metadata
+      });
+    }
+
+    return mapSupabaseError(creditResult.error ?? {});
+  }
+
+  const creditLedger = creditResult.data as BillingCreditLedgerIdRow;
+  const usageResult = await adminResult.data
+    .from("billing_usage_ledger")
+    .insert({
+      owner_id: usageEntryResult.data.ownerId,
+      feature_key: usageEntryResult.data.featureKey,
+      units: usageEntryResult.data.units,
+      unit: usageEntryResult.data.unit,
+      status: usageEntryResult.data.status,
+      idempotency_key: usageEntryResult.data.idempotencyKey,
+      related_credit_ledger_id: creditLedger.id,
+      metadata: input.metadata
+    })
+    .select("id, status")
+    .single();
+
+  if (usageResult.error || !usageResult.data) {
+    return mapSupabaseError(usageResult.error ?? {});
+  }
+
+  const usageLedger = usageResult.data as BillingUsageLedgerIdRow;
+
+  return serviceOk({
+    consumedCredits: input.credits,
+    creditLedgerId: creditLedger.id,
+    deduplicated: false,
+    usageLedgerId: usageLedger.id,
+    usageStatus: usageLedger.status
+  });
+}
+
+export async function findCommittedAiCreditUsage(input: {
+  idempotencyKey: string;
+  ownerId: string;
+}): Promise<ServiceResult<BillingAiCreditUsageCommit | null>> {
+  const adminResult = createSupabaseAdminClient();
+
+  if (!adminResult.ok) {
+    return adminResult;
+  }
+
+  return findCommittedAiCreditUsageWithClient(adminResult.data, input);
+}
+
+async function getDuplicateAiCreditUsageCommit(
+  supabase: AppSupabaseClient,
+  input: {
+    creditIdempotencyKey: string;
+    metadata: Json;
+    ownerId: string;
+    usageEntry: BillingUsageLedgerEntry;
+  }
+): Promise<ServiceResult<BillingAiCreditUsageCommit>> {
+  const creditResult = await supabase
+    .from("billing_credit_ledger")
+    .select("id")
+    .eq("owner_id", input.ownerId)
+    .eq("idempotency_key", input.creditIdempotencyKey)
+    .single();
+
+  if (creditResult.error || !creditResult.data) {
+    return mapSupabaseError(creditResult.error ?? {});
+  }
+
+  const creditLedger = creditResult.data as BillingCreditLedgerIdRow;
+  const usageResult = await supabase
+    .from("billing_usage_ledger")
+    .insert({
+      owner_id: input.usageEntry.ownerId,
+      feature_key: input.usageEntry.featureKey,
+      units: input.usageEntry.units,
+      unit: input.usageEntry.unit,
+      status: input.usageEntry.status,
+      idempotency_key: input.usageEntry.idempotencyKey,
+      related_credit_ledger_id: creditLedger.id,
+      metadata: input.metadata
+    })
+    .select("id, related_credit_ledger_id, status")
+    .single();
+
+  if (usageResult.error || !usageResult.data) {
+    if (isUniqueViolation(usageResult.error)) {
+      const existingResult = await findAiCreditUsageCommitByUsageKey(
+        supabase,
+        input.ownerId,
+        input.usageEntry.idempotencyKey
+      );
+
+      if (existingResult.ok && existingResult.data) {
+        return serviceOk(existingResult.data);
+      }
+    }
+
+    return mapSupabaseError(usageResult.error ?? {});
+  }
+
+  const usageLedger = usageResult.data as BillingUsageLedgerIdRow;
+
+  return serviceOk({
+    consumedCredits: 0,
+    creditLedgerId: creditLedger.id,
+    deduplicated: true,
+    usageLedgerId: usageLedger.id,
+    usageStatus: usageLedger.status
+  });
+}
+
+async function findCommittedAiCreditUsageWithClient(
+  supabase: AppSupabaseClient,
+  input: {
+    idempotencyKey: string;
+    ownerId: string;
+  }
+): Promise<ServiceResult<BillingAiCreditUsageCommit | null>> {
+  return findAiCreditUsageCommitByUsageKey(
+    supabase,
+    input.ownerId,
+    `${input.idempotencyKey}:usage`
+  );
+}
+
+async function findAiCreditUsageCommitByUsageKey(
+  supabase: AppSupabaseClient,
+  ownerId: string,
+  usageIdempotencyKey: string
+): Promise<ServiceResult<BillingAiCreditUsageCommit | null>> {
+  const usageResult = await supabase
+    .from("billing_usage_ledger")
+    .select("id, related_credit_ledger_id, status")
+    .eq("owner_id", ownerId)
+    .eq("idempotency_key", usageIdempotencyKey)
+    .maybeSingle();
+
+  if (usageResult.error) {
+    return mapSupabaseError(usageResult.error);
+  }
+
+  if (!usageResult.data) {
+    return serviceOk(null);
+  }
+
+  const usageLedger = usageResult.data as BillingUsageLedgerIdRow;
+
+  return serviceOk({
+    consumedCredits: 0,
+    creditLedgerId: usageLedger.related_credit_ledger_id,
+    deduplicated: true,
+    usageLedgerId: usageLedger.id,
+    usageStatus: usageLedger.status
+  });
 }
 
 async function getAuthenticatedUserId(
@@ -203,6 +612,63 @@ async function listCommittedUsage(
   return serviceOk(totals);
 }
 
+async function listPaymentRecords(
+  supabase: AppSupabaseClient,
+  ownerId: string
+): Promise<ServiceResult<BillingPaymentRecord[]>> {
+  const { data, error } = await supabase
+    .from("billing_orders")
+    .select("id, plan_id, price_id, status, currency, amount_cents, occurred_at")
+    .eq("owner_id", ownerId)
+    .order("occurred_at", { ascending: false })
+    .limit(5);
+
+  if (error) {
+    return mapSupabaseError(error);
+  }
+
+  return serviceOk(
+    ((data ?? []) as BillingOrderRecordRow[]).map((row) => ({
+      amountCents: row.amount_cents,
+      currency: row.currency,
+      id: row.id,
+      occurredAt: row.occurred_at,
+      planId: row.plan_id,
+      priceId: row.price_id,
+      status: row.status
+    }))
+  );
+}
+
+async function listUsageRecords(
+  supabase: AppSupabaseClient,
+  ownerId: string
+): Promise<ServiceResult<BillingUsageRecord[]>> {
+  const { data, error } = await supabase
+    .from("billing_usage_ledger")
+    .select("id, feature_key, units, unit, status, created_at")
+    .eq("owner_id", ownerId)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (error) {
+    return mapSupabaseError(error);
+  }
+
+  return serviceOk(
+    ((data ?? []) as BillingUsageRecordRow[])
+      .filter((row) => isBillingFeatureKey(row.feature_key))
+      .map((row) => ({
+        createdAt: row.created_at,
+        featureKey: row.feature_key as BillingFeatureKey,
+        id: row.id,
+        status: row.status,
+        unit: row.unit,
+        units: row.units
+      }))
+  );
+}
+
 function applyUsageToSnapshot(
   snapshot: BillingEntitlementSnapshot,
   usageTotals: Partial<Record<BillingFeatureKey, number>>
@@ -282,7 +748,10 @@ function mapBillingEntitlement(
         : {
             kind: "quantity",
             quantity: row.quantity ?? 0,
-            unit: row.unit === "token" ? "token" : "count",
+            unit:
+              row.unit === "credit" || row.unit === "token"
+                ? "credit"
+                : "count",
             used: row.quantity_used
           },
     renewsAt: row.renews_at,
@@ -321,4 +790,8 @@ function mapSupabaseError(error: { code?: string }): ServiceResult<never> {
     "system_error",
     "The billing service is temporarily unavailable."
   );
+}
+
+function isUniqueViolation(error: { code?: string } | null): boolean {
+  return error?.code === "23505";
 }

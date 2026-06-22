@@ -97,8 +97,8 @@ export default async function PaymentResultPage({
                 />
               </dl>
               <div className="mt-5">
-                <Button href="/account">
-                  {copy.account.payment.returnToAccount}
+                <Button href="/account/billing">
+                  {copy.account.payment.returnToBilling}
                 </Button>
               </div>
             </Panel>

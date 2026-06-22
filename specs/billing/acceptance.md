@@ -23,10 +23,10 @@
 
 ## GNE-93 Pricing Config
 
-- [x] Adds Free, Pro monthly, and AI credit-pack examples.
+- [x] Adds Free, Plus monthly, Pro monthly, and AI credit-pack examples.
 - [x] Keeps provider price IDs nullable/reserved.
 - [x] Avoids hard-coding provider price IDs in UI.
-- [x] Makes Free / Pro / AI credit-pack values reviewable in `packages/core/src/billing.ts`.
+- [x] Makes Free / Plus / Pro / AI credit-pack values reviewable in `packages/core/src/billing.ts`.
 
 ## GNE-94 Lifecycle
 
@@ -36,7 +36,7 @@
 
 ## GNE-157 AI Credit Model
 
-- [x] Defines AI token feature and credit-pack price shape.
+- [x] Defines AI Credit as the product-facing unit and credit-pack price shape.
 - [x] Includes credit and usage ledger types with idempotency keys.
 - [x] Defines that AI must check Billing before calls and record usage after calls.
 
@@ -45,12 +45,15 @@
 - [x] Test plan covers unpaid/free, paid, past_due, canceled, expired, duplicate events, usage, and credit cases.
 - [x] Local TypeScript checks can validate service contracts.
 - [x] Local Supabase reset applies the Billing migration successfully.
-- [x] `/account` exposes a human-readable Billing review surface showing the current Free fallback, Free/Pro plan differences, and the AI credit-pack reservation.
+- [x] `/account/billing` exposes a product-like Plans surface where Free/Plus/Pro plan selection carries the current plan state, included access, prices, and recent plan purchase records.
+- [x] `/account/usage` groups available Credit, plan-vs-credit-pack source split, credit-pack top-up, top-up records, and Credit consumption records under the AI entry.
 - [x] Checklist maps the Billing config, specs, migration, service boundary, and page surface to reviewer-facing evidence.
 
 ## GNE-197 App / Review Surface
 
-- [x] Adds a dedicated Linear task for the `/account` Billing reviewer surface.
-- [x] Keeps the page inside the existing app/account UI conventions.
+- [x] Adds a dedicated Linear task for the account Billing reviewer surface.
+- [x] Keeps the page inside the existing app shell conventions with Plans and AI exposed as first-level workspace menu items.
 - [x] Reads entitlement state through the Billing service boundary.
+- [x] Uses short, action-oriented copy while keeping sandbox/live-payment limits clear and restrained.
 - [x] Does not implement real checkout or imply real Payment/AI providers are complete.
+- [x] Lets reviewers switch from paid plans back to Free through a protected server action, and switch to paid plans through sandbox checkout.

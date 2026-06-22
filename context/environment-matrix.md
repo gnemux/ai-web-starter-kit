@@ -114,6 +114,10 @@ Future real provider values must be introduced by the owning Payment, AI, Email,
 
 Do not add `NEXT_PUBLIC_` to Payment, AI, Email, Storage, SMS, webhook, service-role, SMTP, signing, or private provider API key variables.
 
+`AI_BUDGET_LIMIT` is an AI server-only operator guardrail. It caps a single
+request's estimated Credit before provider creation and must not be used as the
+user's visible balance, plan allowance, or browser-visible configuration.
+
 ## Local, Preview, And Production Placement
 
 | Key group | Local `.env.local` | Vercel Preview | Vercel Production |

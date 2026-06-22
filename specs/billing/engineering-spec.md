@@ -61,8 +61,24 @@ These live in `packages/core/src/billing.ts` so pricing UI, checkout, and entitl
 
 - `getCurrentBillingEntitlements`
 - `assertBillingEntitlement`
+- `getCurrentBillingActivity`
+- `switchCurrentBillingPlanToFree`
 
 Pages and components should consume this service rather than querying Billing tables directly.
+
+## UI Requirements
+
+- `/account/billing` should read like a user-facing plan surface, not a provider or database inspection page.
+- The primary order is Free/Plus/Pro plan selection with the current plan state folded into the selected card, then recent plan purchase records.
+- AI Credit balance, plan-vs-credit-pack source split, credit-pack top-up, top-up records, and Credit consumption records belong under `/account/usage`.
+- Non-AI plan-card entitlements may be template placeholder access items when no real product module exists yet. They should be shown as included/not included access, not as fake consumption counts.
+- Higher-tier plans should visibly include lower-tier plan content: Plus includes Free, and Pro includes Plus.
+- Main path copy should be short and action-oriented; avoid standalone explanatory sections such as upgrade guides or template notes.
+- Sandbox/local-payment limits may appear as restrained badges or payment-page copy, but they should not dominate the Billing page.
+- Do not add buttons for unsupported production actions such as invoice download, payment method management, refunds, tax, or live subscription cancellation until the corresponding provider work exists.
+- The page may support sandbox-safe plan switching: Free through a protected account action, and paid plans through sandbox checkout. Existing active sandbox plan facts should be canceled when a different plan becomes current.
+- Recent plan records should read from `billing_orders`; recent AI usage records should read from `billing_usage_ledger` on the AI page. These records are reviewer-facing facts, not a full invoice or reconciliation system.
+- Plan-card badges such as `基础`, `推荐`, `当前套餐`, and their English equivalents are compact status tokens. They must stay on one line; if a future label is too long, shorten the badge and move detail into nearby copy.
 
 ## Lifecycle Rules
 

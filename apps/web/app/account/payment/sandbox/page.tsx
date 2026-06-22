@@ -101,7 +101,7 @@ function CheckoutCard({
           <h2 className="mt-4 text-2xl font-semibold tracking-normal text-slate-950">
             {isCreditPack
               ? copy.account.payment.creditCheckoutTitle
-              : copy.account.payment.proCheckoutTitle}
+              : copy.account.payment.planCheckoutTitle}
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
             {copy.account.payment.sandboxActionDescription}
@@ -167,8 +167,9 @@ function PlanSummary({
   const visibleFeatures: BillingFeatureKey[] = [
     "projects",
     "pages",
+    "leads",
+    "custom_domain",
     "ai_tokens",
-    "custom_domain"
   ];
 
   return (
@@ -206,7 +207,7 @@ function CreditSummary({
       </p>
       <p className="mt-1 text-sm font-semibold text-slate-950">
         {formatNumber(price?.creditQuantity ?? 0)}{" "}
-        {copy.account.billing.units.token}
+        {copy.account.billing.units.credit}
       </p>
     </div>
   );
@@ -263,7 +264,7 @@ function getCheckoutTitle(
     return copy.account.payment.creditCheckoutTitle;
   }
 
-  return copy.account.payment.proCheckoutTitle;
+  return copy.account.payment.planCheckoutTitle;
 }
 
 function formatPrice(priceId: string) {

@@ -1,11 +1,12 @@
 import { serviceError, serviceOk, type ServiceResult } from "./api";
 
-export const billingPlanIds = ["free", "pro"] as const;
+export const billingPlanIds = ["free", "plus", "pro"] as const;
 
 export type BillingPlanId = (typeof billingPlanIds)[number];
 
 export const billingPriceIds = [
   "free",
+  "plus_monthly",
   "pro_monthly",
   "ai_credit_pack_100k"
 ] as const;
@@ -30,7 +31,7 @@ export type BillingAllowance =
   | {
       kind: "quantity";
       quantity: number;
-      unit: "count" | "token";
+      unit: "count" | "credit" | "token";
       used?: number;
     };
 
@@ -122,7 +123,7 @@ export type BillingCreditLedgerEntry = {
   entitlementId: string | null;
   eventType: BillingCreditLedgerEventType;
   amount: number;
-  unit: "token" | "count";
+  unit: "count" | "credit" | "token";
   idempotencyKey: string;
   sourceType:
     | "subscription"
@@ -139,7 +140,7 @@ export type BillingUsageLedgerEntry = {
   ownerId: string;
   featureKey: BillingFeatureKey;
   units: number;
-  unit: "token" | "count";
+  unit: "count" | "credit" | "token";
   status: "reserved" | "committed" | "released" | "failed";
   idempotencyKey: string;
   relatedCreditLedgerId?: string;
@@ -171,10 +172,23 @@ export const defaultBillingPlans: BillingPlan[] = [
     description: "Starter access for validation and local demos.",
     featured: false,
     entitlements: {
-      projects: { kind: "quantity", quantity: 1, unit: "count" },
-      pages: { kind: "quantity", quantity: 3, unit: "count" },
-      leads: { kind: "quantity", quantity: 25, unit: "count" },
-      ai_tokens: { kind: "quantity", quantity: 10000, unit: "token" },
+      projects: { kind: "boolean", enabled: true },
+      pages: { kind: "boolean", enabled: true },
+      leads: { kind: "boolean", enabled: false },
+      ai_tokens: { kind: "quantity", quantity: 10000, unit: "credit" },
+      custom_domain: { kind: "boolean", enabled: false }
+    }
+  },
+  {
+    id: "plus",
+    name: "Plus",
+    description: "Intermediate plan for early product teams.",
+    featured: false,
+    entitlements: {
+      projects: { kind: "boolean", enabled: true },
+      pages: { kind: "boolean", enabled: true },
+      leads: { kind: "boolean", enabled: true },
+      ai_tokens: { kind: "quantity", quantity: 60000, unit: "credit" },
       custom_domain: { kind: "boolean", enabled: false }
     }
   },
@@ -184,10 +198,10 @@ export const defaultBillingPlans: BillingPlan[] = [
     description: "Paid template plan for MVP product validation.",
     featured: true,
     entitlements: {
-      projects: { kind: "quantity", quantity: 10, unit: "count" },
-      pages: { kind: "quantity", quantity: 50, unit: "count" },
-      leads: { kind: "quantity", quantity: 1000, unit: "count" },
-      ai_tokens: { kind: "quantity", quantity: 200000, unit: "token" },
+      projects: { kind: "boolean", enabled: true },
+      pages: { kind: "boolean", enabled: true },
+      leads: { kind: "boolean", enabled: true },
+      ai_tokens: { kind: "quantity", quantity: 200000, unit: "credit" },
       custom_domain: { kind: "boolean", enabled: true }
     }
   }
@@ -201,6 +215,15 @@ export const defaultBillingPrices: BillingPrice[] = [
     amountCents: 0,
     currency: "usd",
     interval: null,
+    providerPriceId: null
+  },
+  {
+    id: "plus_monthly",
+    planId: "plus",
+    type: "recurring",
+    amountCents: 900,
+    currency: "usd",
+    interval: "month",
     providerPriceId: null
   },
   {

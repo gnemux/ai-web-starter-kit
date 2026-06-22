@@ -70,8 +70,9 @@ The service validates sellable prices using `packages/core/src/billing.ts`. Free
 Checkout entry points must follow the project return context contract in
 `context/codex-rules.md`. In practice:
 
-- a plain `/account` upgrade or credit-pack entry returns to plain `/account` on cancel or failure;
-- a quota/paywall-blocked entry returns to the same blocked Account context on cancel or failure;
+- a plain `/account/billing` plan upgrade returns to `/account/billing` on cancel or failure;
+- an AI credit-pack entry from `/account/usage` returns to `/account/usage` on cancel or failure;
+- a quota/paywall-blocked `/account/usage` entry returns to the same blocked AI context on cancel or failure;
 - cancel and failure must not grant entitlement, must not clear the relevant pre-checkout state, and must not create a blocked state when the user did not enter from one;
 - success may return to Account or a result page after the protected server action writes trusted Billing facts.
 
@@ -97,7 +98,7 @@ payment:<provider>:<eventId>
 
 Duplicate events must return an already-processed or ignored result and must not grant duplicate subscriptions, orders, entitlements, or credits. Stale events must not overwrite newer trusted subscription facts.
 
-The sandbox UI result action may write Billing facts through a server-only admin client so reviewers can verify Pro upgrades and AI credit-pack grants locally. The sandbox webhook route remains no-side-effect and only acknowledges the event model. Real provider webhook writes require a later issue, real signature verification, provider-specific tests, and deployment-secret review.
+The sandbox UI result action may write Billing facts through a server-only admin client so reviewers can verify paid-plan changes and AI credit-pack grants locally. The sandbox webhook route remains no-side-effect and only acknowledges the event model. Real provider webhook writes require a later issue, real signature verification, provider-specific tests, and deployment-secret review.
 
 ## Data And Billing Boundary
 
@@ -125,7 +126,7 @@ Minimum events:
 - `payment_failed`: emitted after the protected sandbox server action writes trusted Billing facts for a failure result.
 - `payment_canceled`: emitted after the protected sandbox server action writes trusted Billing facts for a cancel result.
 - `entitlement_granted`: emitted after the protected sandbox server action processes a success result for a subscription or credit-pack entitlement.
-- `quota_limit_reached`: emitted from the Payment review quota gate after a server-side Billing entitlement decision blocks a request above the current project limit. Do not emit it from a checkout button alone.
+- `quota_limit_reached`: emitted from the Payment review quota gate after a server-side Billing entitlement decision blocks a placeholder access item. Do not emit it from a checkout button alone.
 
 Minimum shared properties:
 
@@ -153,6 +154,6 @@ Server-side analytics uses the public PostHog project key and safe product/payme
 - Run `pnpm typecheck`.
 - Run `pnpm lint`.
 - Run `pnpm build`.
-- Smoke test `/account`, `/account/payment`, `/account/payment/sandbox`, and `/account/payment/result`.
+- Smoke test `/account`, `/account/billing`, `/account/usage`, `/account/payment`, `/account/payment/sandbox`, and `/account/payment/result`.
 - Run provider boundary searches from `integrations/provider-config-checklist.md`.
-- Confirm the result URL does not grant Pro entitlement or AI credits by itself.
+- Confirm the result URL does not grant paid-plan entitlement or AI credits by itself.

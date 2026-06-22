@@ -1,6 +1,8 @@
 import "server-only";
 
 import type {
+  AiAnalyticsEvent,
+  AiAnalyticsProperties,
   AnalyticsBaseProperties,
   PaymentAnalyticsEvent,
   PaymentAnalyticsProperties
@@ -18,9 +20,9 @@ const posthogHost =
 
 type ServerAnalyticsEvent = {
   distinctId: string;
-  event: PaymentAnalyticsEvent;
+  event: PaymentAnalyticsEvent | AiAnalyticsEvent;
   module: AnalyticsBaseProperties["module"];
-  properties: PaymentAnalyticsProperties;
+  properties: PaymentAnalyticsProperties | AiAnalyticsProperties;
 };
 
 export async function trackServerEvent({
@@ -41,7 +43,7 @@ export async function trackServerEvent({
         event,
         properties: {
           ...getAnalyticsBaseProperties(module),
-          ...sanitizePaymentProperties(properties)
+          ...sanitizeServerProperties(properties)
         }
       }),
       cache: "no-store",
@@ -65,38 +67,59 @@ export async function trackServerEvent({
   }
 }
 
-function sanitizePaymentProperties(
-  properties: PaymentAnalyticsProperties
-): PaymentAnalyticsProperties {
+function sanitizeServerProperties(
+  properties: PaymentAnalyticsProperties | AiAnalyticsProperties
+): Record<string, unknown> {
+  const values = properties as Record<string, unknown>;
+
   return {
-    ...(typeof properties.amount_cents === "number"
-      ? { amount_cents: properties.amount_cents }
+    ...(typeof values.amount_cents === "number"
+      ? { amount_cents: values.amount_cents }
       : {}),
-    ...(properties.billing_period
-      ? { billing_period: properties.billing_period }
+    ...(values.billing_period
+      ? { billing_period: values.billing_period }
       : {}),
-    ...(properties.checkout_kind ? { checkout_kind: properties.checkout_kind } : {}),
-    ...(properties.checkout_session_id
-      ? { checkout_session_id: properties.checkout_session_id }
+    ...(values.checkout_kind ? { checkout_kind: values.checkout_kind } : {}),
+    ...(values.checkout_session_id
+      ? { checkout_session_id: values.checkout_session_id }
       : {}),
-    ...(properties.currency ? { currency: properties.currency } : {}),
-    ...(properties.entitlement_type
-      ? { entitlement_type: properties.entitlement_type }
+    ...(values.currency ? { currency: values.currency } : {}),
+    ...(values.entitlement_type
+      ? { entitlement_type: values.entitlement_type }
       : {}),
-    ...(properties.feature_key ? { feature_key: properties.feature_key } : {}),
-    ...(properties.quota_reason ? { quota_reason: properties.quota_reason } : {}),
-    ...(typeof properties.requested_units === "number"
-      ? { requested_units: properties.requested_units }
+    ...(values.feature_key ? { feature_key: values.feature_key } : {}),
+    ...(values.quota_reason ? { quota_reason: values.quota_reason } : {}),
+    ...(typeof values.requested_units === "number"
+      ? { requested_units: values.requested_units }
       : {}),
-    ...(properties.order_status ? { order_status: properties.order_status } : {}),
-    payment_mode: properties.payment_mode,
-    plan: properties.plan,
-    ...(properties.price_id ? { price_id: properties.price_id } : {}),
-    provider: properties.provider,
-    ...(typeof properties.remaining_units === "number"
-      ? { remaining_units: properties.remaining_units }
+    ...(values.order_status ? { order_status: values.order_status } : {}),
+    ...(values.payment_mode ? { payment_mode: values.payment_mode } : {}),
+    ...(values.plan ? { plan: values.plan } : {}),
+    ...(values.price_id ? { price_id: values.price_id } : {}),
+    provider: values.provider,
+    ...(typeof values.remaining_units === "number"
+      ? { remaining_units: values.remaining_units }
       : {}),
-    ...(properties.result ? { result: properties.result } : {}),
-    ...(properties.source ? { source: properties.source } : {})
+    ...(values.capability ? { capability: values.capability } : {}),
+    ...(typeof values.consumed_credits === "number"
+      ? { consumed_credits: values.consumed_credits }
+      : {}),
+    ...(values.mode ? { mode: values.mode } : {}),
+    ...(values.model ? { model: values.model } : {}),
+    ...(values.provider_model_id
+      ? { provider_model_id: values.provider_model_id }
+      : {}),
+    ...(values.reason ? { reason: values.reason } : {}),
+    ...(typeof values.remaining_credits === "number"
+      ? { remaining_credits: values.remaining_credits }
+      : {}),
+    ...(typeof values.requested_credits === "number"
+      ? { requested_credits: values.requested_credits }
+      : {}),
+    ...(values.result ? { result: values.result } : {}),
+    ...(values.source ? { source: values.source } : {}),
+    ...(values.usage_record_status
+      ? { usage_record_status: values.usage_record_status }
+      : {})
   };
 }

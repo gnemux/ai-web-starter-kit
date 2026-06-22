@@ -32,6 +32,9 @@ Provider adapter boundary:
 - GNE-181 keeps PostHog behind `apps/web/lib/analytics/*`.
 - `apps/web/lib/providers/analytics-client.ts` is a client-only facade for future provider convention alignment.
 - Do not move existing Auth analytics calls to a new provider layer unless a later Analytics issue explicitly requires it.
+- GNE-155 adds safe server-side AI summary events from the AI service boundary.
+  These events are for observation only; AI entitlement, Credit, and usage
+  ledger truth remain in Billing and AI services.
 
 ## Default Providers
 
@@ -142,7 +145,9 @@ Current status:
 
 - `ANALYTICS-01..04`: Done for MVP1.
 - `ANALYTICS-06`: Done. Production PostHog event reception and required shared properties have visual proof.
-- `ANALYTICS-05`, `ANALYTICS-07..11`: Todo.
+- `ANALYTICS-11`: Partially prepared by GNE-155 server-side AI summary events;
+  dashboards and production event evidence remain Todo.
+- `ANALYTICS-05`, `ANALYTICS-07..10`: Todo.
 
 ## M4 Auth Events
 

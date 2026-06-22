@@ -40,13 +40,18 @@ export const dictionaries = {
       },
       nav: {
         dashboard: "工作台",
-        account: "账户"
+        account: "账户",
+        profile: "个人资料",
+        billing: "套餐",
+        usage: "AI"
       },
       accountMenu: {
         label: "账户菜单",
         signedIn: "已登录",
         dashboard: "工作台",
-        account: "账户设置",
+        account: "个人资料",
+        billing: "套餐",
+        usage: "AI",
         signOut: "退出登录",
         working: "退出中..."
       },
@@ -61,7 +66,9 @@ export const dictionaries = {
           signUp: "注册",
           login: "登录",
           dashboard: "工作台",
-          account: "账户设置"
+          account: "个人资料",
+          billing: "套餐",
+          usage: "AI"
         },
         capabilitiesTitle: "产品预留位",
         capabilities: [
@@ -148,7 +155,7 @@ export const dictionaries = {
       title: "工作台",
       eyebrow: "已登录",
       description:
-        "这里保留模板当前可直接测试的功能：创建、读取 demo item，验证页面、Server Action、服务层、Supabase 和 RLS 的完整链路。",
+        "这里保留模板当前可直接测试的功能：AI 文案草稿、demo item 读写，以及页面、Server Action、服务层、Supabase 和 RLS 的完整链路。",
       demo: {
         title: "Demo 数据",
         description:
@@ -177,15 +184,67 @@ export const dictionaries = {
           active: "有效",
           archived: "已归档"
         }
+      },
+      ai: {
+        title: "AI 文案草稿",
+        description:
+          "输入一个产品场景，生成一段可替换的草稿，并查看本次调用的模式、模型和 Credit 状态。",
+        statusReady: "可试用",
+        statusError: "需检查",
+        serviceErrorTitle: "AI 服务暂不可用",
+        promptLabel: "输入",
+        promptPlaceholder: "例如：为一个面向独立开发者的项目管理工具写一句首页副标题",
+        run: "生成草稿",
+        running: "生成中...",
+        noResult: "输入内容后生成一段草稿。",
+        success: "已生成",
+        blocked: "已拦截",
+        failure: "生成失败",
+        result: "结果",
+        providerMode: "模式",
+        model: "模型",
+        modelSelectLabel: "模型",
+        gateAllowed: "额度通过",
+        gateBlocked: "额度不足",
+        creditRequested: "预估 Credit",
+        creditOutcome: "本次扣减",
+        creditUnit: "Credit",
+        usageRecord: "记录状态",
+        usageRecordPending: "待生成",
+        usageRecordDeferred: "暂未计入",
+        usageRecordRecorded: "已记录",
+        reasons: {
+          allowed: "可以使用。",
+          unauthenticated: "请先登录。",
+          entitlement_missing: "当前套餐暂不可用。",
+          quota_exhausted: "Credit 不足，请升级套餐或充值额度包。",
+          model_unavailable: "模型暂不可用。",
+          provider_unconfigured: "该模型尚未接入。",
+          budget_limited: "本次请求已被预算限制拦截。",
+          provider_failed: "模型服务暂时失败，请稍后重试。",
+          timeout: "请求超时，请稍后重试。",
+          duplicate: "重复请求已被拦截。",
+          validation_failed: "请检查输入内容。",
+          usage_record_deferred: "本次记录稍后同步。",
+          usage_recorded: "本次使用已记录。",
+          usage_record_failed: "结果已返回，但记录暂时失败。"
+        }
       }
     },
     account: {
       shellSubtitle: "eXtensible Web Launch Core",
-      title: "账户设置",
+      title: "个人资料",
       eyebrow: "Profile",
       description:
-        "维护当前登录用户的最小账户资料。这里只保留邮箱展示与 display name 保存这条真实可测试链路。",
+        "维护当前登录用户的个人资料。这里只保留邮箱展示与 display name 保存这条真实可测试链路。",
       emailLabel: "邮箱",
+      sections: {
+        ariaLabel: "账户功能",
+        group: "账户",
+        profile: "个人资料",
+        billing: "套餐",
+        usage: "AI"
+      },
       profile: {
         title: "个人资料",
         description: "保存后会写入当前用户自己的 profile 记录。",
@@ -195,52 +254,71 @@ export const dictionaries = {
         updated: "资料已更新。"
       },
       billing: {
-        title: "计费与权益",
-        description:
-          "这里展示 MVP2 Billing 底座当前可人工验收的状态：当前账户权益、Free/Pro 套餐配置、AI 额度包和 provider 映射边界。",
-        statusReady: "可验收",
-        statusNeedsReview: "需检查",
-        errorTitle: "Billing service 暂不可用",
-        currentPlan: "当前账户计划",
-        currentDescription:
-          "未产生可信订阅事实时，账户默认回退到 Free 权益；后续 Payment sandbox 或真实 provider 会通过服务端事件更新 Billing facts。",
-        currentProDescription:
-          "当前账户已读取到服务端 active Pro subscription，权益由 Billing service 统一判断。",
-        entitlements: "当前权益",
+        eyebrow: "Billing",
+        title: "套餐",
+        description: "管理当前套餐和权益。",
+        statusReady: "已同步",
+        statusNeedsReview: "暂不可用",
+        errorTitle: "套餐信息暂不可用",
+        currentPlan: "当前套餐",
+        subscriptionStatusLabel: "套餐状态",
+        entitlements: "已包含权益",
+        renewalDate: "续费时间",
+        noRenewalDate: "暂无自动续费",
+        viewUsage: "查看 AI",
+        planOptionsTitle: "选择套餐",
+        planOptionsDescription: "查看当前套餐，并选择适合当前阶段的套餐。",
+        currentPlanSelected: "当前套餐",
+        freePrice: "$0",
+        perMonth: "/ 月",
         recommended: "推荐",
         baseline: "基础",
-        enabled: "已启用",
-        disabled: "未启用",
-        creditPackTitle: "AI 额度包",
+        enabled: "已包含",
+        disabled: "未包含",
+        creditOverviewTitle: "Credit 账户",
+        creditOverviewDescription:
+          "这里展示当前可用于 AI 功能的 Credit，总量由套餐和额度包共同组成。",
+        creditAvailable: "可用 Credit",
+        planCreditRemaining: "套餐 Credit",
+        packCreditRemaining: "额度包 Credit",
+        creditConsumed: "已消耗 Credit",
+        creditPackTitle: "充值额度包",
         creditPackDescription:
-          "一次性购买 100,000 AI tokens，用于验证额度包购买和权益发放链路。",
-        sandboxOnly: "Sandbox 预留",
-        upgradePro: "升级 Pro",
-        buyCreditPack: "购买额度包",
+          "一次性增加 100,000 Credit，不改变当前套餐。",
+        sandboxOnly: "本地模拟",
+        upgradePlan: "升级套餐",
+        switchPlan: "切换套餐",
+        switchToFree: "切换到 Free",
+        buyCreditPack: "充值额度包",
         usageDemoTitle: "模拟 AI 使用",
         usageDemoDescription:
-          "先使用一次模拟 AI 生成功能，由后端检查 AI token 权益并写入 usage ledger。额度不足时才提示升级 Pro 或购买 AI 额度包。",
+          "先使用一次模拟 AI 生成功能，系统会检查 Credit 权益并记录本次消耗。额度不足时才提示升级套餐或充值额度包。",
         usageDemoRun: "模拟生成一次",
         usageDemoReady: "可使用",
         usageDemoBlocked: "需升级",
         usageDemoCost: 10000,
         usageDemoCostLabel: "本次消耗",
-        usageDemoRemaining: "剩余 AI tokens",
+        usageDemoRemaining: "剩余 Credit",
         usageDemoLastResult: "上次结果",
         usageDemoNoResult: "尚未使用",
         usageDemoConsumed: "已消耗",
         usageDemoLimitReached: "已触发额度限制",
         creditAmount: "额度",
         price: "价格",
-        providerMapping: "Provider 映射",
-        notMapped: "尚未绑定真实 price id",
         planNames: {
           free: "Free",
+          plus: "Plus",
           pro: "Pro"
         },
         planDescriptions: {
-          free: "默认免费计划，用于未付费账户、注册后试用和本地验收。",
-          pro: "升级后获得更多项目、页面、线索额度、AI tokens 和自定义域名能力。"
+          free: "适合作为模板的起步套餐，包含基础功能和可验证的 AI Credit。",
+          plus: "在 Free 基础上增加额外功能，并提升 AI Credit。",
+          pro: "在 Plus 基础上增加高级功能，适合展示完整付费层级。"
+        },
+        planInheritance: {
+          free: "基础能力",
+          plus: "包含 Free 全部内容",
+          pro: "包含 Plus 全部内容"
         },
         subscriptionStatuses: {
           none: "无订阅",
@@ -252,38 +330,69 @@ export const dictionaries = {
           refunded: "已退款"
         },
         features: {
-          projects: "项目数",
-          pages: "页面数",
-          leads: "线索数",
-          ai_tokens: "AI tokens",
-          custom_domain: "自定义域名"
+          projects: "基础功能一",
+          pages: "基础功能二",
+          leads: "额外功能一",
+          ai_tokens: "AI Credit",
+          custom_domain: "高级功能一"
         },
         units: {
           count: "次",
-          token: "tokens"
+          credit: "Credit",
+          token: "Credit"
+        },
+        planRecordsTitle: "套餐记录",
+        planRecordsDescription: "最近的套餐消费记录。",
+        emptyPlanRecords: "暂无套餐消费记录",
+        aiRecordsTitle: "记录",
+        aiRecordsDescription: "最近的充值和 Credit 消耗记录。",
+        creditRecordsTitle: "充值记录",
+        usageRecordsTitle: "Credit 消耗记录",
+        creditConsumptionRecordTitle: "AI Credit 消耗",
+        emptyCreditRecords: "暂无充值记录",
+        emptyUsageRecords: "暂无 Credit 消耗记录",
+        recordsErrorTitle: "记录暂不可用",
+        orderStatuses: {
+          pending: "处理中",
+          paid: "已完成",
+          failed: "失败",
+          refunded: "已退款",
+          canceled: "已取消"
+        },
+        usageStatuses: {
+          reserved: "已预留",
+          committed: "已记录",
+          released: "已释放",
+          failed: "失败"
         }
       },
+      usage: {
+        eyebrow: "Usage",
+        title: "AI",
+        description:
+          "集中管理可用 Credit、额度包充值和消耗记录。"
+      },
       payment: {
-        eyebrow: "MVP2 Payment",
+        eyebrow: "Payment",
         title: "升级与支付",
         description:
-          "选择套餐或额度包，确认费用后完成支付。当前本地环境使用 Sandbox 支付，不会真实扣款。",
-        statusReady: "可验收",
+          "选择套餐或额度包，确认费用后完成支付。当前本地环境使用模拟支付，不会真实扣款。",
+        statusReady: "可继续",
         statusNeedsReview: "需检查",
-        errorTitle: "Payment service 暂不可用",
-        providerTitle: "Provider 状态",
+        errorTitle: "支付暂不可用",
+        providerTitle: "支付方式",
         providerDescription:
-          "本地使用 Sandbox 支付方式。确认支付后由后端 Server Action 写入 Billing facts，前端页面本身不授予权益。",
-        provider: "Provider",
-        mode: "模式",
+          "当前使用本地模拟支付。确认后，系统会记录购买结果并刷新套餐权益。",
+        provider: "支付方式",
+        mode: "环境",
         entitlementSource: "权益来源",
-        billingFacts: "Billing 服务端事实",
-        currentBillingTitle: "当前 Billing 状态",
+        billingFacts: "以服务端记录为准",
+        currentBillingTitle: "当前套餐状态",
         currentBillingDescription:
-          "当前计划与额度始终从 Billing service 读取。",
+          "当前套餐和 Credit 始终以账户状态为准。",
         quotaGateTitle: "Quota gate 验收",
         quotaGateDescription:
-          "通过服务端 Billing entitlement 检查当前项目额度上限 +1。若被拦截，PostHog 会从服务端 decision 上报 quota_limit_reached。",
+          "通过服务端 Billing entitlement 检查占位权益是否可用。若被拦截，PostHog 会从服务端 decision 上报 quota_limit_reached。",
         quotaGateReady: "可检查",
         quotaGateChecked: "已检查",
         runQuotaGate: "运行 quota gate",
@@ -296,28 +405,28 @@ export const dictionaries = {
         quotaRemaining: "剩余额度",
         subscription: "订阅",
         creditPack: "额度包",
-        creditPackName: "AI 额度包",
+        creditPackName: "AI Credit 额度包",
         subscriptionDescription:
-          "解锁更多项目、页面、线索额度、AI tokens 和自定义域名能力。",
+          "解锁更高层级的模板权益和 AI Credit。",
         creditPackDescription:
-          "一次性增加 AI tokens 额度。",
+          "一次性增加 AI Credit。",
         priceId: "Price ID",
         price: "价格",
         providerMapping: "Provider 映射",
-        sandboxOnly: "sandbox",
-        startCheckout: "进入 Sandbox 支付",
+        sandboxOnly: "本地模拟",
+        startCheckout: "继续",
         currentPlanSelected: "当前已是此套餐",
         sandboxEyebrow: "支付确认",
-        proCheckoutTitle: "确认升级 Pro",
-        creditCheckoutTitle: "购买 AI 额度包",
+        planCheckoutTitle: "确认套餐变更",
+        creditCheckoutTitle: "充值 AI Credit",
         sandboxTitle: "确认支付",
         sandboxDescription:
-          "请确认本次支付信息。当前为本地 Sandbox 支付，不会产生真实扣款。",
-        sandboxMode: "本地 Sandbox",
+          "请确认本次支付信息。当前为本地模拟支付，不会产生真实扣款。",
+        sandboxMode: "本地模拟",
         sandboxActionTitle: "支付信息",
         sandboxActionDescription:
-          "点击确认支付后，后端会验证当前登录用户和 checkout session，并写入 Billing facts。",
-        checkoutSession: "Checkout Session",
+          "确认支付后，系统会验证当前用户和本次支付会话，再更新套餐权益。",
+        checkoutSession: "支付会话",
         confirmPayment: "确认支付",
         chooseSuccess: "确认支付",
         chooseCancel: "取消支付",
@@ -330,20 +439,21 @@ export const dictionaries = {
         },
         resultDescriptions: {
           success:
-            "后端已处理本次 Sandbox 支付，当前账户权益以 Billing 服务端状态为准。",
-          cancel: "你取消了本次支付，Billing 状态不会升级。",
-          failure: "支付失败，Billing 状态不会升级。"
+            "系统已处理本次模拟支付，当前账户权益以服务端记录为准。",
+          cancel: "你取消了本次支付，套餐状态不会升级。",
+          failure: "支付失败，套餐状态不会升级。"
         },
         resultLabels: {
           success: "成功",
           cancel: "取消",
           failure: "失败"
         },
-        resultBoundaryTitle: "Result 与 Billing 边界",
+        resultBoundaryTitle: "权益更新",
         resultBoundaryDescription:
-          "套餐和额度来自后端 Billing facts，不由浏览器 URL 直接决定。",
-        resultNoGrant: "后端 Billing facts",
+          "支付结果会先记录在服务端；页面只负责展示结果与当前权益。",
+        resultNoGrant: "以服务端记录为准",
         returnToAccount: "返回账户查看权益",
+        returnToBilling: "返回套餐",
         billingUnavailable: "Billing 不可用"
       }
     },
@@ -363,6 +473,10 @@ export const dictionaries = {
         notes: "备注不能超过 500 个字符。",
         visibility: "请选择有效的可见性。",
         general: "demo 数据暂时无法保存，请稍后重试。"
+      },
+      ai: {
+        prompt: "请输入至少 3 个字符。",
+        general: "AI 草稿暂时无法生成，请稍后重试。"
       }
     }
   },
@@ -390,13 +504,18 @@ export const dictionaries = {
       },
       nav: {
         dashboard: "Dashboard",
-        account: "Account"
+        account: "Account",
+        profile: "Profile",
+        billing: "Plans",
+        usage: "AI"
       },
       accountMenu: {
         label: "Account menu",
         signedIn: "Signed in",
         dashboard: "Dashboard",
-        account: "Account settings",
+        account: "Profile",
+        billing: "Plans",
+        usage: "AI",
         signOut: "Sign out",
         working: "Signing out..."
       },
@@ -411,7 +530,9 @@ export const dictionaries = {
           signUp: "Sign up",
           login: "Log in",
           dashboard: "Dashboard",
-          account: "Account settings"
+          account: "Profile",
+          billing: "Plans",
+          usage: "AI"
         },
         capabilitiesTitle: "Product slots",
         capabilities: [
@@ -498,7 +619,7 @@ export const dictionaries = {
       title: "Dashboard",
       eyebrow: "Signed in",
       description:
-        "This page keeps the template's directly testable flow: create and read demo items through the page, Server Action, service layer, Supabase, and RLS.",
+        "This page keeps directly testable flows: AI draft generation, demo item reads and writes, and the page, Server Action, service layer, Supabase, and RLS path.",
       demo: {
         title: "Demo data",
         description:
@@ -527,15 +648,67 @@ export const dictionaries = {
           active: "Active",
           archived: "Archived"
         }
+      },
+      ai: {
+        title: "AI draft",
+        description:
+          "Enter a product scenario, generate a replaceable draft, and review the provider mode, model, and Credit state for this call.",
+        statusReady: "Available",
+        statusError: "Check needed",
+        serviceErrorTitle: "AI service unavailable",
+        promptLabel: "Input",
+        promptPlaceholder: "Write a homepage subtitle for a project management tool for indie makers",
+        run: "Generate draft",
+        running: "Generating...",
+        noResult: "Enter input to generate a draft.",
+        success: "Generated",
+        blocked: "Blocked",
+        failure: "Failed",
+        result: "Result",
+        providerMode: "Mode",
+        model: "Model",
+        modelSelectLabel: "Model",
+        gateAllowed: "Credit allowed",
+        gateBlocked: "Credit blocked",
+        creditRequested: "Estimated Credit",
+        creditOutcome: "Credit deducted",
+        creditUnit: "Credit",
+        usageRecord: "Record state",
+        usageRecordPending: "Pending",
+        usageRecordDeferred: "Not recorded yet",
+        usageRecordRecorded: "Recorded",
+        reasons: {
+          allowed: "Allowed.",
+          unauthenticated: "Sign in first.",
+          entitlement_missing: "This model is not available on the current plan.",
+          quota_exhausted: "Credit is not enough. Upgrade or top up Credit.",
+          model_unavailable: "This model is unavailable.",
+          provider_unconfigured: "This model is not connected yet.",
+          budget_limited: "This request was blocked by the budget limit.",
+          provider_failed: "The model service failed. Try again later.",
+          timeout: "The request timed out. Try again later.",
+          duplicate: "Duplicate request blocked.",
+          validation_failed: "Review the input.",
+          usage_record_deferred: "This record will sync later.",
+          usage_recorded: "This usage was recorded.",
+          usage_record_failed: "The result returned, but recording failed."
+        }
       }
     },
     account: {
       shellSubtitle: "eXtensible Web Launch Core",
-      title: "Account settings",
+      title: "Profile",
       eyebrow: "Profile",
       description:
         "Maintain the minimal profile for the signed-in user. This page keeps only the real testable email and display-name flow.",
       emailLabel: "Email",
+      sections: {
+        ariaLabel: "Account sections",
+        group: "Account",
+        profile: "Profile",
+        billing: "Plans",
+        usage: "AI"
+      },
       profile: {
         title: "Profile",
         description: "Saving writes to the signed-in user's own profile row.",
@@ -545,52 +718,73 @@ export const dictionaries = {
         updated: "Profile updated."
       },
       billing: {
-        title: "Billing and access",
-        description:
-          "This surfaces the MVP2 Billing foundation for human review: current account entitlements, Free/Pro plan config, AI credit pack, and provider mapping boundaries.",
-        statusReady: "Reviewable",
-        statusNeedsReview: "Needs review",
-        errorTitle: "Billing service unavailable",
-        currentPlan: "Current account plan",
-        currentDescription:
-          "Without a trusted subscription fact, the account falls back to Free entitlements. Future Payment sandbox or real provider events update Billing facts on the server.",
-        currentProDescription:
-          "This account has an active Pro subscription from server-side Billing facts.",
-        entitlements: "Current entitlements",
+        eyebrow: "Billing",
+        title: "Plans",
+        description: "Manage the current plan and access.",
+        statusReady: "Synced",
+        statusNeedsReview: "Unavailable",
+        errorTitle: "Plan details unavailable",
+        currentPlan: "Current plan",
+        subscriptionStatusLabel: "Plan status",
+        entitlements: "Included access",
+        renewalDate: "Renewal date",
+        noRenewalDate: "No automatic renewal",
+        viewUsage: "View AI",
+        planOptionsTitle: "Choose a plan",
+        planOptionsDescription:
+          "Review the current plan and choose the plan that fits the current stage.",
+        currentPlanSelected: "Current plan",
+        freePrice: "$0",
+        perMonth: "/ month",
         recommended: "Recommended",
         baseline: "Baseline",
-        enabled: "Enabled",
-        disabled: "Disabled",
-        creditPackTitle: "AI credit pack",
+        enabled: "Included",
+        disabled: "Not included",
+        creditOverviewTitle: "Credit account",
+        creditOverviewDescription:
+          "This shows the Credit currently available for AI features. The total comes from the plan and credit packs.",
+        creditAvailable: "Available Credit",
+        planCreditRemaining: "Plan Credit",
+        packCreditRemaining: "Credit-pack Credit",
+        creditConsumed: "Consumed Credit",
+        creditPackTitle: "Credit pack top-up",
         creditPackDescription:
-          "Buy 100,000 AI tokens once to verify credit-pack purchase and entitlement grants.",
-        sandboxOnly: "Sandbox reserved",
-        upgradePro: "Upgrade to Pro",
-        buyCreditPack: "Buy credit pack",
+          "Add 100,000 Credit once without changing the current plan.",
+        sandboxOnly: "Local simulation",
+        upgradePlan: "Upgrade plan",
+        switchPlan: "Switch plan",
+        switchToFree: "Switch to Free",
+        buyCreditPack: "Top up credit pack",
         usageDemoTitle: "Simulate AI usage",
         usageDemoDescription:
-          "Use one simulated AI generation first. The backend checks AI token access and writes usage ledger rows. Upgrade to Pro or buy an AI credit pack only when quota is blocked.",
+          "Use one simulated AI generation first. The system checks Credit access and records the usage. Upgrade the plan or top up a credit pack only when quota is blocked.",
         usageDemoRun: "Generate once",
         usageDemoReady: "Available",
         usageDemoBlocked: "Upgrade needed",
         usageDemoCost: 10000,
         usageDemoCostLabel: "This use costs",
-        usageDemoRemaining: "Remaining AI tokens",
+        usageDemoRemaining: "Remaining Credit",
         usageDemoLastResult: "Last result",
         usageDemoNoResult: "Not used yet",
         usageDemoConsumed: "Consumed",
         usageDemoLimitReached: "Quota limit reached",
         creditAmount: "Credit",
         price: "Price",
-        providerMapping: "Provider mapping",
-        notMapped: "No real price id yet",
         planNames: {
           free: "Free",
+          plus: "Plus",
           pro: "Pro"
         },
         planDescriptions: {
-          free: "The default free plan for unpaid accounts, signup trials, and local review.",
-          pro: "Upgrade for higher project, page, lead, AI token, and custom-domain limits.",
+          free: "For first use, with base template features and verifiable AI Credit.",
+          plus:
+            "Adds extra template access on top of Free and increases AI Credit.",
+          pro: "Adds advanced template access on top of Plus for a full paid-tier example.",
+        },
+        planInheritance: {
+          free: "Base access",
+          plus: "Includes everything in Free",
+          pro: "Includes everything in Plus"
         },
         subscriptionStatuses: {
           none: "No subscription",
@@ -602,38 +796,69 @@ export const dictionaries = {
           refunded: "Refunded"
         },
         features: {
-          projects: "Projects",
-          pages: "Pages",
-          leads: "Leads",
-          ai_tokens: "AI tokens",
-          custom_domain: "Custom domain"
+          projects: "Base feature 1",
+          pages: "Base feature 2",
+          leads: "Extra feature 1",
+          ai_tokens: "AI Credit",
+          custom_domain: "Advanced feature 1"
         },
         units: {
           count: "count",
-          token: "tokens"
+          credit: "Credit",
+          token: "Credit"
+        },
+        planRecordsTitle: "Plan records",
+        planRecordsDescription: "Recent plan purchase records.",
+        emptyPlanRecords: "No plan purchase records yet",
+        aiRecordsTitle: "Records",
+        aiRecordsDescription: "Recent top-up and Credit consumption records.",
+        creditRecordsTitle: "Top-up records",
+        usageRecordsTitle: "Credit consumption records",
+        creditConsumptionRecordTitle: "AI Credit consumption",
+        emptyCreditRecords: "No top-up records yet",
+        emptyUsageRecords: "No Credit consumption records yet",
+        recordsErrorTitle: "Records unavailable",
+        orderStatuses: {
+          pending: "Pending",
+          paid: "Completed",
+          failed: "Failed",
+          refunded: "Refunded",
+          canceled: "Canceled"
+        },
+        usageStatuses: {
+          reserved: "Reserved",
+          committed: "Recorded",
+          released: "Released",
+          failed: "Failed"
         }
       },
+      usage: {
+        eyebrow: "Usage",
+        title: "AI",
+        description:
+          "Manage available Credit, credit-pack top-ups, and consumption records."
+      },
       payment: {
-        eyebrow: "MVP2 Payment",
+        eyebrow: "Payment",
         title: "Upgrade and payment",
         description:
-          "Choose a plan or credit pack, review the price, and confirm payment. The local environment uses Sandbox payments and never creates a real charge.",
-        statusReady: "Reviewable",
+          "Choose a plan or credit pack, review the price, and confirm payment. The local environment uses simulated payment and never creates a real charge.",
+        statusReady: "Ready",
         statusNeedsReview: "Needs review",
-        errorTitle: "Payment service unavailable",
-        providerTitle: "Provider status",
+        errorTitle: "Payment unavailable",
+        providerTitle: "Payment method",
         providerDescription:
-          "The local environment uses Sandbox payments. Confirming payment writes Billing facts through a backend Server Action; the frontend page itself does not grant entitlement.",
-        provider: "Provider",
-        mode: "Mode",
+          "The local environment uses simulated payment. After confirmation, the system records the purchase result and refreshes plan access.",
+        provider: "Payment method",
+        mode: "Environment",
         entitlementSource: "Entitlement source",
-        billingFacts: "Billing server facts",
-        currentBillingTitle: "Current Billing status",
+        billingFacts: "Confirmed by server records",
+        currentBillingTitle: "Current plan status",
         currentBillingDescription:
-          "Current plan and credits always come from the Billing service.",
+          "Current plan and Credit always come from the account state.",
         quotaGateTitle: "Quota gate review",
         quotaGateDescription:
-          "Runs a server-side Billing entitlement check with one unit above the current project limit. When blocked, PostHog receives quota_limit_reached from the service decision.",
+          "Runs a server-side Billing entitlement check for a placeholder access item. When blocked, PostHog receives quota_limit_reached from the service decision.",
         quotaGateReady: "Ready",
         quotaGateChecked: "Checked",
         runQuotaGate: "Run quota gate",
@@ -646,28 +871,28 @@ export const dictionaries = {
         quotaRemaining: "Remaining",
         subscription: "Subscription",
         creditPack: "Credit pack",
-        creditPackName: "AI credit pack",
+        creditPackName: "AI Credit pack",
         subscriptionDescription:
-          "Unlock higher project, page, lead, AI token, and custom-domain limits.",
+          "Unlock higher-tier template access and AI Credit.",
         creditPackDescription:
-          "Add a one-time AI token allowance.",
+          "Add one-time AI Credit.",
         priceId: "Price ID",
         price: "Price",
         providerMapping: "Provider mapping",
-        sandboxOnly: "sandbox",
-        startCheckout: "Open Sandbox payment",
+        sandboxOnly: "local simulation",
+        startCheckout: "Continue",
         currentPlanSelected: "Current plan",
         sandboxEyebrow: "Payment confirmation",
-        proCheckoutTitle: "Confirm Pro upgrade",
-        creditCheckoutTitle: "Buy AI credit pack",
+        planCheckoutTitle: "Confirm plan change",
+        creditCheckoutTitle: "Top up AI Credit",
         sandboxTitle: "Confirm payment",
         sandboxDescription:
-          "Review this payment. The local Sandbox payment method does not create a real charge.",
-        sandboxMode: "Local Sandbox",
+          "Review this payment. The local simulated payment method does not create a real charge.",
+        sandboxMode: "Local simulation",
         sandboxActionTitle: "Payment details",
         sandboxActionDescription:
-          "Confirming payment lets the backend verify the signed-in user and checkout session before writing Billing facts.",
-        checkoutSession: "Checkout session",
+          "After confirmation, the system verifies the signed-in user and this payment session before updating plan access.",
+        checkoutSession: "Payment session",
         confirmPayment: "Confirm payment",
         chooseSuccess: "Confirm payment",
         chooseCancel: "Cancel payment",
@@ -680,21 +905,22 @@ export const dictionaries = {
         },
         resultDescriptions: {
           success:
-            "The backend processed this Sandbox payment. Current account access follows the server-side Billing state.",
+            "The system processed this simulated payment. Current account access follows server records.",
           cancel:
-            "This payment was canceled. Billing status should not upgrade.",
-          failure: "Payment failed. Billing status should not upgrade."
+            "This payment was canceled. The plan should not upgrade.",
+          failure: "Payment failed. The plan should not upgrade."
         },
         resultLabels: {
           success: "Success",
           cancel: "Canceled",
           failure: "Failed"
         },
-        resultBoundaryTitle: "Result and Billing boundary",
+        resultBoundaryTitle: "Access update",
         resultBoundaryDescription:
-          "Plans and credits come from backend Billing facts, not directly from the browser URL.",
-        resultNoGrant: "Backend Billing facts",
+          "Payment results are recorded on the server first; this page only shows the result and current access.",
+        resultNoGrant: "Confirmed by server records",
         returnToAccount: "Return to account",
+        returnToBilling: "Return to plans",
         billingUnavailable: "Billing unavailable"
       }
     },
@@ -714,6 +940,10 @@ export const dictionaries = {
         notes: "Notes must be 500 characters or fewer.",
         visibility: "Choose a valid visibility.",
         general: "Demo data could not be saved. Try again later."
+      },
+      ai: {
+        prompt: "Enter at least 3 characters.",
+        general: "AI draft could not be generated. Try again later."
       }
     }
   }

@@ -24,7 +24,7 @@ export function Badge({
   return (
     <span
       className={cx(
-        "inline-flex max-w-full items-center rounded-md border px-2.5 py-1 text-xs font-medium leading-none",
+        "inline-flex max-w-full shrink-0 items-center whitespace-nowrap rounded-md border px-2.5 py-1 text-xs font-medium leading-none",
         toneClasses[tone]
       )}
     >
@@ -132,7 +132,7 @@ export function AppShell({
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
                   )}
                   href={item.href}
-                  key={item.label}
+                  key={item.href}
                 >
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center">
                     {item.icon}
@@ -160,21 +160,25 @@ export function AppShell({
                 {action}
               </div>
             </div>
-            <div className="flex gap-1 overflow-x-auto border-t border-slate-100 px-4 py-2 lg:hidden">
+            <div className="grid grid-cols-2 gap-1 border-t border-slate-100 px-4 py-2 lg:hidden">
               {navItems.map((item) => (
                 <a
                   aria-current={item.active ? "page" : undefined}
                   className={cx(
-                    "inline-flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
+                    "flex min-h-10 min-w-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
                     item.active
                       ? "bg-slate-950 text-white"
                       : "text-slate-600 hover:bg-slate-100"
                   )}
                   href={item.href}
-                  key={item.label}
+                  key={item.href}
                 >
-                  {item.icon}
-                  {item.label}
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                    {item.icon}
+                  </span>
+                  <span className="min-w-0 [overflow-wrap:anywhere]">
+                    {item.label}
+                  </span>
                 </a>
               ))}
             </div>

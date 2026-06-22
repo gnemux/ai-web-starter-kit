@@ -11,11 +11,11 @@ MVP2 Payment establishes a reviewable sandbox checkout path before any real paym
 
 ## Problem
 
-Billing defines Free, Pro, and credit-pack contracts, but reviewers need a visible Payment path to confirm checkout behavior, result states, and the boundary between navigation status and trusted Billing facts.
+Billing defines Free, Plus, Pro, and credit-pack contracts, but reviewers need a visible Payment path to confirm checkout behavior, result states, and the boundary between navigation status and trusted Billing facts.
 
 ## Goals
 
-- Provide a page-level checkout review path from Account or Billing into Payment.
+- Provide page-level checkout review paths from Plans and AI into Payment.
 - Implement a Sandbox Payment Provider that requires no real SDK, key, live payment mode, or webhook secret.
 - Show success, cancel, and failure result states without granting entitlement from route params.
 - Keep Payment logic behind service/provider boundaries instead of scattering checkout behavior across pages.
@@ -26,15 +26,15 @@ Billing defines Free, Pro, and credit-pack contracts, but reviewers need a visib
 - Do not integrate Stripe, Paddle, Creem, Dodo Payments, Alipay, WeChat Pay, or another real provider.
 - Do not enable live payment, production provider secrets, real user payments, real refunds, reconciliation, invoices, split payments, taxes, or production merchant settlement.
 - Do not collect card data, tax data, invoices, refunds, reconciliation, or settlement records.
-- Do not grant Pro entitlement or AI credits directly from the sandbox success URL.
+- Do not grant paid-plan entitlement or AI credits directly from the sandbox success URL.
 - Do not add payment secrets to `.env.example`, Git, Linear, screenshots, or browser code.
 
 ## User Journey
 
 ```text
-/account Billing review
--> Payment review page
--> start sandbox checkout for Pro or AI credit pack
+/account/billing or /account/usage
+-> Payment review page or direct sandbox checkout
+-> start sandbox checkout for Plus, Pro, or AI credit pack
 -> sandbox provider page
 -> success, cancel, or failure result
 -> Billing status remains derived from trusted server-side facts
@@ -43,7 +43,7 @@ Billing defines Free, Pro, and credit-pack contracts, but reviewers need a visib
 ## Requirements
 
 - The Payment review surface must be protected by Auth.
-- A reviewer must be able to start checkout for `pro_monthly` and `ai_credit_pack_100k`.
+- A reviewer must be able to start checkout for `plus_monthly`, `pro_monthly`, and `ai_credit_pack_100k`.
 - The sandbox provider must return a deterministic provider mode and a reviewable session URL.
 - The result page must clearly state that the result URL is navigation evidence only.
 - Billing status shown after checkout must still come from `apps/web/lib/services/billing.ts`.
@@ -70,6 +70,6 @@ Billing defines Free, Pro, and credit-pack contracts, but reviewers need a visib
 ## Stage Boundary
 
 - MVP2: Payment foundation, SandboxProvider, payment events, analytics events, env placeholders, and security notes.
-- MVP3: Product Validation Kit can validate Free/Pro SaaS flow with SandboxProvider. A real Provider adapter may be tested only in test mode with live payment disabled.
+- MVP3: Product Validation Kit can validate Free/Plus/Pro SaaS flow with SandboxProvider. A real Provider adapter may be tested only in test mode with live payment disabled.
 - MVP4: overseas/china adapter, env template, mock/test-mode strategy, and launch checklist planning.
 - MVP5: production payment readiness for a real vertical product through `GNE-201`.

@@ -50,6 +50,25 @@ Before making code or documentation edits, Codex must inspect the current branch
 - `integrations`: provider setup, environment variables, webhook rules, operational notes.
 - `specs`: product and engineering intent.
 
+## Return Context Contract
+
+Any interrupting flow must preserve the user context that launched it. This includes
+login redirects, checkout, authorization, confirmation screens, and provider-hosted
+or sandbox review pages.
+
+- Do not hardcode a broad fallback such as `/account` when the user entered from a
+  narrower state.
+- Plain entry points should return to their plain source page.
+- Blocked quota or paywall entry points should return to the same blocked context
+  when the user cancels or fails the interrupting flow.
+- Success may navigate to a result or refreshed entitlement state, but success URLs
+  must not be treated as trusted entitlement proof.
+- Cancel and failure must not grant entitlement, must not clear the user's relevant
+  pre-flow state, and must not invent a blocked state when the entry point was not
+  blocked.
+- Preserve only safe, app-local paths. Reject external URLs, protocol-relative URLs,
+  or arbitrary provider-controlled redirect targets.
+
 ## Verification
 
 At minimum:

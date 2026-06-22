@@ -67,6 +67,14 @@ POST server action from /account/payment
 
 The service validates sellable prices using `packages/core/src/billing.ts`. Free prices cannot create checkout sessions.
 
+Checkout entry points must follow the project return context contract in
+`context/codex-rules.md`. In practice:
+
+- a plain `/account` upgrade or credit-pack entry returns to plain `/account` on cancel or failure;
+- a quota/paywall-blocked entry returns to the same blocked Account context on cancel or failure;
+- cancel and failure must not grant entitlement, must not clear the relevant pre-checkout state, and must not create a blocked state when the user did not enter from one;
+- success may return to Account or a result page after the protected server action writes trusted Billing facts.
+
 ## Webhook And Idempotency Rules
 
 Future real providers must verify raw payload signatures before parsing business facts. MVP2 records the reusable event model and a no-side-effect sandbox webhook route.

@@ -47,6 +47,7 @@ export function BillingOverview({
   const creditPack = defaultBillingPrices.find(
     (price) => price.id === "ai_credit_pack_100k"
   );
+  const accountReturnTo = encodeURIComponent(buildUsageReturnTo(usageReview));
 
   return (
     <div className="flex flex-col gap-4">
@@ -127,12 +128,17 @@ export function BillingOverview({
             key={plan.id}
             labels={labels}
             plan={plan}
+            returnTo={accountReturnTo}
           />
         ))}
       </div>
 
       {creditPack ? (
-        <CreditPackReview labels={labels} price={creditPack} />
+        <CreditPackReview
+          labels={labels}
+          price={creditPack}
+          returnTo={accountReturnTo}
+        />
       ) : null}
     </div>
   );
@@ -166,6 +172,7 @@ function UsageDemoCard({
   const canConsume = billingResult.ok && remaining >= labels.usageDemoCost;
   const wasBlocked = usageReview?.result === "blocked";
   const canAttemptUsage = billingResult.ok && !wasBlocked;
+  const usageReturnTo = encodeURIComponent(buildUsageReturnTo(usageReview));
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/[0.03]">
@@ -199,7 +206,7 @@ function UsageDemoCard({
               {billingResult.ok && billingResult.data.planId !== "pro" ? (
                 <Button
                   className="w-full"
-                  href="/account/payment/checkout?price_id=pro_monthly&return_to=%2Faccount"
+                  href={`/account/payment/checkout?price_id=pro_monthly&return_to=${usageReturnTo}`}
                 >
                   {labels.upgradePro}
                 </Button>
@@ -207,7 +214,7 @@ function UsageDemoCard({
               {creditPack ? (
                 <Button
                   className="w-full"
-                  href={`/account/payment/checkout?price_id=${creditPack.id}&return_to=%2Faccount`}
+                  href={`/account/payment/checkout?price_id=${creditPack.id}&return_to=${usageReturnTo}`}
                   variant="secondary"
                 >
                   {labels.buyCreditPack}
@@ -250,14 +257,42 @@ function UsageDemoCard({
   );
 }
 
+function buildUsageReturnTo(
+  usageReview: {
+    consumed: string;
+    featureKey: string;
+    plan: string;
+    reason: string;
+    remaining: string;
+    result: string;
+  } | null
+) {
+  if (usageReview?.result !== "blocked") {
+    return "/account";
+  }
+
+  const params = new URLSearchParams({
+    consumed: usageReview.consumed,
+    feature_key: usageReview.featureKey,
+    plan: usageReview.plan,
+    reason: usageReview.reason,
+    remaining: usageReview.remaining,
+    usage_result: usageReview.result
+  });
+
+  return `/account?${params.toString()}`;
+}
+
 function PlanReviewCard({
   currentPlanId,
   labels,
-  plan
+  plan,
+  returnTo
 }: {
   currentPlanId?: BillingPlan["id"];
   labels: Dictionary["account"]["billing"];
   plan: BillingPlan;
+  returnTo: string;
 }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/[0.03]">
@@ -293,7 +328,9 @@ function PlanReviewCard({
 
       {plan.id === "pro" && currentPlanId !== "pro" ? (
         <div className="mt-4">
-          <Button href="/account/payment/checkout?price_id=pro_monthly&return_to=%2Faccount">
+          <Button
+            href={`/account/payment/checkout?price_id=pro_monthly&return_to=${returnTo}`}
+          >
             {labels.upgradePro}
           </Button>
         </div>
@@ -304,10 +341,12 @@ function PlanReviewCard({
 
 function CreditPackReview({
   labels,
-  price
+  price,
+  returnTo
 }: {
   labels: Dictionary["account"]["billing"];
   price: BillingPrice;
+  returnTo: string;
 }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/[0.03]">
@@ -351,7 +390,7 @@ function CreditPackReview({
       </dl>
       <div className="mt-4">
         <Button
-          href={`/account/payment/checkout?price_id=${price.id}&return_to=%2Faccount`}
+          href={`/account/payment/checkout?price_id=${price.id}&return_to=${returnTo}`}
           variant="secondary"
         >
           {labels.buyCreditPack}

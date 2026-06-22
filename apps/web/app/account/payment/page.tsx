@@ -8,7 +8,9 @@ import {
 } from "@starter/ui";
 import {
   defaultBillingPlans,
+  compareBillingPlans,
   type BillingAllowance,
+  type BillingPlanId,
   type PaymentCheckoutOption
 } from "@starter/core";
 
@@ -135,7 +137,7 @@ function CheckoutOptionCard({
   labels,
   option
 }: {
-  currentPlanId?: string;
+  currentPlanId?: BillingPlanId;
   labels: Dictionary["account"]["payment"];
   option: PaymentCheckoutOption;
 }) {
@@ -145,6 +147,11 @@ function CheckoutOptionCard({
   const isCurrentPlan =
     option.checkoutKind === "subscription" &&
     option.price.planId === currentPlanId;
+  const isIncludedLowerPlan =
+    option.checkoutKind === "subscription" &&
+    option.price.planId !== null &&
+    currentPlanId !== undefined &&
+    compareBillingPlans(option.price.planId, currentPlanId) < 0;
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-900/[0.03]">
@@ -175,9 +182,16 @@ function CheckoutOptionCard({
         />
       </dl>
 
-      {isCurrentPlan ? (
+      {isCurrentPlan || isIncludedLowerPlan ? (
         <div className="mt-4">
-          <StatusBadge label={labels.currentPlanSelected} status="ready" />
+          <StatusBadge
+            label={
+              isCurrentPlan
+                ? labels.currentPlanSelected
+                : labels.includedInCurrentPlan
+            }
+            status="ready"
+          />
         </div>
       ) : (
         <form action={startPaymentCheckoutAction} className="mt-4">

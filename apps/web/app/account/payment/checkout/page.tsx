@@ -18,9 +18,24 @@ export default async function PaymentCheckoutPage({
     redirect(result.data.redirectTo);
   }
 
-  redirect(returnTo?.startsWith("/account") ? returnTo : "/account");
+  redirect(buildCheckoutErrorRedirect(returnTo, result.error.message));
 }
 
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function buildCheckoutErrorRedirect(
+  returnTo: string | undefined,
+  message: string
+) {
+  const fallbackPath = "/account";
+  const safeReturnTo = returnTo?.startsWith("/account") ? returnTo : fallbackPath;
+  const [pathname, search = ""] = safeReturnTo.split("?");
+  const params = new URLSearchParams(search);
+
+  params.set("checkout_result", "error");
+  params.set("checkout_error", message);
+
+  return `${pathname}?${params.toString()}`;
 }

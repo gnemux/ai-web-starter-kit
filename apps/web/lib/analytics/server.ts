@@ -7,6 +7,7 @@ import type {
   PaymentAnalyticsEvent,
   PaymentAnalyticsProperties
 } from "@starter/core";
+import { headers } from "next/headers";
 
 import { getAnalyticsBaseProperties, readOptionalPublicEnv } from "./config";
 
@@ -36,6 +37,8 @@ export async function trackServerEvent({
   }
 
   try {
+    const requestContextProperties = await getServerRequestContextProperties();
+
     const response = await fetch(`${posthogHost.replace(/\/$/, "")}/capture/`, {
       body: JSON.stringify({
         api_key: posthogKey,
@@ -43,6 +46,7 @@ export async function trackServerEvent({
         event,
         properties: {
           ...getAnalyticsBaseProperties(module),
+          ...requestContextProperties,
           ...sanitizeServerProperties(properties)
         }
       }),
@@ -65,6 +69,62 @@ export async function trackServerEvent({
       message: error instanceof Error ? error.message : "unknown_error"
     });
   }
+}
+
+async function getServerRequestContextProperties(): Promise<
+  Record<string, unknown>
+> {
+  const baseProperties = {
+    $lib: "server"
+  };
+
+  try {
+    const requestHeaders = await headers();
+    const currentUrl = resolveCurrentUrl(requestHeaders);
+    const host =
+      requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+
+    return {
+      ...baseProperties,
+      ...(currentUrl
+        ? {
+            $current_url: currentUrl,
+            current_url: currentUrl
+          }
+        : {}),
+      ...(host ? { host } : {})
+    };
+  } catch {
+    return baseProperties;
+  }
+}
+
+function resolveCurrentUrl(requestHeaders: Headers): string | null {
+  const referer = requestHeaders.get("referer");
+
+  if (referer) {
+    return referer;
+  }
+
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  const path =
+    requestHeaders.get("next-url") ??
+    requestHeaders.get("x-next-url") ??
+    requestHeaders.get("x-invoke-path");
+
+  if (!host || !path) {
+    return null;
+  }
+
+  const protocol =
+    requestHeaders.get("x-forwarded-proto") ??
+    (host.includes("localhost") || host.startsWith("127.0.0.1")
+      ? "http"
+      : "https");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${protocol}://${host}${normalizedPath}`;
 }
 
 function sanitizeServerProperties(

@@ -17,6 +17,7 @@
 
 - 明确开发者、Repo 拥有者和 AI Coding Agent 的协作责任。
 - 让 AI 在开始开发前检查当前分支、工作区状态和任务范围。
+- 让 AI 默认遵循 Minimal Implementation First，优先做最小可验收闭环，减少过度设计、过度抽象和一次性组件库。
 - 防止 AI 或开发者在旧功能分支上继续开发新任务。
 - 防止直接在 `main` 上实现新功能或修复，除非用户明确要求且风险已说明。
 - 固化当前 Vercel 规则：非 `main` 分支不自动部署，`main` 合并后触发 Production。
@@ -60,6 +61,7 @@ kick off Linear task
 - PR merge 后删除远程分支；开发者同步 `main` 后删除本地任务分支。
 - Linear 状态建议：开发完成并创建 PR 后进入 `In Review`；PR merge 并完成 Production 验证后进入 `Done`。
 - AI Coding Agent 开始任何代码或文档修改前必须检查当前分支和工作区状态。
+- AI Coding Agent 实现 MVP 功能时必须优先选择最小可工作的改动；不得无必要引入新依赖、新抽象或大型组件库；但安全、支付、Auth、数据库代码不能以“最小”为理由省略校验、幂等、日志、权限、RLS、Webhook 校验或环境隔离。
 - AI Coding Agent 如果发现当前在 `main` 且需要实现新任务，应先从 `main` 新开本地分支。
 - AI Coding Agent 如果发现当前在旧任务分支、已 merge 分支或与新任务不匹配的分支，应提示用户并建议先切回 `main` 再新开分支。
 - AI Coding Agent 如果工作区已有未提交变更，不得擅自切分支、覆盖或丢弃，应先说明状态并保护已有变更。

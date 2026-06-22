@@ -40,6 +40,19 @@ read project rules
 -> summarize branch and next PR action
 ```
 
+## Minimal Implementation First
+
+AI Coding Agent must use a minimal-implementation-first rule for MVP work. The intent is to reduce overbuilding while preserving correctness and reviewability.
+
+- Prefer the smallest working change.
+- Do not introduce new dependencies unless clearly necessary.
+- Reuse existing components, utilities, and patterns.
+- Avoid speculative abstractions and future-proofing.
+- Do not create large component libraries for one-off UI.
+- Before adding code, check whether existing code can be modified or deleted.
+- If a larger change is necessary, state why the smaller path is insufficient before implementing it.
+- For security, payment, auth, and database code, minimal does not mean skipping validation, idempotency, logging, permission checks, RLS, webhook verification, or environment isolation.
+
 ## Branch Rules For AI Agents
 
 - Before edits, run a local status check equivalent to `git status --short --branch` and identify the current branch.

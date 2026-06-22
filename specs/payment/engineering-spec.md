@@ -28,7 +28,7 @@
 ```text
 Billing price config in packages/core
 -> Payment service in apps/web/lib/services/payment.ts
--> Sandbox Payment Provider in apps/web/lib/providers/server.ts
+-> selected Payment Provider in apps/web/lib/providers/server.ts
 -> protected review pages under /account/payment
 -> result/status surface
 -> sandbox server action or future webhook writes trusted Billing facts
@@ -37,6 +37,13 @@ Billing price config in packages/core
 Pages must call the service boundary. Pages and components must not import a real payment SDK, write Billing tables directly, or infer entitlement from URL state.
 
 MVP2 must not introduce live payment, production provider secrets, real user payments, real refunds, reconciliation, invoices, split payments, taxes, or production merchant settlement. Production payment readiness belongs to `GNE-201 MVP5 PAYMENT-00`.
+
+Provider selection:
+
+- `PAYMENT_PROVIDER=sandbox` selects the default SandboxProvider and remains the MVP2/MVP3 mainline.
+- `PAYMENT_PROVIDER=creem` is allowed only for `GNE-100 PAYMENT-08` test-mode spike work.
+- Creem test mode must keep `PAYMENT_MODE=test` and `PAYMENT_LIVE_ENABLED=false`.
+- Creem success URLs are navigation evidence only. They must not grant Pro entitlement or AI credits without trusted server-side processing.
 
 ## Sandbox Provider Contract
 
@@ -64,6 +71,8 @@ POST server action from /account/payment
 -> server action records sandbox Billing facts
 -> /account/payment/result shows result status and current Billing facts
 ```
+
+For `GNE-100 PAYMENT-08`, the same service boundary may create a Creem test checkout session through the Creem adapter. That path returns a hosted Creem test checkout URL and is used only to prove that the third-party provider can create a test checkout/payment visible in the Creem test dashboard. Until a later webhook issue adds provider-specific signature verification and trusted processing, the Creem success URL must not mutate Billing facts.
 
 The service validates sellable prices using `packages/core/src/billing.ts`. Free prices cannot create checkout sessions.
 
@@ -107,12 +116,14 @@ Payment owns checkout sessions and payment events. Billing owns order, subscript
 ## Security
 
 - No real payment SDK is installed in this pass.
+- Creem `PAYMENT-08` uses a server-side REST test adapter only; it must not add a browser SDK or expose provider secrets.
 - No real payment key, webhook secret, account identifier, card data, raw webhook payload, or customer data is committed.
 - Payment secrets remain server-only and never use `NEXT_PUBLIC_`.
 - Sandbox session IDs and result URLs are not authentication or entitlement proofs.
 - `.env.example` may contain payment placeholders only; real provider keys, webhook secrets, service-role keys, and screenshots containing secrets must not enter Git, Linear, README, PR text, or browser-visible code.
 - Real provider adapters before MVP5 are test-mode only and must keep live payment disabled.
 - `PAYMENT_PROVIDER=sandbox`, `PAYMENT_MODE=sandbox`, and `PAYMENT_LIVE_ENABLED=false` are the default MVP2/MVP3 posture.
+- Local `GNE-100` verification may persistently set ignored env to `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, and `PAYMENT_LIVE_ENABLED=false`.
 - `PAYMENT_PROVIDER_SECRET`, `PAYMENT_SECRET_KEY`, and `PAYMENT_WEBHOOK_SECRET` are server-only placeholders. They must never use `NEXT_PUBLIC_`.
 
 ## Analytics Events

@@ -4,6 +4,12 @@ export const billingPlanIds = ["free", "plus", "pro"] as const;
 
 export type BillingPlanId = (typeof billingPlanIds)[number];
 
+const billingPlanRank: Record<BillingPlanId, number> = {
+  free: 0,
+  plus: 1,
+  pro: 2
+};
+
 export const billingPriceIds = [
   "free",
   "plus_monthly",
@@ -253,6 +259,20 @@ export function getBillingPlan(planId: BillingPlanId): BillingPlan {
     defaultBillingPlans.find((plan) => plan.id === planId) ??
     defaultBillingPlans[0]
   );
+}
+
+export function compareBillingPlans(
+  leftPlanId: BillingPlanId,
+  rightPlanId: BillingPlanId
+): number {
+  return billingPlanRank[leftPlanId] - billingPlanRank[rightPlanId];
+}
+
+export function isBillingPlanUpgrade(
+  currentPlanId: BillingPlanId,
+  targetPlanId: BillingPlanId
+): boolean {
+  return compareBillingPlans(targetPlanId, currentPlanId) > 0;
 }
 
 export function getBillingPrice(

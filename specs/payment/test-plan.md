@@ -22,7 +22,7 @@ rg -n "PAYMENT_PROVIDER|PAYMENT_MODE|PAYMENT_LIVE_ENABLED|PAYMENT_PROVIDER_SECRE
 Expected:
 
 - Server-only provider imports appear only in server-side service or route files.
-- No real payment SDK imports are introduced.
+- No real payment SDK imports are introduced; optional provider spikes use server-side REST adapters.
 - Payment secrets are never public browser variables.
 - Payment env placeholders exist and keep sandbox/test/live mode separate from provider secrets.
 
@@ -50,6 +50,19 @@ Expected:
    - success is shown as a processed sandbox result;
    - current Billing status becomes the selected paid plan because the protected server action wrote trusted sandbox Billing facts.
 17. If `NEXT_PUBLIC_POSTHOG_KEY` is configured locally, verify PostHog Activity shows `checkout_started`, `payment_succeeded`, `entitlement_granted`, and `quota_limit_reached` when a gated usage action triggers it, with `module=payment`, `provider=sandbox`, `payment_mode=sandbox`, `plan`, `price_id` when applicable, and no secret/raw payload fields.
+
+## Creem Test-Mode Spike Smoke
+
+This applies only to `GNE-100 PAYMENT-08` after `GNE-99` outputs `Go test mode`.
+
+1. Keep Creem dashboard in test mode.
+2. Set ignored local env to `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, and `PAYMENT_LIVE_ENABLED=false`.
+3. Put the Creem test API key only in ignored local env as `PAYMENT_PROVIDER_SECRET`; do not paste it into Git, Linear, screenshots, or chat.
+4. Set `CREEM_PRO_MONTHLY_PRODUCT_ID` to the Creem test product ID and `CREEM_CHECKOUT_SUCCESS_URL` to an HTTPS result URL.
+5. Run `pnpm payment:creem:test-checkout`.
+6. Open the returned checkout URL and complete payment with a Creem test card.
+7. Verify Creem test dashboard shows the corresponding checkout/payment/subscription record.
+8. Verify the app does not grant Pro entitlement from the Creem success URL alone; trusted provider webhook processing is a later issue.
 
 ## Webhook Smoke
 
@@ -80,5 +93,6 @@ Expected response:
 - Vercel Production and Preview must set `PAYMENT_PROVIDER=sandbox` separately until a real provider is selected.
 - `PAYMENT_SECRET_KEY` and `PAYMENT_WEBHOOK_SECRET` may stay blank for sandbox.
 - `PAYMENT_PROVIDER_SECRET` may stay blank for sandbox.
+- `PAYMENT_PROVIDER=creem` is allowed only in controlled test-mode environments with `PAYMENT_MODE=test` and `PAYMENT_LIVE_ENABLED=false`.
 - `PAYMENT_LIVE_ENABLED=false` must remain set until the MVP5 production-payment gate.
 - Redeploy after changing provider env entries before using a deployment as evidence.

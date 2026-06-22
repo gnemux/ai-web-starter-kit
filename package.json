@@ -9,6 +9,7 @@
     "lint": "turbo lint",
     "test:ai-safety": "node scripts/verify-ai-safety.mjs",
     "typecheck": "turbo typecheck",
+    "payment:creem:test-checkout": "node integrations/scripts/creem-test-checkout.mjs",
     "test": "turbo test"
   },
   "devDependencies": {

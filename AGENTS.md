@@ -16,6 +16,7 @@ Before making code or documentation changes, read:
 
 - Use Specification Driven Development: product spec first, engineering spec second, implementation third, verification last.
 - Keep changes scoped to the Linear issue or user request.
+- Follow Minimal Implementation First: prefer the smallest working change, reuse existing code, and avoid speculative abstractions or one-off component libraries.
 - Prefer durable patterns over one-off patches.
 - Do not commit secrets, API keys, customer data, private credentials, or real tokens.
 - Do not invent provider behavior. Read the integration document before coding against Supabase, Vercel, analytics, payment, email, or AI APIs.

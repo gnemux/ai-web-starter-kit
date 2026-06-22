@@ -85,10 +85,12 @@ export const providerCatalog = [
       "PAYMENT_LIVE_ENABLED",
       "PAYMENT_SECRET_KEY",
       "PAYMENT_PROVIDER_SECRET",
-      "PAYMENT_WEBHOOK_SECRET"
+      "PAYMENT_WEBHOOK_SECRET",
+      "CREEM_PRO_MONTHLY_PRODUCT_ID",
+      "CREEM_CHECKOUT_SUCCESS_URL"
     ],
     notes:
-      "Sandbox checkout contract only; live payment and production provider secrets are outside MVP2."
+      "Sandbox checkout contract by default; Creem may be used only as a test-mode adapter while live payment remains disabled."
   },
   {
     capability: "ai",

@@ -24,6 +24,21 @@ For each feature:
 5. verify
 6. update status
 
+## Minimal Implementation First
+
+AI-assisted implementation should follow the Ponytail-style constraint: do the smallest responsible change that completes the current issue, and avoid building a larger system just because it is possible.
+
+When implementing MVP features:
+
+- Prefer the smallest working change.
+- Do not introduce new dependencies unless clearly necessary.
+- Reuse existing components, utilities, services, migrations, provider interfaces, and patterns.
+- Avoid speculative abstractions, future-proofing, and broad framework work outside the current issue.
+- Do not create large component libraries for one-off UI.
+- Before adding code, check whether existing code can be modified, reused, simplified, or deleted.
+- If a larger change is necessary, explain why the smaller path is insufficient before implementing it.
+- For security, payment, auth, and database code, minimal does not mean skipping validation, idempotency, logging, permission checks, RLS, webhook verification, or environment isolation.
+
 ## Collaboration And Branch Safety
 
 Before making code or documentation edits, Codex must inspect the current branch and working tree.

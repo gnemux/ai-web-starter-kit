@@ -98,6 +98,38 @@ Current staging:
 - Security advisors: clear after hardening.
 - Performance advisors: only new-table unused-index INFO entries for `demo_items_owner_id_idx` and `demo_items_visibility_idx`, expected until staging receives representative traffic.
 
+## GitHub Actions Staging Migrations
+
+Staging migrations are applied by the manual workflow at `.github/workflows/supabase-staging-migrations.yml`.
+
+Purpose:
+
+- Apply reviewed migration files from `supabase/migrations` to the shared staging project.
+- Keep Vercel application deployment separate from database schema deployment.
+- Avoid direct schema edits in the Supabase Dashboard.
+
+Trigger:
+
+1. Merge the migration PR into `main`.
+2. In GitHub Actions, run `Supabase Staging Migrations` from the `main` branch.
+3. Enter `staging` in the confirmation input.
+4. Review the before/after migration list and `db push` logs.
+
+Required GitHub configuration:
+
+- GitHub Environment: `staging`
+- Secret `SUPABASE_ACCESS_TOKEN`: Supabase personal access token with access to the staging project.
+- Secret `STAGING_PROJECT_ID`: staging Supabase project ref, currently `nglilxhkuqzswbwitbdu`.
+- Secret `STAGING_DB_PASSWORD`: staging database password.
+- Optional repository or environment variable `SUPABASE_CLI_VERSION`: pin the Supabase CLI version. If omitted, the workflow uses `latest`.
+
+Rules:
+
+- Do not store secret values in repository files, PR descriptions, Linear comments, or issue text.
+- Do not run the workflow from a feature branch; the workflow enforces `main`.
+- Do not add `--include-seed` unless the staging rollout explicitly requires seed data.
+- For production, create a separate production workflow and approval path instead of reusing the staging secrets.
+
 ## M2 DATA Template
 
 The first reusable data template is tracked by Linear `GNE-132`.

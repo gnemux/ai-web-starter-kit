@@ -70,6 +70,7 @@ MVP1 foundation complete; the MVP2 integrations provider foundation is complete 
 - Completed `GNE-183` by adding the reusable provider configuration, no-op/mock/sandbox behavior, smoke path, and secret leakage checklist.
 - Completed `GNE-167` as the MVP2 integrations provider foundation: matrix, adapter/interface landing points, env/public-secret rules, and reusable verification checklist are all reachable from repository entry points.
 - Completed the MVP2 Billing foundation for `GNE-71`: Billing specs, internal integration notes, provider-agnostic core pricing/entitlement contracts, app Billing service boundary, a human-readable `/account` Billing review surface, and a verified Supabase migration for orders, subscriptions, entitlements, credit ledger, and usage ledger.
+- Added a manual GitHub Actions workflow for Supabase staging migrations so reviewed migration files can be pushed to staging with Supabase CLI instead of relying on Vercel application deployments.
 - Synced the non-black-box reviewer rule for commercial and AI execution: Payment, AI, and MVP3 Product Validation Kit issues now require page-level human acceptance paths in addition to service, database, and provider contracts.
 - Added explicit APP/REVIEW Linear tasks so page-level acceptance cannot be missed during child-issue execution: `GNE-197` for Billing Done, `GNE-198` for Payment, and `GNE-199` for AI.
 - Completed `GNE-105 ANALYTICS-06`: production PostHog Activity now shows the deployed Vercel URL with the required shared properties, including the corrected `env=production`.
@@ -137,13 +138,13 @@ MVP1 foundation complete; the MVP2 integrations provider foundation is complete 
 
 ## In Progress
 
-MVP2 Billing foundation work is complete locally on branch `codex/mvp2-billing-foundation`. TypeScript, lint, production build, and local Supabase reset pass for the current Billing draft.
+MVP2 Billing foundation work is merged into `main`. TypeScript, lint, production build, and local Supabase reset passed for the Billing foundation. The shared staging Supabase project still needs the pending Billing migration applied through the staging migration workflow or a Supabase Maintainer CLI push.
 
 ## Next Steps
 
-1. For `GNE-105 ANALYTICS-06`, expand one production PostHog event and confirm `app`, `mvp_stage`, `market`, `env`, `version`, and `module`; then mark the issue Done in Linear if the fields are present.
+1. Configure GitHub Actions secrets `SUPABASE_ACCESS_TOKEN`, `STAGING_PROJECT_ID`, and `STAGING_DB_PASSWORD`; after this workflow branch is merged to `main`, run `Supabase Staging Migrations` manually from `main` with target `staging`, then verify the Billing tables and migration history in staging.
 2. Continue MVP2 Payment from `GNE-192`, `GNE-96`, `GNE-97`, and `GNE-98`; then execute `GNE-198 PAYMENT-08` so the reviewer path from pricing/billing entry to checkout, result pages, and order/subscription/entitlement status exists before real provider validation.
-3. Prepare a PR for `codex/mvp2-billing-foundation` before any staging Supabase migration.
+3. Use the staging migration workflow, not Vercel deploys or Dashboard edits, for merged Supabase migration files.
 4. Continue MVP2 AI from `GNE-149`, `GNE-156`, `GNE-150`, `GNE-151`, `GNE-152`, `GNE-153`, and `GNE-154`; then execute `GNE-199 AI-10` so the reviewer path for input, entitlement gate, provider mode, result, usage/credit/quota, and failure states exists before final AI test/deploy closure.
 5. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows; the MVP3 parent checklist must keep the full clickable chain visible from auth through project, public page, lead, Free/Pro gating, sandbox checkout, AI generation, and PostHog funnel evidence.
 6. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
@@ -179,3 +180,4 @@ MVP2/MVP3 planning is being synchronized with Linear. MVP1 base Analytics (`ANAL
 - Automatic Vercel Preview deployments are intentionally disabled for non-`main` branches while the project stays on a Hobby/private-repo collaboration setup.
 - Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits, especially if a collaborator PR is merged with `Squash and merge`.
 - GitHub branch protection may remain unenforced on the current free personal private repository, so the documented branch and PR workflow is still a required team convention.
+- Staging Billing tables remain absent until GitHub Actions secrets are configured and the manual `Supabase Staging Migrations` workflow is run from `main`.

@@ -1,0 +1,113 @@
+name: Supabase Staging Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Type staging to confirm this run should apply migrations to the shared staging Supabase project."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-staging-migrations
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  migrate-staging:
+    name: Push migrations to staging
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 15
+
+    steps:
+      - name: Guard target and branch
+        env:
+          CONFIRM_TARGET: ${{ inputs.target }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$REF_NAME" != "main" ]; then
+            echo "::error title=Wrong branch::Run this workflow from main after migrations have been reviewed and merged."
+            exit 1
+          fi
+
+          if [ "$CONFIRM_TARGET" != "staging" ]; then
+            echo "::error title=Wrong target::Type staging to confirm the shared staging Supabase project."
+            exit 1
+          fi
+
+      - name: Check required secrets
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          STAGING_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          STAGING_PROJECT_ID: ${{ secrets.STAGING_PROJECT_ID }}
+        run: |
+          missing=0
+
+          for secret_name in SUPABASE_ACCESS_TOKEN STAGING_DB_PASSWORD STAGING_PROJECT_ID; do
+            if [ -z "${!secret_name}" ]; then
+              echo "::error title=Missing GitHub secret::$secret_name is not configured."
+              missing=1
+            fi
+          done
+
+          exit "$missing"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v2
+        with:
+          version: ${{ vars.SUPABASE_CLI_VERSION || 'latest' }}
+          github-token: ${{ github.token }}
+
+      - name: Link staging project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+          SUPABASE_PROJECT_ID: ${{ secrets.STAGING_PROJECT_ID }}
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID" --yes
+
+      - name: Show migration status before push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        run: supabase migration list --linked
+
+      - name: Preview pending migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        run: supabase db push --linked --dry-run --yes
+
+      - name: Push migrations to staging
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        run: supabase db push --linked --yes
+
+      - name: Confirm migration status after push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_DB_PASSWORD }}
+        run: supabase migration list --linked
+
+      - name: Write run summary
+        if: always()
+        env:
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          {
+            echo "## Supabase staging migration"
+            echo
+            echo "- Source branch: \`$REF_NAME\`"
+            echo "- Target project role: staging"
+            echo "- Review the migration list and db push logs above for applied versions."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -217,6 +217,7 @@ export const dictionaries = {
         price: "价格",
         providerMapping: "Provider 映射",
         notMapped: "尚未绑定真实 price id",
+        paymentAction: "Payment 验收",
         planNames: {
           free: "Free",
           pro: "Pro"
@@ -245,6 +246,71 @@ export const dictionaries = {
           count: "次",
           token: "tokens"
         }
+      },
+      payment: {
+        eyebrow: "MVP2 Payment",
+        title: "支付验收",
+        description:
+          "这里验证 sandbox checkout 的完整可点击路径：选择价格、进入支付页、查看成功/取消/失败结果，并确认 URL 状态不会直接授予权益。",
+        statusReady: "可验收",
+        statusNeedsReview: "需检查",
+        errorTitle: "Payment service 暂不可用",
+        providerTitle: "Provider 状态",
+        providerDescription:
+          "MVP2 默认使用 sandbox provider，不需要真实支付 SDK、支付密钥或 webhook secret。",
+        provider: "Provider",
+        mode: "模式",
+        entitlementSource: "权益来源",
+        billingFacts: "Billing 服务端事实",
+        currentBillingTitle: "当前 Billing 状态",
+        currentBillingDescription:
+          "支付结果页只展示导航状态；当前计划与额度仍从 Billing service 读取。",
+        subscription: "订阅",
+        creditPack: "额度包",
+        creditPackName: "AI 额度包",
+        subscriptionDescription:
+          "Pro monthly sandbox checkout，用于验证后续真实订阅支付入口。",
+        creditPackDescription:
+          "AI credit pack sandbox checkout，用于验证后续积分充值入口。",
+        priceId: "Price ID",
+        price: "价格",
+        providerMapping: "Provider 映射",
+        sandboxOnly: "sandbox",
+        startCheckout: "开始 sandbox checkout",
+        sandboxEyebrow: "Sandbox Provider",
+        sandboxTitle: "Sandbox 支付页",
+        sandboxDescription:
+          "这是站内模拟支付页，用来让 reviewer 主动选择成功、取消或失败路径；这里不会收集真实付款信息。",
+        sandboxMode: "Sandbox",
+        sandboxActionTitle: "选择支付结果",
+        sandboxActionDescription:
+          "三种结果都会进入 result 页面；只有后续可信 webhook/Billing facts 才能改变权益。",
+        checkoutSession: "Checkout Session",
+        chooseSuccess: "模拟成功",
+        chooseCancel: "模拟取消",
+        chooseFailure: "模拟失败",
+        resultEyebrow: "Payment Result",
+        resultTitles: {
+          success: "支付成功导航已返回",
+          cancel: "支付已取消",
+          failure: "支付失败"
+        },
+        resultDescriptions: {
+          success:
+            "这个页面只证明 sandbox checkout 走到了成功结果，不代表已经授予 Pro 或 AI 额度。",
+          cancel: "用户取消了 sandbox checkout，Billing 状态不应发生变化。",
+          failure: "sandbox checkout 返回失败，Billing 状态不应发生变化。"
+        },
+        resultLabels: {
+          success: "成功",
+          cancel: "取消",
+          failure: "失败"
+        },
+        resultBoundaryTitle: "Result 与 Billing 边界",
+        resultBoundaryDescription:
+          "Result URL 是导航证据，不是支付事实来源。订单、订阅、权益和额度必须来自服务端可信事件。",
+        resultNoGrant: "URL 不直接授予权益",
+        billingUnavailable: "Billing 不可用"
       }
     },
     errors: {
@@ -467,6 +533,7 @@ export const dictionaries = {
         price: "Price",
         providerMapping: "Provider mapping",
         notMapped: "No real price id yet",
+        paymentAction: "Payment review",
         planNames: {
           free: "Free",
           pro: "Pro"
@@ -495,6 +562,73 @@ export const dictionaries = {
           count: "count",
           token: "tokens"
         }
+      },
+      payment: {
+        eyebrow: "MVP2 Payment",
+        title: "Payment review",
+        description:
+          "This verifies the clickable sandbox checkout path: choose a price, enter checkout, review success/cancel/failure results, and confirm URL state never grants entitlement directly.",
+        statusReady: "Reviewable",
+        statusNeedsReview: "Needs review",
+        errorTitle: "Payment service unavailable",
+        providerTitle: "Provider status",
+        providerDescription:
+          "MVP2 uses the sandbox provider by default. No real payment SDK, payment key, or webhook secret is required.",
+        provider: "Provider",
+        mode: "Mode",
+        entitlementSource: "Entitlement source",
+        billingFacts: "Billing server facts",
+        currentBillingTitle: "Current Billing status",
+        currentBillingDescription:
+          "Payment result pages show navigation status only. Current plan and credits still come from the Billing service.",
+        subscription: "Subscription",
+        creditPack: "Credit pack",
+        creditPackName: "AI credit pack",
+        subscriptionDescription:
+          "Pro monthly sandbox checkout for the future real subscription entry.",
+        creditPackDescription:
+          "AI credit pack sandbox checkout for the future credit top-up entry.",
+        priceId: "Price ID",
+        price: "Price",
+        providerMapping: "Provider mapping",
+        sandboxOnly: "sandbox",
+        startCheckout: "Start sandbox checkout",
+        sandboxEyebrow: "Sandbox Provider",
+        sandboxTitle: "Sandbox payment page",
+        sandboxDescription:
+          "This in-app simulated payment page lets reviewers choose success, cancel, or failure. It never collects real payment information.",
+        sandboxMode: "Sandbox",
+        sandboxActionTitle: "Choose payment result",
+        sandboxActionDescription:
+          "All three outcomes route to the result page. Only future trusted webhook/Billing facts can change entitlement.",
+        checkoutSession: "Checkout session",
+        chooseSuccess: "Simulate success",
+        chooseCancel: "Simulate cancel",
+        chooseFailure: "Simulate failure",
+        resultEyebrow: "Payment Result",
+        resultTitles: {
+          success: "Payment success navigation returned",
+          cancel: "Payment canceled",
+          failure: "Payment failed"
+        },
+        resultDescriptions: {
+          success:
+            "This page proves the sandbox checkout returned success; it does not grant Pro or AI credits by itself.",
+          cancel:
+            "The user canceled sandbox checkout. Billing status should not change.",
+          failure:
+            "Sandbox checkout returned failure. Billing status should not change."
+        },
+        resultLabels: {
+          success: "Success",
+          cancel: "Canceled",
+          failure: "Failed"
+        },
+        resultBoundaryTitle: "Result and Billing boundary",
+        resultBoundaryDescription:
+          "The result URL is navigation evidence, not the source of payment truth. Orders, subscriptions, entitlements, and credits must come from trusted server events.",
+        resultNoGrant: "URL does not grant entitlement",
+        billingUnavailable: "Billing unavailable"
       }
     },
     errors: {

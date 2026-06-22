@@ -1,5 +1,7 @@
 import "server-only";
 
+import { randomUUID } from "node:crypto";
+
 import {
   serviceOk,
   type AiProvider,
@@ -19,12 +21,23 @@ export function createSandboxPaymentProvider(): PaymentProvider {
   return {
     descriptor,
     async createCheckoutSession(input) {
+      const sessionId = `sandbox-checkout-${randomUUID()}`;
+      const urlSearchParams = new URLSearchParams({
+        cancel_url: input.cancelUrl,
+        checkout_session_id: sessionId,
+        failure_url: input.failureUrl,
+        plan_id: input.planId,
+        price_id: input.priceId,
+        success_url: input.successUrl
+      });
+
       return serviceOk({
-        id: `sandbox-checkout-${input.planId}`,
+        id: sessionId,
         provider: descriptor.provider,
         mode: descriptor.mode,
-        status: "noop",
-        url: null
+        status: "created",
+        url: `${input.checkoutUrl}?${urlSearchParams.toString()}`,
+        priceId: input.priceId
       });
     }
   };

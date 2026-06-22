@@ -1,5 +1,6 @@
 import {
   Badge,
+  Button,
   ErrorState,
   Panel,
   SectionHeader,
@@ -41,7 +42,14 @@ export function BillingOverview({
     <div className="flex flex-col gap-4">
       <Panel>
         <SectionHeader
-          action={<StatusBadge label={labels.statusReady} status="ready" />}
+          action={
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <StatusBadge label={labels.statusReady} status="ready" />
+              <Button href="/account/payment" variant="secondary">
+                {labels.paymentAction}
+              </Button>
+            </div>
+          }
           description={labels.description}
           title={labels.title}
         />

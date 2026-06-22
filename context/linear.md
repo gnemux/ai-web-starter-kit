@@ -159,16 +159,16 @@ GNE-71 MVP2 BILLING-00 [BILLING] 计费、订阅与权益模型（Done）
 Billing reviewer surface: MVP2 owns `packages/core/src/billing.ts`, `specs/billing/*`, `supabase/migrations/20260621130735_create_billing_foundation.sql`, `apps/web/lib/services/billing.ts`, and the minimal `/account` Billing review section. Reviewers should be able to confirm Free / Pro / AI credit-pack config, domain rules, migration/RLS shape, service boundary, and visible Free/Pro differences before Payment, AI, or MVP3 consume Billing.
 
 GNE-72 MVP2 PAYMENT-00 [PAYMENT] 支付 Provider 与结账闭环
-├── GNE-192 PAYMENT-01 [DOC][MVP2] 定义 Payment provider 边界与 Sandbox contract
-├── GNE-96 PAYMENT-02 [DEV][MVP2] 实现 Sandbox Payment Provider
-├── GNE-97 PAYMENT-03 [DEV][MVP2] 建立 checkout demo flow
-├── GNE-98 PAYMENT-04 [DEV][MVP2] 建立 webhook 验签、幂等与事件去重规范
-├── GNE-198 PAYMENT-08 [APP/REVIEW][MVP2] 建立 checkout 与支付结果验收页面
+├── GNE-192 PAYMENT-01 [DOC][MVP2] 定义 Payment provider 边界与 Sandbox contract（Done in repo）
+├── GNE-96 PAYMENT-02 [DEV][MVP2] 实现 Sandbox Payment Provider（Done in repo）
+├── GNE-97 PAYMENT-03 [DEV][MVP2] 建立 checkout demo flow（Done in repo）
+├── GNE-98 PAYMENT-04 [DEV][MVP2] 建立 webhook 验签、幂等与事件去重规范（Done in repo）
+├── GNE-198 PAYMENT-08 [APP/REVIEW][MVP2] 建立 checkout 与支付结果验收页面（Done in repo）
 ├── GNE-99 PAYMENT-05 [DECISION][MVP2] 选择第一个真实支付 Provider
 ├── GNE-100 PAYMENT-06 [TEST][MVP2] 验证真实 Provider 测试闭环
 └── GNE-158 PAYMENT-07 [AI][MVP2] Token 包、积分充值与订阅赠送额度 checkout flow
 
-Payment reviewer surface: reviewers must be able to follow pricing or billing entry -> checkout started -> success, cancel, or failure result -> order, subscription, and entitlement status. Success URLs record navigation only and must not directly grant entitlement. Real provider validation still needs this page-level proof, not only webhook logs.
+Payment reviewer surface: reviewers must be able to follow `/account` billing entry -> `/account/payment` checkout started -> `/account/payment/sandbox` -> success, cancel, or failure result -> current Billing order/subscription/entitlement status. Success URLs record navigation only and must not directly grant entitlement. Real provider validation still needs this page-level proof, not only webhook logs.
 
 GNE-73 MVP1-MVP3 ANALYTICS-00 [ANALYTICS] 统一事件标准、生产验收与转化看板
 ├── GNE-101 ANALYTICS-01 [DOC][MVP1] 事件命名、shared properties 与隐私边界（Done）

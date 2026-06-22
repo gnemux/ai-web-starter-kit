@@ -2,7 +2,7 @@
 
 ## Phase
 
-MVP1 foundation complete; the MVP2 integrations provider foundation is complete in repository docs and Linear child issues.
+MVP1 foundation complete; the MVP2 integrations provider foundation and MVP2 Billing foundation are complete. MVP2 Payment sandbox foundation is implemented in the repository and ready for PR review.
 
 ## Completed
 
@@ -75,6 +75,7 @@ MVP1 foundation complete; the MVP2 integrations provider foundation is complete 
 - Synced the non-black-box reviewer rule for commercial and AI execution: Payment, AI, and MVP3 Product Validation Kit issues now require page-level human acceptance paths in addition to service, database, and provider contracts.
 - Added explicit APP/REVIEW Linear tasks so page-level acceptance cannot be missed during child-issue execution: `GNE-197` for Billing Done, `GNE-198` for Payment, and `GNE-199` for AI.
 - Completed `GNE-105 ANALYTICS-06`: production PostHog Activity now shows the deployed Vercel URL with the required shared properties, including the corrected `env=production`.
+- Completed the MVP2 Payment sandbox foundation in the repository for `GNE-192`, `GNE-96`, `GNE-97`, `GNE-98`, and `GNE-198`: Payment specs, sandbox provider checkout sessions, protected `/account/payment` review surface, sandbox success/cancel/failure result pages, no-side-effect sandbox webhook acknowledgement, and Account -> Payment reviewer entry.
 
 ## Done Issues
 
@@ -132,47 +133,39 @@ MVP1 foundation complete; the MVP2 integrations provider foundation is complete 
 - `GNE-157` BILLING-06
 - `GNE-95` BILLING-07
 - `GNE-197` BILLING-08
+- `GNE-192` PAYMENT-01
+- `GNE-96` PAYMENT-02
+- `GNE-97` PAYMENT-03
+- `GNE-98` PAYMENT-04
+- `GNE-198` PAYMENT-08
 
 ## In Progress Issues
 
 - `GNE-73` MVP1-MVP3 ANALYTICS-00
+- `GNE-72` MVP2 PAYMENT-00
 
 ## In Progress
 
-MVP2 Billing foundation work is merged into `main`. TypeScript, lint, production build, and local Supabase reset passed for the Billing foundation. The shared staging Supabase project still needs the pending Billing migration applied through the staging migration workflow or a Supabase Maintainer CLI push.
+MVP2 Payment sandbox foundation is on branch `codex/mvp2-payment-foundation`. TypeScript, lint, production build, protected-route smoke, and sandbox webhook smoke have passed locally. Real payment provider decision, real provider test loop, Payment analytics conversion events, and AI token checkout/credit granting remain follow-up work.
 
 ## Next Steps
 
-1. After merging the migration timestamp alignment fix to `main`, rerun `Supabase Staging Migrations` manually from `main` with target `staging`, then verify the Billing tables and migration history in staging.
-2. Continue MVP2 Payment from `GNE-192`, `GNE-96`, `GNE-97`, and `GNE-98`; then execute `GNE-198 PAYMENT-08` so the reviewer path from pricing/billing entry to checkout, result pages, and order/subscription/entitlement status exists before real provider validation.
-3. Use the staging migration workflow, not Vercel deploys or Dashboard edits, for merged Supabase migration files.
-4. Continue MVP2 AI from `GNE-149`, `GNE-156`, `GNE-150`, `GNE-151`, `GNE-152`, `GNE-153`, and `GNE-154`; then execute `GNE-199 AI-10` so the reviewer path for input, entitlement gate, provider mode, result, usage/credit/quota, and failure states exists before final AI test/deploy closure.
-5. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows; the MVP3 parent checklist must keep the full clickable chain visible from auth through project, public page, lead, Free/Pro gating, sandbox checkout, AI generation, and PostHog funnel evidence.
-6. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
-7. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
-8. Regenerate Supabase database types from the verified schema in a later hardening pass if the Billing schema changes further.
-9. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-10. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
-11. For collaborator-authored PRs while Vercel remains on Hobby/private-repo constraints, the Repo Owner should use `Create a merge commit`; use `Squash and merge` only after confirming the resulting deployment commit author will pass Vercel checks.
-12. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
-13. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
-MVP2/MVP3 planning is being synchronized with Linear. MVP1 base Analytics (`ANALYTICS-01..04`) is Done, and `ANALYTICS-06` production PostHog event/field verification is Done.
-14. Continue MVP2 Billing with `GNE-91` and `GNE-191` before implementing entitlement service, Payment, or AI credit logic.
-15. . Continue MVP2 Payment from `GNE-192` and `GNE-96`, using the provider matrix and config checklist before adding any real checkout provider.
-16. Continue MVP2 AI from `GNE-149`, `GNE-156`, and `GNE-150`, using the provider matrix and config checklist before adding any real model provider.
-17. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows.
-18. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
-19. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
-20. Add generated Supabase database types in a later API/Auth hardening pass if the schema grows.
-21. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-22. If shared PR preview URLs become required for every collaborator branch, upgrade Vercel collaboration or have the Vercel project owner run manual Preview deployments.
-23. For collaborator-authored PRs while Vercel remains on Hobby/private-repo constraints, the Repo Owner should use `Create a merge commit`; use `Squash and merge` only after confirming the resulting deployment commit author will pass Vercel checks.
-24. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
-25. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+1. Open a PR for `codex/mvp2-payment-foundation` into `main`; Repo Owner should review and merge with the documented Vercel Hobby/private-repo merge method.
+2. Human reviewer should sign in locally or on Preview/Production, open `/account`, click Payment review, run Pro monthly and AI credit-pack sandbox checkout, and verify success/cancel/failure result pages do not directly grant Pro entitlement or AI credits.
+3. Continue `GNE-99` and `GNE-100` only after choosing the first real payment provider; keep real provider secrets server-only and configure Vercel Production/Preview separately.
+4. Continue `GNE-104 ANALYTICS-10` to attach payment conversion events to this service path after the sandbox checkout path is reviewed.
+5. Continue `GNE-158` after AI credit ledger behavior is ready, so token packs can grant credits from trusted Payment/Billing facts rather than result URLs.
+6. Continue MVP2 AI from `GNE-149`, `GNE-156`, `GNE-150`, `GNE-151`, `GNE-152`, `GNE-153`, and `GNE-154`; then execute `GNE-199 AI-10` so the reviewer path for input, entitlement gate, provider mode, result, usage/credit/quota, and failure states exists before final AI test/deploy closure.
+7. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows; the MVP3 parent checklist must keep the full clickable chain visible from auth through project, public page, lead, Free/Pro gating, sandbox checkout, AI generation, and PostHog funnel evidence.
+8. Treat `GNE-194` and `GNE-195` as conditional MVP3 follow-ups only after MVP2 real Payment / AI provider readiness exists.
+9. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
+10. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+11. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
+12. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
 
 ## Risks
 
-- External providers beyond Supabase/PostHog are documented or planned but not configured.
+- External providers beyond Supabase/PostHog are documented or sandbox/mock/no-op only; real Payment and AI providers are not configured.
 - No secrets should be added to the repository.
 - Local machine exposes `pnpm@9.15.0`.
 - Local Supabase runs through Colima; analytics is disabled locally because the Supabase vector container cannot mount Colima's Docker socket path.
@@ -181,4 +174,4 @@ MVP2/MVP3 planning is being synchronized with Linear. MVP1 base Analytics (`ANAL
 - Automatic Vercel Preview deployments are intentionally disabled for non-`main` branches while the project stays on a Hobby/private-repo collaboration setup.
 - Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits, especially if a collaborator PR is merged with `Squash and merge`.
 - GitHub branch protection may remain unenforced on the current free personal private repository, so the documented branch and PR workflow is still a required team convention.
-- Staging Billing tables remain absent until the manual `Supabase Staging Migrations` workflow is rerun from `main` after the M2 migration timestamp alignment fix is merged.
+- Payment sandbox result URLs are intentionally navigation-only; reviewers must not treat them as proof of paid entitlement or credit grant.

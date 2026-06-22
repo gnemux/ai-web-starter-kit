@@ -125,7 +125,7 @@ Record:
 | Capability | Minimum GNE-167 path | What to verify |
 | --- | --- | --- |
 | Analytics | Browser page load plus existing PostHog no-op fallback. | Missing analytics public key does not break UI; events must not include passwords, tokens, payment payloads, prompts, or provider secrets. |
-| Payment | `createSandboxPaymentProvider().createCheckoutSession(...)` through a future server test or service call. | Returns a sandbox/no-op checkout session with `url: null`; does not require `PAYMENT_SECRET_KEY` or a real SDK. |
+| Payment | `/account/payment` -> `/account/payment/sandbox` -> `/account/payment/result`, plus `createSandboxPaymentProvider().createCheckoutSession(...)` through the Payment service. | Returns a sandbox checkout session with a local review URL; success/cancel/failure result pages do not require `PAYMENT_SECRET_KEY`, a webhook secret, or a real SDK, and do not grant entitlement directly. |
 | AI | `createMockAiProvider().generateText(...)` through a future server test or service call. | Returns deterministic mock text and zero token usage; does not require `AI_PROVIDER_API_KEY`. |
 | Email | `createNoopEmailProvider().sendEmail(...)` through a future server test or service call. | Returns `noop`; sends no email and needs no provider key. |
 | Storage | `createNoopStorageProvider().createUploadTarget(...)` through a future server test or service call. | Returns `noop`, `method: "noop"`, and `url: null`; creates no signed URL or object. |

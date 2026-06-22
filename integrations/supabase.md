@@ -92,9 +92,11 @@ Current staging:
 - Project ref: `nglilxhkuqzswbwitbdu`
 - API URL: `https://nglilxhkuqzswbwitbdu.supabase.co`
 - Applied migrations:
-  - `create_data_template`
-  - `harden_data_template`
-  - `revoke_public_rls_auto_enable`
+  - `20260618070613_create_data_template`
+  - `20260618070813_harden_data_template`
+  - `20260618070953_revoke_public_rls_auto_enable`
+- Pending migration:
+  - `20260621130735_create_billing_foundation`
 - Security advisors: clear after hardening.
 - Performance advisors: only new-table unused-index INFO entries for `demo_items_owner_id_idx` and `demo_items_visibility_idx`, expected until staging receives representative traffic.
 

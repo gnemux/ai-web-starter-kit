@@ -43,6 +43,14 @@ supabase db reset
 - staging 可以由 CI 或 Supabase Maintainer 执行迁移。
 - 本地 CLI 可以 link 到 staging 用于 `db diff`、类型生成或联调检查，但不能从个人分支直接 `db push` 未审查 migration。
 
+当前仓库提供手动触发的 GitHub Actions staging migration workflow：`.github/workflows/supabase-staging-migrations.yml`。
+
+- 只能在 migration 合并到 `main` 后运行。
+- 触发时必须输入 `staging` 作为确认。
+- GitHub Environment 使用 `staging`。
+- 所需 GitHub Secrets 为 `SUPABASE_ACCESS_TOKEN`、`STAGING_PROJECT_ID`、`STAGING_DB_PASSWORD`。
+- 可选 GitHub Variable 为 `SUPABASE_CLI_VERSION`，用于固定 Supabase CLI 版本。
+
 ### Production
 
 生产 Supabase 项目必须严格受控。

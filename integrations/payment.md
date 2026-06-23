@@ -27,7 +27,7 @@ GNE-72 MVP2 PAYMENT-00
 
 For Creem manual verification under `GNE-99`, use `integrations/payment-creem-research.md` as the Chinese research record. Creem is currently approved only for `Go test mode`: test API key, test checkout, and test webhook mapping are allowed; production KYC/live payment remains blocked until a real vertical product, policy pages, support/refund terms, and production-payment readiness are defined. Never paste secrets, identity documents, bank details, or full sensitive dashboard screenshots into Linear, Git, README, or browser-visible code.
 
-For the `GNE-100` Creem test-mode spike, set local ignored env to `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, and `PAYMENT_LIVE_ENABLED=false`. Creem is integrated as a replaceable PaymentProvider adapter, not as a replacement for Billing or trusted entitlement facts. Use `pnpm payment:creem:test-checkout` or the app checkout entry to create a Creem test checkout. The adapter requires a server-only Creem test key, `CREEM_PRO_MONTHLY_PRODUCT_ID`, and an HTTPS `CREEM_CHECKOUT_SUCCESS_URL`, and prints only a redacted checkout summary. The acceptance target is not just an API response: the returned checkout URL must open, a test card payment must complete, and Creem test mode dashboard must show the corresponding test payment / checkout / subscription record. Webhook test scenes are also in scope for `GNE-100`: configure a public HTTPS test endpoint or controlled preview/ngrok endpoint, validate signature and event id/idempotency, record safe event fields, and confirm duplicate/failed events do not grant entitlement.
+For the `GNE-100` Creem test-mode spike, set local ignored env to `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, and `PAYMENT_LIVE_ENABLED=false`. Creem is integrated as a replaceable PaymentProvider adapter, not as a replacement for Billing or trusted entitlement facts. Use `pnpm payment:creem:test-checkout -- pro_monthly` or the app checkout entry to create a Creem test checkout; optional follow-up checks can use `plus_monthly` and `ai_credit_pack_100k`. The adapter requires a server-only Creem test key, Creem product IDs for the selected test price, and an HTTPS `CREEM_CHECKOUT_SUCCESS_URL`, and prints only a redacted checkout summary. The acceptance target is not just an API response: the returned checkout URL must open, a test card payment must complete, and Creem test mode dashboard must show the corresponding test payment / checkout / subscription record. Webhook test scenes are also in scope for `GNE-100`: configure a public HTTPS test endpoint or controlled preview/ngrok endpoint, validate signature and event id/idempotency, record safe event fields, and confirm duplicate/failed events do not grant entitlement.
 
 Provider matrix and stage boundaries live in `integrations/provider-matrix.md`.
 
@@ -90,7 +90,7 @@ Current MVP2 routes:
 | `/account/payment` | Protected Payment review page with sellable sandbox prices. | Starts checkout through `apps/web/lib/services/payment.ts`. |
 | `/account/payment/sandbox` | In-app Sandbox Provider surface. | Lets reviewers submit success, cancel, or failure through a server action. |
 | `/account/payment/result` | Result status page. | Shows result status and current Billing facts; URL state never grants entitlement directly. |
-| `/api/payment/webhook` | Sandbox webhook event-shape acknowledgement. | Returns idempotency key and writes no Billing facts; real webhook writes remain later work. |
+| `/api/payment/webhook` | Payment webhook endpoint for sandbox event-shape acknowledgement and Creem test-mode callbacks. | Sandbox payloads return an idempotency key and write no Billing facts. Creem test-mode payloads must pass `creem-signature` HMAC verification; `checkout.completed` can write trusted order/subscription/entitlement facts, while subscription/refund/dispute lifecycle events are recorded and ignored in MVP2. |
 
 ## Candidate Real Providers
 
@@ -123,7 +123,9 @@ PAYMENT_WEBHOOK_SECRET=
 - Payment tests must include success, failure, duplicate event, and stale event cases.
 - Success or cancel pages record user navigation only. They must not directly grant entitlement.
 - Sandbox success must update Billing through the protected server action so reviewers can verify paid-plan changes locally.
-- The sandbox webhook route is no-side-effect and only acknowledges the MVP2 event model.
+- The sandbox webhook branch is no-side-effect and only acknowledges the MVP2 event model.
+- Creem test-mode webhook processing is allowed only when `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, `PAYMENT_LIVE_ENABLED=false`, and `PAYMENT_WEBHOOK_SECRET` are configured. It verifies the raw request body against `creem-signature` before parsing trusted facts.
+- Creem `checkout.completed` is the only MVP2 provider webhook event that grants Billing facts. `subscription.*`, `refund.created`, and `dispute.created` events are recorded in `payment_events` and ignored until their lifecycle handling is explicitly modeled.
 - PostHog payment events must include shared properties such as `app`, `mvp_stage`, `market`, `env`, `module`, `plan`, and `provider`; analytics is not a payment source of truth.
 - `checkout_started`, `payment_succeeded`, `payment_failed`, `payment_canceled`, `entitlement_granted`, and `quota_limit_reached` are emitted from server-side Payment service boundaries in MVP2. The quota event must come from the Billing entitlement decision path behind a gated usage action, not from a generic checkout button.
 - Real provider secrets and webhook secrets must remain server-only and never use `NEXT_PUBLIC_`.

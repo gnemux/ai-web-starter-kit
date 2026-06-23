@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { acknowledgeSandboxWebhook } from "@/lib/services/payment";
+import { processPaymentWebhook } from "@/lib/services/payment";
 
 export async function POST(request: Request) {
-  let payload: Record<string, unknown>;
+  const rawBody = await request.text();
 
-  try {
-    payload = (await request.json()) as Record<string, unknown>;
-  } catch {
+  if (!rawBody.trim()) {
     return NextResponse.json(
       {
         error: "Invalid JSON payload."
@@ -16,11 +14,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = acknowledgeSandboxWebhook(payload);
+  const result = await processPaymentWebhook({
+    creemSignature: request.headers.get("creem-signature"),
+    rawBody
+  });
 
   if (!result.ok) {
     const status =
-      result.error.code === "configuration_error" ? 403 : 400;
+      result.error.code === "configuration_error"
+        ? 403
+        : result.error.message.includes("signature")
+          ? 401
+          : 400;
 
     return NextResponse.json(
       {
@@ -30,5 +35,5 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json(result.data, { status: 202 });
+  return NextResponse.json(result.data, { status: 200 });
 }

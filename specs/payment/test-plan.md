@@ -58,15 +58,17 @@ This applies only to `GNE-100 PAYMENT-08` after `GNE-99` outputs `Go test mode`.
 1. Keep Creem dashboard in test mode.
 2. Set ignored local env to `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, and `PAYMENT_LIVE_ENABLED=false`.
 3. Put the Creem test API key only in ignored local env as `PAYMENT_PROVIDER_SECRET`; do not paste it into Git, Linear, screenshots, or chat.
-4. Set `CREEM_PRO_MONTHLY_PRODUCT_ID` to the Creem test product ID and `CREEM_CHECKOUT_SUCCESS_URL` to an HTTPS result URL.
-5. Run `pnpm payment:creem:test-checkout`.
-6. Open the returned checkout URL and complete payment with a Creem test card.
-7. Verify Creem test dashboard shows the corresponding checkout/payment/subscription record.
-8. Verify the app does not grant Pro entitlement from the Creem success URL alone; trusted provider webhook processing is a later issue.
+4. Set the Creem test product IDs: `CREEM_PLUS_MONTHLY_PRODUCT_ID`, `CREEM_PRO_MONTHLY_PRODUCT_ID`, and `CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID`.
+5. Set `CREEM_CHECKOUT_SUCCESS_URL` to an HTTPS result URL.
+6. Run `pnpm payment:creem:test-checkout -- pro_monthly`. Optional follow-up checks may use `plus_monthly` and `ai_credit_pack_100k`.
+7. Open the returned checkout URL and complete payment with a Creem test card.
+8. Verify Creem test dashboard shows the corresponding checkout/payment/subscription record.
+9. Verify the app does not grant Pro entitlement or AI credits from the Creem success URL alone; trusted provider grants must come from `/api/payment/webhook`.
+10. For app-created Creem checkout, verify the checkout request includes server-generated metadata (`referenceId`, `owner_id`, `price_id`, `plan_id`) so webhook processing can map the event to a Billing owner and price. Older script-only checkouts without owner metadata are dashboard evidence only and should not grant app entitlement.
 
 ## Webhook Smoke
 
-For MVP2 sandbox, webhook checks are no-side-effect contract checks only because the local reviewer flow writes Billing facts through a protected server action. A future real provider issue must add signature verification tests before writing Billing facts from webhooks.
+For MVP2 sandbox, webhook checks are no-side-effect contract checks only because the local reviewer flow writes Billing facts through a protected server action. For Creem `GNE-100`, webhook checks are trusted provider checks and must verify signatures before writing Billing facts.
 
 Example local request shape:
 
@@ -87,6 +89,25 @@ Expected response:
 - acknowledges the sandbox event model;
 - returns the derived idempotency key;
 - does not write order, subscription, entitlement, credit, or usage facts.
+
+Creem test-mode webhook setup:
+
+1. Create a Creem test webhook in `Developers -> API and Webhooks -> Webhook`.
+2. Use a public HTTPS endpoint:
+   - local tunnel: `https://<your-ngrok-or-cloudflared-domain>/api/payment/webhook`;
+   - controlled deployed test target: `https://<vercel-preview-or-test-domain>/api/payment/webhook`.
+3. Copy the Creem webhook signing secret into ignored server env as `PAYMENT_WEBHOOK_SECRET`.
+4. Keep `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, and `PAYMENT_LIVE_ENABLED=false`.
+5. Select at least `checkout.completed`; selecting all test events is acceptable, but only `checkout.completed` grants Billing facts in MVP2.
+6. Create checkout from the app, not only from the standalone script, so metadata maps the event to `owner_id` and `price_id`.
+7. Complete a test payment and verify:
+   - `payment_events` has provider `creem`, event id, event type, status, raw payload, processed timestamp, and idempotency key;
+   - `billing_orders` has provider `creem`, the Creem order/checkout id, and status `paid`;
+   - subscription purchases update `billing_subscriptions` and active entitlements;
+   - AI credit-pack purchases add `billing_entitlements` and `billing_credit_ledger` credit grants;
+   - PostHog receives `payment_succeeded` and `entitlement_granted` with `provider=creem` and `payment_mode=test`.
+8. Resend the same webhook event from Creem if available and verify duplicate delivery does not create duplicate orders, subscriptions, entitlements, or credit grants.
+9. Remove or change the signature secret and verify the endpoint returns a signature error and does not write Billing facts.
 
 ## Production / Preview Notes
 

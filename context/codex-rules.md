@@ -184,4 +184,7 @@ Before writing, summarize the currently remembered state. When updating, use `pa
 
 - Never store secrets in docs, examples, tests, commits, logs, or prompts.
 - Keep `.env.example` as placeholders only.
+- Keep related environment variables together in their provider/module block. Do not
+  append new keys to the bottom of `.env.local` or `.env.example` when they belong
+  with existing Payment, Supabase, Analytics, AI, Email, Storage, or SMS entries.
 - Prefer least privilege for provider keys and automation tokens.

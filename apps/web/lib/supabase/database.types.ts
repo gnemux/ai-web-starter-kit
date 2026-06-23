@@ -339,6 +339,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      payment_events: {
+        Row: {
+          id: string;
+          provider: string;
+          event_id: string;
+          event_type: string;
+          status: "received" | "processed" | "ignored" | "failed";
+          owner_id: string | null;
+          checkout_session_id: string | null;
+          price_id: string | null;
+          idempotency_key: string;
+          raw_payload: Json;
+          error_message: string | null;
+          processed_at: string | null;
+          occurred_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          provider: string;
+          event_id: string;
+          event_type: string;
+          status?: "received" | "processed" | "ignored" | "failed";
+          owner_id?: string | null;
+          checkout_session_id?: string | null;
+          price_id?: string | null;
+          idempotency_key: string;
+          raw_payload?: Json;
+          error_message?: string | null;
+          processed_at?: string | null;
+          occurred_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          provider?: string;
+          event_id?: string;
+          event_type?: string;
+          status?: "received" | "processed" | "ignored" | "failed";
+          owner_id?: string | null;
+          checkout_session_id?: string | null;
+          price_id?: string | null;
+          idempotency_key?: string;
+          raw_payload?: Json;
+          error_message?: string | null;
+          processed_at?: string | null;
+          occurred_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       user_profiles: {
         Row: {
           id: string;

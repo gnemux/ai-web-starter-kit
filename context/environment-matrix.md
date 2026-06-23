@@ -16,6 +16,10 @@ copyable, placeholder-only, and safe for Git.
   `.env.example`.
 - Every new environment variable must state whether it is browser-visible
   `NEXT_PUBLIC`, server-only, required now, or reserved for a later MVP/provider.
+- Related keys must stay in the same provider/module block. For example, Payment
+  selectors, Payment secrets, and Creem product IDs belong under the Payment
+  server-only config block. Do not append related keys to the bottom of `.env.local`
+  or `.env.example`, because reviewers need to inspect one contiguous block.
 - Vercel Production and Preview values are configured in the Vercel dashboard, not
   copied from local ignored files.
 
@@ -107,7 +111,7 @@ Future real provider values must be introduced by the owning Payment, AI, Email,
 | App metadata | `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_PRODUCT_ID`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_APP_ENV`, `NEXT_PUBLIC_APP_MARKET`, `NEXT_PUBLIC_APP_VERSION`, `NEXT_PUBLIC_MVP_STAGE` | None |
 | Supabase Auth/Database | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `AUTH_PROVIDER`, `DATABASE_PROVIDER`, `SUPABASE_PROJECT_REF`, `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
 | Analytics | `NEXT_PUBLIC_ANALYTICS_PROVIDER`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN`, `NEXT_PUBLIC_POSTHOG_HOST`, `NEXT_PUBLIC_JIGUANG_APP_KEY` | None for current MVP2 analytics config |
-| Payment | None | `PAYMENT_PROVIDER`, `PAYMENT_MODE`, `PAYMENT_LIVE_ENABLED`, `PAYMENT_SECRET_KEY`, `PAYMENT_PROVIDER_SECRET`, `PAYMENT_WEBHOOK_SECRET`, `CREEM_PRO_MONTHLY_PRODUCT_ID`, `CREEM_CHECKOUT_SUCCESS_URL` |
+| Payment | None | `PAYMENT_PROVIDER`, `PAYMENT_MODE`, `PAYMENT_LIVE_ENABLED`, `PAYMENT_SECRET_KEY`, `PAYMENT_PROVIDER_SECRET`, `PAYMENT_WEBHOOK_SECRET`, `CREEM_PLUS_MONTHLY_PRODUCT_ID`, `CREEM_PRO_MONTHLY_PRODUCT_ID`, `CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID`, `CREEM_CHECKOUT_SUCCESS_URL` |
 | AI | None | `AI_PROVIDER`, `AI_MODEL`, `AI_PROVIDER_API_KEY`, `AI_BUDGET_LIMIT` |
 | Email | None | `EMAIL_PROVIDER`, `EMAIL_PROVIDER_API_KEY`, `EMAIL_FROM_ADDRESS` |
 | Storage | None | `STORAGE_PROVIDER`, `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY` |
@@ -134,9 +138,33 @@ For `GNE-100 PAYMENT-08`, local ignored env may persistently use:
 PAYMENT_PROVIDER=creem
 PAYMENT_MODE=test
 PAYMENT_LIVE_ENABLED=false
+CREEM_PLUS_MONTHLY_PRODUCT_ID=prod_7YlXijrX6eeQjeoQyyhByr
+CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=prod_4IRFjMpu3pxY5eK75y8BP7
 ```
 
 The Creem test API key must stay in local ignored env or a controlled secret manager as `PAYMENT_PROVIDER_SECRET`. Do not put it in `.env.example`, Git, Linear, screenshots, browser-visible code, or public PR text. Vercel Production should stay on `PAYMENT_PROVIDER=sandbox` until the MVP5 production-payment gate.
+
+For `GNE-100 PAYMENT-08` when the Creem webhook points at Vercel Production,
+Vercel Production must be switched intentionally to the controlled test-mode
+payment config:
+
+```text
+PAYMENT_PROVIDER=creem
+PAYMENT_MODE=test
+PAYMENT_LIVE_ENABLED=false
+PAYMENT_PROVIDER_SECRET=<Creem test API key, server-only>
+PAYMENT_WEBHOOK_SECRET=<Creem webhook signing secret, server-only>
+CREEM_PLUS_MONTHLY_PRODUCT_ID=prod_7YlXijrX6eeQjeoQyyhByr
+CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=prod_4IRFjMpu3pxY5eK75y8BP7
+CREEM_CHECKOUT_SUCCESS_URL=https://ai-web-starter-kit-web.vercel.app/account/payment/result?status=success
+```
+
+Do not copy the real `PAYMENT_PROVIDER_SECRET` or `PAYMENT_WEBHOOK_SECRET`
+values into Git, Linear, screenshots, chat, README, or browser-visible env.
+After webhook verification, rotate any secret that was exposed during manual
+debugging and update only ignored local env plus Vercel server env.
 
 After changing any Vercel environment variable, redeploy the affected Preview or Production deployment before testing. Existing deployments do not automatically receive new env values.
 

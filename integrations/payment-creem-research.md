@@ -32,8 +32,9 @@ MVP2 不做以下事情:
 
 | 内部价格 ID | 当前含义 | 类型 | 金额 | 币种 | 周期 | Creem 对应对象 | 验证状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `pro_monthly` | Pro 月订阅 | recurring | 19.00 | USD | month | Product ID: `prod_3TvLvuLXmwQseX16nFNyQE` | 产品已创建，checkout/webhook 待验证 |
-| `ai_credit_pack_100k` | AI 额度包 100k tokens | one_time | 9.00 | USD | none | 待填写，不放 secret | 待验证 |
+| `plus_monthly` | Plus 月订阅 | recurring | 9.00 | USD | month | Product ID: `prod_7YlXijrX6eeQjeoQyyhByr` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
+| `pro_monthly` | Pro 月订阅 | recurring | 19.00 | USD | month | Product ID: `prod_3TvLvuLXmwQseX16nFNyQE` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
+| `ai_credit_pack_100k` | AI 额度包 100k credits | one_time | 9.00 | USD | none | Product ID: `prod_4IRFjMpu3pxY5eK75y8BP7` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
 
 ## Creem 产品创建记录
 
@@ -54,18 +55,24 @@ MVP2 不做以下事情:
 - 产品功能展示: yes，Creem onboarding 支持添加功能说明；当前选择“私密备注”作为 SaaS 权益交付说明，不使用文件下载或许可证密钥。
 - 备注: 当前只验证 test mode，不接入生产支付。Creem 示例显示通过 `POST https://api.creem.io/v1/checkouts` 创建 checkout。早期方形图标 `integrations/assets/xwlc-product-icon.png` 在 Creem 预览中比例不合适，后续改用 16:9 banner。
 
-### 产品 2: AI 额度包
+### 产品 2: Plus 订阅
 
-如果 Creem 支持同一个产品下同时配置订阅和一次性价格，可以不单独创建第二个产品；否则单独创建 AI credit pack 产品。
+- 产品名称: AI Web Starter Kit Plus
+- 产品描述: AI Web Starter Kit 的 Plus 套餐，用于验证较低层级订阅权益、订单、订阅和 webhook 映射。
+- Creem Product ID: `prod_7YlXijrX6eeQjeoQyyhByr`
+- 价格: 9.00 USD / month
+- 是否支持测试 checkout: yes
+- 备注: 仅 test mode 验证，不代表生产收款可用。
 
-- 产品名称:
-- 产品描述:
-- 是否支持一次性价格: yes / no / unknown
-- 是否支持测试 checkout: yes / no / unknown
-- 是否支持成功 URL: yes / no / unknown
-- 是否支持取消 URL: yes / no / unknown
-- 是否支持失败 URL: yes / no / unknown
-- 备注:
+### 产品 3: AI 额度包
+
+- 产品名称: AI Credit Pack 100K
+- 产品描述: 一次性购买的 AI Credit Pack，用于验证非订阅型额度包支付、权益授予和 credit ledger 增量。
+- Creem Product ID: `prod_4IRFjMpu3pxY5eK75y8BP7`
+- 价格: 9.00 USD one-time
+- 是否支持一次性价格: yes
+- 是否支持测试 checkout: yes
+- 备注: 仅 test mode 验证，不代表生产收款可用。
 
 ## Checkout 验证
 
@@ -146,6 +153,26 @@ MVP2 mapping notes:
 - Refund: `refund.created`
 - Dispute / chargeback risk: `dispute.created`
 
+Project webhook mapping:
+
+- App endpoint: `/api/payment/webhook`
+- Local test endpoint must be exposed through HTTPS tunnel, for example `https://<ngrok-or-cloudflared-domain>/api/payment/webhook`.
+- Controlled deployed test endpoint can use a Vercel preview/test domain, for example `https://<preview-domain>/api/payment/webhook`.
+- Required signature header: `creem-signature`
+- Required server env: `PAYMENT_WEBHOOK_SECRET`
+- Current MVP2 grant event: only `checkout.completed`
+- Current ignored lifecycle events: `subscription.*`, `refund.created`, `dispute.created`
+- Required checkout metadata for entitlement grant: `referenceId` or `owner_id`, `price_id`, `plan_id`
+- Test-mode dashboard payments created before this metadata existed are valid Creem evidence but must not grant app entitlement.
+
+Webhook dashboard setup observed on 2026-06-23:
+
+- Webhook name: `ai-web-starter-kit-test-webhook`
+- Webhook URL: `https://ai-web-starter-kit-web.vercel.app/api/payment/webhook`
+- Status: Enabled
+- Event selection: all 13 test-mode events selected.
+- Important deployment dependency: this endpoint can process Creem events only after the current webhook code is deployed, `PAYMENT_WEBHOOK_SECRET` is configured in Vercel server env, and the `payment_events` migration is applied to the target Supabase project.
+
 需要重点记录的字段名称:
 
 ```text
@@ -175,9 +202,9 @@ PAYMENT_LIVE_ENABLED=false
 PAYMENT_PROVIDER_SECRET=
 PAYMENT_WEBHOOK_SECRET=
 CREEM_WEBHOOK_ENDPOINT=
+CREEM_PLUS_MONTHLY_PRODUCT_ID=prod_7YlXijrX6eeQjeoQyyhByr
 CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE
-CREEM_PRO_MONTHLY_PRICE_ID=
-CREEM_AI_CREDIT_PACK_100K_PRICE_ID=
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=prod_4IRFjMpu3pxY5eK75y8BP7
 ```
 
 安全边界:
@@ -309,7 +336,9 @@ PAYMENT_PROVIDER=creem
 PAYMENT_MODE=test
 PAYMENT_LIVE_ENABLED=false
 PAYMENT_PROVIDER_SECRET=your_creem_test_api_key
+CREEM_PLUS_MONTHLY_PRODUCT_ID=prod_7YlXijrX6eeQjeoQyyhByr
 CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=prod_4IRFjMpu3pxY5eK75y8BP7
 CREEM_CHECKOUT_SUCCESS_URL=https://your-preview-or-production-url/account/payment/result?status=success&price_id=pro_monthly
 ```
 
@@ -317,7 +346,8 @@ CREEM_CHECKOUT_SUCCESS_URL=https://your-preview-or-production-url/account/paymen
 
 人工验收 checklist:
 
-- `pnpm payment:creem:test-checkout` 返回 test checkout URL。
+- `pnpm payment:creem:test-checkout -- pro_monthly` 返回 test checkout URL。
+- 可选补充验证 `plus_monthly` 和 `ai_credit_pack_100k`，确认三类 Creem test product 都能创建 checkout。
 - checkout URL 可在浏览器打开。
 - 使用 Creem test card 能完成一次测试支付。
 - Creem test mode dashboard 能看到对应 test payment / checkout / subscription 记录。
@@ -331,6 +361,30 @@ CREEM_CHECKOUT_SUCCESS_URL=https://your-preview-or-production-url/account/paymen
 - 不启用 live payment。
 - 不接真实用户付款。
 - 不处理真实退款、对账、发票、税务或分账。
+
+### 2026-06-23 PAYMENT-08 test checkout evidence
+
+本次验证证明 Creem test checkout 可以创建，且人工测试卡支付后 Creem 后台能看到 3 笔 test payment。尚未证明项目 webhook 处理、PostHog `payment_succeeded`、Billing trusted facts 或 subscription/entitlement 写入完成。
+
+| Price ID | Creem Product ID | Checkout ID | Checkout URL | Script result | Human payment/dashboard check |
+| --- | --- | --- | --- | --- | --- |
+| `plus_monthly` | `prod_7YlXijrX6eeQjeoQyyhByr` | `ch_4PCEWBF9V6nP859SFuDinQ` | `https://creem.io/test/checkout/prod_7YlXijrX6eeQjeoQyyhByr/ch_4PCEWBF9V6nP859SFuDinQ` | `200`, `pending` | pass: Creem dashboard shows paid subscription payment |
+| `pro_monthly` | `prod_3TvLvuLXmwQseX16nFNyQE` | `ch_1jjUTUzHiQQ0K8UYR0BPgD` | `https://creem.io/test/checkout/prod_3TvLvuLXmwQseX16nFNyQE/ch_1jjUTUzHiQQ0K8UYR0BPgD` | `200`, `pending` | pass: Creem dashboard shows paid subscription payment |
+| `ai_credit_pack_100k` | `prod_4IRFjMpu3pxY5eK75y8BP7` | `ch_6bP1Uct3WHrt6FyeAKa699` | `https://creem.io/test/checkout/prod_4IRFjMpu3pxY5eK75y8BP7/ch_6bP1Uct3WHrt6FyeAKa699` | `200`, `pending` | pass: Creem dashboard shows paid one-time payment |
+
+PostHog 状态:
+
+- 当前没有期望中的 Creem `payment_succeeded` / `entitlement_granted` 日志是正常缺口，因为这三笔支付发生在 Creem hosted checkout，项目还没有接收 Creem webhook、校验签名、处理幂等事件并写入 Billing facts。
+- `checkout_started` 只有从项目 app 的 Payment service 创建 checkout 时才会发出；直接运行 `integrations/scripts/creem-test-checkout.mjs` 属于 provider spike 脚本，不发送 PostHog 事件。
+- 按当前项目规则，不能从 Creem success URL、截图或前端页面直接补发 `payment_succeeded`。该事件必须来自 webhook 或等价可信服务端处理。
+
+下一步动作:
+
+1. 配置 public HTTPS webhook test endpoint。
+2. 在 Creem test mode 配置 webhook 事件。
+3. 验证 signature、event id、event type、幂等 key 和 raw payload 保存边界。
+4. 从可信 webhook 处理路径发出 `payment_succeeded`、`entitlement_granted` 等 PostHog 事件。
+5. 继续验证重复事件不会重复授予权益。
 
 结论: Go test mode
 

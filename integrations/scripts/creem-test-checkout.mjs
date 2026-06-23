@@ -12,12 +12,16 @@ const paymentProvider = env.PAYMENT_PROVIDER ?? "sandbox";
 const paymentMode = env.PAYMENT_MODE ?? "sandbox";
 const liveEnabled = String(env.PAYMENT_LIVE_ENABLED ?? "false").toLowerCase();
 const apiKey = env.PAYMENT_PROVIDER_SECRET || env.CREEM_API_KEY;
-const productId = env.CREEM_PRO_MONTHLY_PRODUCT_ID;
-const successUrl =
-  env.CREEM_CHECKOUT_SUCCESS_URL ||
-  buildDefaultSuccessUrl(env.NEXT_PUBLIC_APP_URL);
-
+const requestedPriceId = process.argv.slice(2).find((arg) => arg !== "--");
+const priceId = requestedPriceId || env.CREEM_TEST_PRICE_ID || "pro_monthly";
 const errors = [];
+const productId = resolveProductId(priceId, env);
+const successUrl =
+  resolveSuccessUrl(
+    env.CREEM_CHECKOUT_SUCCESS_URL,
+    env.NEXT_PUBLIC_APP_URL,
+    priceId
+  );
 
 if (paymentProvider !== "creem") {
   errors.push("PAYMENT_PROVIDER must be creem for this spike.");
@@ -38,7 +42,7 @@ if (!apiKey) {
 }
 
 if (!productId) {
-  errors.push("Missing CREEM_PRO_MONTHLY_PRODUCT_ID.");
+  errors.push(`Missing Creem product id for ${priceId}.`);
 }
 
 if (!successUrl) {
@@ -68,7 +72,8 @@ const response = await fetch("https://test-api.creem.io/v1/checkouts", {
     metadata: {
       source: "payment_08_creem_test_checkout",
       payment_provider: paymentProvider,
-      payment_mode: paymentMode
+      payment_mode: paymentMode,
+      price_id: priceId
     }
   })
 });
@@ -166,7 +171,44 @@ function buildDefaultSuccessUrl(appUrl) {
     return "";
   }
 
-  return `${appUrl.replace(/\/$/, "")}/account/payment/result?status=success&price_id=pro_monthly`;
+  return `${appUrl.replace(/\/$/, "")}/account/payment/result?status=success`;
+}
+
+function resolveProductId(priceId, values) {
+  const envKeyByPriceId = {
+    plus_monthly: "CREEM_PLUS_MONTHLY_PRODUCT_ID",
+    pro_monthly: "CREEM_PRO_MONTHLY_PRODUCT_ID",
+    ai_credit_pack_100k: "CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID"
+  };
+  const envKey = envKeyByPriceId[priceId];
+
+  if (!envKey) {
+    errors.push(
+      "Unsupported price id. Use plus_monthly, pro_monthly, or ai_credit_pack_100k."
+    );
+
+    return "";
+  }
+
+  return values[envKey] ?? "";
+}
+
+function resolveSuccessUrl(configuredUrl, appUrl, priceId) {
+  const url = configuredUrl || buildDefaultSuccessUrl(appUrl);
+
+  if (!url) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+
+    parsedUrl.searchParams.set("price_id", priceId);
+
+    return parsedUrl.toString();
+  } catch {
+    return url;
+  }
 }
 
 function extractCheckoutSummary(payload) {

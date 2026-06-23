@@ -19,14 +19,12 @@ import {
   type PaymentWebhookAcknowledgement,
   type ServiceResult
 } from "@starter/core";
-import { randomUUID } from "crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
 import { trackServerEvent } from "@/lib/analytics/server";
-import {
-  createPaymentProvider,
-  createSandboxPaymentProvider
-} from "@/lib/providers/server";
+import { createPaymentProvider } from "@/lib/providers/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import type { Json } from "@/lib/supabase/database.types";
 
 import { getCurrentAccount } from "./auth";
 import {
@@ -148,10 +146,7 @@ export async function createPaymentCheckout(
     }
   }
 
-  const provider =
-    price.type === "one_time"
-      ? createSandboxPaymentProvider()
-      : createPaymentProvider();
+  const provider = createPaymentProvider();
   const returnTo = normalizeReturnTo(options.returnTo, "/account/payment");
   const result = await provider.createCheckoutSession({
     userId: accountResult.data.user.id,
@@ -163,6 +158,10 @@ export async function createPaymentCheckout(
     failureUrl: buildResultUrl("failure", price.id),
     metadata: {
       checkout_kind: optionResult.data.checkoutKind,
+      owner_id: accountResult.data.user.id,
+      plan_id: price.planId ?? "credit_pack",
+      price_id: price.id,
+      referenceId: accountResult.data.user.id,
       return_url: returnTo,
       source: "account_payment_review"
     }
@@ -293,7 +292,7 @@ export async function processSandboxCheckoutResult(input: {
     );
   }
 
-  const orderResult = await recordSandboxBillingFacts({
+  const orderResult = await recordPaymentBillingFacts({
     amountCents: optionResult.data.price.amountCents,
     checkoutKind: optionResult.data.checkoutKind,
     checkoutSessionId,
@@ -301,6 +300,8 @@ export async function processSandboxCheckoutResult(input: {
     ownerId: accountResult.data.user.id,
     planId: optionResult.data.price.planId ?? "credit_pack",
     priceId: optionResult.data.price.id,
+    provider: "sandbox",
+    source: "sandbox_payment_result",
     status: input.status
   });
 
@@ -535,14 +536,228 @@ export function acknowledgeSandboxWebhook(
   });
 }
 
-async function recordSandboxBillingFacts(input: {
+export async function processPaymentWebhook(input: {
+  creemSignature?: string | null;
+  rawBody: string;
+}): Promise<ServiceResult<PaymentWebhookAcknowledgement>> {
+  const payload = parseJsonObject(input.rawBody);
+
+  if (!payload) {
+    return serviceError("validation_error", "Invalid JSON payload.");
+  }
+
+  if (payload.provider === "sandbox") {
+    return acknowledgeSandboxWebhook(payload);
+  }
+
+  return processCreemWebhook({
+    payload,
+    rawBody: input.rawBody,
+    signature: input.creemSignature
+  });
+}
+
+async function processCreemWebhook(input: {
+  payload: Record<string, unknown>;
+  rawBody: string;
+  signature?: string | null;
+}): Promise<ServiceResult<PaymentWebhookAcknowledgement>> {
+  const safetyResult = validateCreemWebhookConfig(input.rawBody, input.signature);
+
+  if (!safetyResult.ok) {
+    return safetyResult;
+  }
+
+  const eventResult = normalizeCreemWebhookEvent(input.payload);
+
+  if (!eventResult.ok) {
+    return eventResult;
+  }
+
+  const idempotencyKey = createPaymentIdempotencyKey({
+    provider: eventResult.data.provider,
+    eventId: eventResult.data.eventId
+  });
+  const adminResult = createSupabaseAdminClient();
+
+  if (!adminResult.ok) {
+    return adminResult;
+  }
+
+  const existingEventResult = await adminResult.data
+    .from("payment_events")
+    .select("id, status")
+    .eq("provider", eventResult.data.provider)
+    .eq("event_id", eventResult.data.eventId)
+    .maybeSingle();
+
+  if (existingEventResult.error) {
+    return mapSupabasePaymentError(existingEventResult.error);
+  }
+
+  if (
+    existingEventResult.data &&
+    (existingEventResult.data.status === "processed" ||
+      existingEventResult.data.status === "ignored")
+  ) {
+    return serviceOk({
+      accepted: true,
+      idempotencyKey,
+      message: "Creem webhook event was already handled."
+    });
+  }
+
+  let paymentEventId = existingEventResult.data?.id ?? null;
+
+  if (!paymentEventId) {
+    const insertEventResult = await adminResult.data
+      .from("payment_events")
+      .insert({
+        provider: eventResult.data.provider,
+        event_id: eventResult.data.eventId,
+        event_type: eventResult.data.eventType,
+        status: "received",
+        owner_id: eventResult.data.ownerId,
+        checkout_session_id: eventResult.data.checkoutSessionId,
+        price_id: eventResult.data.priceId,
+        idempotency_key: idempotencyKey,
+        raw_payload: toJson(input.payload),
+        occurred_at: eventResult.data.occurredAt
+      })
+      .select("id")
+      .single();
+
+    if (insertEventResult.error || !insertEventResult.data) {
+      return mapSupabasePaymentError(insertEventResult.error);
+    }
+
+    paymentEventId = insertEventResult.data.id;
+  }
+
+  if (eventResult.data.eventType !== "checkout.completed") {
+    const ignoreResult = await updatePaymentEventStatus({
+      eventId: paymentEventId,
+      status: "ignored"
+    });
+
+    if (!ignoreResult.ok) {
+      return ignoreResult;
+    }
+
+    return serviceOk({
+      accepted: true,
+      idempotencyKey,
+      message:
+        "Creem lifecycle event acknowledged. Billing facts are only granted from checkout.completed in MVP2."
+    });
+  }
+
+  if (
+    !eventResult.data.ownerId ||
+    !eventResult.data.priceId ||
+    !eventResult.data.planId ||
+    !eventResult.data.checkoutKind ||
+    !eventResult.data.amountCents ||
+    !eventResult.data.currency
+  ) {
+    await updatePaymentEventStatus({
+      eventId: paymentEventId,
+      errorMessage:
+        "Creem checkout.completed did not include enough metadata to grant Billing facts.",
+      status: "failed"
+    });
+
+    return serviceError(
+      "validation_error",
+      "Creem checkout.completed requires owner, price, product, amount, and currency metadata."
+    );
+  }
+
+  const orderResult = await recordPaymentBillingFacts({
+    amountCents: eventResult.data.amountCents,
+    checkoutKind: eventResult.data.checkoutKind,
+    checkoutSessionId: eventResult.data.checkoutSessionId,
+    currency: eventResult.data.currency,
+    ownerId: eventResult.data.ownerId,
+    planId: eventResult.data.planId,
+    priceId: eventResult.data.priceId,
+    provider: eventResult.data.provider,
+    providerOrderId: eventResult.data.providerOrderId,
+    providerSubscriptionId: eventResult.data.providerSubscriptionId,
+    source: "creem_webhook",
+    status: "success",
+    occurredAt: eventResult.data.occurredAt,
+    metadata: {
+      creem_event_id: eventResult.data.eventId,
+      creem_event_type: eventResult.data.eventType,
+      creem_product_id: eventResult.data.productId,
+      payment_event_id: paymentEventId
+    }
+  });
+
+  if (!orderResult.ok) {
+    await updatePaymentEventStatus({
+      eventId: paymentEventId,
+      errorMessage: orderResult.error.message,
+      status: "failed"
+    });
+
+    return orderResult;
+  }
+
+  await updatePaymentEventStatus({
+    eventId: paymentEventId,
+    status: "processed"
+  });
+
+  const analyticsProperties = buildPaymentAnalyticsProperties({
+    checkoutKind: eventResult.data.checkoutKind,
+    checkoutSessionId: eventResult.data.checkoutSessionId,
+    orderStatus: orderResult.data.orderStatus,
+    priceId: eventResult.data.priceId,
+    provider: eventResult.data.provider,
+    result: "success",
+    source: "creem_webhook"
+  });
+
+  await trackPaymentEvent({
+    distinctId: eventResult.data.ownerId,
+    event: "payment_succeeded",
+    properties: analyticsProperties
+  });
+  await trackPaymentEvent({
+    distinctId: eventResult.data.ownerId,
+    event: "entitlement_granted",
+    properties: {
+      ...analyticsProperties,
+      entitlement_type:
+        eventResult.data.checkoutKind === "subscription"
+          ? "subscription"
+          : "credit_pack"
+    }
+  });
+
+  return serviceOk({
+    accepted: true,
+    idempotencyKey,
+    message: "Creem checkout.completed processed into Billing facts."
+  });
+}
+
+async function recordPaymentBillingFacts(input: {
   amountCents: number;
   checkoutKind: "subscription" | "credit_pack";
   checkoutSessionId: string;
   currency: "usd";
+  metadata?: Record<string, unknown>;
   ownerId: string;
   planId: string;
   priceId: BillingPriceId;
+  provider?: string;
+  providerOrderId?: string | null;
+  providerSubscriptionId?: string | null;
+  source?: string;
+  occurredAt?: string;
   status: PaymentCheckoutResultStatus;
 }): Promise<ServiceResult<{ orderStatus: BillingOrderStatus }>> {
   const adminResult = createSupabaseAdminClient();
@@ -551,18 +766,21 @@ async function recordSandboxBillingFacts(input: {
     return adminResult;
   }
 
+  const provider = input.provider ?? "sandbox";
+  const source = input.source ?? "sandbox_payment_result";
   const orderStatus = mapResultToOrderStatus(input.status);
   const idempotencyKey = createPaymentIdempotencyKey({
-    provider: "sandbox",
+    provider,
     eventId: `${input.checkoutSessionId}:${input.status}`
   });
-  const providerOrderId = `sandbox-order-${input.checkoutSessionId}:${input.status}`;
+  const providerOrderId =
+    input.providerOrderId ?? `sandbox-order-${input.checkoutSessionId}:${input.status}`;
   const orderResult = await adminResult.data
     .from("billing_orders")
     .upsert(
       {
         owner_id: input.ownerId,
-        provider: "sandbox",
+        provider,
         provider_order_id: providerOrderId,
         provider_checkout_session_id: input.checkoutSessionId,
         idempotency_key: idempotencyKey,
@@ -573,9 +791,10 @@ async function recordSandboxBillingFacts(input: {
         amount_cents: input.amountCents,
         metadata: {
           checkout_kind: input.checkoutKind,
-          source: "sandbox_payment_result"
+          ...input.metadata,
+          source
         },
-        occurred_at: new Date().toISOString()
+        occurred_at: input.occurredAt ?? new Date().toISOString()
       },
       {
         onConflict: "idempotency_key"
@@ -614,16 +833,19 @@ async function recordSandboxBillingFacts(input: {
       .from("billing_subscriptions")
       .insert({
         owner_id: input.ownerId,
-        provider: "sandbox",
-        provider_subscription_id: `sandbox-subscription-${input.checkoutSessionId}`,
+        provider,
+        provider_subscription_id:
+          input.providerSubscriptionId ??
+          `sandbox-subscription-${input.checkoutSessionId}`,
         plan_id: input.planId,
         price_id: input.priceId,
         status: "active",
         current_period_start: now.toISOString(),
         current_period_end: addMonths(now, 1).toISOString(),
         metadata: {
+          ...input.metadata,
           order_id: orderResult.data.id,
-          source: "sandbox_payment_result"
+          source
         }
       })
       .select("id")
@@ -654,8 +876,9 @@ async function recordSandboxBillingFacts(input: {
         unit: "credit",
         status: "active",
         metadata: {
+          ...input.metadata,
           order_id: orderResult.data.id,
-          source: "sandbox_payment_result"
+          source
         }
       })
       .select("id")
@@ -679,9 +902,11 @@ async function recordSandboxBillingFacts(input: {
           idempotency_key: `${idempotencyKey}:credit_grant`,
           source_type: "credit_pack",
           source_id: orderResult.data.id,
-          reason: "Sandbox AI credit pack checkout success.",
+          reason: `${provider} AI credit pack checkout success.`,
           metadata: {
-            checkout_session_id: input.checkoutSessionId
+            ...input.metadata,
+            checkout_session_id: input.checkoutSessionId,
+            source
           }
         },
         {
@@ -695,6 +920,192 @@ async function recordSandboxBillingFacts(input: {
   }
 
   return serviceOk({ orderStatus });
+}
+
+type NormalizedCreemWebhookEvent = {
+  amountCents: number | null;
+  checkoutKind: "subscription" | "credit_pack" | null;
+  checkoutSessionId: string;
+  currency: "usd" | null;
+  eventId: string;
+  eventType: string;
+  occurredAt: string;
+  ownerId: string | null;
+  planId: string | null;
+  priceId: BillingPriceId | null;
+  productId: string | null;
+  provider: "creem";
+  providerOrderId: string | null;
+  providerSubscriptionId: string | null;
+};
+
+function validateCreemWebhookConfig(
+  rawBody: string,
+  signature: string | null | undefined
+): ServiceResult<{ webhookSecret: string }> {
+  if (process.env.PAYMENT_PROVIDER !== "creem") {
+    return serviceError(
+      "configuration_error",
+      "Creem webhooks require PAYMENT_PROVIDER=creem."
+    );
+  }
+
+  if (process.env.PAYMENT_MODE !== "test") {
+    return serviceError(
+      "configuration_error",
+      "Creem webhooks are only enabled for PAYMENT_MODE=test in MVP2."
+    );
+  }
+
+  if (process.env.PAYMENT_LIVE_ENABLED !== "false") {
+    return serviceError(
+      "configuration_error",
+      "Creem webhooks require PAYMENT_LIVE_ENABLED=false in MVP2."
+    );
+  }
+
+  const webhookSecret = process.env.PAYMENT_WEBHOOK_SECRET?.trim();
+
+  if (!webhookSecret) {
+    return serviceError(
+      "configuration_error",
+      "Creem webhooks require PAYMENT_WEBHOOK_SECRET."
+    );
+  }
+
+  if (!verifyCreemWebhookSignature(rawBody, signature, webhookSecret)) {
+    return serviceError(
+      "validation_error",
+      "Creem webhook signature is invalid."
+    );
+  }
+
+  return serviceOk({ webhookSecret });
+}
+
+function verifyCreemWebhookSignature(
+  rawBody: string,
+  signature: string | null | undefined,
+  secret: string
+) {
+  const normalizedSignature = signature?.trim();
+
+  if (!normalizedSignature) {
+    return false;
+  }
+
+  const expectedSignature = createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("hex");
+  const actual = Buffer.from(normalizedSignature, "hex");
+  const expected = Buffer.from(expectedSignature, "hex");
+
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+}
+
+function normalizeCreemWebhookEvent(
+  payload: Record<string, unknown>
+): ServiceResult<NormalizedCreemWebhookEvent> {
+  const eventId = readString(payload.id);
+  const eventType = readString(payload.eventType);
+  const object = readObject(payload.object) ?? {};
+  const checkout = readObject(object.checkout);
+  const order = readObject(object.order);
+  const subscription = readObject(object.subscription) ?? (
+    readString(object.object) === "subscription" ? object : null
+  );
+  const product =
+    readObject(object.product) ??
+    readObject(subscription?.product) ??
+    readObject(order?.product);
+  const metadata =
+    readObject(object.metadata) ??
+    readObject(checkout?.metadata) ??
+    readObject(subscription?.metadata) ??
+    {};
+  const checkoutSessionId =
+    readString(readString(object.object) === "checkout" ? object.id : null) ??
+    readString(checkout?.id) ??
+    readString(metadata.checkout_session_id) ??
+    eventId;
+  const productId =
+    readString(product?.id) ??
+    readString(order?.product) ??
+    readString(subscription?.product);
+
+  if (!eventId || !eventType || !checkoutSessionId) {
+    return serviceError(
+      "validation_error",
+      "Creem webhook events require id, eventType, and checkout id."
+    );
+  }
+
+  const priceId = readBillingPriceId(metadata.price_id) ??
+    resolveBillingPriceIdFromCreemProductId(productId);
+  const optionResult = priceId ? getCheckoutOption(priceId) : null;
+  const price = priceId ? getBillingPrice(priceId) : null;
+
+  if (priceId && optionResult && !optionResult.ok) {
+    return optionResult;
+  }
+
+  const currency = normalizeCurrency(readString(order?.currency) ?? readString(product?.currency));
+  const amountCents =
+    readNumber(order?.amount) ?? readNumber(product?.price) ?? price?.amountCents ?? null;
+  const occurredAt = normalizeCreemTimestamp(
+    payload.created_at,
+    readString(order?.created_at) ?? readString(subscription?.created_at)
+  );
+  const ownerId =
+    readString(metadata.referenceId) ??
+    readString(metadata.owner_id) ??
+    readString(metadata.user_id) ??
+    readString(metadata.internal_customer_id);
+
+  return serviceOk({
+    amountCents,
+    checkoutKind: optionResult?.ok ? optionResult.data.checkoutKind : null,
+    checkoutSessionId,
+    currency,
+    eventId,
+    eventType,
+    occurredAt,
+    ownerId,
+    planId: price?.planId ?? (priceId ? "credit_pack" : null),
+    priceId,
+    productId,
+    provider: "creem",
+    providerOrderId: readString(order?.id),
+    providerSubscriptionId:
+      readString(subscription?.id) ?? readString(object.subscription_id)
+  });
+}
+
+async function updatePaymentEventStatus(input: {
+  errorMessage?: string;
+  eventId: string;
+  status: "processed" | "ignored" | "failed";
+}): Promise<ServiceResult<void>> {
+  const adminResult = createSupabaseAdminClient();
+
+  if (!adminResult.ok) {
+    return adminResult;
+  }
+
+  const result = await adminResult.data
+    .from("payment_events")
+    .update({
+      error_message: input.errorMessage ?? null,
+      processed_at: new Date().toISOString(),
+      status: input.status
+    })
+    .eq("id", input.eventId);
+
+  if (result.error) {
+    return mapSupabasePaymentError(result.error);
+  }
+
+  return serviceOk(undefined);
 }
 
 function buildResultUrl(
@@ -799,6 +1210,82 @@ function addMonths(date: Date, months: number): Date {
   nextDate.setMonth(nextDate.getMonth() + months);
 
   return nextDate;
+}
+
+function parseJsonObject(text: string): Record<string, unknown> | null {
+  try {
+    const value = JSON.parse(text) as unknown;
+
+    return value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function toJson(value: unknown): Json {
+  return JSON.parse(JSON.stringify(value)) as Json;
+}
+
+function readObject(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function readString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function readNumber(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function readBillingPriceId(value: unknown): BillingPriceId | null {
+  const priceId = readString(value);
+
+  return priceId && isBillingCheckoutPriceId(priceId) ? priceId : null;
+}
+
+function resolveBillingPriceIdFromCreemProductId(
+  productId: string | null
+): BillingPriceId | null {
+  if (!productId) {
+    return null;
+  }
+
+  const productIdByPriceId: Record<BillingPriceId, string | undefined> = {
+    free: undefined,
+    plus_monthly: process.env.CREEM_PLUS_MONTHLY_PRODUCT_ID,
+    pro_monthly: process.env.CREEM_PRO_MONTHLY_PRODUCT_ID,
+    ai_credit_pack_100k: process.env.CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID
+  };
+
+  const entry = Object.entries(productIdByPriceId).find(
+    ([, configuredProductId]) => configuredProductId?.trim() === productId
+  );
+
+  return entry && isBillingCheckoutPriceId(entry[0]) ? entry[0] : null;
+}
+
+function normalizeCurrency(value: string | null): "usd" | null {
+  return value?.toLowerCase() === "usd" ? "usd" : null;
+}
+
+function normalizeCreemTimestamp(
+  createdAt: unknown,
+  fallback: string | null
+): string {
+  if (typeof createdAt === "number" && Number.isFinite(createdAt)) {
+    return new Date(createdAt).toISOString();
+  }
+
+  if (fallback && !Number.isNaN(Date.parse(fallback))) {
+    return new Date(fallback).toISOString();
+  }
+
+  return new Date().toISOString();
 }
 
 function mapSupabasePaymentError(error: { code?: string } | null) {

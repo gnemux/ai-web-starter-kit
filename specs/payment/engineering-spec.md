@@ -31,7 +31,7 @@ Billing price config in packages/core
 -> selected Payment Provider in apps/web/lib/providers/server.ts
 -> protected review pages under /account/payment
 -> result/status surface
--> sandbox server action or future webhook writes trusted Billing facts
+-> sandbox server action or verified Creem test webhook writes trusted Billing facts
 ```
 
 Pages must call the service boundary. Pages and components must not import a real payment SDK, write Billing tables directly, or infer entitlement from URL state.
@@ -72,7 +72,7 @@ POST server action from /account/payment
 -> /account/payment/result shows result status and current Billing facts
 ```
 
-For `GNE-100 PAYMENT-08`, the same service boundary may create a Creem test checkout session through the Creem adapter. That path returns a hosted Creem test checkout URL and is used only to prove that the third-party provider can create a test checkout/payment visible in the Creem test dashboard. Until a later webhook issue adds provider-specific signature verification and trusted processing, the Creem success URL must not mutate Billing facts.
+For `GNE-100 PAYMENT-08`, the same service boundary may create a Creem test checkout session through the Creem adapter. That path returns a hosted Creem test checkout URL and is used to prove that the third-party provider can create a test checkout/payment visible in the Creem test dashboard. Creem success URLs remain navigation evidence only; Billing mutations require the verified `/api/payment/webhook` path.
 
 The service validates sellable prices using `packages/core/src/billing.ts`. Free prices cannot create checkout sessions.
 
@@ -87,7 +87,7 @@ Checkout entry points must follow the project return context contract in
 
 ## Webhook And Idempotency Rules
 
-Future real providers must verify raw payload signatures before parsing business facts. MVP2 records the reusable event model and a no-side-effect sandbox webhook route.
+Provider webhooks must verify raw payload signatures before parsing business facts. MVP2 records the reusable event model, keeps the sandbox webhook branch no-side-effect, and allows Creem test-mode webhook processing only inside `GNE-100`.
 
 Minimum event fields:
 
@@ -107,7 +107,18 @@ payment:<provider>:<eventId>
 
 Duplicate events must return an already-processed or ignored result and must not grant duplicate subscriptions, orders, entitlements, or credits. Stale events must not overwrite newer trusted subscription facts.
 
-The sandbox UI result action may write Billing facts through a server-only admin client so reviewers can verify paid-plan changes and AI credit-pack grants locally. The sandbox webhook route remains no-side-effect and only acknowledges the event model. Real provider webhook writes require a later issue, real signature verification, provider-specific tests, and deployment-secret review.
+The sandbox UI result action may write Billing facts through a server-only admin client so reviewers can verify paid-plan changes and AI credit-pack grants locally. The sandbox webhook branch remains no-side-effect and only acknowledges the event model.
+
+Creem test-mode webhook rules:
+
+- route: `/api/payment/webhook`;
+- required header: `creem-signature`;
+- verification: HMAC-SHA256 over the raw request body with `PAYMENT_WEBHOOK_SECRET`;
+- required safety env: `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, `PAYMENT_LIVE_ENABLED=false`;
+- required checkout metadata for grants: `referenceId` or `owner_id`, `price_id`, and `plan_id`;
+- event storage: `payment_events` stores provider, event id, event type, raw payload, status, processed timestamp, and idempotency key with service-role-only access;
+- grant scope: only `checkout.completed` writes Billing facts in MVP2;
+- lifecycle scope: `subscription.*`, `refund.created`, and `dispute.created` are recorded and ignored until their handling is explicitly modeled.
 
 ## Data And Billing Boundary
 

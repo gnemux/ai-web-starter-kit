@@ -74,7 +74,9 @@ export function createCreemTestPaymentProvider(): PaymentProvider {
       "PAYMENT_LIVE_ENABLED",
       "PAYMENT_PROVIDER_SECRET",
       "PAYMENT_WEBHOOK_SECRET",
+      "CREEM_PLUS_MONTHLY_PRODUCT_ID",
       "CREEM_PRO_MONTHLY_PRODUCT_ID",
+      "CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID",
       "CREEM_CHECKOUT_SUCCESS_URL"
     ],
     notes:
@@ -96,7 +98,10 @@ export function createCreemTestPaymentProvider(): PaymentProvider {
         return productIdResult;
       }
 
-      const successUrlResult = resolveCreemSuccessUrl(input.successUrl);
+      const successUrlResult = resolveCreemSuccessUrl(
+        input.successUrl,
+        input.priceId
+      );
 
       if (!successUrlResult.ok) {
         return successUrlResult;
@@ -110,6 +115,14 @@ export function createCreemTestPaymentProvider(): PaymentProvider {
         },
         body: JSON.stringify({
           product_id: productIdResult.data,
+          request_id: `payment:${input.userId}:${input.priceId}:${randomUUID()}`,
+          metadata: sanitizeProviderMetadata({
+            ...input.metadata,
+            owner_id: input.userId,
+            plan_id: input.planId,
+            price_id: input.priceId,
+            referenceId: input.userId
+          }),
           success_url: successUrlResult.data
         })
       });
@@ -310,30 +323,37 @@ function validateCreemTestModeConfig() {
 }
 
 function resolveCreemProductId(priceId: string) {
-  if (priceId === "pro_monthly") {
-    const productId = process.env.CREEM_PRO_MONTHLY_PRODUCT_ID?.trim();
+  const envKeyByPriceId: Record<string, string> = {
+    plus_monthly: "CREEM_PLUS_MONTHLY_PRODUCT_ID",
+    pro_monthly: "CREEM_PRO_MONTHLY_PRODUCT_ID",
+    ai_credit_pack_100k: "CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID"
+  };
+  const envKey = envKeyByPriceId[priceId];
 
-    if (!productId) {
-      return serviceError(
-        "configuration_error",
-        "Creem test checkout requires CREEM_PRO_MONTHLY_PRODUCT_ID."
-      );
-    }
-
-    return serviceOk(productId);
+  if (!envKey) {
+    return serviceError(
+      "configuration_error",
+      "Creem test checkout is only configured for plus_monthly, pro_monthly, and ai_credit_pack_100k."
+    );
   }
 
-  return serviceError(
-    "configuration_error",
-    "Creem test checkout is only configured for pro_monthly."
-  );
+  const productId = process.env[envKey]?.trim();
+
+  if (!productId) {
+    return serviceError(
+      "configuration_error",
+      `Creem test checkout requires ${envKey}.`
+    );
+  }
+
+  return serviceOk(productId);
 }
 
-function resolveCreemSuccessUrl(fallbackPath: string) {
+function resolveCreemSuccessUrl(fallbackPath: string, priceId: string) {
   const configuredUrl = process.env.CREEM_CHECKOUT_SUCCESS_URL?.trim();
 
   if (configuredUrl) {
-    return validateHttpsUrl(configuredUrl);
+    return validateHttpsUrl(withPriceId(configuredUrl, priceId));
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
@@ -346,6 +366,18 @@ function resolveCreemSuccessUrl(fallbackPath: string) {
   }
 
   return validateHttpsUrl(`${appUrl}${fallbackPath}`);
+}
+
+function withPriceId(url: string, priceId: string) {
+  try {
+    const parsedUrl = new URL(url);
+
+    parsedUrl.searchParams.set("price_id", priceId);
+
+    return parsedUrl.toString();
+  } catch {
+    return url;
+  }
 }
 
 function validateHttpsUrl(url: string) {
@@ -390,4 +422,15 @@ function readCheckoutPayload(payload: Record<string, unknown>) {
 
 function readString(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function sanitizeProviderMetadata(
+  metadata: Record<string, string | undefined>
+) {
+  return Object.fromEntries(
+    Object.entries(metadata).filter(
+      (entry): entry is [string, string] =>
+        typeof entry[1] === "string" && entry[1].trim().length > 0
+    )
+  );
 }

@@ -15,7 +15,7 @@
 
 ## MVP 边界
 
-MVP2 的目标是确认 Creem 是否适合作为未来真实 Provider 的候选，并判断是否可以进入 `PAYMENT-08` test mode 技术打样。
+MVP2 的目标是确认 Creem 是否适合作为未来真实 Provider 的候选，并判断是否可以进入 `PAYMENT-08` test mode 技术打样。当前结论: `GNE-99` 已输出 `Go test mode`，`GNE-100 PAYMENT-08` 已完成 test-mode-only spike。
 
 MVP2 不做以下事情:
 
@@ -79,14 +79,14 @@ MVP2 不做以下事情:
 | 验证项 | 结果 | 记录 |
 | --- | --- | --- |
 | 测试模式是否明确开启 | yes | Creem 左侧状态显示“测试模式开启”。 |
-| 能否创建 test checkout | go test mode | 官方 Test Mode 文档确认 test endpoint `https://test-api.creem.io/v1/checkouts` 可创建 checkout；dashboard 未发现手动 checkout link 入口，进入 `PAYMENT-08` 用 test API/SDK 验证。 |
-| checkout 是否返回 session/order/id | go test mode | 官方示例返回 `checkout.checkoutUrl`；webhook 示例包含 checkout id `ch_...`，进入 `PAYMENT-08` 记录真实 test response 字段。 |
-| 成功支付后是否能跳转 success URL | yes / no / unknown | |
-| 取消支付后是否能跳转 cancel URL | yes / no / unknown | |
-| 失败支付后是否能跳转 failure URL | yes / no / unknown | |
-| checkout 结果是否能在后台查看 | yes / no / unknown | |
-| 是否支持订阅 checkout | go test mode | 官方文档包含 recurring product 和 checkout 创建示例；当前产品后台未发现手动入口，进入 `PAYMENT-08` 用 test API/SDK 验证。 |
-| 是否支持一次性付款 checkout | yes / no / unknown | |
+| 能否创建 test checkout | yes | 官方 Test Mode 文档确认 test endpoint `https://test-api.creem.io/v1/checkouts`；`GNE-100` 已用 test API 创建 Plus / Pro / AI credit pack checkout。 |
+| checkout 是否返回 session/order/id | yes | `GNE-100` 已记录 test checkout id，例如 `ch_...`；正式文档只保留非敏感字段，不记录 secret。 |
+| 成功支付后是否能跳转 success URL | yes | 已通过 Creem test hosted checkout 验证成功支付和回跳。 |
+| 取消支付后是否能跳转 cancel URL | yes | 已通过本地/线上测试确认取消路径可返回应用。 |
+| 失败支付后是否能跳转 failure URL | partial | Sandbox failure path 已验证；Creem test-mode provider failure 依赖第三方失败卡/失败事件能力，不作为 MVP2 阻塞项。 |
+| checkout 结果是否能在后台查看 | yes | Creem test dashboard 已看到 Plus / Pro / AI credit pack test payments。 |
+| 是否支持订阅 checkout | yes | Plus / Pro monthly subscription checkout 已验证。 |
+| 是否支持一次性付款 checkout | yes | AI Credit Pack 100K one-time checkout 已验证。 |
 
 Creem checkout API 初步观察:
 
@@ -271,15 +271,15 @@ KYC / account review observation on 2026-06-22:
 
 | Provider | Account | Product allowed | Test mode | Webhook | Env needed | Payout | Risks | Decision |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Creem | Test dashboard 可访问，test mode 可开启，Developers / API keys / Webhooks 可访问；production KYC/account review 因缺少真实垂直产品暂停 | 已创建 `AI Web Starter Kit Pro`，可表达 Pro monthly subscription；Product ID: `prod_3TvLvuLXmwQseX16nFNyQE`；AI credit pack 是否单独产品后置 | 已确认 test mode 与 production mode 隔离；官方 test checkout endpoint 为 `https://test-api.creem.io/v1/checkouts`；真实 response 字段进入 `PAYMENT-08` | 可创建 Webhook；支持 13 个事件；签名 header 为 `creem-signature`；真实 webhook secret、payload、replay 和 public HTTPS endpoint 进入 `PAYMENT-08` | `PAYMENT_PROVIDER=creem`、`PAYMENT_MODE=test`、`PAYMENT_LIVE_ENABLED=false`；`PAYMENT_PROVIDER_SECRET` / `CREEM_API_KEY` server-only；`PAYMENT_WEBHOOK_SECRET` server-only；`CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE` | 未作为 MVP2 通过项；production KYC 前置于 payout/settlement，后置到 `GNE-201` | production KYC 要求明确真实产品、prohibited products 确认、account review checklist 确认；被拒后 3 个月不能再次 review；不能使用 production key/live payment | `Go test mode`，仅允许 `GNE-100` test-mode-only spike；生产支付进入 `GNE-201` |
+| Creem | Test dashboard 可访问，test mode 可开启，Developers / API keys / Webhooks 可访问；production KYC/account review 因缺少真实垂直产品暂停 | 已创建 Plus / Pro subscription 和 AI credit pack test products；Pro Product ID: `prod_3TvLvuLXmwQseX16nFNyQE` | 已确认 test mode 与 production mode 隔离；官方 test checkout endpoint 为 `https://test-api.creem.io/v1/checkouts`；`GNE-100` 已验证 test checkout、test payment 和跳转链路 | 已创建 Webhook；支持 13 个事件；签名 header 为 `creem-signature`；`GNE-100` 已验证 public Vercel HTTPS endpoint 收到 `checkout.completed` 并返回 200 | `PAYMENT_PROVIDER=creem`、`PAYMENT_MODE=test`、`PAYMENT_LIVE_ENABLED=false`；`PAYMENT_PROVIDER_SECRET` / `CREEM_API_KEY` server-only；`PAYMENT_WEBHOOK_SECRET` server-only；`CREEM_PLUS_MONTHLY_PRODUCT_ID`、`CREEM_PRO_MONTHLY_PRODUCT_ID`、`CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID` | 未作为 MVP2 通过项；production KYC 前置于 payout/settlement，后置到 `GNE-201` | production KYC 要求明确真实产品、prohibited products 确认、account review checklist 确认；被拒后 3 个月不能再次 review；不能使用 production key/live payment | `Go test mode` 已完成；`GNE-100` test-mode-only spike Done；生产支付进入 `GNE-201` |
 
 | Checklist 项 | 结论 | 说明 |
 | --- | --- | --- |
 | 区分 `PAY-KNOW-01` 与本任务 | done | `PAY-KNOW-01` 记录支付能力知识共识；本文件记录 Creem 人工证据。 |
 | Creem 账号验证 | partial / enough for test mode | Dashboard、test mode、Developers / API keys / Webhooks 可访问；production KYC 暂停。 |
-| 产品验证 | done for Pro subscription | 已创建 `AI Web Starter Kit Pro`，Product ID 为 `prod_3TvLvuLXmwQseX16nFNyQE`；AI credit pack 是否单独产品后置。 |
-| test mode 验证 | done for entry | 已确认 test mode 开启和官方 test endpoint；真实 response 字段进入 `PAYMENT-08`。 |
-| webhook 验证 | done for entry | 已确认可创建 webhook、13 个事件和 `creem-signature`；真实 secret/payload/replay 进入 `PAYMENT-08`。 |
+| 产品验证 | done for test mode | 已创建 Plus / Pro subscription 和 AI credit pack test products；Product IDs 已在本地 ignored env 和 Vercel Production 手工配置，不写入 Git。 |
+| test mode 验证 | done | 已确认 test mode 开启、官方 test endpoint、checkout URL、test payment、success/cancel 跳转和 Creem test dashboard payment 记录。 |
+| webhook 验证 | done | 已确认可创建 webhook、13 个事件、`creem-signature`、public Vercel endpoint、`checkout.completed` delivery success、HTTP 200 response、Supabase `payment_events`、Billing credit grant 和 PostHog server-side events。 |
 | payout / settlement 验证 | deferred | Production KYC 前置于 payout/settlement；当前 MVP2 不是具体垂直产品，后置到 `GNE-201`。 |
 | 风险验证 | done | 已识别 production KYC、prohibited products、review checklist、被拒 3 个月、secret 泄露、webhook endpoint、live payment 边界风险。 |
 | secret 安全 | done | API key / webhook secret 不进入 Git、Linear、README、截图或 `NEXT_PUBLIC_*`。 |
@@ -290,17 +290,19 @@ KYC / account review observation on 2026-06-22:
 - `GNE-100 PAYMENT-08`: 验证真实 test checkout API response、success/cancel/failure、test webhook payload、signature、幂等字段和 adapter 映射。
 - `GNE-201 Production Payment`: 验证 production KYC、live payment、production key、payout/settlement、真实退款、对账、发票、税务和分账。
 
-## 最终判断
+## PAYMENT-07 最终判断
 
-请选择一个:
+`GNE-99` 的历史人工调研结论:
 
 - `Go test mode`: 可以进入 `PAYMENT-08`，只使用 test mode / sandbox mode 做技术打样。
 - `Need more info`: 信息不足，需要继续查文档、问客服或补充账号验证。
 - `No-go for now`: 当前不适合作为候选 Provider，暂不进入技术打样。
 
-## PAYMENT-08 启动判断
+最终选择: `Go test mode`，且后续 `GNE-100 PAYMENT-08` 已执行完成。
 
-`PAYMENT-07` 的人工调研已经足够支持进入 `PAYMENT-08`，但只限 Creem test mode 技术打样:
+## PAYMENT-08 启动判断与完成状态
+
+`PAYMENT-07` 的人工调研足够支持进入 `PAYMENT-08`，且 `PAYMENT-08` 已完成 Creem test mode 技术打样:
 
 - Test mode 已开启。
 - Pro subscription 产品已创建。
@@ -364,7 +366,7 @@ CREEM_CHECKOUT_SUCCESS_URL=https://your-preview-or-production-url/account/paymen
 
 ### 2026-06-23 PAYMENT-08 test checkout evidence
 
-本次验证证明 Creem test checkout 可以创建，且人工测试卡支付后 Creem 后台能看到 3 笔 test payment。尚未证明项目 webhook 处理、PostHog `payment_succeeded`、Billing trusted facts 或 subscription/entitlement 写入完成。
+本次验证证明 Creem test checkout 可以创建，且人工测试卡支付后 Creem 后台能看到 3 笔 test payment。
 
 | Price ID | Creem Product ID | Checkout ID | Checkout URL | Script result | Human payment/dashboard check |
 | --- | --- | --- | --- | --- | --- |
@@ -372,22 +374,37 @@ CREEM_CHECKOUT_SUCCESS_URL=https://your-preview-or-production-url/account/paymen
 | `pro_monthly` | `prod_3TvLvuLXmwQseX16nFNyQE` | `ch_1jjUTUzHiQQ0K8UYR0BPgD` | `https://creem.io/test/checkout/prod_3TvLvuLXmwQseX16nFNyQE/ch_1jjUTUzHiQQ0K8UYR0BPgD` | `200`, `pending` | pass: Creem dashboard shows paid subscription payment |
 | `ai_credit_pack_100k` | `prod_4IRFjMpu3pxY5eK75y8BP7` | `ch_6bP1Uct3WHrt6FyeAKa699` | `https://creem.io/test/checkout/prod_4IRFjMpu3pxY5eK75y8BP7/ch_6bP1Uct3WHrt6FyeAKa699` | `200`, `pending` | pass: Creem dashboard shows paid one-time payment |
 
-PostHog 状态:
+### 2026-06-23 PAYMENT-08 webhook and product evidence
 
-- 当前没有期望中的 Creem `payment_succeeded` / `entitlement_granted` 日志是正常缺口，因为这三笔支付发生在 Creem hosted checkout，项目还没有接收 Creem webhook、校验签名、处理幂等事件并写入 Billing facts。
-- `checkout_started` 只有从项目 app 的 Payment service 创建 checkout 时才会发出；直接运行 `integrations/scripts/creem-test-checkout.mjs` 属于 provider spike 脚本，不发送 PostHog 事件。
-- 按当前项目规则，不能从 Creem success URL、截图或前端页面直接补发 `payment_succeeded`。该事件必须来自 webhook 或等价可信服务端处理。
+本次补充验证证明 `GNE-100 PAYMENT-08` 已经完成 MVP2 test-mode-only 技术打样。可信链路如下:
 
-下一步动作:
+```text
+app checkout
+-> Creem test hosted checkout
+-> Creem test payment
+-> Vercel /api/payment/webhook
+-> Supabase payment_events
+-> Billing credit ledger grant
+-> PostHog server-side payment events
+-> /account/usage Credit 增加
+```
 
-1. 配置 public HTTPS webhook test endpoint。
-2. 在 Creem test mode 配置 webhook 事件。
-3. 验证 signature、event id、event type、幂等 key 和 raw payload 保存边界。
-4. 从可信 webhook 处理路径发出 `payment_succeeded`、`entitlement_granted` 等 PostHog 事件。
-5. 继续验证重复事件不会重复授予权益。
+验收事实:
 
-结论: Go test mode
+- Creem test webhook endpoint: `https://ai-web-starter-kit-web.vercel.app/api/payment/webhook`
+- Webhook event sample: `checkout.completed`
+- Creem delivery status: success, HTTP `200`
+- Webhook response shape: `{"accepted":true,"idempotencyKey":"payment:creem:..."}`
+- Supabase `payment_events` row: `provider=creem`, `event_type=checkout.completed`, `status=processed`
+- Observed event id: `evt_1PlbmZFYtN04AWNeE6O0hc`
+- Billing result: AI credit pack grants `100,000 Credit` through server-side Billing facts
+- PostHog result: server-side `payment_succeeded` and `entitlement_granted` events are visible for the signed-in reviewer
+- Product result: `/account/usage` shows available Credit increase after the Creem test payment and webhook processing
 
-原因: Creem test mode、Pro 产品、订阅/月付价格、产品图片、产品功能展示、Developers/API/Webhook 入口、Webhook 事件列表和官方 test checkout API 已确认，足以进入 `PAYMENT-08` 做 test-mode-only 技术打样；production KYC/account review 会要求明确产品、prohibited products/checklist 承诺和被拒 3 个月限制，当前 MVP2 不是具体垂直产品，因此 production KYC/live payment 仍不准入。
+结论: Done for MVP2 test mode.
 
-下一步: 启动 `PAYMENT-08`。需要人工在 Creem test mode 创建 test API key，并只放入本地 ignored env 或受控 secret manager；Codex 只能读取/使用本地环境变量，不接收、不记录、不提交 key。生产认证和 live payment 留到 `GNE-201` 或真实垂直产品阶段。
+边界:
+
+- 这不是 production payment approval.
+- 不代表 KYC、payout、settlement、refund、reconciliation、invoice、tax、chargeback、dispute handling 或真实用户付款已经完成。
+- Production KYC/live payment 仍归 `GNE-201` 或真实垂直产品阶段处理。

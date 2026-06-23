@@ -11,6 +11,10 @@ For every task, Codex should first read:
 5. the relevant integration document under `integrations/`
 6. `specs/deploy/engineering-spec.md` plus the relevant deploy memory document when the task involves deployment status, Preview / Production verification, smoke tests, production monitoring, incidents, or environment matrices
 
+When a task changes code, tests, schema, migrations, configuration,
+infrastructure, or technical documentation that affects implementation behavior,
+also read `context/engineering-decision-rules.md`.
+
 ## SDD Rule
 
 Do not implement a non-trivial feature directly from a vague request.
@@ -24,20 +28,12 @@ For each feature:
 5. verify
 6. update status
 
-## Minimal Implementation First
+## Engineering Decision Rules
 
-AI-assisted implementation should follow the Ponytail-style constraint: do the smallest responsible change that completes the current issue, and avoid building a larger system just because it is possible.
-
-When implementing MVP features:
-
-- Prefer the smallest working change.
-- Do not introduce new dependencies unless clearly necessary.
-- Reuse existing components, utilities, services, migrations, provider interfaces, and patterns.
-- Avoid speculative abstractions, future-proofing, and broad framework work outside the current issue.
-- Do not create large component libraries for one-off UI.
-- Before adding code, check whether existing code can be modified, reused, simplified, or deleted.
-- If a larger change is necessary, explain why the smaller path is insufficient before implementing it.
-- For security, payment, auth, and database code, minimal does not mean skipping validation, idempotency, logging, permission checks, RLS, webhook verification, or environment isolation.
+For implementation tradeoffs, use `context/engineering-decision-rules.md`.
+It keeps the Minimal Responsible Implementation rule, untrusted-input boundary,
+contract compatibility rule, and verification choice separate from workflow
+rules in this file.
 
 ## Collaboration And Branch Safety
 

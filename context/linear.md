@@ -118,6 +118,24 @@ GNE-11 FOUNDATION-00 [FOUNDATION] GitHub 仓库基础与 AI 协作规则
 ├── GNE-80 FOUNDATION-06 [CI] 配置基础检查：lint、typecheck、build
 └── GNE-116 FOUNDATION-07 [DOC] 建立 Supabase 多人数据库协作规范
 
+`GNE-76` remains the Foundation owner for AI execution rules. On 2026-06-23,
+the engineering tradeoff guidance was moved out of the main Codex workflow
+surface into `context/engineering-decision-rules.md`, with
+`context/codex-rules.md` keeping only a lightweight trigger and reference. The
+root `AGENTS.md` stays intentionally small. The new rules cover implementation
+choices, untrusted retrieved/model/tool output, contract compatibility, and
+verification selection; they do not override acceptance criteria, specs,
+integrations, security rules, `AGENTS.md`, or project workflow.
+
+MVP1/MVP2 structure review on 2026-06-23 found the current code ownership
+reasonable: `packages/core` owns reusable contracts and pure logic, `apps/web`
+owns routes, provider wiring, UI, and service boundaries, `specs` owns module
+intent, `integrations` owns provider operations, and `context` owns project
+memory. No runtime refactor is required for this governance update. Future
+refactor candidates are `apps/web/lib/services/payment.ts` and
+`apps/web/app/account/billing-overview.tsx` if they become difficult to review,
+test, or edit in parallel.
+
 GNE-70 APP-00 [APP] 产品外壳与可复用 UI
 ├── GNE-81 APP-01 [APP] 初始化 Next.js + TypeScript Web 应用
 ├── GNE-82 APP-02 [APP] 建立应用外壳：导航、布局、基础页面容器

@@ -68,7 +68,7 @@ export default async function PaymentPage() {
                 />
                 <Fact
                   label={copy.account.payment.mode}
-                  value={stateResult.data.mode}
+                  value={formatPaymentMode(stateResult.data, copy)}
                 />
                 <Fact
                   label={copy.account.payment.entitlementSource}
@@ -130,6 +130,20 @@ export default async function PaymentPage() {
       </div>
     </PaymentShell>
   );
+}
+
+function formatPaymentMode(
+  state: {
+    mode: string;
+    provider: string;
+  },
+  copy: Dictionary
+) {
+  if (state.provider === "creem" && state.mode === "real") {
+    return copy.account.payment.realAdapterTestModeOnly;
+  }
+
+  return state.mode;
 }
 
 function CheckoutOptionCard({

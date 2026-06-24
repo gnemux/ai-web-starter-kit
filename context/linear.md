@@ -87,9 +87,19 @@ MVP2 扩展底座
 MVP3 Product Validation Kit
 ├── GNE-171 MVP3 PRODUCT-00
 ├── GNE-75 MVP3 GROWTH-00
-├── GNE-194 MVP3-CP-07 Payment provider test mode adapter validation
-├── GNE-195 MVP3-CP-08 real AI provider acceptance
-└── GNE-158 MVP3-CP-09 AI credit pack sandbox validation
+├── GNE-210 MVP3-CP-00 architecture/test preflight
+├── GNE-173 MVP3-CP-01 specs and template boundary
+├── GNE-174 MVP3-CP-02 projects owner-only chain
+├── GNE-175 MVP3-CP-03 public validation pages and leads
+├── GNE-206 MVP3-CP-04 owner dashboard and permission boundary
+├── GNE-176 MVP3-CP-05 funnel, UTM, and PostHog events
+├── GNE-177 MVP3-CP-06 Billing/Payment product flow
+├── GNE-179 MVP3-CP-07 validation-page AI copy generation
+├── GNE-178 MVP3-CP-08 notifications and ops status
+├── GNE-188 MVP3-CP-09 activation and core feature events
+├── GNE-158 MVP3-CP-10 AI credit pack sandbox validation
+├── GNE-194 MVP3-CP-11 Payment provider test mode adapter validation
+└── GNE-195 MVP3-CP-12 real AI provider acceptance
 
 MVP4 国内外双模式底座
 └── GNE-193 MVP4 INTEGRATIONS-00
@@ -100,9 +110,9 @@ MVP5 真实海外垂直产品验证
 
 `GNE-168` records the detailed MVP1-MVP6 mapping. `GNE-190` is an MVP2 consensus document, not an implementation parent. `GNE-167` is MVP2-only integrations: provider matrix, env naming, mock/no-op/sandbox strategy, and interface boundaries. `GNE-193` owns MVP4 overseas / China adapter, env template, mock, and launch-checklist planning. `GNE-201` owns future production payment readiness for real vertical products.
 
-MVP3 core execution remains `GNE-173` through `GNE-179`. Payment provider validation in MVP3 is test-mode only through `GNE-194`; live payment belongs to MVP5 or later. AI provider product acceptance remains conditionally split into `GNE-195`. AI credit pack payment validation is `GNE-158` and uses sandbox payment by default.
+MVP3 execution should now start with `GNE-210 / MVP3-CP-00` as an architecture/test preflight before new Product Validation Kit runtime work. After `GNE-210`, core product execution follows the CP order under `GNE-171`: specs, projects, public pages/leads, owner dashboard, funnel events, Billing/Payment, AI, Ops, activation, credit-pack sandbox, and conditional provider validation. Payment provider validation in MVP3 is test-mode only through `GNE-194 / MVP3-CP-11`; live payment belongs to MVP5 or later. AI provider product acceptance remains conditionally split into `GNE-195 / MVP3-CP-12`. AI credit pack payment validation is `GNE-158 / MVP3-CP-10` and uses sandbox payment by default.
 
-Execution tasks remain as child issues under the parent issue tree below. Examples: `GNE-180` through `GNE-183` stay under `GNE-167`; `GNE-173` through `GNE-195` plus `GNE-158` stay under `GNE-171`; those child issues should not be directly assigned to Project Milestones.
+Execution tasks remain as child issues under the parent issue tree below. Examples: `GNE-180` through `GNE-183` stay under `GNE-167`; Product Kit CP tasks such as `GNE-210`, `GNE-173` through `GNE-179`, `GNE-206`, `GNE-188`, `GNE-158`, `GNE-194`, and `GNE-195` stay under `GNE-171`; those child issues should not be directly assigned to Project Milestones.
 
 ## Baseline Issue Tree
 
@@ -191,9 +201,9 @@ GNE-72 MVP2 PAYMENT-00 [PAYMENT] 支付底座与真实 Provider 验证边界（D
 ├── GNE-99 PAYMENT-07 [RESEARCH][MVP2 可选] 真实支付 Provider 人工验证清单（Done）
 └── GNE-100 PAYMENT-08 [SPIKE][MVP2] Creem test checkout 与 webhook 技术打样（Done）
 
-`PAYMENT-01..06` plus `PAYMENT-04R` are the MVP2 Payment mainline. `PAYMENT-07/08` are optional research/spike work: `GNE-99` asks a human to verify whether Creem/Dodo/Paddle/Alipay/WeChat Pay can actually support the team's account, product, test mode, webhook, payout, and risk requirements; `GNE-99` output `Go test mode` for Creem only, and `GNE-100` completed the Creem test-mode checkout/webhook spike. The accepted evidence chain is: app checkout -> Creem test payment -> Vercel `/api/payment/webhook` -> Supabase `payment_events` -> Billing credit grant -> PostHog server-side payment events -> `/account/usage` Credit increase. Production KYC/live payment remains blocked by missing real vertical product readiness and is tracked by `GNE-201`, not by MVP2.
+`PAYMENT-01..06` plus `PAYMENT-04R` are the MVP2 Payment mainline. `PAYMENT-07/08` are optional research/spike work: `GNE-99` asks a human to verify whether Creem/Dodo/Paddle/Alipay/WeChat Pay can actually support the team's account, product, test mode, webhook, payout, and risk requirements; `GNE-99` output `Go test mode` for Creem only, and `GNE-100` completed the Creem test-mode checkout/webhook spike. The accepted evidence chain is: app checkout -> Creem test payment -> Vercel `/api/payment/webhook` -> Supabase `payment_events` -> Billing credit grant -> PostHog server-side payment events -> `/account/usage` Credit increase. Production KYC/live payment remains blocked by missing real vertical product readiness and is tracked by `GNE-201`, not by MVP2. `specs/payment/acceptance.md` is synced to this Done state and records the latest verification snapshot; `/account/payment` should describe Creem as a real external adapter running in test mode only, not as live payment.
 
-Stash audit note: `stash@{0}` was reviewed across MVP2 Integrations, Billing, Payment, AI, and Analytics. It must not be applied wholesale because current `main` supersedes the Payment/Creem runtime. Useful Analytics dashboard/template content was merged manually into `integrations/analytics.md` under `GNE-73`; the remaining stash should stay until the audit PR is merged and the team confirms no further cherry-pick is needed.
+Stash audit note: the old `codex-before-sync-main-20260623` stash was reviewed across MVP2 Integrations, Billing, Payment, AI, and Analytics. It was not applied wholesale because current `main` superseded the Payment/Creem runtime. Useful Analytics dashboard/template content was merged manually into `integrations/analytics.md` under `GNE-73`; the remaining stash was later dropped after the team confirmed no further cherry-pick was needed.
 
 Payment reviewer surface: reviewers must be able to follow `/account/billing` or `/account/usage` entry -> `/account/payment` checkout started -> `/account/payment/sandbox` -> success, cancel, or failure result -> current Billing order/subscription/entitlement status. Success URLs record navigation only and must not directly grant entitlement. MVP2 defaults to SandboxProvider. Real provider work is research/test-mode only until a real vertical product reaches the MVP5 production-payment gate.
 
@@ -208,7 +218,7 @@ GNE-73 MVP1-MVP3 ANALYTICS-00 [ANALYTICS] 统一事件标准、生产验收与�
 ├── GNE-125 ANALYTICS-08 [TEST][MVP2/MVP3] 验证单 Project 多环境/多产品数据隔离（Done）
 └── GNE-159 ANALYTICS-09 [AI][MVP2] AI 使用量、成本与转化事件看板（Done）
 
-Payment-specific analytics execution moved to `GNE-104 PAYMENT-05` under the Payment parent. MVP3 activation/core-feature analytics moved to `GNE-188 MVP3-CP-10` under the Product Validation Kit parent. Analytics keeps the shared event standard, privacy boundary, dashboard ownership, and review conventions; it is not a payment, order, entitlement, AI usage, or quota source of truth.
+Payment-specific analytics execution moved to `GNE-104 PAYMENT-05` under the Payment parent. MVP3 activation/core-feature analytics moved to `GNE-188 MVP3-CP-09` under the Product Validation Kit parent. Analytics keeps the shared event standard, privacy boundary, dashboard ownership, and review conventions; it is not a payment, order, entitlement, AI usage, or quota source of truth.
 
 GNE-74 DEPLOY-00 [DEPLOY] 部署、环境变量与线上验收
 ├── GNE-107 DEPLOY-01 [DOC] 建立环境变量清单与 .env.example
@@ -231,6 +241,14 @@ GNE-75 GROWTH-00 [GROWTH] 增长营销基础能力
 ├── GNE-127 GROWTH-07 [DEV] 建立推广链接示例与 attribution 验证页面
 ├── GNE-128 GROWTH-08 [DOC] 建立增长复盘模板与行动规则
 └── GNE-161 GROWTH-09 [AI] AI 产品 Demo 模板与落地页表达
+
+Growth execution order remains intentionally separate from MVP3 Product Kit CP
+order. `GROWTH-01..09` is a reusable growth foundation sequence: SEO baseline
+-> landing modules -> campaign attribution -> feedback -> launch checklist
+-> UTM naming -> attribution verification -> retro template -> AI demo
+expression. Product-specific owner dashboard, funnel events, activation, and
+AI/payment validation belong under `GNE-171` CP issues instead of being
+renumbered into Growth.
 
 GNE-148 MVP2 AI-00 [AI] AI Provider、Usage、Credit 与 Entitlement 底座（Done in repo）
 ├── GNE-149 AI-01 [DOC][MVP2] 定义 AI provider、model、token、credit、entitlement 边界（Done in repo）
@@ -266,7 +284,9 @@ GNE-148 repo completion closes the MVP2 AI foundation locally. The accepted
 review path is `/dashboard` for AI input/result, `/account/usage` for Credit
 balance/top-up/records, and `/account/billing` for plan selection. The parent
 does not claim real-provider production smoke, which remains a future deployed
-verification step.
+verification step. `specs/ai/acceptance.md` is synced to this Done state and
+records the latest local verification snapshot while keeping real-provider
+production smoke as `not_run`.
 
 GNE-152/GNE-153 repo implementation uses the existing Billing ledger tables:
 successful workspace mock text generation writes provider usage measurement into
@@ -290,22 +310,33 @@ GNE-167 MVP2 INTEGRATIONS-00 [INTEGRATIONS] Provider matrix、环境变量与 ad
 GNE-193 MVP4 INTEGRATIONS-00 [INTEGRATIONS] 海外/国内双模式 adapter、env 模板与上线 checklist
 
 GNE-171 MVP3 PRODUCT-00 [PD] Product Validation Kit / Indie 产品验证工作台
-├── GNE-173 MVP3-CP-00 [DOC] 对齐 Product Validation Kit 规格与模板边界
-├── GNE-174 MVP3-CP-01 [DATA/API/APP] 建立 projects 领域对象与 owner-only 链路
-├── GNE-175 MVP3-CP-02 [DATA/API/APP] 建立公开验证页与 leads 匿名提交
-├── GNE-176 MVP3-CP-03 [ANALYTICS/GROWTH] 建立验证页漏斗、UTM 与 PostHog 事件
-├── GNE-177 MVP3-CP-04 [BILLING/PAYMENT] 建立 Free/Plus/Pro 权益、sandbox checkout 与 webhook 闭环
-├── GNE-178 MVP3-CP-05 [EMAIL/OPS] 建立通知、失败记录与 admin 运营状态
-├── GNE-179 MVP3-CP-06 [AI] 建立验证页 AI 文案生成与 usage credits
-├── GNE-194 MVP3-CP-07 [PAYMENT][TEST MODE] 复用真实 Provider 到产品场景验证
-├── GNE-195 MVP3-CP-08 [AI][MVP3] 真实 AI Provider 产品化验收
-└── GNE-158 MVP3-CP-09 [PAYMENT/AI] AI credit pack 与订阅赠送额度 sandbox 验证
+├── GNE-210 MVP3-CP-00 [ARCH/TEST] Product Validation Kit 结构拆分与回归护栏
+├── GNE-173 MVP3-CP-01 [DOC] 对齐 Product Validation Kit 规格与模板边界
+├── GNE-174 MVP3-CP-02 [DATA/API/APP] 建立 projects 领域对象与 owner-only 链路
+├── GNE-175 MVP3-CP-03 [DATA/API/APP] 建立公开验证页与 leads 匿名提交
+├── GNE-206 MVP3-CP-04 [APP/ANALYTICS] 项目 Owner 验证看板与权限边界
+├── GNE-176 MVP3-CP-05 [ANALYTICS/GROWTH] 建立验证页漏斗、UTM 与 PostHog 事件
+├── GNE-177 MVP3-CP-06 [BILLING/PAYMENT] 建立 Free/Plus/Pro 权益、sandbox checkout 与 webhook 闭环
+├── GNE-179 MVP3-CP-07 [AI] 建立验证页 AI 文案生成与 usage credits
+├── GNE-178 MVP3-CP-08 [EMAIL/OPS] 建立通知、失败记录与 admin 运营状态
+├── GNE-188 MVP3-CP-09 [ANALYTICS] 接入 activation 与核心功能事件
+├── GNE-158 MVP3-CP-10 [PAYMENT/AI] AI credit pack 与订阅赠送额度 sandbox 验证
+├── GNE-194 MVP3-CP-11 [PAYMENT][TEST MODE] 复用真实 Provider 到产品场景验证
+└── GNE-195 MVP3-CP-12 [AI][MVP3] 真实 AI Provider 产品化验收
 
 GNE-201 MVP5 PAYMENT-00 [PAYMENT] 真实垂直产品生产支付准入
 
 MVP3 reviewer surface: the product kit must be a clickable chain, not a collection of backend tasks. The minimum human check is login/signup -> project creation -> public validation page -> anonymous lead submission -> owner dashboard lead view -> Free/Plus/Pro gating -> sandbox checkout success/cancel/failure -> order/subscription/entitlement status -> AI generation -> usage/credit/quota result -> PostHog funnel evidence.
 
-Payment boundary in MVP3: `GNE-177` consumes MVP2 Billing/Payment foundations inside Product Validation Kit product features; it does not redo the Creem adapter spike. `GNE-194` is not merged with `GNE-100`: `GNE-100` answers whether Creem test-mode checkout/webhook/signature/idempotency can technically connect to the foundation, while `GNE-194` later answers whether that test-mode provider path is useful in the productized MVP3 flow. If the low-level Creem evidence is missing, keep `GNE-194` in Backlog and return to `GNE-100`.
+MVP3 architecture preflight: `GNE-210 / MVP3-CP-00` should run before adding the Product Validation Kit runtime. It owns low-risk structure and regression-guard work for the product kit: splitting large Payment/Billing review surfaces when needed, tightening service-role usage behind narrower server-only facades, defining transaction or compensation strategy for multi-table commercial facts, reviewing runtime security headers before public pages launch, and adding a proper lightweight behavior-test layer that protects Auth confirmation and login `next` preservation, Payment result trust, owner-only data access, public write-path abuse prevention, sandbox upgrade interpretation, and AI duplicate/idempotency behavior. It must preserve existing MVP1/MVP2 business behavior.
+
+MVP3 data boundary: `GNE-174` must not reuse the MVP1 `demo_items.visibility = public` authenticated-public-read template for project ownership. Product kit `projects` are owner-only; any public validation experience should expose only published public-page fields through a dedicated boundary such as `validation_pages`, while leads and owner dashboards remain owner-only or service-boundary mediated.
+
+Public entry abuse boundary in MVP3: `GNE-175 / MVP3-CP-03` owns the first anonymous public write path. The initial implementation should include server-side validation, dedupe, rate-limit or provider/edge-level abuse-prevention hooks, and failure behavior that does not leak owner-private fields.
+
+Payment boundary in MVP3: `GNE-177 / MVP3-CP-06` consumes MVP2 Billing/Payment foundations inside Product Validation Kit product features; it does not redo the Creem adapter spike. `GNE-194 / MVP3-CP-11` is not merged with `GNE-100`: `GNE-100` answers whether Creem test-mode checkout/webhook/signature/idempotency can technically connect to the foundation, while `GNE-194` later answers whether that test-mode provider path is useful in the productized MVP3 flow. If the low-level Creem evidence is missing, keep `GNE-194` in Backlog and return to `GNE-100`.
+
+Sandbox upgrade boundary in MVP3: `GNE-177 / MVP3-CP-06` should make Plus -> Pro and credit-pack sandbox flows understandable without claiming real proration, refund, invoice, or reconciliation. The UI or reviewer evidence should explain full-price sandbox records, previously paid amount, simulated delta, or no-op refund assumptions. Real production proration, refunds, invoices, settlement, and reconciliation remain `GNE-201`.
 ```
 
 ## Usage

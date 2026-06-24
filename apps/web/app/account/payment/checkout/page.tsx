@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import type { ServiceErrorCode } from "@starter/core";
+
 import { createPaymentCheckout } from "@/lib/services/payment";
 
 type CheckoutPageProps = {
@@ -18,7 +20,7 @@ export default async function PaymentCheckoutPage({
     redirect(result.data.redirectTo);
   }
 
-  redirect(buildCheckoutErrorRedirect(returnTo, result.error.message));
+  redirect(buildCheckoutErrorRedirect(returnTo, mapCheckoutErrorCode(result.error.code)));
 }
 
 function getParam(value: string | string[] | undefined) {
@@ -27,7 +29,7 @@ function getParam(value: string | string[] | undefined) {
 
 function buildCheckoutErrorRedirect(
   returnTo: string | undefined,
-  message: string
+  code: "configuration" | "unavailable" | "unsupported_price"
 ) {
   const fallbackPath = "/account";
   const safeReturnTo = returnTo?.startsWith("/account") ? returnTo : fallbackPath;
@@ -35,7 +37,21 @@ function buildCheckoutErrorRedirect(
   const params = new URLSearchParams(search);
 
   params.set("checkout_result", "error");
-  params.set("checkout_error", message);
+  params.set("checkout_error", code);
 
   return `${pathname}?${params.toString()}`;
+}
+
+function mapCheckoutErrorCode(
+  code: ServiceErrorCode
+): "configuration" | "unavailable" | "unsupported_price" {
+  if (code === "configuration_error") {
+    return "configuration";
+  }
+
+  if (code === "validation_error") {
+    return "unsupported_price";
+  }
+
+  return "unavailable";
 }

@@ -72,6 +72,7 @@ export function AiWorkflowForm({
     state?.result.ok ? state.result.data.model : state?.values.model || model
   );
   const [prompt, setPrompt] = useState(state?.values.prompt ?? "");
+  const [promptTouched, setPromptTouched] = useState(false);
   const selectedModel = useMemo(
     () =>
       modelOptions.find((option) => option.id === selectedModelId) ??
@@ -81,8 +82,10 @@ export function AiWorkflowForm({
   const resultState = state?.result ?? null;
   const fieldErrors =
     resultState && !resultState.ok ? resultState.error.fields : undefined;
+  const promptLength = prompt.trim().length;
+  const promptTooShort = promptLength > 0 && promptLength < 3;
   const promptHasBeenCorrected =
-    Boolean(fieldErrors?.prompt) && prompt.trim().length >= 3;
+    Boolean(fieldErrors?.prompt) && promptLength >= 3;
   const visibleState = promptHasBeenCorrected ? null : resultState;
 
   useEffect(() => {
@@ -104,11 +107,16 @@ export function AiWorkflowForm({
             className="min-h-28 resize-y rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
             maxLength={4000}
             name="prompt"
-            onChange={(event) => setPrompt(event.target.value)}
+            onBlur={() => setPromptTouched(true)}
+            onChange={(event) => {
+              setPrompt(event.target.value);
+              setPromptTouched(true);
+            }}
             placeholder={labels.promptPlaceholder}
             value={prompt}
           />
-          {fieldErrors?.prompt && !promptHasBeenCorrected ? (
+          {(promptTooShort && promptTouched) ||
+          (fieldErrors?.prompt && !promptHasBeenCorrected) ? (
             <span className="text-xs font-medium text-rose-600">
               {errorLabels.prompt}
             </span>
@@ -151,7 +159,7 @@ export function AiWorkflowForm({
           state={visibleState}
         />
         <Button
-          disabled={pending}
+          disabled={pending || promptTooShort}
           icon={<UsageIcon className="h-4 w-4" />}
           type="submit"
         >

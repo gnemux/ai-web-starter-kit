@@ -9,13 +9,19 @@ import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
 
-export async function PaymentShell({ children }: { children: ReactNode }) {
+export async function PaymentShell({
+  children,
+  nextPath = "/account/payment"
+}: {
+  children: ReactNode;
+  nextPath?: string;
+}) {
   const locale = await getRequestLocale();
   const copy = getDictionary(locale);
   const accountResult = await getCurrentAccount();
 
   if (!accountResult.ok) {
-    redirect("/login?next=/account/payment");
+    redirect(`/login?next=${encodeURIComponent(nextPath)}`);
   }
 
   const displayName = accountResult.data.profile?.displayName ?? "";

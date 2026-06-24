@@ -20,6 +20,7 @@ export function ProfileForm({
   initialDisplayName: string;
   labels: {
     displayName: string;
+    displayNamePlaceholder: string;
     save: string;
     saving: string;
     updated: string;
@@ -55,6 +56,7 @@ export function ProfileForm({
           id="displayName"
           maxLength={80}
           name="displayName"
+          placeholder={labels.displayNamePlaceholder}
           type="text"
         />
         {!state?.ok && state?.error.fields?.displayName ? (

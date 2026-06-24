@@ -6,7 +6,7 @@ Supabase is the default provider for authentication, user profiles, and MVP data
 
 ## Status
 
-M2 DATA verified locally and applied to staging. M3 API service helpers are verified locally. M4 Auth implementation is in progress with local SSR, protected route, and account UI verification complete.
+MVP1 Data/API/Auth foundations and MVP2 Billing/Payment/AI consumers are complete locally. Supabase remains the real Auth and Database provider. Online release must verify that the target Supabase project has the repository migrations applied and that Auth URL settings point to the deployed app domain before production signup or email confirmation is used as evidence.
 
 ## Collaboration Model
 
@@ -58,6 +58,41 @@ SUPABASE_SERVICE_ROLE_KEY=
 
 `AUTH_PROVIDER` and `DATABASE_PROVIDER` are non-secret server-side selectors. `SUPABASE_PROJECT_REF` is not a secret, but it identifies a linked project and should use a placeholder in `.env.example`. Keep real URL, publishable/anon key, service role key, access token, and database password out of Git.
 
+## Online Release Checklist
+
+Before using a Vercel deployment as release evidence, confirm these Supabase settings in the target project:
+
+1. Database schema:
+   - Apply reviewed repository migrations through the approved workflow, not Dashboard edits.
+   - Required repository migrations for the current MVP2 release:
+     - `20260618070613_create_data_template.sql`
+     - `20260618070813_harden_data_template.sql`
+     - `20260618070953_revoke_public_rls_auto_enable.sql`
+     - `20260621130735_create_billing_foundation.sql`
+     - `20260623025251_create_payment_events_webhook_boundary.sql`
+     - `20260624044653_add_billing_entitlement_source_idempotency.sql`
+   - The final idempotency migration is required so repeated credit-pack payment processing cannot create duplicate entitlement balance.
+2. Auth URL Configuration:
+   - Site URL: `https://ai-web-starter-kit-web.vercel.app` for the current production deployment.
+   - Production Redirect URLs:
+     - `https://ai-web-starter-kit-web.vercel.app/auth/confirm`
+     - `https://ai-web-starter-kit-web.vercel.app/auth/confirm/**`
+   - Local Redirect URLs are optional and only for local testing. Add exact ports that are actually used, for example:
+     - `http://localhost:3000/auth/confirm`
+     - `http://localhost:3000/auth/confirm/**`
+     - `http://localhost:3003/auth/confirm`
+     - `http://localhost:3003/auth/confirm/**`
+   - Supabase wildcard matching is useful for paths and preview domains, but do not rely on a single unbounded localhost-port rule. Add explicit local ports used by reviewers, or keep `NEXT_PUBLIC_APP_URL` stable during local Auth tests.
+3. Email confirmation:
+   - Confirm the Supabase email template uses the configured redirect target flow. If a template hardcodes `SiteURL`, production email confirmation can still point to the wrong host even when app code passes `emailRedirectTo`.
+   - Do not treat an unverified email login as valid release evidence; this app blocks unconfirmed email users at the service boundary.
+4. Server-side Supabase secrets:
+   - Vercel must have `SUPABASE_SECRET_KEY` or the legacy `SUPABASE_SERVICE_ROLE_KEY` configured as server-only for trusted Billing/Payment writes.
+   - Never add those keys as `NEXT_PUBLIC_` variables.
+5. RLS and service boundary:
+   - Keep RLS enabled for user-owned tables.
+   - Payment/Billing/AI writes that require elevated privileges must continue through server-only service code, not client code or SQL copied into Dashboard.
+
 ## Rules
 
 - Do not use the service role key in browser code.
@@ -91,14 +126,17 @@ Current staging:
 
 - Project ref: `nglilxhkuqzswbwitbdu`
 - API URL: `https://nglilxhkuqzswbwitbdu.supabase.co`
-- Applied migrations:
+- Originally documented applied migrations:
   - `20260618070613_create_data_template`
   - `20260618070813_harden_data_template`
   - `20260618070953_revoke_public_rls_auto_enable`
-- Pending migration:
+- Repository migrations added after that staging note:
   - `20260621130735_create_billing_foundation`
-- Security advisors: clear after hardening.
-- Performance advisors: only new-table unused-index INFO entries for `demo_items_owner_id_idx` and `demo_items_visibility_idx`, expected until staging receives representative traffic.
+  - `20260623025251_create_payment_events_webhook_boundary`
+  - `20260624044653_add_billing_entitlement_source_idempotency`
+- Release operators must check the target Supabase migration history before launch and apply any missing reviewed migrations through the workflow. This document does not claim those later migrations are already applied to every remote target.
+- Security advisors: clear after hardening in the earlier staging check.
+- Performance advisors: only new-table unused-index INFO entries were recorded for `demo_items_owner_id_idx` and `demo_items_visibility_idx`, expected until staging receives representative traffic.
 
 ## GitHub Actions Staging Migrations
 

@@ -7,7 +7,7 @@
 - Mainline child issues: `GNE-192`, `GNE-98`, `GNE-96`, `GNE-97`, `GNE-198`, `GNE-104`, `GNE-202`
 - Optional research/spike issues: `GNE-99`, `GNE-100`
 
-`GNE-99 PAYMENT-07` is a human research checklist, not a code task: verify whether a real Provider such as Creem can support the team's account, product, test mode, webhook, payout, and risk requirements. `GNE-100 PAYMENT-08` is a test-mode-only technical spike after `GNE-99` outputs `Go test mode`. Neither issue permits live payment, production keys, or real user charges. Use `GNE-194` only when MVP3 needs productized test-mode validation, and use `GNE-201` for production payment readiness. AI credit-pack commercialization moved to `GNE-158 MVP3-CP-09` and must use SandboxProvider unless a later production-payment gate is satisfied.
+`GNE-99 PAYMENT-07` is a human research checklist, not a code task: verify whether a real Provider such as Creem can support the team's account, product, test mode, webhook, payout, and risk requirements. `GNE-100 PAYMENT-08` is a test-mode-only technical spike after `GNE-99` outputs `Go test mode`. Neither issue permits live payment, production keys, or real user charges. Use `GNE-194 / MVP3-CP-11` only when MVP3 needs productized test-mode validation, and use `GNE-201` for production payment readiness. AI credit-pack commercialization moved to `GNE-158 / MVP3-CP-10` and must use SandboxProvider unless a later production-payment gate is satisfied.
 
 ## Affected Areas
 
@@ -114,6 +114,9 @@ Creem test-mode webhook rules:
 - route: `/api/payment/webhook`;
 - required header: `creem-signature`;
 - verification: HMAC-SHA256 over the raw request body with `PAYMENT_WEBHOOK_SECRET`;
+- external error responses must use generic webhook errors and must not expose
+  internal service messages, env variable names, provider configuration gaps,
+  raw payload details, or secret-validation internals;
 - required safety env: `PAYMENT_PROVIDER=creem`, `PAYMENT_MODE=test`, `PAYMENT_LIVE_ENABLED=false`;
 - required checkout metadata for grants: `referenceId` or `owner_id`, `price_id`, and `plan_id`;
 - event storage: `payment_events` stores provider, event id, event type, raw payload, status, processed timestamp, and idempotency key with service-role-only access;

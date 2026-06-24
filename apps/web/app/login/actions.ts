@@ -9,7 +9,10 @@ import {
   signUpWithPasswordFromFormData
 } from "@/lib/services/auth";
 
-export type AuthFormState = ServiceResult<AuthActionPayload> | null;
+export type AuthFormState = {
+  mode: AuthMode;
+  result: ServiceResult<AuthActionPayload>;
+} | null;
 
 export async function submitAuthAction(
   _previousState: AuthFormState,
@@ -26,5 +29,8 @@ export async function submitAuthAction(
     revalidatePath("/account");
   }
 
-  return result;
+  return {
+    mode,
+    result
+  };
 }

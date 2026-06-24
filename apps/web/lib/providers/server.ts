@@ -100,7 +100,8 @@ export function createCreemTestPaymentProvider(): PaymentProvider {
 
       const successUrlResult = resolveCreemSuccessUrl(
         input.successUrl,
-        input.priceId
+        input.priceId,
+        input.metadata?.return_url
       );
 
       if (!successUrlResult.ok) {
@@ -349,14 +350,33 @@ function resolveCreemProductId(priceId: string) {
   return serviceOk(productId);
 }
 
-function resolveCreemSuccessUrl(fallbackPath: string, priceId: string) {
+function resolveCreemSuccessUrl(
+  fallbackPath: string,
+  priceId: string,
+  returnTo: string | undefined
+) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  const isLocalTestMode =
+    process.env.NEXT_PUBLIC_APP_ENV === "local" &&
+    process.env.PAYMENT_MODE === "test" &&
+    process.env.PAYMENT_LIVE_ENABLED === "false";
+  const allowLocalhost =
+    isLocalTestMode && Boolean(appUrl && isLocalhostUrl(appUrl));
+
+  if (allowLocalhost && appUrl) {
+    return validateCreemCheckoutUrl(`${appUrl}${fallbackPath}`, {
+      allowLocalhost
+    });
+  }
+
   const configuredUrl = process.env.CREEM_CHECKOUT_SUCCESS_URL?.trim();
 
   if (configuredUrl) {
-    return validateHttpsUrl(withPriceId(configuredUrl, priceId));
+    return validateCreemCheckoutUrl(
+      withPriceId(configuredUrl, priceId, returnTo),
+      { allowLocalhost }
+    );
   }
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
 
   if (!appUrl) {
     return serviceError(
@@ -365,14 +385,19 @@ function resolveCreemSuccessUrl(fallbackPath: string, priceId: string) {
     );
   }
 
-  return validateHttpsUrl(`${appUrl}${fallbackPath}`);
+  return validateCreemCheckoutUrl(`${appUrl}${fallbackPath}`, {
+    allowLocalhost
+  });
 }
 
-function withPriceId(url: string, priceId: string) {
+function withPriceId(url: string, priceId: string, returnTo: string | undefined) {
   try {
     const parsedUrl = new URL(url);
 
     parsedUrl.searchParams.set("price_id", priceId);
+    if (returnTo) {
+      parsedUrl.searchParams.set("return_to", returnTo);
+    }
 
     return parsedUrl.toString();
   } catch {
@@ -380,15 +405,34 @@ function withPriceId(url: string, priceId: string) {
   }
 }
 
-function validateHttpsUrl(url: string) {
-  if (!url.startsWith("https://")) {
-    return serviceError(
-      "configuration_error",
-      "Creem checkout URLs must be HTTPS."
-    );
+function validateCreemCheckoutUrl(
+  url: string,
+  options: { allowLocalhost: boolean }
+) {
+  if (
+    url.startsWith("https://") ||
+    (options.allowLocalhost && isLocalhostUrl(url))
+  ) {
+    return serviceOk(url);
   }
 
-  return serviceOk(url);
+  return serviceError(
+    "configuration_error",
+    "Creem checkout URLs must be HTTPS outside local test mode."
+  );
+}
+
+function isLocalhostUrl(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+
+    return (
+      parsedUrl.protocol === "http:" &&
+      ["localhost", "127.0.0.1", "::1"].includes(parsedUrl.hostname)
+    );
+  } catch {
+    return false;
+  }
 }
 
 function parseJsonObject(text: string): Record<string, unknown> {

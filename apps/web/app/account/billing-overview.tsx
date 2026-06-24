@@ -82,7 +82,11 @@ export function BillingOverview({
         </div>
       </section>
 
-      <PlanRecords activityResult={activityResult} labels={labels} />
+      <PlanRecords
+        activityResult={activityResult}
+        billingResult={billingResult}
+        labels={labels}
+      />
     </div>
   );
 }
@@ -229,9 +233,7 @@ function PlanReviewCard({
     : plan.featured
       ? labels.recommended
     : labels.baseline;
-  const entitlements = isCurrentPlan && currentSnapshot
-    ? currentSnapshot.entitlements
-    : plan.entitlements;
+  const entitlements = plan.entitlements;
 
   return (
     <section
@@ -295,11 +297,18 @@ function PlanReviewCard({
             {labels.includedInCurrentPlan}
           </p>
         ) : price ? (
-          <Button
-            href={`/account/payment/checkout?price_id=${price.id}&return_to=${returnTo}`}
-          >
-            {currentPlanId === "free" ? labels.upgradePlan : labels.switchPlan}
-          </Button>
+          <div className="grid gap-2">
+            {currentPlanId && currentPlanId !== "free" ? (
+              <p className="text-xs leading-5 text-slate-500">
+                {labels.planSwitchNote}
+              </p>
+            ) : null}
+            <Button
+              href={`/account/payment/checkout?price_id=${price.id}&return_to=${returnTo}`}
+            >
+              {currentPlanId === "free" ? labels.upgradePlan : labels.switchPlan}
+            </Button>
+          </div>
         ) : null}
       </div>
     </section>
@@ -362,9 +371,11 @@ function CreditPackReview({
 
 function PlanRecords({
   activityResult,
+  billingResult,
   labels
 }: {
   activityResult: ServiceResult<BillingActivity>;
+  billingResult: ServiceResult<BillingEntitlementSnapshot>;
   labels: Dictionary["account"]["billing"];
 }) {
   const paymentRecords = activityResult.ok
@@ -389,19 +400,49 @@ function PlanRecords({
           />
         </div>
       ) : (
-        <div className="mt-5 divide-y divide-slate-100">
-          {paymentRecords.length > 0 ? (
-            paymentRecords.map((record) => (
-              <PaymentRecordRow key={record.id} labels={labels} record={record} />
-            ))
-          ) : (
-            <p className="py-3 text-sm text-slate-500">
-              {labels.emptyPlanRecords}
-            </p>
-          )}
-        </div>
+        <>
+          {billingResult.ok ? (
+            <CurrentPlanPeriod labels={labels} snapshot={billingResult.data} />
+          ) : null}
+          <div className="mt-5 divide-y divide-slate-100">
+            {paymentRecords.length > 0 ? (
+              paymentRecords.map((record) => (
+                <PaymentRecordRow
+                  key={record.id}
+                  labels={labels}
+                  record={record}
+                />
+              ))
+            ) : (
+              <p className="py-3 text-sm text-slate-500">
+                {labels.emptyPlanRecords}
+              </p>
+            )}
+          </div>
+        </>
       )}
     </Panel>
+  );
+}
+
+function CurrentPlanPeriod({
+  labels,
+  snapshot
+}: {
+  labels: Dictionary["account"]["billing"];
+  snapshot: BillingEntitlementSnapshot;
+}) {
+  return (
+    <dl className="mt-5 grid gap-3 rounded-md border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2">
+      <PlanCardFact
+        label={labels.currentPlan}
+        value={labels.planNames[snapshot.planId]}
+      />
+      <PlanCardFact
+        label={labels.renewalDate}
+        value={formatRenewalDate(snapshot.currentPeriodEnd, labels)}
+      />
+    </dl>
   );
 }
 

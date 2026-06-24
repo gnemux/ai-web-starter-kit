@@ -36,7 +36,7 @@ export default async function SandboxPaymentPage({
   });
 
   return (
-    <PaymentShell>
+    <PaymentShell nextPath={buildCurrentPath("/account/payment/sandbox", params)}>
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.03]">
           <p className="text-sm font-medium text-cyan-700">
@@ -53,7 +53,7 @@ export default async function SandboxPaymentPage({
         {!stateResult.ok ? (
           <ErrorState
             badgeLabel={copy.account.payment.statusNeedsReview}
-            description={stateResult.error.message}
+            description={copy.account.payment.errorDescription}
             title={copy.account.payment.errorTitle}
           />
         ) : (
@@ -254,6 +254,27 @@ function Fact({ label, value }: { label: string; value: string }) {
 
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function buildCurrentPath(
+  pathname: string,
+  params: Record<string, string | string[] | undefined>
+) {
+  const search = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => search.append(key, item));
+      return;
+    }
+
+    if (value) {
+      search.set(key, value);
+    }
+  });
+
+  const query = search.toString();
+  return query ? `${pathname}?${query}` : pathname;
 }
 
 function getCheckoutTitle(

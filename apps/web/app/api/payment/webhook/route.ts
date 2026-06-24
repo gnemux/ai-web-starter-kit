@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   if (!rawBody.trim()) {
     return NextResponse.json(
       {
-        error: "Invalid JSON payload."
+        error: "Invalid webhook payload."
       },
       { status: 400 }
     );
@@ -20,20 +20,39 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok) {
-    const status =
-      result.error.code === "configuration_error"
-        ? 403
-        : result.error.message.includes("signature")
-          ? 401
-          : 400;
+    const response = mapWebhookErrorResponse(result.error);
 
     return NextResponse.json(
       {
-        error: result.error.message
+        error: response.error
       },
-      { status }
+      { status: response.status }
     );
   }
 
   return NextResponse.json(result.data, { status: 200 });
+}
+
+function mapWebhookErrorResponse(error: {
+  code: string;
+  message: string;
+}): { error: string; status: number } {
+  if (error.code === "configuration_error") {
+    return {
+      error: "Webhook endpoint is not available.",
+      status: 403
+    };
+  }
+
+  if (error.message.toLowerCase().includes("signature")) {
+    return {
+      error: "Webhook signature verification failed.",
+      status: 401
+    };
+  }
+
+  return {
+    error: "Invalid webhook payload.",
+    status: 400
+  };
 }

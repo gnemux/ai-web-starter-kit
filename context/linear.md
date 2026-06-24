@@ -118,6 +118,24 @@ GNE-11 FOUNDATION-00 [FOUNDATION] GitHub 仓库基础与 AI 协作规则
 ├── GNE-80 FOUNDATION-06 [CI] 配置基础检查：lint、typecheck、build
 └── GNE-116 FOUNDATION-07 [DOC] 建立 Supabase 多人数据库协作规范
 
+`GNE-76` remains the Foundation owner for AI execution rules. On 2026-06-23,
+the engineering tradeoff guidance was moved out of the main Codex workflow
+surface into `context/engineering-decision-rules.md`, with
+`context/codex-rules.md` keeping only a lightweight trigger and reference. The
+root `AGENTS.md` stays intentionally small. The new rules cover implementation
+choices, untrusted retrieved/model/tool output, contract compatibility, and
+verification selection; they do not override acceptance criteria, specs,
+integrations, security rules, `AGENTS.md`, or project workflow.
+
+MVP1/MVP2 structure review on 2026-06-23 found the current code ownership
+reasonable: `packages/core` owns reusable contracts and pure logic, `apps/web`
+owns routes, provider wiring, UI, and service boundaries, `specs` owns module
+intent, `integrations` owns provider operations, and `context` owns project
+memory. No runtime refactor is required for this governance update. Future
+refactor candidates are `apps/web/lib/services/payment.ts` and
+`apps/web/app/account/billing-overview.tsx` if they become difficult to review,
+test, or edit in parallel.
+
 GNE-70 APP-00 [APP] 产品外壳与可复用 UI
 ├── GNE-81 APP-01 [APP] 初始化 Next.js + TypeScript Web 应用
 ├── GNE-82 APP-02 [APP] 建立应用外壳：导航、布局、基础页面容器
@@ -162,7 +180,7 @@ GNE-71 MVP2 BILLING-00 [BILLING] 计费、订阅与权益模型（Done）
 
 Billing reviewer surface: MVP2 owns `packages/core/src/billing.ts`, `specs/billing/*`, `supabase/migrations/20260621130735_create_billing_foundation.sql`, `apps/web/lib/services/billing.ts`, the minimal `/account/billing` Plans page, and the AI-facing Billing evidence on `/account/usage`. Reviewers should be able to confirm Free / Plus / Pro / AI credit-pack config, domain rules, migration/RLS shape, service boundary, visible plan differences, plan records, credit-pack records, and usage records before Payment, AI, or MVP3 consume Billing.
 
-GNE-72 MVP2 PAYMENT-00 [PAYMENT] 支付底座与真实 Provider 验证边界
+GNE-72 MVP2 PAYMENT-00 [PAYMENT] 支付底座与真实 Provider 验证边界（Done）
 ├── GNE-192 PAYMENT-01 [DOC][MVP2] 支付模块范围、订单模型和 Provider 架构（Done in repo）
 ├── GNE-98 PAYMENT-02 [DATA][MVP2] 建立支付数据模型与 payment_events 幂等边界（Done in repo）
 ├── GNE-96 PAYMENT-03 [DEV][MVP2] 实现 PaymentProvider interface 和 SandboxProvider（Done in repo）
@@ -171,25 +189,26 @@ GNE-72 MVP2 PAYMENT-00 [PAYMENT] 支付底座与真实 Provider 验证边界
 ├── GNE-104 PAYMENT-05 [ANALYTICS][MVP2] 接入 PostHog 支付事件（Done in repo）
 ├── GNE-202 PAYMENT-06 [DOC][MVP2] 补充 .env.example 和支付安全说明（Done in repo）
 ├── GNE-99 PAYMENT-07 [RESEARCH][MVP2 可选] 真实支付 Provider 人工验证清单（Done）
-└── GNE-100 PAYMENT-08 [SPIKE][MVP2] Creem test checkout 与 webhook 技术打样（In Progress）
+└── GNE-100 PAYMENT-08 [SPIKE][MVP2] Creem test checkout 与 webhook 技术打样（Done）
 
-`PAYMENT-01..06` plus `PAYMENT-04R` are the MVP2 Payment mainline. `PAYMENT-07/08` are optional research/spike work: `GNE-99` asks a human to verify whether Creem/Dodo/Paddle/Alipay/WeChat Pay can actually support the team's account, product, test mode, webhook, payout, and risk requirements; `GNE-99` has output `Go test mode` for Creem only, so `GNE-100` is now a Creem test-mode-only technical spike. Its scope includes Creem test checkout, Creem test dashboard payment/subscription evidence, test webhook delivery, signature/idempotency/event-field verification, env boundary checks, and safe PostHog observability. Production KYC/live payment is still blocked by missing real vertical product readiness and is tracked by `GNE-201`, not by MVP2.
+`PAYMENT-01..06` plus `PAYMENT-04R` are the MVP2 Payment mainline. `PAYMENT-07/08` are optional research/spike work: `GNE-99` asks a human to verify whether Creem/Dodo/Paddle/Alipay/WeChat Pay can actually support the team's account, product, test mode, webhook, payout, and risk requirements; `GNE-99` output `Go test mode` for Creem only, and `GNE-100` completed the Creem test-mode checkout/webhook spike. The accepted evidence chain is: app checkout -> Creem test payment -> Vercel `/api/payment/webhook` -> Supabase `payment_events` -> Billing credit grant -> PostHog server-side payment events -> `/account/usage` Credit increase. Production KYC/live payment remains blocked by missing real vertical product readiness and is tracked by `GNE-201`, not by MVP2.
+
+Stash audit note: `stash@{0}` was reviewed across MVP2 Integrations, Billing, Payment, AI, and Analytics. It must not be applied wholesale because current `main` supersedes the Payment/Creem runtime. Useful Analytics dashboard/template content was merged manually into `integrations/analytics.md` under `GNE-73`; the remaining stash should stay until the audit PR is merged and the team confirms no further cherry-pick is needed.
 
 Payment reviewer surface: reviewers must be able to follow `/account/billing` or `/account/usage` entry -> `/account/payment` checkout started -> `/account/payment/sandbox` -> success, cancel, or failure result -> current Billing order/subscription/entitlement status. Success URLs record navigation only and must not directly grant entitlement. MVP2 defaults to SandboxProvider. Real provider work is research/test-mode only until a real vertical product reaches the MVP5 production-payment gate.
 
-GNE-73 MVP1-MVP3 ANALYTICS-00 [ANALYTICS] 统一事件标准、生产验收与转化看板
+GNE-73 MVP1-MVP3 ANALYTICS-00 [ANALYTICS] 统一事件标准、生产验收与转化看板（Done）
 ├── GNE-101 ANALYTICS-01 [DOC][MVP1] 事件命名、shared properties 与隐私边界（Done）
 ├── GNE-123 ANALYTICS-02 [DEV][MVP1] 建立产品级 analytics 配置与环境变量入口（Done）
 ├── GNE-102 ANALYTICS-03 [DEV][MVP1] 建立 PostHog adapter、no-op 与 shared properties 注入（Done）
 ├── GNE-103 ANALYTICS-04 [DEV][MVP1] 接入 Auth 与 pageview 转化事件（Done）
-├── GNE-188 ANALYTICS-05 [DEV][MVP3] 接入 activation 与核心功能事件
-├── GNE-105 ANALYTICS-06 [TEST][MVP2] 验证 Production PostHog 事件接收与字段完整性（Done）
-├── GNE-124 ANALYTICS-07 [DOC][MVP2/MVP3] 建立 PostHog 漏斗和看板模板
-├── GNE-122 ANALYTICS-08 [DOC][MVP2] 定义多环境与多产品数据查看约定
-├── GNE-125 ANALYTICS-09 [TEST][MVP2/MVP3] 验证单 Project 多环境/多产品数据隔离
-└── GNE-159 ANALYTICS-11 [AI][MVP2] AI 使用量、成本与转化事件看板
+├── GNE-105 ANALYTICS-05 [TEST][MVP2] 验证 Production PostHog 事件接收与字段完整性（Done）
+├── GNE-124 ANALYTICS-06 [DOC][MVP2/MVP3] 建立 PostHog 漏斗和看板模板（Done）
+├── GNE-122 ANALYTICS-07 [DOC][MVP2] 定义多环境与多产品数据查看约定（Done）
+├── GNE-125 ANALYTICS-08 [TEST][MVP2/MVP3] 验证单 Project 多环境/多产品数据隔离（Done）
+└── GNE-159 ANALYTICS-09 [AI][MVP2] AI 使用量、成本与转化事件看板（Done）
 
-Payment-specific analytics execution moved to `GNE-104 PAYMENT-05` under the Payment parent. Analytics keeps the shared event standard, privacy boundary, and dashboard ownership; it is not a payment, order, entitlement, or quota source of truth.
+Payment-specific analytics execution moved to `GNE-104 PAYMENT-05` under the Payment parent. MVP3 activation/core-feature analytics moved to `GNE-188 MVP3-CP-10` under the Product Validation Kit parent. Analytics keeps the shared event standard, privacy boundary, dashboard ownership, and review conventions; it is not a payment, order, entitlement, AI usage, or quota source of truth.
 
 GNE-74 DEPLOY-00 [DEPLOY] 部署、环境变量与线上验收
 ├── GNE-107 DEPLOY-01 [DOC] 建立环境变量清单与 .env.example

@@ -59,6 +59,17 @@
 - [ ] Real provider test mode uses test keys only.
 - [ ] Live payment is documented as an MVP5/real-vertical-product production gate, not MVP2 work.
 
+## GNE-100 Creem Test-Mode Spike
+
+- [x] Creem test mode can create hosted checkout sessions for the configured test products.
+- [x] A Creem test payment can reach the project webhook endpoint over HTTPS.
+- [x] The webhook endpoint verifies Creem test-mode callbacks before writing trusted facts.
+- [x] Supabase `payment_events` records provider, event ID, event type, status, and processed state for the Creem callback.
+- [x] The AI credit-pack test payment grants Credit through server-side Billing facts, not from a success URL alone.
+- [x] PostHog receives server-side `payment_succeeded` and `entitlement_granted` events after trusted processing.
+- [x] `/account/usage` reflects the Credit increase after webhook processing.
+- [x] The spike remains test-mode only: no live payment, production KYC, real refund, reconciliation, invoice, tax, settlement, dispute, or real-customer payment is approved by MVP2.
+
 ## Security Acceptance
 
 - [ ] No `NEXT_PUBLIC_` payment secret is added.

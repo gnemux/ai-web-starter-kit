@@ -2,7 +2,7 @@
 
 ## Phase
 
-MVP1 foundation complete; the MVP2 integrations provider foundation, MVP2 Billing foundation, and MVP2 AI foundation are complete locally. MVP2 Payment sandbox foundation is implemented locally and is under reviewer hardening before PR. Real-provider AI production smoke remains `not_run` until a provider is configured and deployed.
+MVP1 foundation complete; MVP2 integrations provider foundation, Billing foundation, Payment foundation, AI foundation, and Analytics dashboard/observability foundation are complete locally. Real-provider AI production smoke remains `not_run` until a provider is configured and deployed.
 
 ## Completed
 
@@ -78,6 +78,8 @@ MVP1 foundation complete; the MVP2 integrations provider foundation, MVP2 Billin
 - Completed the MVP2 Payment sandbox foundation in the repository for `GNE-192`, `GNE-96`, `GNE-97`, `GNE-98`, and `GNE-198`: Payment specs, sandbox provider checkout sessions, protected `/account/payment` review surface, sandbox success/cancel/failure result pages, protected sandbox server action that writes trusted Billing facts, no-side-effect sandbox webhook acknowledgement, and an Account usage-gate reviewer entry that simulates AI usage before prompting upgrade or credit-pack payment.
 - Synced the Linear Payment route cleanup into project docs: `GNE-72` is now the MVP2 Payment foundation and real Provider validation boundary; `PAYMENT-01..06` plus `PAYMENT-04R` are the mainline, while `PAYMENT-07/08` are optional Provider research/test-mode spike work; `GNE-158` moved to `MVP3-CP-09`; `GNE-201` owns future production payment readiness.
 - Advanced MVP2 Payment analytics and env safety: `GNE-104` now emits server-side `checkout_started`, `payment_succeeded`, `payment_failed`, `payment_canceled`, `entitlement_granted`, and `quota_limit_reached` from trusted Payment/Billing service boundaries. `GNE-202` is complete in repo with `.env.example` and provider docs covering `PAYMENT_MODE`, `PAYMENT_LIVE_ENABLED`, `PAYMENT_PROVIDER_SECRET`, server-only secrets, and the MVP5 live-payment gate.
+- Completed optional MVP2 Payment real-provider validation: `GNE-99` produced `Go test mode` for Creem, and `GNE-100` validated the Creem test-mode AI credit-pack path through app checkout, Vercel webhook, Supabase `payment_events`, Billing credit grant, PostHog server-side payment events, and `/account/usage` Credit increase. This closes `GNE-72` for MVP2 while keeping live payment, production KYC, payout, refunds, reconciliation, invoices, taxes, and real-customer payments under `GNE-201`.
+- Audited `stash@{0}` (`codex-before-sync-main-20260623`) in `context/stash-audit.md` across MVP2 Integrations, Billing, Payment, AI, and Analytics: it must not be applied wholesale because current `main` already supersedes the runtime pieces; the useful Analytics dashboard/template content has been merged manually into `integrations/analytics.md` under `GNE-73`.
 - Completed `GNE-149 AI-01`: added `specs/ai/*` and updated AI integration notes so provider, model, capability, token usage, Credit, quota, entitlement, ledger, server-only service boundaries, workspace sample placement, failure states, and Billing/Payment/Analytics ownership are defined before AI runtime work.
 - Completed `GNE-156 AI-02`: added reusable AI service request/response contracts in `packages/core/src/ai.ts`, a server-only `apps/web/lib/services/ai.ts` boundary, and a controlled `POST /api/ai/text` route. The service validates input, checks the current account and Billing entitlement before provider invocation, and calls only the local mock/no-op provider adapter.
 - Completed `GNE-150 AI-03`: expanded provider-neutral AI adapter contracts for text/chat/embedding/moderation, provider usage, finish reasons, and error mapping; added server-only AI model config and catalog with mock/no-op text and mock embedding models; added configured mock/no-op provider factories; and updated the AI service to resolve provider/model/cost config before entitlement preflight and provider invocation.
@@ -89,6 +91,8 @@ MVP1 foundation complete; the MVP2 integrations provider foundation, MVP2 Billin
 - Completed `GNE-160 AI-09`: AI deploy-readiness now has server-only env documentation, a server-side `AI_BUDGET_LIMIT` single-request Credit cap, production smoke pass criteria, deployment memory writeback, and extended `npm run test:ai-safety` coverage. Real-provider production smoke is documented as `not_run`.
 - Completed `GNE-148 MVP2 AI-00`: all AI child issues are Done in repo and Linear; `/dashboard`, `/account/usage`, and `/account/billing` form the reviewer-facing AI workflow and commercial boundary; local AI safety, type, lint, browser, and secret checks passed while keeping real-provider production smoke explicitly outside the verified facts.
 - Added reviewer-facing rules for Analytics, UI validation recovery, and Billing ledger interpretation: new instrumentation must use the local analytics wrappers and carry shared properties, correctable UI errors must recover from current input without refresh, and nullable Billing ledger links such as `billing_credit_ledger.entitlement_id` must be interpreted by event type and source.
+- Added `context/engineering-decision-rules.md` so engineering tradeoff guidance stays discoverable without enlarging `AGENTS.md` or duplicating workflow rules. `context/codex-rules.md` now keeps only a lightweight trigger for implementation-affecting changes.
+- Reviewed MVP1/MVP2 code ownership after the engineering-rule split. The current structure remains acceptable: reusable contracts and pure logic live in `packages/core`, app routes/service boundaries/provider wiring live in `apps/web`, module intent lives in `specs`, provider operations live in `integrations`, and project memory lives in `context`. No runtime refactor is required now; `apps/web/lib/services/payment.ts` and `apps/web/app/account/billing-overview.tsx` are future split candidates only if reviewability or parallel editing becomes painful.
 
 ## Done Issues
 
@@ -130,7 +134,12 @@ MVP1 foundation complete; the MVP2 integrations provider foundation, MVP2 Billin
 - `GNE-123` ANALYTICS-02
 - `GNE-102` ANALYTICS-03
 - `GNE-103` ANALYTICS-04
-- `GNE-105` ANALYTICS-06
+- `GNE-105` ANALYTICS-05
+- `GNE-124` ANALYTICS-06
+- `GNE-122` ANALYTICS-07
+- `GNE-125` ANALYTICS-08
+- `GNE-159` ANALYTICS-09
+- `GNE-73` MVP1-MVP3 ANALYTICS-00
 - `GNE-190` MVP2-KNOW-01
 - `GNE-167` MVP2 INTEGRATIONS-00
 - `GNE-180` MVP2-INT-01
@@ -153,6 +162,9 @@ MVP1 foundation complete; the MVP2 integrations provider foundation, MVP2 Billin
 - `GNE-198` PAYMENT-04R
 - `GNE-104` PAYMENT-05
 - `GNE-202` PAYMENT-06
+- `GNE-99` PAYMENT-07
+- `GNE-100` PAYMENT-08
+- `GNE-72` MVP2 PAYMENT-00
 - `GNE-148` MVP2 AI-00
 - `GNE-149` AI-01
 - `GNE-156` AI-02
@@ -167,28 +179,23 @@ MVP1 foundation complete; the MVP2 integrations provider foundation, MVP2 Billin
 
 ## In Progress Issues
 
-- `GNE-73` MVP1-MVP3 ANALYTICS-00
-- `GNE-72` MVP2 PAYMENT-00
+None for MVP2 foundation parents.
 
 ## In Progress
 
-MVP2 Payment sandbox foundation is implemented locally and is under reviewer hardening before PR. TypeScript, lint, production build, protected-route smoke, and sandbox webhook smoke have passed locally for the foundation. Paid-plan sandbox success writes trusted Billing subscription facts through a protected server action; AI credit-pack sandbox success writes credit-pack entitlement and ledger facts. The workspace menu now exposes profile settings, Plans, and AI as first-level entries: `/account` is profile settings, `/account/billing` shows a product-like Free/Plus/Pro plan selection with recent plan records, and `/account/usage` contains a product-facing AI Credit account with available Credit, plan-vs-credit-pack source split, credit-pack top-up, top-up records, and Credit consumption records. AI usage writes `billing_usage_ledger`, reduces remaining Credit in Billing snapshots, and only triggers next-plan or credit-pack payment when the backend entitlement decision blocks usage. Payment analytics (`GNE-104`) emits checkout, success, failure, cancel, entitlement-granted, and quota-limit events from trusted service boundaries. Payment env/security documentation (`GNE-202`) is complete in repo. MVP2 AI parent `GNE-148` is complete locally: the AI boundary docs now define Credit-first UI, provider token measurement as an internal fact, server-only AI service ownership, workspace placement for sample AI workflows, and Billing/Payment/Analytics responsibilities; the runtime now exposes a server-only AI text service, controlled API route, server-only model catalog, mock/no-op provider factories, provider-neutral adapter shapes, workspace AI draft example, successful mock usage/Credit ledger commit path, selected-model access gate, page-level app review path, repeatable safety verification, duplicate idempotency protection, safe server-side AI analytics summary events, and a server-side `AI_BUDGET_LIMIT` operator cap for deploy readiness. Real Provider work is represented by optional `GNE-99` research and `GNE-100` test-mode spike only; production payment is deferred to `GNE-201`; real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
+MVP2 foundation parents are complete locally and in Linear: Integrations, Billing, Payment, AI, and Analytics. Production payment remains deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
 
 ## Next Steps
 
-1. Human reviewer should sign in locally, review `/account/billing` for the product-like Free/Plus/Pro plan selection and recent plan records, open `/account/usage` for available Credit, plan-vs-credit-pack source split, credit-pack top-up, top-up records, and Credit consumption records, run Plus/Pro monthly and AI credit-pack sandbox checkout from the prompted actions, and verify success changes the current plan or grants credits through server-side Billing facts while cancel/failure do not upgrade or grant credits.
-2. Open a PR from the task branch into `main` only after the local page-level checklist is accepted; Repo Owner should review and merge with the documented Vercel Hobby/private-repo merge method.
-3. Ask a human reviewer to verify local or deployed PostHog Activity for the implemented Payment events if `NEXT_PUBLIC_POSTHOG_KEY` is configured; record evidence without secrets.
-5. `GNE-99` has produced `Go test mode` for Creem based on test mode, Pro product, API/Webhook dashboard, and official test checkout evidence. `GNE-100` is now In Progress as a Creem test-mode PaymentProvider adapter spike, not as a production payment integration. `PAYMENT_PROVIDER=creem` selects the Creem adapter locally, while `PAYMENT_PROVIDER=sandbox` still selects SandboxProvider. The adapter and `pnpm payment:creem:test-checkout` safely stop before sending a request when the server-only Creem test key is missing; next progress requires a human-created Creem test API key in ignored local env. Keep `PAYMENT_MODE=test`, `PAYMENT_LIVE_ENABLED=false`, and send production payment planning to `GNE-201`.
-6. Continue `GNE-158 MVP3-CP-09` only inside MVP3 Product Validation Kit, using SandboxProvider for AI credit pack and subscription allowance validation.
-7. MVP2 AI parent `GNE-148` is complete locally. Keep real-provider AI acceptance under future provider tasks and do not mark production AI smoke as passed until a deployed real-provider path is verified.
-8. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows; the MVP3 parent checklist must keep the full clickable chain visible from auth through project, public page, lead, Free/Plus/Pro gating, sandbox checkout, AI generation, and PostHog funnel evidence.
-9. Treat `GNE-194` as test-mode-only Payment adapter validation with live payment disabled, and treat `GNE-195` as conditional AI provider acceptance.
-10. Use `GNE-201` for any production payment, live payment, merchant settlement, refund, reconciliation, invoice, or real user payment planning.
-11. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
-12. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-13. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
-14. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+1. Do not apply the remaining `stash@{0}` wholesale. The useful MVP2 Analytics dashboard/template content is already merged into `integrations/analytics.md`; keep the stash only until the audit PR is merged and the team confirms no further cherry-pick is needed.
+2. Continue `GNE-158 MVP3-CP-09` only inside MVP3 Product Validation Kit, using SandboxProvider for AI credit pack and subscription allowance validation unless a later gate explicitly allows a real test provider.
+3. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows; the MVP3 parent checklist must keep the full clickable chain visible from auth through project, public page, lead, Free/Plus/Pro gating, sandbox checkout, AI generation, and PostHog funnel evidence.
+4. Treat `GNE-194` as test-mode-only Payment adapter validation with live payment disabled, and treat `GNE-195` as conditional AI provider acceptance.
+5. Use `GNE-201` for any production payment, live payment, merchant settlement, refund, reconciliation, invoice, or real user payment planning.
+6. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
+7. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+8. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
+9. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
 
 ## Risks
 

@@ -66,6 +66,16 @@ This applies only to `GNE-100 PAYMENT-08` after `GNE-99` outputs `Go test mode`.
 9. Verify the app does not grant Pro entitlement or AI credits from the Creem success URL alone; trusted provider grants must come from `/api/payment/webhook`.
 10. For app-created Creem checkout, verify the checkout request includes server-generated metadata (`referenceId`, `owner_id`, `price_id`, `plan_id`) so webhook processing can map the event to a Billing owner and price. Older script-only checkouts without owner metadata are dashboard evidence only and should not grant app entitlement.
 
+Latest verified result on 2026-06-23:
+
+- Creem test checkout completed a test payment.
+- Creem test webhook delivery to `/api/payment/webhook` returned HTTP `200`.
+- Supabase `payment_events` stored the Creem `checkout.completed` event with `status=processed`.
+- Billing granted the AI credit pack through server-side facts.
+- PostHog showed server-side `payment_succeeded` and `entitlement_granted`.
+- `/account/usage` showed the Credit increase after processing.
+- This verifies test mode only; production payment readiness remains outside MVP2.
+
 ## Webhook Smoke
 
 For MVP2 sandbox, webhook checks are no-side-effect contract checks only because the local reviewer flow writes Billing facts through a protected server action. For Creem `GNE-100`, webhook checks are trusted provider checks and must verify signatures before writing Billing facts.

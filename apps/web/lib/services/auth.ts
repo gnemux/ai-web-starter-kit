@@ -20,6 +20,31 @@ import {
 import type { Database } from "../supabase/database.types";
 
 type ProfileRow = Database["public"]["Tables"]["user_profiles"]["Row"];
+type AuthVerificationError = Awaited<
+  ReturnType<AppSupabaseClient["auth"]["verifyOtp"]>
+>["error"];
+type AuthEmailOtpType =
+  | "signup"
+  | "invite"
+  | "magiclink"
+  | "recovery"
+  | "email_change"
+  | "email";
+type AuthConfirmationInput = {
+  code: string | null;
+  tokenHash: string | null;
+  type: string | null;
+  nextPath: string;
+};
+
+const EMAIL_OTP_TYPES = new Set<AuthEmailOtpType>([
+  "signup",
+  "invite",
+  "magiclink",
+  "recovery",
+  "email_change",
+  "email"
+]);
 
 export async function getCurrentAccount(): Promise<
   ServiceResult<AccountPayload>
@@ -257,12 +282,14 @@ export async function updateCurrentUserProfile(
   return serviceOk(mapProfile(data));
 }
 
-export async function exchangeAuthCodeForSession(
-  code: string | null,
-  nextPath: string
+export async function exchangeAuthConfirmationForSession(
+  input: AuthConfirmationInput
 ): Promise<ServiceResult<{ redirectTo: string }>> {
-  if (!code) {
-    return serviceError("validation_error", "Missing Auth confirmation code.");
+  if (!input.code && !input.tokenHash) {
+    return serviceError(
+      "validation_error",
+      "Missing Auth confirmation token."
+    );
   }
 
   const clientResult = await createSupabaseServerClient();
@@ -271,15 +298,65 @@ export async function exchangeAuthCodeForSession(
     return clientResult;
   }
 
-  const { error } = await clientResult.data.auth.exchangeCodeForSession(code);
+  let authError: AuthVerificationError = null;
 
-  if (error) {
-    return mapAuthError(error);
+  if (input.code) {
+    authError = (
+      await clientResult.data.auth.exchangeCodeForSession(input.code)
+    ).error;
+  } else {
+    const verifyResult = await verifyAuthTokenHash(
+      clientResult.data,
+      input.tokenHash,
+      input.type
+    );
+
+    if (!verifyResult.ok) {
+      return verifyResult;
+    }
+
+    authError = verifyResult.data;
+  }
+
+  if (authError) {
+    return mapAuthError(authError);
   }
 
   return serviceOk({
-    redirectTo: normalizeNextPath(nextPath)
+    redirectTo: normalizeNextPath(input.nextPath)
   });
+}
+
+async function verifyAuthTokenHash(
+  supabase: AppSupabaseClient,
+  tokenHash: string | null,
+  type: string | null
+): Promise<ServiceResult<AuthVerificationError>> {
+  const otpType = normalizeAuthEmailOtpType(type);
+
+  if (!tokenHash || !otpType) {
+    return serviceError(
+      "validation_error",
+      "Missing Auth confirmation token hash or type."
+    );
+  }
+
+  const { error } = await supabase.auth.verifyOtp({
+    token_hash: tokenHash,
+    type: otpType
+  });
+
+  return serviceOk(error);
+}
+
+function normalizeAuthEmailOtpType(type: string | null): AuthEmailOtpType | null {
+  if (!type) {
+    return null;
+  }
+
+  return EMAIL_OTP_TYPES.has(type as AuthEmailOtpType)
+    ? (type as AuthEmailOtpType)
+    : null;
 }
 
 async function getAuthenticatedUser(

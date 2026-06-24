@@ -44,6 +44,83 @@ Only `NEXT_PUBLIC_ANALYTICS_PROVIDER` is browser-visible. Payment, AI, Email, St
 
 Public product/environment metadata includes `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLIC_PRODUCT_ID`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_APP_ENV`, `NEXT_PUBLIC_APP_MARKET`, `NEXT_PUBLIC_APP_VERSION`, and `NEXT_PUBLIC_MVP_STAGE`.
 
+## Current MVP2 Production Configuration Checklist
+
+For the current production URL `https://ai-web-starter-kit-web.vercel.app`, Vercel Production should be configured as follows before release verification:
+
+Required public app metadata:
+
+```text
+NEXT_PUBLIC_APP_NAME=XWLC
+NEXT_PUBLIC_PRODUCT_ID=xwlc
+NEXT_PUBLIC_APP_URL=https://ai-web-starter-kit-web.vercel.app
+NEXT_PUBLIC_APP_ENV=production
+NEXT_PUBLIC_APP_MARKET=overseas
+NEXT_PUBLIC_APP_VERSION=v0.1
+NEXT_PUBLIC_MVP_STAGE=mvp2
+```
+
+Required provider selectors:
+
+```text
+AUTH_PROVIDER=supabase
+DATABASE_PROVIDER=supabase
+NEXT_PUBLIC_ANALYTICS_PROVIDER=posthog
+PAYMENT_PROVIDER=sandbox
+PAYMENT_MODE=sandbox
+PAYMENT_LIVE_ENABLED=false
+AI_PROVIDER=mock
+EMAIL_PROVIDER=noop
+STORAGE_PROVIDER=noop
+SMS_PROVIDER=noop
+```
+
+Required Supabase keys:
+
+```text
+SUPABASE_PROJECT_REF=<target project ref>
+NEXT_PUBLIC_SUPABASE_URL=<target Supabase API URL>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<public browser key, preferred>
+# or NEXT_PUBLIC_SUPABASE_ANON_KEY=<legacy public browser key>
+SUPABASE_SECRET_KEY=<server-only key>
+# or SUPABASE_SERVICE_ROLE_KEY=<legacy server-only fallback>
+```
+
+Required analytics keys when production analytics evidence is needed:
+
+```text
+NEXT_PUBLIC_POSTHOG_KEY=<public PostHog key>
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+```
+
+Payment for MVP2 production should stay sandbox unless the operator is intentionally replaying the completed `GNE-100` Creem test-mode verification. Do not configure live payment:
+
+```text
+PAYMENT_PROVIDER=sandbox
+PAYMENT_MODE=sandbox
+PAYMENT_LIVE_ENABLED=false
+PAYMENT_PROVIDER_SECRET=
+PAYMENT_WEBHOOK_SECRET=
+```
+
+If a controlled Creem test-mode verification is intentionally run against the deployed URL, switch only for that verification window and keep live payment disabled:
+
+```text
+PAYMENT_PROVIDER=creem
+PAYMENT_MODE=test
+PAYMENT_LIVE_ENABLED=false
+PAYMENT_PROVIDER_SECRET=<Creem test API key, server-only>
+PAYMENT_WEBHOOK_SECRET=<Creem webhook signing secret, server-only>
+CREEM_PLUS_MONTHLY_PRODUCT_ID=<test product id>
+CREEM_PRO_MONTHLY_PRODUCT_ID=<test product id>
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=<test product id>
+CREEM_CHECKOUT_SUCCESS_URL=https://ai-web-starter-kit-web.vercel.app/account/payment/result?status=success
+```
+
+Do not configure `PAYMENT_LIVE_ENABLED=true` for MVP2 or MVP3. Live payment, refunds, proration, invoices, settlement, reconciliation, disputes, taxes, KYC, and real-customer charges remain under `GNE-201`.
+
+After changing any Vercel environment variable, redeploy the affected Production or Preview deployment before testing it. Existing deployments keep the old environment values.
+
 Operational memory:
 
 - Deployment status and smoke test writeback: `context/deployment-status.md`

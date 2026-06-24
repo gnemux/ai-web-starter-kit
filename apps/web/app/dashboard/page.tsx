@@ -194,6 +194,8 @@ function AiFact({ label, value }: { label: string; value: string }) {
 type DemoItemLabels = {
   emptyTitle: string;
   emptyDescription: string;
+  privateItemsTitle: string;
+  publicItemsTitle: string;
   itemVisibility: {
     private: string;
     public: string;
@@ -211,6 +213,9 @@ function DemoItemsList({
   items: DemoItem[];
   labels: DemoItemLabels;
 }) {
+  const privateItems = items.filter((item) => item.visibility === "private");
+  const publicItems = items.filter((item) => item.visibility === "public");
+
   if (items.length === 0) {
     return (
       <div className="mt-5">
@@ -223,31 +228,65 @@ function DemoItemsList({
   }
 
   return (
-    <div className="mt-5 divide-y divide-slate-200">
-      {items.map((item) => (
-        <div className="py-4 first:pt-0 last:pb-0" key={item.id}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-sm font-semibold text-slate-950">
-                  {item.title}
-                </h3>
-                <span className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-500">
-                  {labels.itemVisibility[item.visibility]}
-                </span>
-              </div>
-              {item.notes ? (
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  {item.notes}
-                </p>
-              ) : null}
-            </div>
-            <p className="shrink-0 text-xs font-medium text-slate-400">
-              {labels.itemStatus[item.status]}
-            </p>
-          </div>
-        </div>
-      ))}
+    <div className="mt-5 grid gap-5">
+      <DemoItemsGroup
+        items={privateItems}
+        labels={labels}
+        title={labels.privateItemsTitle}
+      />
+      <DemoItemsGroup
+        items={publicItems}
+        labels={labels}
+        title={labels.publicItemsTitle}
+      />
     </div>
+  );
+}
+
+function DemoItemsGroup({
+  items,
+  labels,
+  title
+}: {
+  items: DemoItem[];
+  labels: DemoItemLabels;
+  title: string;
+}) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="min-w-0">
+      <h3 className="text-xs font-semibold uppercase tracking-normal text-slate-500">
+        {title}
+      </h3>
+      <div className="mt-2 divide-y divide-slate-200">
+        {items.map((item) => (
+          <div className="py-4 first:pt-0 last:pb-0" key={item.id}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="text-sm font-semibold text-slate-950">
+                    {item.title}
+                  </h4>
+                  <span className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-500">
+                    {labels.itemVisibility[item.visibility]}
+                  </span>
+                </div>
+                {item.notes ? (
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {item.notes}
+                  </p>
+                ) : null}
+              </div>
+              <p className="shrink-0 text-xs font-medium text-slate-400">
+                {labels.itemStatus[item.status]}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

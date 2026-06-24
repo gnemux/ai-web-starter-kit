@@ -17,7 +17,27 @@ const statusByErrorCode: Record<ServiceErrorCode, number> = {
 export async function GET() {
   const result = await listDemoItems();
 
-  return NextResponse.json(result, {
+  return NextResponse.json(sanitizeApiResult(result), {
     status: result.ok ? 200 : statusByErrorCode[result.error.code]
   });
+}
+
+function sanitizeApiResult(
+  result: Awaited<ReturnType<typeof listDemoItems>>
+) {
+  if (result.ok || !isInternalError(result.error.code)) {
+    return result;
+  }
+
+  return {
+    ok: false,
+    error: {
+      code: result.error.code,
+      message: "The demo data service is temporarily unavailable."
+    }
+  } satisfies typeof result;
+}
+
+function isInternalError(code: ServiceErrorCode) {
+  return code === "configuration_error" || code === "system_error";
 }

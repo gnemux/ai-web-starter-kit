@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { AuthMode, ServiceErrorCode } from "@starter/core";
@@ -14,6 +14,7 @@ import {
 import { submitAuthAction, type AuthFormState } from "./actions";
 
 type AuthFormLabels = {
+  accessDashboard: string;
   email: string;
   password: string;
   createAccount: string;
@@ -24,12 +25,19 @@ type AuthFormLabels = {
   switchToSignIn: string;
   switchToSignUp: string;
   confirmationPending: string;
+  providerNote: string;
+  startWithEmail: string;
+  welcomeBack: string;
 };
 
 type AuthFormErrorLabels = {
+  accountExists: string;
+  configuration: string;
+  confirmationRequired: string;
   email: string;
   password: string;
   general: string;
+  signUpGeneral: string;
 };
 
 export function AuthForm({
@@ -46,24 +54,36 @@ export function AuthForm({
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [submittedMode, setSubmittedMode] = useState<AuthMode>(initialMode);
+  const [hasSubmittedCurrentMode, setHasSubmittedCurrentMode] = useState(false);
+  const handledStateRef = useRef<AuthFormState>(null);
   const [state, formAction, isPending] = useActionState<
     AuthFormState,
     FormData
   >(submitAuthAction, null);
   const isSignUp = mode === "signup";
+  const visibleState =
+    hasSubmittedCurrentMode &&
+    !isPending &&
+    state?.mode === mode &&
+    state.mode === submittedMode
+      ? state.result
+      : null;
 
   useEffect(() => {
-    if (!state) {
+    if (!state || handledStateRef.current === state) {
       return;
     }
 
-    if (!state.ok) {
-      if (submittedMode === "signin") {
+    handledStateRef.current = state;
+    const result = state.result;
+
+    if (!result.ok) {
+      if (state.mode === "signin") {
         trackEvent("auth_login_failed", {
           auth_provider: "supabase",
           auth_method: "password",
           result: "failure",
-          error_category: mapErrorCategory(state.error.code),
+          error_category: mapErrorCategory(result.error.code),
           next_path: nextPath
         });
       }
@@ -71,16 +91,16 @@ export function AuthForm({
       return;
     }
 
-    if (state.data.user) {
-      identifyAuthUser(state.data.user);
+    if (result.data.user) {
+      identifyAuthUser(result.data.user);
     }
 
-    if (submittedMode === "signup") {
+    if (state.mode === "signup") {
       trackEvent("user_signed_up", {
         auth_provider: "supabase",
         auth_method: "password",
         result:
-          state.data.status === "confirmation_pending"
+          result.data.status === "confirmation_pending"
             ? "pending_confirmation"
             : "success",
         next_path: nextPath
@@ -94,10 +114,10 @@ export function AuthForm({
       });
     }
 
-    if (state.data.status === "authenticated") {
-      router.push(state.data.redirectTo);
+    if (result.data.status === "authenticated") {
+      router.push(result.data.redirectTo);
     }
-  }, [nextPath, router, state, submittedMode]);
+  }, [nextPath, router, state]);
 
   return (
     <form
@@ -107,6 +127,7 @@ export function AuthForm({
         const formData = new FormData(event.currentTarget);
         const submitted = String(formData.get("mode") ?? "signin") as AuthMode;
         setSubmittedMode(submitted);
+        setHasSubmittedCurrentMode(true);
         trackEvent(
           submitted === "signup" ? "signup_started" : "login_started",
           {
@@ -121,6 +142,18 @@ export function AuthForm({
       <input name="next" type="hidden" value={nextPath} />
 
       <div>
+        <p className="text-sm font-semibold text-cyan-700">
+          {isSignUp ? labels.createAccount : labels.welcomeBack}
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold tracking-normal text-slate-950">
+          {isSignUp ? labels.startWithEmail : labels.accessDashboard}
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          {labels.providerNote}
+        </p>
+      </div>
+
+      <div>
         <label className="text-sm font-medium text-slate-700" htmlFor="email">
           {labels.email}
         </label>
@@ -132,7 +165,7 @@ export function AuthForm({
           required
           type="email"
         />
-        {!state?.ok && state?.error.fields?.email ? (
+        {!visibleState?.ok && visibleState?.error.fields?.email ? (
           <p className="mt-2 text-sm text-rose-700">{errorLabels.email}</p>
         ) : null}
       </div>
@@ -149,22 +182,26 @@ export function AuthForm({
           required
           type="password"
         />
-        {!state?.ok && state?.error.fields?.password ? (
+        {!visibleState?.ok && visibleState?.error.fields?.password ? (
           <p className="mt-2 text-sm text-rose-700">
             {errorLabels.password}
           </p>
         ) : null}
       </div>
 
-      {state && !state.ok && !state.error.fields ? (
+      {visibleState && !visibleState.ok && !visibleState.error.fields ? (
         <div className="rounded-md border border-rose-200 bg-rose-50 p-3">
           <p className="text-sm font-medium text-rose-900">
-            {errorLabels.general}
+            {getGeneralErrorLabel(
+              visibleState.error.code,
+              mode,
+              errorLabels
+            )}
           </p>
         </div>
       ) : null}
 
-      {state?.ok && state.data.status === "confirmation_pending" ? (
+      {visibleState?.ok && visibleState.data.status === "confirmation_pending" ? (
         <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
           <p className="text-sm font-medium text-emerald-900">
             {labels.confirmationPending}
@@ -180,7 +217,14 @@ export function AuthForm({
         <span>{isSignUp ? labels.alreadyHaveAccount : labels.newHere}</span>
         <button
           className="font-medium text-cyan-700 hover:text-cyan-900"
-          onClick={() => setMode(isSignUp ? "signin" : "signup")}
+          onClick={() => {
+            const nextMode = isSignUp ? "signin" : "signup";
+
+            setMode(nextMode);
+            setSubmittedMode(nextMode);
+            setHasSubmittedCurrentMode(false);
+            router.replace(buildModeUrl(nextMode, nextPath));
+          }}
           type="button"
         >
           {isSignUp ? labels.switchToSignIn : labels.switchToSignUp}
@@ -188,6 +232,46 @@ export function AuthForm({
       </div>
     </form>
   );
+}
+
+function buildModeUrl(mode: AuthMode, nextPath: string) {
+  const params = new URLSearchParams();
+
+  if (mode === "signup") {
+    params.set("mode", "signup");
+  }
+
+  if (nextPath !== "/dashboard") {
+    params.set("next", nextPath);
+  }
+
+  const query = params.toString();
+
+  return query ? `/login?${query}` : "/login";
+}
+
+function getGeneralErrorLabel(
+  code: ServiceErrorCode,
+  mode: AuthMode,
+  labels: AuthFormErrorLabels
+) {
+  if (code === "conflict") {
+    return labels.accountExists;
+  }
+
+  if (code === "configuration_error") {
+    return labels.configuration;
+  }
+
+  if (code === "forbidden") {
+    return labels.confirmationRequired;
+  }
+
+  if (mode === "signup") {
+    return labels.signUpGeneral;
+  }
+
+  return labels.general;
 }
 
 function mapErrorCategory(

@@ -48,6 +48,7 @@ MVP2 扩展底座
 
 MVP3 Product Validation Kit
 -> a realistic sample product that consumes MVP2 foundations to validate data, public pages, leads, growth, entitlement, payment, and AI usage
+-> before runtime work, run `GNE-210 / MVP3-CP-00` as the architecture/test preflight so the kit does not overload MVP1/MVP2 foundation files or weaken security boundaries
 
 MVP4 海外/国内双模式真实 Provider 接入
 -> turn MVP2 provider reservations into real overseas/china provider integrations and smoke paths
@@ -92,5 +93,9 @@ Each capability track should have:
 - Payment starts with a Sandbox Provider before real provider integration.
 - Analytics starts with PostHog and keeps space for China-friendly providers.
 - MVP3 should not be blocked by real Payment or real AI provider readiness. It uses sandbox/mock/no-op paths first, then runs real provider product acceptance through dedicated follow-up tasks when MVP2 provider readiness exists.
+- MVP3 Product Validation Kit execution should start with `GNE-210 / MVP3-CP-00` as a structure and regression-guard preflight before adding new product runtime. This protects the MVP1/MVP2 Auth, Payment, Billing, AI, and Analytics foundations while still allowing conservative file splits when reviewability or security boundaries require them.
+- MVP3 Product Kit `CP-00..CP-12` names represent Product Validation Kit execution order. Growth `GROWTH-01..09` remains a reusable growth-foundation order and should not be renumbered to match Product Kit runtime work.
+- MVP3 project ownership must not reuse the MVP1 demo public-read pattern. Project data is owner-only; public validation pages expose only intentionally published fields through their own boundary.
+- MVP3 sandbox upgrade flows must explain simulated pricing or delta behavior to reviewers, while real proration, refunds, invoices, settlement, reconciliation, and live payment remain under the MVP5 production-payment gate.
 - Payment success pages, AI result pages, and analytics events are not sources of truth. They are reviewer surfaces over trusted server-side Billing, Payment, AI, and ledger facts.
 - MVP4 owns real overseas/china dual-mode provider rollout, including domestic payment, domestic AI, domestic analytics, cloud, CDN, SMS, email, storage, and compliance/deployment differences.

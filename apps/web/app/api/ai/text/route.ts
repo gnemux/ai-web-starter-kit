@@ -30,7 +30,27 @@ export async function POST(request: Request) {
 
   const result = await generateAiTextFromJson(payload);
 
-  return NextResponse.json(result, {
+  return NextResponse.json(sanitizeApiResult(result), {
     status: result.ok ? 200 : statusByErrorCode[result.error.code]
   });
+}
+
+function sanitizeApiResult<T>(
+  result: Awaited<ReturnType<typeof generateAiTextFromJson>>
+) {
+  if (result.ok || !isInternalError(result.error.code)) {
+    return result;
+  }
+
+  return {
+    ok: false,
+    error: {
+      code: result.error.code,
+      message: "The AI service is temporarily unavailable."
+    }
+  } satisfies typeof result;
+}
+
+function isInternalError(code: ServiceErrorCode) {
+  return code === "configuration_error" || code === "system_error";
 }

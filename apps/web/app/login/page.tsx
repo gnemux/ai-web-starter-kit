@@ -45,22 +45,6 @@ export default async function LoginPage({
         </section>
 
         <Panel className="mx-auto w-full max-w-md p-6">
-          <div>
-            <p className="text-sm font-semibold text-cyan-700">
-              {initialMode === "signup"
-                ? copy.login.createAccount
-                : copy.login.welcomeBack}
-            </p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-normal text-slate-950">
-              {initialMode === "signup"
-                ? copy.login.startWithEmail
-                : copy.login.accessDashboard}
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              {copy.login.providerNote}
-            </p>
-          </div>
-
           {params.error === "confirmation_failed" ? (
             <div className="mt-5 rounded-md border border-rose-200 bg-rose-50 p-3">
               <p className="text-sm font-medium text-rose-900">
@@ -72,7 +56,13 @@ export default async function LoginPage({
           <AuthForm
             errorLabels={copy.errors.auth}
             initialMode={initialMode}
-            labels={copy.login.form}
+            labels={{
+              ...copy.login.form,
+              accessDashboard: copy.login.accessDashboard,
+              providerNote: copy.login.providerNote,
+              startWithEmail: copy.login.startWithEmail,
+              welcomeBack: copy.login.welcomeBack
+            }}
             nextPath={nextPath}
           />
         </Panel>

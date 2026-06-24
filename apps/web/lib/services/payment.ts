@@ -23,7 +23,10 @@ import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
 import { trackServerEvent } from "@/lib/analytics/server";
 import { createPaymentProvider } from "@/lib/providers/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import {
+  createSupabaseAdminClient,
+  createSupabaseServerClient
+} from "@/lib/supabase/server";
 import type { Json } from "@/lib/supabase/database.types";
 
 import { getCurrentAccount } from "./auth";
@@ -48,9 +51,11 @@ export type SandboxCheckoutState = {
 };
 
 export type PaymentResultState = {
+  orderId: string | null;
   status: PaymentCheckoutResultStatus;
   checkoutSessionId: string | null;
   priceId: BillingPriceId | null;
+  returnTo: string;
   billing: ServiceResult<BillingEntitlementSnapshot>;
 };
 
@@ -153,9 +158,9 @@ export async function createPaymentCheckout(
     planId: price.planId ?? "credit_pack",
     priceId: price.id,
     checkoutUrl: "/account/payment/sandbox",
-    successUrl: buildResultUrl("success", price.id),
-    cancelUrl: buildResultUrl("cancel", price.id),
-    failureUrl: buildResultUrl("failure", price.id),
+    successUrl: buildResultUrl("success", price.id, returnTo),
+    cancelUrl: buildResultUrl("cancel", price.id, returnTo),
+    failureUrl: buildResultUrl("failure", price.id, returnTo),
     metadata: {
       checkout_kind: optionResult.data.checkoutKind,
       owner_id: accountResult.data.user.id,
@@ -176,6 +181,22 @@ export async function createPaymentCheckout(
       "system_error",
       "The payment provider did not return a checkout URL."
     );
+  }
+
+  if (isSandboxPaymentReviewProvider(provider)) {
+    const pendingResult = await recordSandboxPendingCheckout({
+      amountCents: price.amountCents,
+      checkoutKind: optionResult.data.checkoutKind,
+      checkoutSessionId: result.data.id,
+      currency: price.currency,
+      ownerId: accountResult.data.user.id,
+      planId: price.planId ?? "credit_pack",
+      priceId: price.id
+    });
+
+    if (!pendingResult.ok) {
+      return pendingResult;
+    }
   }
 
   await trackPaymentEvent({
@@ -205,6 +226,12 @@ export function getSandboxCheckoutState(input: {
   failureUrl?: string;
   returnUrl?: string;
 }): ServiceResult<SandboxCheckoutState> {
+  const sandboxResult = assertSandboxPaymentReviewEnabled();
+
+  if (!sandboxResult.ok) {
+    return sandboxResult;
+  }
+
   const checkoutSessionId = String(input.checkoutSessionId ?? "").trim();
   const priceId = String(input.priceId ?? "").trim();
   const planId = String(input.planId ?? "").trim();
@@ -238,9 +265,11 @@ export function getSandboxCheckoutState(input: {
 }
 
 export async function getPaymentResultState(input: {
+  orderId?: string;
   status?: string;
   checkoutSessionId?: string;
   priceId?: string;
+  returnTo?: string;
 }): Promise<ServiceResult<PaymentResultState>> {
   const status = normalizeResultStatus(input.status);
 
@@ -256,12 +285,89 @@ export async function getPaymentResultState(input: {
     input.priceId && isBillingCheckoutPriceId(input.priceId)
       ? input.priceId
       : null;
+  const accountResult = await getCurrentAccount();
+
+  if (!accountResult.ok) {
+    return accountResult;
+  }
+
+  const orderResult = await getConfirmedPaymentResultOrder({
+    checkoutSessionId: input.checkoutSessionId,
+    orderId: input.orderId,
+    ownerId: accountResult.data.user.id,
+    priceId,
+    status
+  });
+
+  if (!orderResult.ok) {
+    return orderResult;
+  }
 
   return serviceOk({
+    orderId: orderResult.data.orderId,
     status,
-    checkoutSessionId: input.checkoutSessionId?.trim() || null,
+    checkoutSessionId: orderResult.data.checkoutSessionId,
     priceId,
+    returnTo: normalizeReturnTo(input.returnTo, "/account/billing"),
     billing
+  });
+}
+
+async function getConfirmedPaymentResultOrder(input: {
+  checkoutSessionId?: string;
+  orderId?: string;
+  ownerId: string;
+  priceId: BillingPriceId | null;
+  status: PaymentCheckoutResultStatus;
+}): Promise<ServiceResult<{ checkoutSessionId: string | null; orderId: string }>> {
+  const orderId = input.orderId?.trim();
+  const checkoutSessionId = input.checkoutSessionId?.trim();
+
+  if (!orderId && !checkoutSessionId) {
+    return serviceError(
+      "not_found",
+      "The payment result has not been confirmed by a trusted order record."
+    );
+  }
+
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  let query = clientResult.data
+    .from("billing_orders")
+    .select("id, provider_checkout_session_id, price_id, status")
+    .eq("owner_id", input.ownerId)
+    .eq("status", mapResultToOrderStatus(input.status))
+    .limit(1);
+
+  if (input.priceId) {
+    query = query.eq("price_id", input.priceId);
+  }
+
+  query = orderId
+    ? query.eq("id", orderId)
+    : query.eq("provider_checkout_session_id", checkoutSessionId ?? "");
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    return mapSupabasePaymentError(error);
+  }
+
+  if (!data) {
+    return serviceError(
+      "not_found",
+      "The payment result has not been confirmed by a trusted order record."
+    );
+  }
+
+  return serviceOk({
+    checkoutSessionId:
+      data.provider_checkout_session_id ?? checkoutSessionId ?? null,
+    orderId: data.id
   });
 }
 
@@ -271,6 +377,12 @@ export async function processSandboxCheckoutResult(input: {
   returnTo?: string;
   status: PaymentCheckoutResultStatus;
 }): Promise<ServiceResult<{ redirectTo: string }>> {
+  const sandboxResult = assertSandboxPaymentReviewEnabled();
+
+  if (!sandboxResult.ok) {
+    return sandboxResult;
+  }
+
   const accountResult = await getCurrentAccount();
 
   if (!accountResult.ok) {
@@ -290,6 +402,16 @@ export async function processSandboxCheckoutResult(input: {
       "validation_error",
       "Sandbox checkout session is required."
     );
+  }
+
+  const pendingResult = await assertSandboxPendingCheckout({
+    checkoutSessionId,
+    ownerId: accountResult.data.user.id,
+    priceId: optionResult.data.price.id
+  });
+
+  if (!pendingResult.ok) {
+    return pendingResult;
   }
 
   const orderResult = await recordPaymentBillingFacts({
@@ -354,18 +476,11 @@ export async function processSandboxCheckoutResult(input: {
   });
 
   return serviceOk({
-    redirectTo:
-      input.status === "cancel"
-        ? withPaymentResult(
-            normalizeReturnTo(input.returnTo, "/account/billing"),
-            input.status,
-            input.priceId
-          )
-        : buildResultRedirectUrl({
-            checkoutSessionId,
-            priceId: input.priceId,
-            status: input.status
-          })
+    redirectTo: withPaymentResult(
+      normalizeReturnTo(input.returnTo, "/account/billing"),
+      input.status,
+      input.priceId
+    )
   });
 }
 
@@ -744,6 +859,95 @@ async function processCreemWebhook(input: {
   });
 }
 
+async function recordSandboxPendingCheckout(input: {
+  amountCents: number;
+  checkoutKind: "subscription" | "credit_pack";
+  checkoutSessionId: string;
+  currency: "usd";
+  ownerId: string;
+  planId: string;
+  priceId: BillingPriceId;
+}): Promise<ServiceResult<true>> {
+  const adminResult = createSupabaseAdminClient();
+
+  if (!adminResult.ok) {
+    return adminResult;
+  }
+
+  const idempotencyKey = createPaymentIdempotencyKey({
+    provider: "sandbox",
+    eventId: `${input.checkoutSessionId}:pending`
+  });
+  const orderResult = await adminResult.data
+    .from("billing_orders")
+    .upsert(
+      {
+        owner_id: input.ownerId,
+        provider: "sandbox",
+        provider_order_id: `sandbox-order-${input.checkoutSessionId}:pending`,
+        provider_checkout_session_id: input.checkoutSessionId,
+        idempotency_key: idempotencyKey,
+        plan_id: input.planId,
+        price_id: input.priceId,
+        status: "pending",
+        currency: input.currency,
+        amount_cents: input.amountCents,
+        metadata: {
+          checkout_kind: input.checkoutKind,
+          source: "sandbox_checkout_started"
+        },
+        occurred_at: new Date().toISOString()
+      },
+      {
+        onConflict: "idempotency_key"
+      }
+    )
+    .select("id")
+    .single();
+
+  if (orderResult.error || !orderResult.data) {
+    return mapSupabasePaymentError(orderResult.error);
+  }
+
+  return serviceOk(true);
+}
+
+async function assertSandboxPendingCheckout(input: {
+  checkoutSessionId: string;
+  ownerId: string;
+  priceId: BillingPriceId;
+}): Promise<ServiceResult<true>> {
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const { data, error } = await clientResult.data
+    .from("billing_orders")
+    .select("id")
+    .eq("owner_id", input.ownerId)
+    .eq("provider", "sandbox")
+    .eq("provider_checkout_session_id", input.checkoutSessionId)
+    .eq("price_id", input.priceId)
+    .eq("status", "pending")
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    return mapSupabasePaymentError(error);
+  }
+
+  if (!data) {
+    return serviceError(
+      "forbidden",
+      "Sandbox checkout session is not recognized."
+    );
+  }
+
+  return serviceOk(true);
+}
+
 async function recordPaymentBillingFacts(input: {
   amountCents: number;
   checkoutKind: "subscription" | "credit_pack";
@@ -866,28 +1070,31 @@ async function recordPaymentBillingFacts(input: {
   ) {
     const entitlementResult = await adminResult.data
       .from("billing_entitlements")
-      .insert({
-        owner_id: input.ownerId,
-        source_type: "credit_pack",
-        source_id: orderResult.data.id,
-        feature_key: "ai_tokens",
-        allowance_kind: "quantity",
-        quantity: 100000,
-        unit: "credit",
-        status: "active",
-        metadata: {
-          ...input.metadata,
-          order_id: orderResult.data.id,
-          source
+      .upsert(
+        {
+          owner_id: input.ownerId,
+          source_type: "credit_pack",
+          source_id: orderResult.data.id,
+          feature_key: "ai_tokens",
+          allowance_kind: "quantity",
+          quantity: 100000,
+          unit: "credit",
+          status: "active",
+          metadata: {
+            ...input.metadata,
+            order_id: orderResult.data.id,
+            source
+          }
+        },
+        {
+          onConflict: "source_type,source_id,feature_key"
         }
-      })
+      )
       .select("id")
       .single();
 
     if (entitlementResult.error || !entitlementResult.data) {
-      if (entitlementResult.error.code !== "23505") {
-        return mapSupabasePaymentError(entitlementResult.error);
-      }
+      return mapSupabasePaymentError(entitlementResult.error);
     }
 
     const creditLedgerResult = await adminResult.data
@@ -1110,25 +1317,13 @@ async function updatePaymentEventStatus(input: {
 
 function buildResultUrl(
   status: PaymentCheckoutResultStatus,
-  priceId: BillingPriceId
+  priceId: BillingPriceId,
+  returnTo: string
 ) {
   const params = new URLSearchParams({
+    return_to: returnTo,
     status,
     price_id: priceId
-  });
-
-  return `/account/payment/result?${params.toString()}`;
-}
-
-function buildResultRedirectUrl(input: {
-  checkoutSessionId: string;
-  priceId: BillingPriceId;
-  status: PaymentCheckoutResultStatus;
-}) {
-  const params = new URLSearchParams({
-    checkout_session_id: input.checkoutSessionId,
-    price_id: input.priceId,
-    status: input.status
   });
 
   return `/account/payment/result?${params.toString()}`;
@@ -1188,6 +1383,28 @@ function normalizeResultStatus(
   }
 
   return null;
+}
+
+function assertSandboxPaymentReviewEnabled(): ServiceResult<true> {
+  const provider = createPaymentProvider();
+
+  if (!isSandboxPaymentReviewProvider(provider)) {
+    return serviceError(
+      "configuration_error",
+      "Sandbox payment review is not enabled for this environment."
+    );
+  }
+
+  return serviceOk(true);
+}
+
+function isSandboxPaymentReviewProvider(
+  provider: ReturnType<typeof createPaymentProvider>
+) {
+  return (
+    provider.descriptor.provider === "sandbox" &&
+    provider.descriptor.mode === "sandbox"
+  );
 }
 
 function mapResultToOrderStatus(

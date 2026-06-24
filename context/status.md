@@ -76,7 +76,7 @@ MVP1 foundation complete; MVP2 integrations provider foundation, Billing foundat
 - Added explicit APP/REVIEW Linear tasks so page-level acceptance cannot be missed during child-issue execution: `GNE-197` for Billing Done, `GNE-198` for Payment, and `GNE-199` for AI.
 - Completed `GNE-105 ANALYTICS-06`: production PostHog Activity now shows the deployed Vercel URL with the required shared properties, including the corrected `env=production`.
 - Completed the MVP2 Payment sandbox foundation in the repository for `GNE-192`, `GNE-96`, `GNE-97`, `GNE-98`, and `GNE-198`: Payment specs, sandbox provider checkout sessions, protected `/account/payment` review surface, sandbox success/cancel/failure result pages, protected sandbox server action that writes trusted Billing facts, no-side-effect sandbox webhook acknowledgement, and an Account usage-gate reviewer entry that simulates AI usage before prompting upgrade or credit-pack payment.
-- Synced the Linear Payment route cleanup into project docs: `GNE-72` is now the MVP2 Payment foundation and real Provider validation boundary; `PAYMENT-01..06` plus `PAYMENT-04R` are the mainline, while `PAYMENT-07/08` are optional Provider research/test-mode spike work; `GNE-158` moved to `MVP3-CP-09`; `GNE-201` owns future production payment readiness.
+- Synced the Linear Payment route cleanup into project docs: `GNE-72` is now the MVP2 Payment foundation and real Provider validation boundary; `PAYMENT-01..06` plus `PAYMENT-04R` are the mainline, while `PAYMENT-07/08` are optional Provider research/test-mode spike work; `GNE-158` moved to `MVP3-CP-10`; `GNE-201` owns future production payment readiness.
 - Advanced MVP2 Payment analytics and env safety: `GNE-104` now emits server-side `checkout_started`, `payment_succeeded`, `payment_failed`, `payment_canceled`, `entitlement_granted`, and `quota_limit_reached` from trusted Payment/Billing service boundaries. `GNE-202` is complete in repo with `.env.example` and provider docs covering `PAYMENT_MODE`, `PAYMENT_LIVE_ENABLED`, `PAYMENT_PROVIDER_SECRET`, server-only secrets, and the MVP5 live-payment gate.
 - Completed optional MVP2 Payment real-provider validation: `GNE-99` produced `Go test mode` for Creem, and `GNE-100` validated the Creem test-mode AI credit-pack path through app checkout, Vercel webhook, Supabase `payment_events`, Billing credit grant, PostHog server-side payment events, and `/account/usage` Credit increase. This closes `GNE-72` for MVP2 while keeping live payment, production KYC, payout, refunds, reconciliation, invoices, taxes, and real-customer payments under `GNE-201`.
 - Audited `stash@{0}` (`codex-before-sync-main-20260623`) in `context/stash-audit.md` across MVP2 Integrations, Billing, Payment, AI, and Analytics: it must not be applied wholesale because current `main` already supersedes the runtime pieces; the useful Analytics dashboard/template content has been merged manually into `integrations/analytics.md` under `GNE-73`.
@@ -93,6 +93,31 @@ MVP1 foundation complete; MVP2 integrations provider foundation, Billing foundat
 - Added reviewer-facing rules for Analytics, UI validation recovery, and Billing ledger interpretation: new instrumentation must use the local analytics wrappers and carry shared properties, correctable UI errors must recover from current input without refresh, and nullable Billing ledger links such as `billing_credit_ledger.entitlement_id` must be interpreted by event type and source.
 - Added `context/engineering-decision-rules.md` so engineering tradeoff guidance stays discoverable without enlarging `AGENTS.md` or duplicating workflow rules. `context/codex-rules.md` now keeps only a lightweight trigger for implementation-affecting changes.
 - Reviewed MVP1/MVP2 code ownership after the engineering-rule split. The current structure remains acceptable: reusable contracts and pure logic live in `packages/core`, app routes/service boundaries/provider wiring live in `apps/web`, module intent lives in `specs`, provider operations live in `integrations`, and project memory lives in `context`. No runtime refactor is required now; `apps/web/lib/services/payment.ts` and `apps/web/app/account/billing-overview.tsx` are future split candidates only if reviewability or parallel editing becomes painful.
+- Synced final-test architecture decisions into MVP3 planning: `GNE-210` is now `MVP3-CP-00` and the first Product Validation Kit execution step before new runtime work, `GNE-174` must use owner-only `projects` instead of the MVP1 public-read demo pattern, `GNE-177` must make sandbox upgrade pricing understandable without claiming production proration/refund/invoice behavior, and production payment reconciliation remains under `GNE-201`.
+- Renumbered MVP3 Product Validation Kit Linear issues so CP names match execution order: `GNE-210 CP-00`, `GNE-173 CP-01`, `GNE-174 CP-02`, `GNE-175 CP-03`, `GNE-206 CP-04`, `GNE-176 CP-05`, `GNE-177 CP-06`, `GNE-179 CP-07`, `GNE-178 CP-08`, `GNE-188 CP-09`, `GNE-158 CP-10`, `GNE-194 CP-11`, and `GNE-195 CP-12`. Growth order remains separate and unchanged because it is a reusable growth foundation sequence, not Product Kit runtime order.
+- Hardened the MVP2 payment webhook route so external responses no longer expose internal service error messages, and extended the release-boundary check to prevent regression.
+- Added MVP3 follow-up scope to Linear and project memory for multi-table commercial fact transaction/compensation strategy, runtime security headers before public validation pages, and abuse-prevention hooks for anonymous public write paths.
+- Synced MVP2 Payment and AI acceptance evidence: `specs/payment/acceptance.md` and `specs/ai/acceptance.md` now reflect the completed local code/docs/test facts, include the latest verification snapshot, and keep Creem labeled as a real external adapter running in test mode only. `/account/payment` now shows Creem as `真实适配器 · 仅测试模式` / `Real adapter · test mode only` so reviewers do not confuse test-mode adapter validation with live payment.
+- Fixed the protected-route login redirect so `next` preserves both pathname and query string, keeping deep-link context for checkout/result URLs after authentication. The release-boundary script now guards this behavior. Formal lightweight behavior tests are deferred to `GNE-210` because the repo currently has guard scripts but no committed TypeScript test runner; `GNE-210` should introduce that layer deliberately instead of adding an ad-hoc loader during release hardening.
+- Fixed the Payment shell's secondary auth redirect so `/account/payment/result?...` and `/account/payment/sandbox?...` preserve their full query string when an unauthenticated reviewer is sent through login. This keeps Payment result trust, sandbox return paths, and checkout review context aligned with the `GNE-210` regression-guard scope.
+- Cleared the old `codex-before-sync-main-20260623` stash after audit. The useful Analytics documentation content had already been merged manually; the remaining stash is no longer a project input and must not be submitted with this release branch.
+
+## Verification Snapshot
+
+Latest local release-hardening verification:
+
+- `pnpm typecheck` passed.
+- `pnpm test:release-boundaries` passed.
+- `pnpm test:ai-safety` passed.
+- `pnpm test` passed.
+- `pnpm lint` passed.
+- `pnpm build` passed.
+- Local smoke on `http://127.0.0.1:3005` passed for login, dashboard, AI immediate validation, Payment test-mode copy, forged Payment result rejection, forged sandbox rejection, unauthenticated API guards, webhook safe errors, and protected Payment deep-link `next` preservation.
+
+Boundaries still not claimed as verified production facts:
+
+- Real-provider AI production smoke remains `not_run`.
+- Creem is test-mode-only with `PAYMENT_LIVE_ENABLED=false`; live payment, production KYC, real refunds, reconciliation, invoices, taxes, settlement, disputes, and real-customer charges remain under `GNE-201`.
 
 ## Done Issues
 
@@ -187,15 +212,16 @@ MVP2 foundation parents are complete locally and in Linear: Integrations, Billin
 
 ## Next Steps
 
-1. Do not apply the remaining `stash@{0}` wholesale. The useful MVP2 Analytics dashboard/template content is already merged into `integrations/analytics.md`; keep the stash only until the audit PR is merged and the team confirms no further cherry-pick is needed.
-2. Continue `GNE-158 MVP3-CP-09` only inside MVP3 Product Validation Kit, using SandboxProvider for AI credit pack and subscription allowance validation unless a later gate explicitly allows a real test provider.
-3. Start MVP3 from `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows; the MVP3 parent checklist must keep the full clickable chain visible from auth through project, public page, lead, Free/Plus/Pro gating, sandbox checkout, AI generation, and PostHog funnel evidence.
-4. Treat `GNE-194` as test-mode-only Payment adapter validation with live payment disabled, and treat `GNE-195` as conditional AI provider acceptance.
-5. Use `GNE-201` for any production payment, live payment, merchant settlement, refund, reconciliation, invoice, or real user payment planning.
-6. Keep `SUPABASE_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, AI provider keys, payment secrets, webhook secrets, email keys, storage secrets, and SMS keys out of browser code and `NEXT_PUBLIC_` variables.
-7. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-8. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md` before making edits.
-9. Future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+1. Before online release, apply the repository Supabase migrations through the reviewed staging/production workflow, including `20260623025251_create_payment_events_webhook_boundary.sql` and `20260624044653_add_billing_entitlement_source_idempotency.sql`; do not rely on dashboard-only schema edits.
+2. Configure Supabase Auth URL settings for the deployed domain: Site URL should be the production app origin, and Redirect URLs must include the production `/auth/confirm` path plus any local or Preview paths that will actually be used for testing.
+3. Configure Vercel Production env entries from `.env.example` and `context/environment-matrix.md`, keeping server-only Supabase, Payment, AI, Email, Storage, and SMS secrets out of `NEXT_PUBLIC_`; redeploy after any env change before using the deployment as evidence.
+4. Start MVP3 from `GNE-210 MVP3-CP-00` before adding new Product Validation Kit runtime work. Use it to split or guard the large Payment/Billing surfaces only where needed, tighten service-role access behind server-only boundaries, and add regression checks that protect Auth confirmation, Payment result trust, owner-only data access, and sandbox upgrade interpretation.
+5. After `GNE-210`, continue `GNE-173` by writing Product Validation Kit specs before implementing new data or app flows; the MVP3 parent checklist must keep the full clickable chain visible from auth through project, public page, lead, Free/Plus/Pro gating, sandbox checkout, AI generation, and PostHog funnel evidence.
+6. Continue `GNE-158 MVP3-CP-10` only inside MVP3 Product Validation Kit, using SandboxProvider for AI credit pack and subscription allowance validation unless a later gate explicitly allows a real test provider.
+7. Treat `GNE-194 MVP3-CP-11` as test-mode-only Payment adapter validation with live payment disabled, and treat `GNE-195 MVP3-CP-12` as conditional AI provider acceptance.
+8. Use `GNE-201` for any production payment, live payment, merchant settlement, refund, reconciliation, invoice, or real user payment planning.
+9. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+10. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md`; future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
 
 ## Risks
 

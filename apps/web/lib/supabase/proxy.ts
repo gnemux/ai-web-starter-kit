@@ -47,9 +47,11 @@ export async function updateSession(request: NextRequest) {
 
   if (!hasClaims) {
     const loginUrl = request.nextUrl.clone();
+    const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
+
     loginUrl.pathname = "/login";
     loginUrl.search = "";
-    loginUrl.searchParams.set("next", request.nextUrl.pathname);
+    loginUrl.searchParams.set("next", nextPath);
 
     return NextResponse.redirect(loginUrl);
   }

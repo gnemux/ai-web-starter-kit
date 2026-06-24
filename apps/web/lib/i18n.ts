@@ -164,6 +164,8 @@ export const dictionaries = {
         statusError: "需检查",
         emptyTitle: "还没有 demo item",
         emptyDescription: "创建第一条记录，验证当前账户的数据写入和读取流程。",
+        privateItemsTitle: "我的数据",
+        publicItemsTitle: "公共样例",
         serviceErrorTitle: "数据服务暂不可用",
         createHint: "提交会经过 Server Action 和 demo service。",
         created: "已通过服务层创建 demo item。",
@@ -195,7 +197,7 @@ export const dictionaries = {
         promptLabel: "输入",
         promptPlaceholder: "例如：为一个面向独立开发者的项目管理工具写一句首页副标题",
         run: "生成草稿",
-        running: "生成中...",
+        running: "正在生成中...",
         noResult: "输入内容后生成一段草稿。",
         success: "已生成",
         blocked: "已拦截",
@@ -250,6 +252,7 @@ export const dictionaries = {
         title: "个人资料",
         description: "保存后会写入当前用户自己的 profile 记录。",
         displayName: "显示名称",
+        displayNamePlaceholder: "未设置",
         save: "保存资料",
         saving: "保存中...",
         updated: "资料已更新。"
@@ -280,16 +283,18 @@ export const dictionaries = {
         creditOverviewDescription:
           "这里展示当前可用于 AI 功能的 Credit，总量由套餐和额度包共同组成。",
         creditAvailable: "可用 Credit",
-        planCreditRemaining: "套餐 Credit",
+        planCreditRemaining: "套餐剩余 Credit",
         packCreditRemaining: "额度包 Credit",
         creditConsumed: "已消耗 Credit",
         creditPackTitle: "充值额度包",
         creditPackDescription:
           "一次性增加 100,000 Credit，不改变当前套餐。",
         sandboxOnly: "本地模拟",
+        planSwitchNote:
+          "测试模式按目标套餐全额记录，不处理差额或退款。",
         upgradePlan: "升级套餐",
         switchPlan: "切换套餐",
-        includedInCurrentPlan: "已包含在当前套餐",
+        includedInCurrentPlan: "权益已覆盖",
         switchToFree: "切换到 Free",
         buyCreditPack: "充值额度包",
         usageDemoTitle: "模拟 AI 使用",
@@ -382,11 +387,14 @@ export const dictionaries = {
         statusReady: "可继续",
         statusNeedsReview: "需检查",
         errorTitle: "支付暂不可用",
+        errorDescription:
+          "当前支付结果无法确认，请返回套餐页重新发起或稍后重试。",
         providerTitle: "支付方式",
         providerDescription:
           "当前使用本地模拟支付。确认后，系统会记录购买结果并刷新套餐权益。",
         provider: "支付方式",
         mode: "环境",
+        realAdapterTestModeOnly: "真实适配器 · 仅测试模式",
         entitlementSource: "权益来源",
         billingFacts: "以服务端记录为准",
         currentBillingTitle: "当前套餐状态",
@@ -418,7 +426,7 @@ export const dictionaries = {
         sandboxOnly: "本地模拟",
         startCheckout: "继续",
         currentPlanSelected: "当前已是此套餐",
-        includedInCurrentPlan: "已包含在当前套餐",
+        includedInCurrentPlan: "权益已覆盖",
         sandboxEyebrow: "支付确认",
         planCheckoutTitle: "确认套餐变更",
         creditCheckoutTitle: "充值 AI Credit",
@@ -454,18 +462,23 @@ export const dictionaries = {
         resultBoundaryTitle: "权益更新",
         resultBoundaryDescription:
           "支付结果会先记录在服务端；页面只负责展示结果与当前权益。",
-        resultNoGrant: "以服务端记录为准",
+        resultNoGrant: "仅展示服务端记录",
         returnToAccount: "返回账户查看权益",
         returnToBilling: "返回套餐",
+        returnToUsage: "返回 AI",
         billingUnavailable: "Billing 不可用"
       }
     },
     errors: {
       fallback: "操作失败，请检查表单后重试。",
       auth: {
+        accountExists: "该邮箱已经完成注册，请直接登录。",
+        configuration: "当前环境的认证配置需要检查。",
+        confirmationRequired: "该邮箱正在等待确认，请先完成邮箱确认。",
         email: "请输入有效邮箱。",
         password: "密码至少需要 8 个字符。",
-        general: "邮箱或密码无法验证，请检查后重试。"
+        general: "邮箱或密码无法验证，请检查后重试。",
+        signUpGeneral: "账户暂时无法创建，请检查邮箱后重试。"
       },
       profile: {
         displayName: "显示名称不能超过 80 个字符。",
@@ -631,6 +644,8 @@ export const dictionaries = {
         statusError: "Check needed",
         emptyTitle: "No demo items yet",
         emptyDescription: "Create the first record to verify account-scoped reads and writes.",
+        privateItemsTitle: "My data",
+        publicItemsTitle: "Public samples",
         serviceErrorTitle: "Data service unavailable",
         createHint: "Submissions route through a Server Action and demo service.",
         created: "Created demo item through the service layer.",
@@ -717,6 +732,7 @@ export const dictionaries = {
         title: "Profile",
         description: "Saving writes to the signed-in user's own profile row.",
         displayName: "Display name",
+        displayNamePlaceholder: "Not set",
         save: "Save profile",
         saving: "Saving...",
         updated: "Profile updated."
@@ -748,16 +764,18 @@ export const dictionaries = {
         creditOverviewDescription:
           "This shows the Credit currently available for AI features. The total comes from the plan and credit packs.",
         creditAvailable: "Available Credit",
-        planCreditRemaining: "Plan Credit",
+        planCreditRemaining: "Remaining plan Credit",
         packCreditRemaining: "Credit-pack Credit",
         creditConsumed: "Consumed Credit",
         creditPackTitle: "Credit pack top-up",
         creditPackDescription:
           "Add 100,000 Credit once without changing the current plan.",
         sandboxOnly: "Local simulation",
+        planSwitchNote:
+          "Test mode records the target plan at full price; proration and refunds are not handled here.",
         upgradePlan: "Upgrade plan",
         switchPlan: "Switch plan",
-        includedInCurrentPlan: "Included in current plan",
+        includedInCurrentPlan: "Covered by current plan",
         switchToFree: "Switch to Free",
         buyCreditPack: "Top up credit pack",
         usageDemoTitle: "Simulate AI usage",
@@ -851,11 +869,14 @@ export const dictionaries = {
         statusReady: "Ready",
         statusNeedsReview: "Needs review",
         errorTitle: "Payment unavailable",
+        errorDescription:
+          "This payment result could not be confirmed. Return to plans and try again.",
         providerTitle: "Payment method",
         providerDescription:
           "The local environment uses simulated payment. After confirmation, the system records the purchase result and refreshes plan access.",
         provider: "Payment method",
         mode: "Environment",
+        realAdapterTestModeOnly: "Real adapter · test mode only",
         entitlementSource: "Entitlement source",
         billingFacts: "Confirmed by server records",
         currentBillingTitle: "Current plan status",
@@ -887,7 +908,7 @@ export const dictionaries = {
         sandboxOnly: "local simulation",
         startCheckout: "Continue",
         currentPlanSelected: "Current plan",
-        includedInCurrentPlan: "Included in current plan",
+        includedInCurrentPlan: "Covered by current plan",
         sandboxEyebrow: "Payment confirmation",
         planCheckoutTitle: "Confirm plan change",
         creditCheckoutTitle: "Top up AI Credit",
@@ -924,18 +945,23 @@ export const dictionaries = {
         resultBoundaryTitle: "Access update",
         resultBoundaryDescription:
           "Payment results are recorded on the server first; this page only shows the result and current access.",
-        resultNoGrant: "Confirmed by server records",
+        resultNoGrant: "Server records only",
         returnToAccount: "Return to account",
         returnToBilling: "Return to plans",
+        returnToUsage: "Return to AI",
         billingUnavailable: "Billing unavailable"
       }
     },
     errors: {
       fallback: "The action failed. Review the form and try again.",
       auth: {
+        accountExists: "This email is already registered. Sign in instead.",
+        configuration: "The Auth configuration for this environment needs review.",
+        confirmationRequired: "Confirm this email before signing in.",
         email: "Enter a valid email address.",
         password: "Password must be at least 8 characters.",
-        general: "The email or password could not be verified."
+        general: "The email or password could not be verified.",
+        signUpGeneral: "The account could not be created. Review the email and try again."
       },
       profile: {
         displayName: "Display name must be 80 characters or fewer.",

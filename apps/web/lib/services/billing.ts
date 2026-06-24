@@ -620,6 +620,7 @@ async function listPaymentRecords(
     .from("billing_orders")
     .select("id, plan_id, price_id, status, currency, amount_cents, occurred_at")
     .eq("owner_id", ownerId)
+    .neq("status", "pending")
     .order("occurred_at", { ascending: false })
     .limit(5);
 

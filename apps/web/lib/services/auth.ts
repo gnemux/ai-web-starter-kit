@@ -91,6 +91,15 @@ export async function signInWithPasswordFromFormData(
     return mapAuthError(error);
   }
 
+  if (!data.user.email_confirmed_at) {
+    await clientResult.data.auth.signOut();
+
+    return serviceError(
+      "forbidden",
+      "Confirm this email before signing in."
+    );
+  }
+
   const user = mapAuthUser({
     id: data.user.id,
     email: data.user.email ?? inputResult.data.email
@@ -128,11 +137,17 @@ export async function signUpWithPasswordFromFormData(
     return clientResult;
   }
 
+  const appUrlResult = getAppUrl();
+
+  if (!appUrlResult.ok) {
+    return appUrlResult;
+  }
+
   const { data, error } = await clientResult.data.auth.signUp({
     email: inputResult.data.email,
     password: inputResult.data.password,
     options: {
-      emailRedirectTo: `${getAppUrl()}/auth/confirm?next=${encodeURIComponent(
+      emailRedirectTo: `${appUrlResult.data}/auth/confirm?next=${encodeURIComponent(
         inputResult.data.nextPath
       )}`
     }
@@ -147,7 +162,7 @@ export async function signUpWithPasswordFromFormData(
     email: data.user.email ?? inputResult.data.email
   });
 
-  if (data.session) {
+  if (data.session && data.user.email_confirmed_at) {
     const profileResult = await ensureProfile(clientResult.data, user.id);
 
     if (!profileResult.ok) {
@@ -160,6 +175,10 @@ export async function signUpWithPasswordFromFormData(
       redirectTo: inputResult.data.nextPath,
       message: "Account created."
     });
+  }
+
+  if (data.session) {
+    await clientResult.data.auth.signOut();
   }
 
   return serviceOk({
@@ -336,7 +355,9 @@ function mapProfile(row: ProfileRow): UserProfile {
   };
 }
 
-function mapAuthError(error: { status?: number; code?: string } | null) {
+function mapAuthError(
+  error: { status?: number; code?: string; message?: string } | null
+) {
   if (error?.status === 429 || error?.code === "over_email_send_rate_limit") {
     return serviceError(
       "system_error",
@@ -344,9 +365,30 @@ function mapAuthError(error: { status?: number; code?: string } | null) {
     );
   }
 
+  if (isEmailNotConfirmedError(error)) {
+    return serviceError(
+      "forbidden",
+      "Confirm this email before signing in."
+    );
+  }
+
   return serviceError(
     "unauthorized",
     "The email or password could not be verified."
+  );
+}
+
+function isEmailNotConfirmedError(
+  error: { code?: string; message?: string } | null
+) {
+  const code = error?.code?.toLowerCase() ?? "";
+  const message = error?.message?.toLowerCase() ?? "";
+
+  return (
+    code.includes("email_not_confirmed") ||
+    code.includes("email_not_confirm") ||
+    message.includes("email not confirmed") ||
+    message.includes("email is not confirmed")
   );
 }
 
@@ -368,12 +410,27 @@ function mapSupabaseError(error: { code?: string }): ServiceResult<never> {
   );
 }
 
-function getAppUrl(): string {
-  return (
+function getAppUrl(): ServiceResult<string> {
+  const appUrl = (
     process.env.NEXT_PUBLIC_APP_URL ??
     process.env.VERCEL_URL?.replace(/^/, "https://") ??
     "http://localhost:3000"
-  );
+  ).replace(/\/$/, "");
+  const appEnv = process.env.NEXT_PUBLIC_APP_ENV;
+  const requiresPublicUrl =
+    appEnv === "production" || appEnv === "preview" || process.env.VERCEL === "1";
+
+  if (
+    requiresPublicUrl &&
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(appUrl)
+  ) {
+    return serviceError(
+      "configuration_error",
+      "Production Auth confirmation URL is not configured."
+    );
+  }
+
+  return serviceOk(appUrl);
 }
 
 async function hasSupabaseAuthCookie(): Promise<boolean> {

@@ -6,10 +6,14 @@ import {
   SectionHeader,
   StatusBadge
 } from "@starter/ui";
+import { redirect } from "next/navigation";
 
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
-import { getPaymentResultState } from "@/lib/services/payment";
+import {
+  getPaymentResultState,
+  type PaymentResultState
+} from "@/lib/services/payment";
 
 import { PaymentShell } from "../payment-shell";
 
@@ -24,18 +28,25 @@ export default async function PaymentResultPage({
   const locale = await getRequestLocale();
   const copy = getDictionary(locale);
   const stateResult = await getPaymentResultState({
+    orderId: getParam(params.billing_order_id),
     status: getParam(params.status),
-    checkoutSessionId: getParam(params.checkout_session_id),
-    priceId: getParam(params.price_id)
+    checkoutSessionId:
+      getParam(params.checkout_session_id) ?? getParam(params.checkout_id),
+    priceId: getParam(params.price_id),
+    returnTo: getParam(params.return_to)
   });
 
+  if (stateResult.ok && shouldCleanPaymentResultUrl(params)) {
+    redirect(buildCleanPaymentResultUrl(stateResult.data));
+  }
+
   return (
-    <PaymentShell>
+    <PaymentShell nextPath={buildCurrentPath("/account/payment/result", params)}>
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         {!stateResult.ok ? (
           <ErrorState
             badgeLabel={copy.account.payment.statusNeedsReview}
-            description={stateResult.error.message}
+            description={copy.account.payment.errorDescription}
             title={copy.account.payment.errorTitle}
           />
         ) : (
@@ -97,8 +108,10 @@ export default async function PaymentResultPage({
                 />
               </dl>
               <div className="mt-5">
-                <Button href="/account/billing">
-                  {copy.account.payment.returnToBilling}
+                <Button href={stateResult.data.returnTo}>
+                  {stateResult.data.returnTo.startsWith("/account/usage")
+                    ? copy.account.payment.returnToUsage
+                    : copy.account.payment.returnToBilling}
                 </Button>
               </div>
             </Panel>
@@ -122,6 +135,55 @@ function Fact({ label, value }: { label: string; value: string }) {
 
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function buildCurrentPath(
+  pathname: string,
+  params: Record<string, string | string[] | undefined>
+) {
+  const search = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((item) => search.append(key, item));
+      return;
+    }
+
+    if (value) {
+      search.set(key, value);
+    }
+  });
+
+  const query = search.toString();
+  return query ? `${pathname}?${query}` : pathname;
+}
+
+function shouldCleanPaymentResultUrl(
+  params: Record<string, string | string[] | undefined>
+) {
+  return [
+    "checkout_id",
+    "checkout_session_id",
+    "customer_id",
+    "order_id",
+    "product_id",
+    "request_id",
+    "signature"
+  ].some((key) => Boolean(getParam(params[key])));
+}
+
+function buildCleanPaymentResultUrl(state: PaymentResultState) {
+  const params = new URLSearchParams({
+    billing_order_id: state.orderId ?? "",
+    return_to: state.returnTo,
+    status: state.status
+  });
+
+  if (state.priceId) {
+    params.set("price_id", state.priceId);
+  }
+
+  return `/account/payment/result?${params.toString()}`;
 }
 
 function resultTone(status: "success" | "cancel" | "failure") {

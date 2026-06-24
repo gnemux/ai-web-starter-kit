@@ -27,7 +27,7 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
 | Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. AI production smoke is `not_run` until a real provider is configured and deployed. |
-| Next owner action | Continue MVP2 Billing / Payment / AI work from the provider matrix and checklist; run full Production Smoke Path and AI provider smoke separately when needed. |
+| Next owner action | Before online release, verify Supabase Auth URL configuration, apply any missing reviewed Supabase migrations to the target project, confirm Vercel Production env entries, redeploy after env changes, then run the full Production Smoke Path. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -146,6 +146,16 @@ No Preview deployment result has been recorded in this file yet.
 No full Production Smoke Path has been recorded in this file yet. AI production
 smoke is also not recorded as passed; GNE-160 defines the repository-level
 checklist and budget guard only.
+
+## Current Release Configuration Notes
+
+- Supabase Auth Site URL for production should be `https://ai-web-starter-kit-web.vercel.app`.
+- Supabase Redirect URLs should include production `/auth/confirm` and any exact local or Preview callback URLs used by reviewers.
+- Vercel Production should use `NEXT_PUBLIC_APP_URL=https://ai-web-starter-kit-web.vercel.app` and `NEXT_PUBLIC_APP_ENV=production`.
+- Vercel Production should keep `PAYMENT_PROVIDER=sandbox`, `PAYMENT_MODE=sandbox`, and `PAYMENT_LIVE_ENABLED=false` for normal MVP2 release verification.
+- Creem may be enabled only for controlled `GNE-100` test-mode verification, with test secrets server-only and `PAYMENT_LIVE_ENABLED=false`.
+- Required repository migrations include the Payment events migration and the Billing entitlement source-idempotency migration. The target Supabase project migration history must be checked before release.
+- Vercel environment variable changes require a new deployment before the changed values can be verified.
 
 ## 2026-06-20 19:58 CST - production PostHog event verification
 

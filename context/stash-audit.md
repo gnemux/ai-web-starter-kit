@@ -5,10 +5,15 @@
 Audited stash:
 
 ```text
-stash@{0}: On codex/analytics-dashboard-templates: codex-before-sync-main-20260623
+historical ref at audit time: stash@{0}: On codex/analytics-dashboard-templates: codex-before-sync-main-20260623
 stash commit: a639e98d229888530999b27406f53789ad90bb7a
 base commit: bdb0d5612a91cde8f0349f12bb1d5a8538361c6e
 ```
+
+Final handling: the stash was dropped after the useful Analytics documentation
+content was manually merged and the team confirmed no further cherry-pick was
+needed. The `stash@{0}` name above is historical and should not be expected to
+exist in the current local stash list.
 
 Audit commands used:
 
@@ -59,4 +64,5 @@ Parent closure should be judged from current Linear child issue states and the c
 
 ## Stash Handling
 
-Keep the stash until the audit PR is merged and the team confirms the manually merged Analytics content is enough. Do not drop it automatically.
+The stash has been dropped. Keep this audit record only as historical evidence
+that the stash was reviewed and was not a patch source for the release branch.

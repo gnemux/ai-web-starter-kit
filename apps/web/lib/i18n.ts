@@ -136,7 +136,7 @@ export const dictionaries = {
       startWithEmail: "使用邮箱注册",
       accessDashboard: "登录账户",
       providerNote: "请使用当前环境配置的 Supabase Auth 项目。",
-      confirmationFailed: "确认链接无法验证，请重新登录或重新注册。",
+      confirmationFailed: "确认链接无法验证。如账号已完成确认，请直接登录。",
       form: {
         email: "邮箱",
         password: "密码",
@@ -616,7 +616,8 @@ export const dictionaries = {
       startWithEmail: "Start with email",
       accessDashboard: "Sign in",
       providerNote: "Use the Supabase Auth project configured for this environment.",
-      confirmationFailed: "The confirmation link could not be verified.",
+      confirmationFailed:
+        "The confirmation link could not be verified. If the account is already confirmed, sign in directly.",
       form: {
         email: "Email",
         password: "Password",

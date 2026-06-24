@@ -27,6 +27,7 @@ function section(source, start, end) {
 }
 
 const authService = read("apps/web/lib/services/auth.ts");
+const authConfirmRoute = read("apps/web/app/auth/confirm/route.ts");
 const authForm = read("apps/web/app/login/auth-form.tsx");
 const billingService = read("apps/web/lib/services/billing.ts");
 const paymentService = read("apps/web/lib/services/payment.ts");
@@ -62,6 +63,16 @@ expect(
     signUp.includes("auth.signOut()") &&
     signUp.includes('"confirmation_pending"'),
   "Sign-up must not leave an unconfirmed Supabase session authenticated."
+);
+
+expect(
+  authConfirmRoute.includes('searchParams.get("token_hash")') &&
+    authConfirmRoute.includes('searchParams.get("type")') &&
+    authConfirmRoute.includes("exchangeAuthConfirmationForSession") &&
+    authService.includes("verifyOtp") &&
+    authService.includes("token_hash: tokenHash") &&
+    authService.includes("normalizeAuthEmailOtpType"),
+  "Auth confirmation must support Supabase token_hash email callbacks as well as PKCE code callbacks."
 );
 
 const getAppUrl = section(authService, "function getAppUrl", "async function");

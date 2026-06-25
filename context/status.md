@@ -101,6 +101,7 @@ MVP1 foundation complete; MVP2 integrations provider foundation, Billing foundat
 - Fixed the protected-route login redirect so `next` preserves both pathname and query string, keeping deep-link context for checkout/result URLs after authentication. The release-boundary script now guards this behavior. Formal lightweight behavior tests are deferred to `GNE-210` because the repo currently has guard scripts but no committed TypeScript test runner; `GNE-210` should introduce that layer deliberately instead of adding an ad-hoc loader during release hardening.
 - Fixed the Payment shell's secondary auth redirect so `/account/payment/result?...` and `/account/payment/sandbox?...` preserve their full query string when an unauthenticated reviewer is sent through login. This keeps Payment result trust, sandbox return paths, and checkout review context aligned with the `GNE-210` regression-guard scope.
 - Cleared the old `codex-before-sync-main-20260623` stash after audit. The useful Analytics documentation content had already been merged manually; the remaining stash is no longer a project input and must not be submitted with this release branch.
+- Closed `GNE-209` in Linear as the PR #32 release-final regression bucket after PR #32 and PR #33 were merged. `GNE-209` is no longer an MVP2 open item; PR #34 is a separate Auth follow-up for duplicate signup messaging and post-confirmation return-to-login behavior.
 
 ## Verification Snapshot
 
@@ -201,6 +202,7 @@ Boundaries still not claimed as verified production facts:
 - `GNE-199` AI-10
 - `GNE-155` AI-08
 - `GNE-160` AI-09
+- `GNE-209` release-final regression bucket
 
 ## In Progress Issues
 

@@ -60,19 +60,29 @@ const signUp = section(
 );
 expect(
   signUp.includes("data.session && data.user.email_confirmed_at") &&
+    signUp.includes("isExistingEmailSignup(data.user, data.session)") &&
+    signUp.includes('"conflict"') &&
+    signUp.includes("auth/confirm?next=/login") &&
     signUp.includes("auth.signOut()") &&
     signUp.includes('"confirmation_pending"'),
-  "Sign-up must not leave an unconfirmed Supabase session authenticated."
+  "Sign-up must reject duplicate email signups, return confirmation users to login, and not leave unconfirmed sessions authenticated."
 );
 
+const authConfirmation = section(
+  authService,
+  "export async function exchangeAuthConfirmationForSession",
+  "async function verifyAuthTokenHash"
+);
 expect(
   authConfirmRoute.includes('searchParams.get("token_hash")') &&
     authConfirmRoute.includes('searchParams.get("type")') &&
     authConfirmRoute.includes("exchangeAuthConfirmationForSession") &&
     authService.includes("verifyOtp") &&
     authService.includes("token_hash: tokenHash") &&
-    authService.includes("normalizeAuthEmailOtpType"),
-  "Auth confirmation must support Supabase token_hash email callbacks as well as PKCE code callbacks."
+    authService.includes("normalizeAuthEmailOtpType") &&
+    authConfirmation.includes('redirectTo === "/login"') &&
+    authConfirmation.includes("auth.signOut()"),
+  "Auth confirmation must support Supabase token_hash callbacks and return signup confirmations to login without an authenticated session."
 );
 
 const getAppUrl = section(authService, "function getAppUrl", "async function");

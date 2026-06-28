@@ -127,6 +127,13 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   `pnpm test:release-boundaries`, `git diff --check`, and targeted boundary
   searches over `packages/platform` plus `packages/db` for runtime/provider
   terms and Reference Product object names.
+- Clarified GNE-242 after GNE-241 review: package-consumption validation must
+  cover both an existing `apps/web` MVP1/MVP2 real chain and the future
+  Reference Product minimum entry. Payment/Billing, AI Credit usage, webhooks,
+  and Supabase SSR cookie/session adapter do not need broad rewrites in
+  GNE-242, but they must be audited as `uses_public_contract`,
+  `adapter_only_ok`, or `gap_deferred`; live-payment production readiness still
+  belongs to GNE-201/MVP5.
 
 ## Verification Snapshot
 

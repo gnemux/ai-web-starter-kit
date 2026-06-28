@@ -215,7 +215,7 @@ GNE-228 PLAN
 GNE-229 PLATFORM
 ├── GNE-240 PLATFORM-01 Package 边界与依赖方向 (In Review, PR #37)
 ├── GNE-241 PLATFORM-02 core/ui/platform/db 最小公开入口
-├── GNE-242 PLATFORM-03 Reference Product 消费 Package
+├── GNE-242 PLATFORM-03 apps/web 与 Reference Product 消费 Package
 ├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查
 └── GNE-244 PLATFORM-05 Package patch 升级演练
 
@@ -278,6 +278,20 @@ packages may define actor/session/auth-result contracts, owner checks, auth
 errors, and RLS expectations; the current Next.js/Vercel Supabase SSR behavior
 belongs in the app adapter; a future Hono/Cloudflare path should add a Worker
 adapter rather than rewriting reusable packages.
+
+GNE-242 was clarified after the GNE-241 public-entry review: it is not only a
+future Reference Product task, and it is not a directory-moving exercise. It
+must prove package consumption from two sides. First, at least one existing
+`apps/web` MVP1/MVP2 real chain should consume a package public entry without
+regressing current pages. Second, the Reference Product minimum entry or module
+should consume package public entries without deep imports. High-risk existing
+chains such as Payment/Billing, AI Credit usage, webhooks, and Supabase SSR
+cookie/session adapter do not need broad behavior rewrites in GNE-242, but they
+must receive a package-contract audit conclusion: `uses_public_contract`,
+`adapter_only_ok`, or `gap_deferred`. `adapter_only_ok` is valid for runtime
+adapters that should stay in `apps/web`; `gap_deferred` must name the later
+issue or stage. MVP5 owns live payment production readiness, not a blanket
+excuse to leave MVP3 package-contract usage unexamined.
 
 The 30-minute Reviewer Runbook lives in `GNE-234 VERIFY`, not as a standalone
 issue. It is the final verification script for page flow, Supabase data/RLS,

@@ -28,7 +28,9 @@
 - [x] The GNE-241 package naming strategy is explicit: new entries use the
   current `@starter/*` transition names, while `@xwlc/*` remains the MVP3 target
   convention after package consumption is validated.
-- [ ] Reference Product consumes package public exports. Deferred to GNE-242.
+- [ ] Existing `apps/web` and Reference Product consume package public exports,
+  with Payment/Billing, AI Credit usage, webhook, and Supabase SSR adapter
+  package-contract audit results. Deferred to GNE-242.
 - [ ] Boundary rules are machine checked. Deferred to GNE-243.
 - [ ] Patch upgrade evidence exists. Deferred to GNE-244.
 

@@ -175,7 +175,11 @@ GNE-243 should convert this list into a machine-checkable boundary rule.
 ## Handoff To Later Child Issues
 
 - GNE-241 creates or adjusts minimal public package entry points.
-- GNE-242 proves the Reference Product consumes public package entry points.
+- GNE-242 proves public package consumption from existing `apps/web` and the
+  Reference Product. It must audit Payment/Billing, AI Credit usage, webhooks,
+  and Supabase SSR cookie/session adapter as `uses_public_contract`,
+  `adapter_only_ok`, or `gap_deferred` instead of treating high-risk chains as
+  out of sight.
 - GNE-243 adds build/typecheck/boundary checks.
 - GNE-244 records patch-upgrade evidence.
 

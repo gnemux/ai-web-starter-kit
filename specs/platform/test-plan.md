@@ -18,6 +18,22 @@ GNE-241 is a minimal public-entry task. Required checks:
 7. Run `pnpm typecheck`.
 8. Run `git diff --check`.
 
+## GNE-242 Checks
+
+GNE-242 is the package-consumption proof. Required checks:
+
+1. Confirm at least one existing `apps/web` MVP1/MVP2 real chain imports from a
+   package public entry without deep imports.
+2. Confirm the Reference Product minimum entry or module imports from package
+   public entries without copying Starter Kit internals.
+3. Confirm Payment/Billing, AI Credit usage, webhook, and Supabase SSR
+   cookie/session adapter each have one audit result: `uses_public_contract`,
+   `adapter_only_ok`, or `gap_deferred`.
+4. Confirm `adapter_only_ok` runtime adapters stay in `apps/web` but expose or
+   consume package-level contracts at the business boundary.
+5. Confirm every `gap_deferred` names a later issue or stage.
+6. Run type/build checks and record any UI smoke that was not run.
+
 ## GNE-240 Checks
 
 GNE-240 is a boundary/spec task. Required checks:

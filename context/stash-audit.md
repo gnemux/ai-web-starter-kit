@@ -59,7 +59,7 @@ Parent closure should be judged from current Linear child issue states and the c
 - `GNE-71` Billing is Done for MVP2 plan, entitlement, subscription, Credit, and ledger foundations.
 - `GNE-72` Payment can be Done for MVP2: `PAYMENT-01..06`, `PAYMENT-04R`, optional `PAYMENT-07`, and optional `PAYMENT-08` are complete for sandbox/test-mode scope.
 - `GNE-148` AI is Done for MVP2 mock/no-op provider, service boundary, Credit usage, quota, and safe analytics scope.
-- `GNE-73` Analytics is Done for MVP2 shared event standards, production field verification, dashboard templates, multi-environment viewing rules, data-isolation checks, and AI/Payment observability positions. MVP3 activation events continue under the MVP3 Product Validation Kit, not as a remaining MVP2 blocker.
+- `GNE-73` Analytics is Done for MVP2 shared event standards, production field verification, dashboard templates, multi-environment viewing rules, data-isolation checks, and AI/Payment observability positions. MVP3 activation events continue under the current MVP3 Reference Product route, not as a remaining MVP2 blocker.
 - Production payment remains explicitly out of scope and stays under `GNE-201`.
 
 ## Stash Handling

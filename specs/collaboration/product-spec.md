@@ -49,8 +49,10 @@ kick off Linear task
 
 ## Requirements
 
+- GitHub tag `v0.2.0` is the MVP2 sealed baseline. MVP3 work should start from latest `main` at or after this tag.
 - 开发者从 Linear 领取任务后，从最新 `main` 新开任务分支，例如 `feat/xxx`、`fix/xxx`、`chore/xxx` 或 `docs/xxx`。
 - 一个任务使用一个分支；不要复用已经 merge、关闭或属于其他任务的旧分支。
+- PR #34 and earlier task branches must not be reused for MVP3 work after `v0.2.0`; pull latest `main` and create a fresh branch for each MVP3 issue.
 - 开发者在本地完成开发、检查和预览后 push 任务分支，并创建 PR 到 `main`。
 - PR 阶段不依赖 Vercel Preview。开发者必须在 PR 描述中写清楚本地验证方式，并尽量提供截图或录屏。
 - 如果 Repo 拥有者要求修改，开发者必须在同一个分支继续 commit 和 push，让原 PR 自动更新。
@@ -61,6 +63,7 @@ kick off Linear task
 - PR merge 后删除远程分支；开发者同步 `main` 后删除本地任务分支。
 - Linear 状态建议：开发完成并创建 PR 后进入 `In Review`；PR merge 并完成 Production 验证后进入 `Done`。
 - AI Coding Agent 开始任何代码或文档修改前必须检查当前分支和工作区状态。
+- AI Coding Agent should treat `v0.2.0` as the last stable release marker. If local `main` is behind `origin/main` or does not contain `v0.2.0`, fetch/pull before implementation.
 - AI Coding Agent 实现 MVP 功能时必须优先选择最小可工作的改动；不得无必要引入新依赖、新抽象或大型组件库；但安全、支付、Auth、数据库代码不能以“最小”为理由省略校验、幂等、日志、权限、RLS、Webhook 校验或环境隔离。
 - AI Coding Agent 如果发现当前在 `main` 且需要实现新任务，应先从 `main` 新开本地分支。
 - AI Coding Agent 如果发现当前在旧任务分支、已 merge 分支或与新任务不匹配的分支，应提示用户并建议先切回 `main` 再新开分支。

@@ -23,11 +23,20 @@ copyable, placeholder-only, and safe for Git.
 - Vercel Production and Preview values are configured in the Vercel dashboard, not
   copied from local ignored files.
 
-## Current MVP2 Rule
+## Current MVP2/MVP3 Rule
 
 The Vercel Production and Preview environment variable entries must be configured separately.
 
-Because only one provider environment may exist right now, Production and Preview may temporarily use the same Supabase and PostHog values. This is an interim state, not final provider isolation. Keep the Vercel entries separate so values can diverge later without changing application code.
+GitHub tag `v0.2.0` is the MVP2 sealed baseline. MVP3 continues from latest
+`main` at or after that tag and uses the current cloud Supabase project as
+reference/staging/test for validation. A true Production Supabase project is not
+enabled during MVP3.
+
+Because only one cloud provider environment may exist right now, validation
+deployments may temporarily use the same reference/staging Supabase and PostHog
+values. This is an interim validation state, not final provider isolation. Keep
+the Vercel entries separate so values can diverge later without changing
+application code.
 
 Do not create empty Vercel environment variable entries for fallback keys. For example, if `NEXT_PUBLIC_SUPABASE_ANON_KEY` is the active public key, do not add an empty `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` entry.
 
@@ -36,8 +45,8 @@ Do not create empty Vercel environment variable entries for fallback keys. For e
 | Environment | `NEXT_PUBLIC_APP_ENV` | Vercel target | Intended use | Data expectation |
 | --- | --- | --- | --- | --- |
 | Local | `local` | local dev server | Development on a developer machine. | Local or shared staging provider values in `.env.local`; never committed. |
-| Preview | `preview` | Manual Vercel Preview from PR branch or commit SHA | Repo Owner checks PR behavior when a shared URL is needed. | May temporarily share provider values with Production; should later use staging provider resources. |
-| Production | `production` | Vercel Production from `main` | Final MVP1 online acceptance and user-facing deployment. | Should later use production provider resources once created. |
+| Preview | `preview` | Manual Vercel Preview from PR branch or commit SHA | Repo Owner checks PR behavior when a shared URL is needed. | Uses reference/staging provider resources during MVP3 validation. |
+| Production | `production` | Vercel Production from `main` | Current online validation shell; true production is a future gate. | Do not treat current cloud Supabase as production. Production Supabase is not enabled in MVP3. |
 
 Allowed values for `NEXT_PUBLIC_APP_ENV`:
 
@@ -128,8 +137,8 @@ user's visible balance, plan allowance, or browser-visible configuration.
 | Key group | Local `.env.local` | Vercel Preview | Vercel Production |
 | --- | --- | --- | --- |
 | App metadata | Configure local values such as `NEXT_PUBLIC_APP_ENV=local`. | Configure Preview entries separately with `NEXT_PUBLIC_APP_ENV=preview`. | Configure Production entries separately with `NEXT_PUBLIC_APP_ENV=production`. |
-| Provider selectors | Configure defaults from `.env.example` unless testing a specific provider branch. | Configure Preview entries separately. Values may temporarily match Production. | Configure Production entries separately. Values may temporarily match Preview while one provider environment exists. |
-| Public provider keys | Local or shared staging public values only. | Preview public provider entries. Values may temporarily match Production. | Production public provider entries. |
+| Provider selectors | Configure defaults from `.env.example` unless testing a specific provider branch. | Configure Preview entries separately. Values may temporarily match validation Production while one reference/staging provider exists. | Configure Production entries separately, but treat them as validation entries until a true production provider exists. |
+| Public provider keys | Local or shared reference/staging public values only. | Preview public provider entries. Values may temporarily match validation Production. | Validation public provider entries only during MVP3; true production keys are a later gate. |
 | Server-only secrets | Local ignored values only when needed. | Preview secrets in Vercel Dashboard only. | Production secrets in Vercel Dashboard only. |
 
 For `GNE-100 PAYMENT-08`, local ignored env may persistently use:
@@ -190,8 +199,12 @@ Vercel environment variables:
 | Environment | Current role | Future role | Notes |
 | --- | --- | --- | --- |
 | Local | Local Supabase or shared staging values in `.env.local`. | Same. | `.env.local` is ignored and may contain real local values. |
-| Preview | May temporarily use the same Supabase project as Production. | Prefer staging Supabase. | Keep Preview Vercel entries separate so values can diverge. |
-| Production | May temporarily use the current shared Supabase project until a true production project exists. | Production Supabase. | Production schema changes must follow `context/supabase-workflow.md`. |
+| Preview | May use the current cloud Supabase reference/staging project. | Prefer dedicated staging/reference Supabase. | Keep Preview Vercel entries separate so values can diverge. |
+| Production | Not enabled as a true Supabase production project during MVP3. | Production Supabase. | Record `not_run / not enabled in MVP3` until a true production project is created from migrations. |
+
+Current cloud Supabase should be described as `reference / staging / test`.
+Create a separate Production Supabase project only before real users, live
+payment, real AI cost, or formal production data are introduced.
 
 Supabase public browser keys:
 
@@ -228,7 +241,7 @@ module
 | Product line | `app` value | Stage | Notes |
 | --- | --- | --- | --- |
 | Starter kit | `XWLC` | MVP1 / MVP2 | Current reusable foundation and public site brand. |
-| Product Validation Kit | `product-validation-kit` or agreed slug | MVP3 | Future validation workspace. |
+| Reference Product cat care plan | `reference-cat-care` or agreed slug | MVP3 | Validates package consumption, private-link access, and cross-system reviewer evidence. |
 | Overseas/china provider foundation | product-specific or shared provider mode slug | MVP4 | Real dual-mode provider rollout; see `GNE-193`. |
 | Real overseas vertical product | product slug | MVP5 | Should receive its own URL and provider isolation plan. |
 | Real China product | product slug | MVP6 or later | Requires MVP4 dual-mode provider decisions first. |

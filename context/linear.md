@@ -19,9 +19,9 @@ MVP2 扩展底座
 ├── Parent issues: GNE-167, GNE-71, GNE-72, GNE-148, GNE-73
 └── Consensus issue: GNE-190
 
-MVP3 Product Validation Kit
+MVP3 Reference Product：双底座架构与 Package 消费验证
 ├── ID: f85fc4d2-304b-406b-94aa-12f303b0acbc
-└── Parent issues: GNE-171, GNE-75
+└── Parent issues: GNE-228, GNE-229, GNE-230, GNE-231, GNE-232, GNE-233, GNE-234
 
 MVP4 国内外双模式底座
 ├── ID: 5eed1508-a480-44d1-aa39-efebe17dd4f9
@@ -89,22 +89,17 @@ Release-final bug bucket: `GNE-209` was closed as Done after PR #32 and PR
 confirmation and duplicate-signup follow-ups after PR #33 are handled in a
 separate PR #34 branch rather than reopening `GNE-209`.
 
-MVP3 Product Validation Kit
-├── GNE-171 MVP3 PRODUCT-00
-├── GNE-75 MVP3 GROWTH-00
-├── GNE-210 MVP3-CP-00 architecture/test preflight
-├── GNE-173 MVP3-CP-01 specs and template boundary
-├── GNE-174 MVP3-CP-02 projects owner-only chain
-├── GNE-175 MVP3-CP-03 public validation pages and leads
-├── GNE-206 MVP3-CP-04 owner dashboard and permission boundary
-├── GNE-176 MVP3-CP-05 funnel, UTM, and PostHog events
-├── GNE-177 MVP3-CP-06 Billing/Payment product flow
-├── GNE-179 MVP3-CP-07 validation-page AI copy generation
-├── GNE-178 MVP3-CP-08 notifications and ops status
-├── GNE-188 MVP3-CP-09 activation and core feature events
-├── GNE-158 MVP3-CP-10 AI credit pack sandbox validation
-├── GNE-194 MVP3-CP-11 Payment provider test mode adapter validation
-└── GNE-195 MVP3-CP-12 real AI provider acceptance
+MVP3 Reference Product：双底座架构与 Package 消费验证
+├── GNE-228 MVP3-01 PLAN [DOC/ARCH] 范围、双底座架构与失败标准
+├── GNE-229 MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
+├── GNE-230 MVP3-03 DELIVERY [DEPLOY] 多仓 CI/CD、环境治理与版本迁移
+├── GNE-231 MVP3-04 PRODUCT [APP/DATA] 主人侧 Reference Product 最小业务闭环
+├── GNE-232 MVP3-05 ACCESS [SECURITY] 私密分享、匿名访问与提交边界
+├── GNE-233 MVP3-06 CAPABILITY [AI/BILLING/OUTBOX/AUDIT] 平台能力接入真实业务
+└── GNE-234 MVP3-07 VERIFY [QA] 交叉验证、升级演练与 v0.3.0 结论
+
+Future / Backlog 横向能力
+└── GNE-75 FUTURE GROWTH-00 [GROWTH] 通用增长营销与反馈闭环
 
 MVP4 国内外双模式底座
 └── GNE-193 MVP4 INTEGRATIONS-00
@@ -115,9 +110,168 @@ MVP5 真实海外垂直产品验证
 
 `GNE-168` records the detailed MVP1-MVP6 mapping. `GNE-190` is an MVP2 consensus document, not an implementation parent. `GNE-167` is MVP2-only integrations: provider matrix, env naming, mock/no-op/sandbox strategy, and interface boundaries. `GNE-193` owns MVP4 overseas / China adapter, env template, mock, and launch-checklist planning. `GNE-201` owns future production payment readiness for real vertical products.
 
-MVP3 execution should now start with `GNE-210 / MVP3-CP-00` as an architecture/test preflight before new Product Validation Kit runtime work. After `GNE-210`, core product execution follows the CP order under `GNE-171`: specs, projects, public pages/leads, owner dashboard, funnel events, Billing/Payment, AI, Ops, activation, credit-pack sandbox, and conditional provider validation. Payment provider validation in MVP3 is test-mode only through `GNE-194 / MVP3-CP-11`; live payment belongs to MVP5 or later. AI provider product acceptance remains conditionally split into `GNE-195 / MVP3-CP-12`. AI credit pack payment validation is `GNE-158 / MVP3-CP-10` and uses sandbox payment by default.
+MVP3 execution now starts with `GNE-228 / MVP3-01 PLAN`, then follows
+`GNE-229` through `GNE-234`. The stage validates a Reference Product and a
+package-consumed platform foundation, not the old Product Validation Kit. MVP3
+uses the 4-package naming convention `@xwlc/core`, `@xwlc/ui`,
+`@xwlc/platform`, and `@xwlc/db`; do not mix in the previous 5-package naming
+unless a later v0.3.x decision explicitly splits the packages. Product-specific
+cat-care objects stay in the Reference Product repo and must not enter the
+platform packages. Live payment still belongs to MVP5 or later.
 
-Execution tasks remain as child issues under the parent issue tree below. Examples: `GNE-180` through `GNE-183` stay under `GNE-167`; Product Kit CP tasks such as `GNE-210`, `GNE-173` through `GNE-179`, `GNE-206`, `GNE-188`, `GNE-158`, `GNE-194`, and `GNE-195` stay under `GNE-171`; those child issues should not be directly assigned to Project Milestones.
+GitHub tag `v0.2.0` is the MVP2 sealed baseline. MVP3 implementation branches
+should start from latest `main` at or after `v0.2.0`, not from old PR branches.
+Current cloud Supabase is reference/staging/test for MVP3 validation; Production
+Supabase is not enabled during MVP3 and should be recorded as `not_run / not
+enabled in MVP3` when a template asks for Production evidence.
+
+`GNE-228` PLAN records the current stage decisions before implementation starts:
+MVP3 keeps the Linear + repo evidence-sync rule from MVP1/MVP2; it continues on
+`main` with short task branches instead of a long-lived `mvp3` branch; it stays
+single-repo/monorepo for MVP3 while enforcing package boundaries; it uses the
+current cloud Supabase project only as reference/staging/test; it keeps
+Supabase + Vercel as the mainline; it treats Cloudflare/Hono as future adapter
+readiness only; and it keeps AI/Billing on mock/no-op/sandbox/test paths.
+
+`GNE-228` also defines the MVP3 failure standards. MVP3 should be considered
+off-track if product-specific cat-care objects enter platform packages, if work
+starts from old pre-`v0.2.0` branches, if child issues are executed out of the
+parent sequence without an explicit decision, if production Supabase/live
+payment/real AI become MVP3 blockers, if private-link raw tokens or private
+content appear in logs, docs, Linear, PostHog, or reviewer evidence, or if the
+final Reviewer path cannot connect page flow, Supabase data/RLS, Vercel/env,
+PostHog, GitHub CI, package version, and schema version evidence.
+
+MVP3 parent dependency chain is linear by design: `GNE-228` blocks `GNE-229`,
+`GNE-229` blocks `GNE-230`, `GNE-230` blocks `GNE-231`, `GNE-231` blocks
+`GNE-232`, `GNE-232` blocks `GNE-233`, and `GNE-233` blocks `GNE-234`. This is
+the 小团队 WIP rule for MVP3: one parent issue should carry the main
+implementation at a time; the next parent can be reviewed ahead, but should not
+start a separate implementation track unless the team deliberately accepts that
+tradeoff.
+
+MVP3 child issues were created on 2026-06-26 after the parent-issue charter was
+approved. These child issues are attached to their parent issues, carry no
+Linear labels, and should remain `No milestone` so the milestone view stays
+focused on the seven parent issues. Parent issues should now act as navigation,
+boundary, input/output, and reviewer-acceptance charters; implementation
+details, SQL, commands, screenshots, runbook records, and final evidence belong
+inside child issues or specs/context documents.
+
+On 2026-06-26, the MVP3 milestone and execution issues were strengthened for
+newcomer and reviewer readability. The milestone now contains Mermaid diagrams
+for dual-foundation architecture, the business loop, data flow, and reviewer
+verification flow. The seven parent issues now include purpose, rationale,
+boundaries, code-architecture role, reusable-platform value, product value,
+reviewer actions, and verification method. Key child issues add concrete
+templates for glossary/diagrams, package boundaries, delivery evidence, product
+data model, share-token lifecycle, capability mapping, and the 30-minute
+Reviewer Runbook. Do not duplicate the full diagrams here; keep Linear as the
+primary readable execution surface and sync only durable decisions into
+`context/*` or `specs/*`.
+
+The follow-up execution-quality review was accepted with scope control. Linear
+now adds the MVP3 final 5 questions, a code-directory mapping table, and a
+minimum construction template for child issues. High-risk child issues were
+expanded: `GNE-251` has the Reference Product ERD/minimum fields/RLS ownership,
+`GNE-259` has the owner/anonymous permission matrix, `GNE-252`, `GNE-253`,
+`GNE-257`, and `GNE-258` have page-level Done criteria, and `GNE-273` /
+`GNE-274` have final conclusion and product-expansion templates. Do not
+mechanically expand all 39 child issues before execution; instead, bring each
+child issue up to the minimum construction template when its parent becomes
+active. Create a standalone MVP3 evidence document only after real verification
+evidence exists.
+
+The PLAN pure-document child issues were intentionally collapsed back into
+`GNE-228` after the milestone and parent issue absorbed their content. `GNE-236`,
+`GNE-237`, and `GNE-239` were manually deleted, and `GNE-238` is no longer needed
+after its ADR checklist was merged into `GNE-228`. Do not recreate PLAN child
+issues unless new executable work appears.
+
+The second execution-risk review was accepted where it improved execution
+clarity, not where it duplicated already-added diagrams. `GNE-247` now spells
+out migration/schema-version flow, product-vs-platform migration ownership, RLS
+SQL coverage, and no-dashboard-only schema edits. `GNE-243` now carries
+machine-checkable package and runtime boundary checks. `GNE-263`, `GNE-264`,
+`GNE-265`, and `GNE-267` now describe Outbox, AI draft, Billing/Credit, and
+failure/retry/idempotency behavior in enough detail for implementation and
+review. `GNE-251` now includes the unified Reference Product state model. The
+parent chain remains linear: `GNE-228` blocks `GNE-229`, `GNE-229` blocks
+`GNE-230`, `GNE-230` blocks `GNE-231`, `GNE-231` blocks `GNE-232`, `GNE-232`
+blocks `GNE-233`, and `GNE-233` blocks `GNE-234`. No labels were added.
+
+Several overlap-prone child issues have explicit boundaries: `GNE-248` builds
+the version evidence mechanism while `GNE-272` aggregates final evidence;
+`GNE-249` defines recovery principles while `GNE-273` writes the final v0.3.0
+decision; `GNE-255` covers Product page analytics while `GNE-266` covers
+cross-capability PostHog correlation; `GNE-260` implements ACCESS security
+rules/audit while `GNE-270` independently reruns final security negative
+verification.
+
+```text
+GNE-228 PLAN
+└── No active child issues; PLAN scope, diagrams, ADR, and WIP rules live in the parent issue and milestone.
+
+GNE-229 PLATFORM
+├── GNE-240 PLATFORM-01 Package 边界与依赖方向
+├── GNE-241 PLATFORM-02 core/ui/platform/db 最小公开入口
+├── GNE-242 PLATFORM-03 Reference Product 消费 Package
+├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查
+└── GNE-244 PLATFORM-05 Package patch 升级演练
+
+GNE-230 DELIVERY
+├── GNE-245 DELIVERY-01 多仓/单仓阶段策略与 CI 入口
+├── GNE-246 DELIVERY-02 Vercel 环境矩阵
+├── GNE-247 DELIVERY-03 Supabase migration 与 schema version
+├── GNE-248 DELIVERY-04 package/app/db version 对齐
+├── GNE-249 DELIVERY-05 回滚/前滚原则与 Reviewer 证据清单
+└── GNE-250 DELIVERY-06 真实 Reference Product 部署复现记录
+
+GNE-231 PRODUCT
+├── GNE-251 PRODUCT-01 猫咪档案、照护计划、任务、提交数据模型
+├── GNE-252 PRODUCT-02 主人侧创建/编辑/发布流程
+├── GNE-253 PRODUCT-03 主人侧结果查看和状态变化
+├── GNE-254 PRODUCT-04 Supabase RLS 验收 SQL 与 seed 数据
+└── GNE-255 PRODUCT-05 基础事件和页面级验收
+
+GNE-232 ACCESS
+├── GNE-256 ACCESS-01 share token scope、有效期、撤销和重放规则
+├── GNE-257 ACCESS-02 匿名查看页面和最小可见数据
+├── GNE-258 ACCESS-03 匿名提交和字段白名单
+├── GNE-259 ACCESS-04 owner-only 与匿名边界 RLS 验收
+└── GNE-260 ACCESS-05 安全负向测试和审计事件
+
+GNE-233 CAPABILITY
+├── GNE-261 CAP-01 业务动作到能力映射表
+├── GNE-262 CAP-02 Audit 接入发布、分享、提交、撤销动作
+├── GNE-263 CAP-03 Outbox 接入通知和异步任务
+├── GNE-264 CAP-04 AI 生成照护摘要或提醒文案
+├── GNE-265 CAP-05 Billing/Credit 用量权益
+├── GNE-266 CAP-06 PostHog 行为与能力事件串联
+└── GNE-267 CAP-07 失败、重试、幂等与降级验证
+
+GNE-234 VERIFY
+├── GNE-268 VERIFY-01 Reviewer 账号、测试数据、URL、版本
+├── GNE-269 VERIFY-02 30 分钟 Reviewer Runbook
+├── GNE-270 VERIFY-03 安全负向验证
+├── GNE-271 VERIFY-04 Package patch 与 DB migration 验证
+├── GNE-272 VERIFY-05 PostHog、Vercel、Supabase、GitHub CI 证据汇总
+├── GNE-273 VERIFY-06 v0.3.0 结论
+└── GNE-274 VERIFY-07 产品扩展判定
+```
+
+The 30-minute Reviewer Runbook lives in `GNE-234 VERIFY`, not as a standalone
+issue. It is the final verification script for page flow, Supabase data/RLS,
+Vercel deployment/env, PostHog events, GitHub CI, package version, schema
+version, and patch-upgrade evidence.
+
+Execution tasks remain as child issues under the parent issue tree below.
+Examples: `GNE-180` through `GNE-183` stay under `GNE-167`. The old Product
+Validation Kit route was canceled and then manually removed from the active
+Linear planning view on 2026-06-26. Its CP tasks are not current execution
+sources and should not be moved into MVP4-MVP6. If any old idea is still useful,
+rewrite it into the new `GNE-228..GNE-234` structure instead of reviving the
+legacy route.
 
 ## Baseline Issue Tree
 
@@ -223,7 +377,7 @@ GNE-73 MVP1-MVP3 ANALYTICS-00 [ANALYTICS] 统一事件标准、生产验收与�
 ├── GNE-125 ANALYTICS-08 [TEST][MVP2/MVP3] 验证单 Project 多环境/多产品数据隔离（Done）
 └── GNE-159 ANALYTICS-09 [AI][MVP2] AI 使用量、成本与转化事件看板（Done）
 
-Payment-specific analytics execution moved to `GNE-104 PAYMENT-05` under the Payment parent. MVP3 activation/core-feature analytics moved to `GNE-188 MVP3-CP-09` under the Product Validation Kit parent. Analytics keeps the shared event standard, privacy boundary, dashboard ownership, and review conventions; it is not a payment, order, entitlement, AI usage, or quota source of truth.
+Payment-specific analytics execution moved to `GNE-104 PAYMENT-05` under the Payment parent. MVP3 Reference Product activation/core-feature analytics belong under `GNE-233 CAPABILITY` and its analytics child issue, not under the retired Product Validation Kit route. Analytics keeps the shared event standard, privacy boundary, dashboard ownership, and review conventions; it is not a payment, order, entitlement, AI usage, or quota source of truth.
 
 GNE-74 DEPLOY-00 [DEPLOY] 部署、环境变量与线上验收
 ├── GNE-107 DEPLOY-01 [DOC] 建立环境变量清单与 .env.example
@@ -236,7 +390,7 @@ GNE-74 DEPLOY-00 [DEPLOY] 部署、环境变量与线上验收
 ├── GNE-187 DEPLOY-08 [OPS] 建立生产监控与告警检查清单
 └── GNE-129 DEPLOY-09 [DOC] 建立多环境 / 多产品配置预留清单
 
-GNE-75 GROWTH-00 [GROWTH] 增长营销基础能力
+GNE-75 FUTURE GROWTH-00 [GROWTH] 通用增长营销与反馈闭环
 ├── GNE-111 GROWTH-01 [DOC] 定义 SEO baseline
 ├── GNE-112 GROWTH-02 [UI] 建立营销落地页模块
 ├── GNE-113 GROWTH-03 [DEV] 建立 campaign attribution 基础能力
@@ -247,13 +401,14 @@ GNE-75 GROWTH-00 [GROWTH] 增长营销基础能力
 ├── GNE-128 GROWTH-08 [DOC] 建立增长复盘模板与行动规则
 └── GNE-161 GROWTH-09 [AI] AI 产品 Demo 模板与落地页表达
 
-Growth execution order remains intentionally separate from MVP3 Product Kit CP
-order. `GROWTH-01..09` is a reusable growth foundation sequence: SEO baseline
+Growth execution order remains intentionally separate from current MVP3
+Reference Product execution. `GNE-75` is a Future / Backlog horizontal growth
+parent, not an MVP3, MVP4, MVP5, or MVP6 execution parent. `GROWTH-01..09` is a reusable growth foundation sequence: SEO baseline
 -> landing modules -> campaign attribution -> feedback -> launch checklist
 -> UTM naming -> attribution verification -> retro template -> AI demo
 expression. Product-specific owner dashboard, funnel events, activation, and
-AI/payment validation belong under `GNE-171` CP issues instead of being
-renumbered into Growth.
+AI/payment validation for the current MVP3 route belongs under `GNE-228` through
+`GNE-234`.
 
 GNE-148 MVP2 AI-00 [AI] AI Provider、Usage、Credit 与 Entitlement 底座（Done in repo）
 ├── GNE-149 AI-01 [DOC][MVP2] 定义 AI provider、model、token、credit、entitlement 边界（Done in repo）
@@ -314,34 +469,46 @@ GNE-167 MVP2 INTEGRATIONS-00 [INTEGRATIONS] Provider matrix、环境变量与 ad
 
 GNE-193 MVP4 INTEGRATIONS-00 [INTEGRATIONS] 海外/国内双模式 adapter、env 模板与上线 checklist
 
-GNE-171 MVP3 PRODUCT-00 [PD] Product Validation Kit / Indie 产品验证工作台
-├── GNE-210 MVP3-CP-00 [ARCH/TEST] Product Validation Kit 结构拆分与回归护栏
-├── GNE-173 MVP3-CP-01 [DOC] 对齐 Product Validation Kit 规格与模板边界
-├── GNE-174 MVP3-CP-02 [DATA/API/APP] 建立 projects 领域对象与 owner-only 链路
-├── GNE-175 MVP3-CP-03 [DATA/API/APP] 建立公开验证页与 leads 匿名提交
-├── GNE-206 MVP3-CP-04 [APP/ANALYTICS] 项目 Owner 验证看板与权限边界
-├── GNE-176 MVP3-CP-05 [ANALYTICS/GROWTH] 建立验证页漏斗、UTM 与 PostHog 事件
-├── GNE-177 MVP3-CP-06 [BILLING/PAYMENT] 建立 Free/Plus/Pro 权益、sandbox checkout 与 webhook 闭环
-├── GNE-179 MVP3-CP-07 [AI] 建立验证页 AI 文案生成与 usage credits
-├── GNE-178 MVP3-CP-08 [EMAIL/OPS] 建立通知、失败记录与 admin 运营状态
-├── GNE-188 MVP3-CP-09 [ANALYTICS] 接入 activation 与核心功能事件
-├── GNE-158 MVP3-CP-10 [PAYMENT/AI] AI credit pack 与订阅赠送额度 sandbox 验证
-├── GNE-194 MVP3-CP-11 [PAYMENT][TEST MODE] 复用真实 Provider 到产品场景验证
-└── GNE-195 MVP3-CP-12 [AI][MVP3] 真实 AI Provider 产品化验收
+GNE-228 MVP3-01 PLAN [DOC/ARCH] 范围、双底座架构与失败标准
+GNE-229 MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
+GNE-230 MVP3-03 DELIVERY [DEPLOY] 多仓 CI/CD、环境治理与版本迁移
+GNE-231 MVP3-04 PRODUCT [APP/DATA] 主人侧 Reference Product 最小业务闭环
+GNE-232 MVP3-05 ACCESS [SECURITY] 私密分享、匿名访问与提交边界
+GNE-233 MVP3-06 CAPABILITY [AI/BILLING/OUTBOX/AUDIT] 平台能力接入真实业务
+GNE-234 MVP3-07 VERIFY [QA] 交叉验证、升级演练与 v0.3.0 结论
+
+Retired legacy route, not current MVP3 execution:
+The old Product Validation Kit parent and CP task line was replaced by
+`GNE-228..GNE-234`, canceled in Linear, and then manually removed from the
+active planning view on 2026-06-26. Do not assign new work to that route, do not
+move it into MVP4-MVP6, and do not use it as reviewer scope. Recreate any still
+valid idea inside the Reference Product parent/child structure instead.
 
 GNE-201 MVP5 PAYMENT-00 [PAYMENT] 真实垂直产品生产支付准入
 
-MVP3 reviewer surface: the product kit must be a clickable chain, not a collection of backend tasks. The minimum human check is login/signup -> project creation -> public validation page -> anonymous lead submission -> owner dashboard lead view -> Free/Plus/Pro gating -> sandbox checkout success/cancel/failure -> order/subscription/entitlement status -> AI generation -> usage/credit/quota result -> PostHog funnel evidence.
+MVP3 reviewer surface: the Reference Product must be a clickable chain, not a
+collection of backend tasks. The minimum human check is login/signup -> create
+cat profile -> create care plan -> publish plan -> generate private link ->
+anonymous sitter opens link -> sitter submits completion / note / exception ->
+owner views result -> Supabase/Vercel/PostHog/GitHub evidence matches the page.
 
-MVP3 architecture preflight: `GNE-210 / MVP3-CP-00` should run before adding the Product Validation Kit runtime. It owns low-risk structure and regression-guard work for the product kit: splitting large Payment/Billing review surfaces when needed, tightening service-role usage behind narrower server-only facades, defining transaction or compensation strategy for multi-table commercial facts, reviewing runtime security headers before public pages launch, and adding a proper lightweight behavior-test layer that protects Auth confirmation and login `next` preservation, Payment result trust, owner-only data access, public write-path abuse prevention, sandbox upgrade interpretation, and AI duplicate/idempotency behavior. It must preserve existing MVP1/MVP2 business behavior.
+MVP3 delivery boundary: `GNE-230` owns the minimum delivery gate: product repo
+can install `@xwlc/*` packages, GitHub CI runs, Supabase staging migrations run,
+Vercel staging deploys, version info exposes Commit SHA / Package Version /
+Schema Version / Deployment URL, and smoke tests pass. Migration order is
+Platform Migration -> Product Migration -> Deploy -> Smoke. Database rollback is
+not promised; prefer app rollback, package downgrade, feature flags, and forward
+fix / expand-contract database changes.
 
-MVP3 data boundary: `GNE-174` must not reuse the MVP1 `demo_items.visibility = public` authenticated-public-read template for project ownership. Product kit `projects` are owner-only; any public validation experience should expose only published public-page fields through a dedicated boundary such as `validation_pages`, while leads and owner dashboards remain owner-only or service-boundary mediated.
+MVP3 access boundary: `GNE-232` owns private-link and anonymous command
+security. Token values must be high-entropy, stored only as non-reversible
+digests, scoped to one resource, expirable, revocable, and safe against repeated
+submits. Logs, analytics, and screenshots must not contain raw tokens.
 
-Public entry abuse boundary in MVP3: `GNE-175 / MVP3-CP-03` owns the first anonymous public write path. The initial implementation should include server-side validation, dedupe, rate-limit or provider/edge-level abuse-prevention hooks, and failure behavior that does not leak owner-private fields.
-
-Payment boundary in MVP3: `GNE-177 / MVP3-CP-06` consumes MVP2 Billing/Payment foundations inside Product Validation Kit product features; it does not redo the Creem adapter spike. `GNE-194 / MVP3-CP-11` is not merged with `GNE-100`: `GNE-100` answers whether Creem test-mode checkout/webhook/signature/idempotency can technically connect to the foundation, while `GNE-194` later answers whether that test-mode provider path is useful in the productized MVP3 flow. If the low-level Creem evidence is missing, keep `GNE-194` in Backlog and return to `GNE-100`.
-
-Sandbox upgrade boundary in MVP3: `GNE-177 / MVP3-CP-06` should make Plus -> Pro and credit-pack sandbox flows understandable without claiming real proration, refund, invoice, or reconciliation. The UI or reviewer evidence should explain full-price sandbox records, previously paid amount, simulated delta, or no-op refund assumptions. Real production proration, refunds, invoices, settlement, and reconciliation remain `GNE-201`.
+MVP3 capability boundary: `GNE-233` must not block the PRODUCT or ACCESS
+minimum path. Its internal order is Audit / Correlation ID -> Outbox -> AI draft
+with human review -> Entitlement / Usage -> Sandbox / Test Mode -> Health /
+Trace / Metrics.
 ```
 
 ## Usage

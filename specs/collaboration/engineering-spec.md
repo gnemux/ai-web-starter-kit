@@ -56,11 +56,14 @@ AI Coding Agent must use a minimal-implementation-first rule for MVP work. The i
 ## Branch Rules For AI Agents
 
 - Before edits, run a local status check equivalent to `git status --short --branch` and identify the current branch.
+- Treat GitHub tag `v0.2.0` as the MVP2 sealed baseline. MVP3 task branches should start from latest `main` at or after this tag.
+- If local `main` is behind `origin/main` or does not contain `v0.2.0`, fetch/pull latest `main` before creating an MVP3 task branch.
 - If the task requires code or documentation changes and the current branch is `main`, create a new task branch before editing.
 - Branch names should reflect the task: `feat/xxx`, `fix/xxx`, `chore/xxx`, `docs/xxx`, or the agent default `codex/xxx`.
 - If the current branch is not `main`, confirm it matches the current task before editing.
 - If the current branch appears to belong to a different task, warn the user and recommend switching to `main`, pulling latest, and creating a fresh branch.
 - If the current branch was previously merged or used for an older PR, do not reuse it for new work.
+- Do not continue MVP3 implementation from pre-`v0.2.0` PR branches such as release-final Auth/Payment branches; create a fresh branch from current `main`.
 - If the working tree has uncommitted changes, do not switch branches, reset, checkout, or delete files unless the user explicitly approves.
 - Never use destructive Git commands such as `git reset --hard` or `git checkout --` to force the workflow.
 - After completing any workflow step, report both the result and the next best-practice action.
@@ -95,7 +98,7 @@ If the PR is documentation-only, the PR body should say so and avoid implying th
 ## Developer Workflow
 
 1. Claim a Linear task.
-2. Pull latest `main`.
+2. Pull latest `main` and confirm it contains `v0.2.0` or a later reviewed commit.
 3. Create a task branch from `main`.
 4. Develop locally on that branch.
 5. Run local checks and preview.

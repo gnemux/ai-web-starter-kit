@@ -17,7 +17,28 @@
 
 ## Deferred Acceptance
 
-- [ ] Public package entry points exist. Deferred to GNE-241.
+- [x] Public package entry points exist for `@starter/core`, `@starter/ui`,
+  `@starter/platform`, and `@starter/db`. Completed in GNE-241.
+- [x] `@starter/platform` exposes runtime-agnostic Auth/session/owner,
+  email-verification, analytics-event, and outbox contracts without Next.js,
+  Vercel, Hono, Cloudflare, Supabase admin, or service-role types.
+- [x] `@starter/db` exposes schema-version, RLS policy, owner/token scope, and
+  migration/RLS evidence contracts without app routes, provider clients, or
+  runtime request/response types.
+- [x] The GNE-241 package naming strategy is explicit: new entries use the
+  current `@starter/*` transition names, while `@xwlc/*` remains the MVP3 target
+  convention after package consumption is validated.
 - [ ] Reference Product consumes package public exports. Deferred to GNE-242.
 - [ ] Boundary rules are machine checked. Deferred to GNE-243.
 - [ ] Patch upgrade evidence exists. Deferred to GNE-244.
+
+## GNE-241 Verification Snapshot
+
+- `pnpm typecheck` passed and included `@starter/platform` plus `@starter/db`.
+- `pnpm test:release-boundaries` passed.
+- `git diff --check` passed.
+- Runtime/provider boundary search returned no matches in `packages/platform`
+  or `packages/db` for Next.js, Vercel, Hono, Cloudflare runtime objects,
+  Supabase admin/service-role terms, or provider client construction.
+- Product-object boundary search returned no matches in `packages/platform` or
+  `packages/db` for the Reference Product business names listed in this spec.

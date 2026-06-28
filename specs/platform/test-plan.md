@@ -1,12 +1,30 @@
 # Test Plan: MVP3 Platform Package Boundary
 
+## GNE-241 Checks
+
+GNE-241 is a minimal public-entry task. Required checks:
+
+1. Confirm `packages/platform` and `packages/db` exist as workspace packages.
+2. Confirm each package exposes a single public entry from `src/index.ts`.
+3. Confirm `@starter/platform` and `@starter/db` compile without importing
+   Next.js, Vercel, Hono, Cloudflare runtime objects, Supabase admin clients, or
+   service-role helpers.
+4. Confirm product-specific Reference Product object names stay out of
+   `packages/platform` and `packages/db`.
+5. Confirm the package naming strategy remains transitional: `@starter/*`
+   exists in code, while `@xwlc/*` remains the MVP3 target convention.
+6. Run `pnpm install --lockfile-only --ignore-scripts` if the workspace lockfile
+   needs the new importers.
+7. Run `pnpm typecheck`.
+8. Run `git diff --check`.
+
 ## GNE-240 Checks
 
 GNE-240 is a boundary/spec task. Required checks:
 
 1. Confirm the current repo still has only `packages/core` and `packages/ui`.
-2. Confirm the docs state that `packages/platform` and `packages/db` are future
-   GNE-241+ work, not silently created in GNE-240.
+2. Confirm the docs state that `packages/platform` and `packages/db` were not
+   silently created in GNE-240; they are created by GNE-241.
 3. Confirm package responsibilities are clear enough for code review.
 4. Confirm forbidden examples include product object leakage, internal package
    imports, and browser imports of server-only modules.

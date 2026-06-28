@@ -261,11 +261,11 @@ GNE-234 VERIFY
 ```
 
 GNE-240 owns detailed package dependency rules for the GNE-229 parent. Current
-repo packages are still `@starter/core` and `@starter/ui`; `@xwlc/core`,
-`@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db` are the MVP3 target convention.
-GNE-240 does not rename packages or create `packages/platform` / `packages/db`.
-Those changes start in GNE-241+ after the boundary is agreed. GNE-240 is in
-Linear `In Review` with PR #37. The durable rules now live in
+repo packages use the transition names `@starter/core`, `@starter/ui`,
+`@starter/platform`, and `@starter/db`; `@xwlc/core`, `@xwlc/ui`,
+`@xwlc/platform`, and `@xwlc/db` remain the MVP3 target convention. GNE-240 did
+not rename packages or create `packages/platform` / `packages/db`; GNE-241
+creates those minimal public entries as contracts only. The durable rules live in
 `specs/platform/*`: product-specific cat-care objects stay out of platform
 packages, package consumers use public exports rather than internal paths,
 browser code must not import server-only modules, provider SDK / service-role

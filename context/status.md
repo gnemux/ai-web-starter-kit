@@ -218,11 +218,20 @@ Boundaries still not claimed as verified production facts:
 ## In Progress Issues
 
 - `GNE-229` MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
-- `GNE-240` MVP3 PLATFORM-01 [ARCH] Package 边界与依赖方向
+
+## In Review Issues
+
+- `GNE-240` MVP3 PLATFORM-01 Package 边界与依赖方向: PR #37 is open for
+  review. The issue defines the target `@xwlc/core`, `@xwlc/ui`,
+  `@xwlc/platform`, and `@xwlc/db` responsibilities; dependency direction;
+  product-object boundaries; runtime-agnostic package rules; Auth contract vs
+  runtime adapter separation; and the handoff to `GNE-241` through `GNE-244`.
+  It does not rename packages, create `packages/platform` / `packages/db`,
+  change runtime code, add migrations, or deploy.
 
 ## In Progress
 
-MVP2 foundation parents are complete locally and in Linear: Integrations, Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed baseline. `GNE-228` PLAN is Done. MVP3 is now in `GNE-229` PLATFORM, starting with `GNE-240` package boundary and dependency direction. Current repo packages remain `@starter/core` and `@starter/ui`; `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db` are the MVP3 target convention. GNE-240 records the boundary only; package renaming, new public exports, product consumption, boundary checks, and patch evidence belong to later PLATFORM child issues. Production payment remains deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
+MVP2 foundation parents are complete locally and in Linear: Integrations, Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed baseline. `GNE-228` PLAN is Done. MVP3 is now in `GNE-229` PLATFORM, with `GNE-240` package boundary and dependency direction in review through PR #37. Current repo packages remain `@starter/core` and `@starter/ui`; `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db` are the MVP3 target convention. GNE-240 records the boundary only; package renaming, new public exports, product consumption, boundary checks, and patch evidence belong to later PLATFORM child issues. Production payment remains deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
 
 ## Next Steps
 

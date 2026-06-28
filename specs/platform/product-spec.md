@@ -25,6 +25,8 @@ boundary, MVP3 could accidentally:
 - let product code import internal package files instead of public exports;
 - move provider SDK and service-role code into browser-reachable code;
 - call the work "package化" without proving consumer boundaries.
+- bind reusable packages directly to the current Next.js/Vercel runtime, making
+  future Hono/Cloudflare adapters require a rewrite instead of a new adapter.
 
 ## Goals
 
@@ -33,6 +35,10 @@ boundary, MVP3 could accidentally:
 - Record the current transitional state: existing package names are still
   `@starter/core` and `@starter/ui`; `platform` and `db` are not created yet.
 - Make allowed and forbidden dependency directions reviewable.
+- Define the runtime-agnostic boundary so common packages do not expose
+  Next.js, Vercel, Cloudflare, or Hono request/response types.
+- Define the Auth contract boundary so actor/session/auth-result concepts are
+  reusable while current Supabase SSR cookie behavior stays in the app adapter.
 - Give GNE-241, GNE-242, GNE-243, and GNE-244 a shared boundary contract.
 
 ## Non-goals
@@ -55,9 +61,18 @@ as `cat`, `cats`, `care_plan`, `care_plans`, `care_task`,
 Product layer unless a later approved issue explicitly defines a generic,
 provider-free abstraction.
 
+Reusable packages also must not require `NextRequest`, `NextResponse`,
+`next/headers`, Vercel request objects, Hono context, or Cloudflare
+request/response types in public APIs. Runtime-specific request, cookie, header,
+and env handling belongs in app adapters. Shared Auth code should work with
+actor/session/auth-result contracts rather than Supabase User objects or
+runtime cookie stores.
+
 ## Success Criteria
 
 - A reviewer can explain what each target package owns and does not own.
 - A reviewer can identify whether a proposed import path is allowed.
+- A reviewer can identify whether a proposed API is portable across runtime
+  adapters.
 - GNE-241 can add minimal public entries without reopening the boundary debate.
 - GNE-243 can implement machine checks using the forbidden examples in this spec.

@@ -9,6 +9,10 @@
 - [x] Product-specific cat-care objects are explicitly forbidden from reusable
   platform packages.
 - [x] The handoff to GNE-241, GNE-242, GNE-243, and GNE-244 is clear.
+- [x] Runtime-agnostic package rules are documented: common packages do not bind
+  to Next.js, Vercel, Cloudflare, or Hono request/response types.
+- [x] Auth contract vs runtime adapter separation is documented for current
+  Supabase/Vercel and future Hono/Cloudflare paths.
 - [x] `git diff --check` passes.
 
 ## Deferred Acceptance

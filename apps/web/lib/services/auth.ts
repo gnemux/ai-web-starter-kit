@@ -172,14 +172,19 @@ export async function signUpWithPasswordFromFormData(
     email: inputResult.data.email,
     password: inputResult.data.password,
     options: {
-      emailRedirectTo: `${appUrlResult.data}/auth/confirm?next=${encodeURIComponent(
-        inputResult.data.nextPath
-      )}`
+      emailRedirectTo: `${appUrlResult.data}/auth/confirm?next=/login`
     }
   });
 
   if (error || !data.user) {
     return mapAuthError(error);
+  }
+
+  if (isExistingEmailSignup(data.user, data.session)) {
+    return serviceError(
+      "conflict",
+      "This email is already registered."
+    );
   }
 
   const user = mapAuthUser({
@@ -322,9 +327,13 @@ export async function exchangeAuthConfirmationForSession(
     return mapAuthError(authError);
   }
 
-  return serviceOk({
-    redirectTo: normalizeNextPath(input.nextPath)
-  });
+  const redirectTo = normalizeNextPath(input.nextPath);
+
+  if (redirectTo === "/login") {
+    await clientResult.data.auth.signOut();
+  }
+
+  return serviceOk({ redirectTo });
 }
 
 async function verifyAuthTokenHash(
@@ -420,6 +429,17 @@ function mapAuthUser(user: { id: string; email: string }): AuthenticatedUser {
     id: user.id,
     email: user.email
   };
+}
+
+function isExistingEmailSignup(
+  user: { identities?: unknown[] } | null,
+  session: unknown
+) {
+  return (
+    !session &&
+    Array.isArray(user?.identities) &&
+    user.identities.length === 0
+  );
 }
 
 function mapProfile(row: ProfileRow): UserProfile {

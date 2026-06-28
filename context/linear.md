@@ -84,6 +84,11 @@ MVP2 扩展底座
 ├── GNE-148 MVP2 AI-00
 └── GNE-73 MVP1-MVP3 ANALYTICS-00
 
+Release-final bug bucket: `GNE-209` was closed as Done after PR #32 and PR
+#33 were merged. It should not keep the MVP2 milestone visually open. New Auth
+confirmation and duplicate-signup follow-ups after PR #33 are handled in a
+separate PR #34 branch rather than reopening `GNE-209`.
+
 MVP3 Product Validation Kit
 ├── GNE-171 MVP3 PRODUCT-00
 ├── GNE-75 MVP3 GROWTH-00

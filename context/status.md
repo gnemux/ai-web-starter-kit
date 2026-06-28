@@ -217,11 +217,12 @@ Boundaries still not claimed as verified production facts:
 
 ## In Progress Issues
 
-- `GNE-228` MVP3-01 PLAN [DOC/ARCH] 范围、双底座架构与失败标准
+- `GNE-229` MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
+- `GNE-240` MVP3 PLATFORM-01 [ARCH] Package 边界与依赖方向
 
 ## In Progress
 
-MVP2 foundation parents are complete locally and in Linear: Integrations, Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed baseline. MVP3 has started with `GNE-228` PLAN. This parent is a documentation and architecture gate only: it records scope, stage decisions, failure standards, ADR expectations, and small-team execution rules before PLATFORM implementation begins. Production payment remains deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
+MVP2 foundation parents are complete locally and in Linear: Integrations, Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed baseline. `GNE-228` PLAN is Done. MVP3 is now in `GNE-229` PLATFORM, starting with `GNE-240` package boundary and dependency direction. Current repo packages remain `@starter/core` and `@starter/ui`; `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db` are the MVP3 target convention. GNE-240 records the boundary only; package renaming, new public exports, product consumption, boundary checks, and patch evidence belong to later PLATFORM child issues. Production payment remains deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
 
 ## Next Steps
 

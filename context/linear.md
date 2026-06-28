@@ -213,7 +213,7 @@ GNE-228 PLAN
 └── No active child issues; PLAN scope, diagrams, ADR, and WIP rules live in the parent issue and milestone.
 
 GNE-229 PLATFORM
-├── GNE-240 PLATFORM-01 Package 边界与依赖方向
+├── GNE-240 PLATFORM-01 Package 边界与依赖方向 (In Review, PR #37)
 ├── GNE-241 PLATFORM-02 core/ui/platform/db 最小公开入口
 ├── GNE-242 PLATFORM-03 Reference Product 消费 Package
 ├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查
@@ -259,6 +259,25 @@ GNE-234 VERIFY
 ├── GNE-273 VERIFY-06 v0.3.0 结论
 └── GNE-274 VERIFY-07 产品扩展判定
 ```
+
+GNE-240 owns detailed package dependency rules for the GNE-229 parent. Current
+repo packages are still `@starter/core` and `@starter/ui`; `@xwlc/core`,
+`@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db` are the MVP3 target convention.
+GNE-240 does not rename packages or create `packages/platform` / `packages/db`.
+Those changes start in GNE-241+ after the boundary is agreed. GNE-240 is in
+Linear `In Review` with PR #37. The durable rules now live in
+`specs/platform/*`: product-specific cat-care objects stay out of platform
+packages, package consumers use public exports rather than internal paths,
+browser code must not import server-only modules, provider SDK / service-role
+usage stays behind platform/server facades, and common packages must stay
+runtime-agnostic instead of binding directly to Next.js, Vercel, Cloudflare, or
+Hono request/response types.
+
+GNE-240 also records the Auth contract boundary for future portability: common
+packages may define actor/session/auth-result contracts, owner checks, auth
+errors, and RLS expectations; the current Next.js/Vercel Supabase SSR behavior
+belongs in the app adapter; a future Hono/Cloudflare path should add a Worker
+adapter rather than rewriting reusable packages.
 
 The 30-minute Reviewer Runbook lives in `GNE-234 VERIFY`, not as a standalone
 issue. It is the final verification script for page flow, Supabase data/RLS,

@@ -65,6 +65,27 @@ MVP3 uses the 4-package convention:
 - `@xwlc/db`: migrations, RLS conventions, database access contracts, and Schema
   Version.
 
+Current code is in a transition state: the repository still exposes
+`@starter/core` from `packages/core` and `@starter/ui` from `packages/ui`, while
+`packages/platform` and `packages/db` have not been created yet. GNE-240 defines
+the target package boundary and dependency direction only. Package renaming,
+new package entry points, product consumption, boundary scripts, and patch
+upgrade evidence belong to GNE-241 through GNE-244.
+
+The GNE-240 boundary is runtime-agnostic by default. Common packages must not
+directly depend on Next.js, Vercel, Cloudflare, or Hono request/response types.
+Current Next.js/Vercel behavior belongs in the app adapter; a future
+Hono/Cloudflare path should add a Worker adapter that consumes the same package
+contracts. If common code needs headers, cookies, env, or request metadata, it
+should receive them through a minimal interface rather than reading runtime
+globals directly.
+
+Auth follows the same split. Reusable packages may define actor/session/auth
+result contracts, owner-check helpers, auth error types, and RLS expectations.
+The current Supabase SSR integration and cookie/session refresh mechanics remain
+in the Next.js/Vercel app adapter. A future Hono/Cloudflare adapter can map its
+own request/cookie/env objects into the same contracts.
+
 Reference Product cat-care objects such as cats, care plans, care tasks,
 submissions, product prompts, and product events must stay outside the platform
 packages.
@@ -90,9 +111,9 @@ The current MVP3 child-issue rules add three implementation constraints that
 must be preserved during coding:
 
 - package boundaries must be machine-checkable: product business names stay out
-  of platform packages, browser/client code must not import server-only
-  modules, and provider SDK/service-role usage stays behind platform/server
-  facades;
+  of platform packages, package consumers use public exports instead of
+  internal paths, browser/client code must not import server-only modules, and
+  provider SDK/service-role usage stays behind platform/server facades;
 - Reference Product state language must be consistent across code, pages,
   Supabase rows, PostHog events, and reviewer notes. The baseline state model is
   `draft -> ready -> published -> shared -> active -> submitted -> reviewed ->

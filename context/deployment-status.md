@@ -26,8 +26,8 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. AI production smoke is `not_run` until a real provider is configured and deployed. |
-| Next owner action | Before online release, verify Supabase Auth URL configuration, apply any missing reviewed Supabase migrations to the target project, confirm Vercel Production env entries, redeploy after env changes, then run the full Production Smoke Path. |
+| Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. AI production smoke is `not_run` until a real provider is configured and deployed. The current live Production deployment was observed before the region change and still reported Vercel Function region `iad1`; the `sin1` config is not live until merged and redeployed. |
+| Next owner action | Before online release, verify Supabase Auth URL configuration, apply any missing reviewed Supabase migrations to the target project, confirm Vercel Production env entries, merge and redeploy the Vercel Function region config, verify the next deployment reports `regions=["sin1"]`, then run the full Production Smoke Path. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -156,6 +156,7 @@ checklist and budget guard only.
 - Creem may be enabled only for controlled `GNE-100` test-mode verification, with test secrets server-only and `PAYMENT_LIVE_ENABLED=false`.
 - Required repository migrations include the Payment events migration and the Billing entitlement source-idempotency migration. The target Supabase project migration history must be checked before release.
 - Vercel environment variable changes require a new deployment before the changed values can be verified.
+- Vercel Functions should run in `sin1` while the current Supabase project is in `ap-southeast-1`. Verify the next Production deployment reports `regions=["sin1"]` before treating the region alignment as passed.
 
 ## 2026-06-20 19:58 CST - production PostHog event verification
 

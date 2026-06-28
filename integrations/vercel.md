@@ -6,7 +6,9 @@ Vercel is the default deployment target for preview and production Web deploymen
 
 ## Status
 
-Configured for `main`-only automatic deployments.
+Configured for `main`-only automatic deployments. Vercel Functions are pinned
+to `sin1` so server-side runtime calls stay close to the current Supabase
+project region, `ap-southeast-1`.
 
 ## Initial Scope
 
@@ -47,6 +49,19 @@ Public product/environment metadata includes `NEXT_PUBLIC_APP_NAME`, `NEXT_PUBLI
 ## Current MVP2 Production Configuration Checklist
 
 For the current production URL `https://ai-web-starter-kit-web.vercel.app`, Vercel Production should be configured as follows before release verification:
+
+Required Function region:
+
+```json
+{
+  "regions": ["sin1"]
+}
+```
+
+Keep this setting mirrored in `/vercel.json` and `/apps/web/vercel.json` while
+the Vercel Project Root Directory may be either the repository root or
+`apps/web`. The next Production deployment must be checked in Vercel before
+treating the region change as live.
 
 Required public app metadata:
 

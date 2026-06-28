@@ -40,10 +40,71 @@ Use a stable internal interface for each external capability:
 
 Start with one implementation, but keep the app code provider-agnostic where it matters.
 
-## MVP3 Architecture Preflight
+## MVP3 Reference Product Architecture
 
-`GNE-210 / MVP3-CP-00` runs before new Product Validation Kit runtime work. Its
-job is to protect MVP1/MVP2 foundations while preparing the kit for MVP3:
+MVP3 now starts from `GNE-228 / MVP3-01 PLAN` and validates the Reference
+Product route through `GNE-229` to `GNE-234`. It is no longer driven by the old
+Product Validation Kit CP chain; that route has been retired from current
+planning and should not be treated as a fallback MVP3/MVP4-MVP6 path. Its job is
+to prove that an independent product repo can consume the XWLC platform
+foundation through packages without copying Starter Kit source.
+
+The execution order is intentionally linear for 小团队 delivery: PLAN ->
+PLATFORM -> DELIVERY -> PRODUCT -> ACCESS -> CAPABILITY -> VERIFY. Child-task
+lines stay inside the parent issue descriptions until each parent is approved
+for execution. `GNE-234 VERIFY` owns the 30-minute Reviewer Runbook that checks
+page flow, Supabase data/RLS, Vercel deployment/env, PostHog events, GitHub CI,
+package version, schema version, and patch-upgrade evidence.
+
+MVP3 uses the 4-package convention:
+
+- `@xwlc/core`: config, errors, logging, version, and result contracts;
+- `@xwlc/ui`: reusable layout, forms, state display, and UI primitives;
+- `@xwlc/platform`: Auth, AI, Entitlement, Outbox, Audit, PostHog, and delivery
+  entry points;
+- `@xwlc/db`: migrations, RLS conventions, database access contracts, and Schema
+  Version.
+
+Reference Product cat-care objects such as cats, care plans, care tasks,
+submissions, product prompts, and product events must stay outside the platform
+packages.
+
+The Linear MVP3 milestone is the primary visual execution surface for this
+architecture. It now carries Mermaid diagrams for the dual-foundation
+architecture, business loop, data flow, and reviewer verification flow; the
+parent issues carry the detailed page, data, deployment, analytics, and CI
+verification expectations. Keep durable architecture decisions synced here, but
+avoid duplicating every Linear diagram in this file.
+
+The milestone also owns the current code-directory mapping table for MVP3:
+product app code stays in the Reference Product surface, pure provider-free
+contracts stay in `packages/core`, reusable UI primitives stay in `packages/ui`,
+provider facades stay in `packages/platform`, database delivery conventions stay
+in `packages/db`, and behavior/acceptance memory stays in `specs/*` and
+`context/*`. Before a child issue enters implementation, make sure it has enough
+construction detail to limit blast radius: likely files/directories, concrete
+outputs, non-goals, reviewer verification, documentation sync, and not_run/risk
+records.
+
+The current MVP3 child-issue rules add three implementation constraints that
+must be preserved during coding:
+
+- package boundaries must be machine-checkable: product business names stay out
+  of platform packages, browser/client code must not import server-only
+  modules, and provider SDK/service-role usage stays behind platform/server
+  facades;
+- Reference Product state language must be consistent across code, pages,
+  Supabase rows, PostHog events, and reviewer notes. The baseline state model is
+  `draft -> ready -> published -> shared -> active -> submitted -> reviewed ->
+  closed`; if the implementation uses fewer states, it must document the mapping
+  instead of inventing parallel names;
+- cross-system capability work must be idempotent and degradable by default:
+  Outbox, AI draft, Billing/Credit, audit, and analytics failures should be
+  handled with explicit retry, no duplicate business effects, and no leakage of
+  raw tokens, prompts, or private content.
+
+MVP3 still preserves the architecture-hardening intent from the old preflight
+scope:
 
 - split large Payment/Billing review surfaces only when it improves
   reviewability or reduces security risk;
@@ -56,7 +117,7 @@ job is to protect MVP1/MVP2 foundations while preparing the kit for MVP3:
 - review runtime security headers such as CSP, `frame-ancestors`,
   Referrer-Policy, and X-Content-Type-Options before public validation pages
   are exposed;
-- add basic abuse-prevention checks for public write paths such as anonymous
-  lead submission and Product Kit API endpoints;
+- add basic abuse-prevention checks for public write paths such as private-link
+  anonymous submissions and Reference Product API endpoints;
 - preserve existing MVP1/MVP2 business behavior unless a spec or Linear issue
   explicitly changes the contract.

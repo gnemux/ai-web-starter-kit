@@ -218,7 +218,7 @@ GNE-229 PLATFORM
 ├── GNE-241 PLATFORM-02 core/ui/platform/db 最小公开入口 (Done, PR #38)
 ├── GNE-242 PLATFORM-03 apps/web 与 Reference Product 消费 Package (Done, PR #40)
 ├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查 (Done, PR #41)
-└── GNE-244 PLATFORM-05 Package patch 升级演练 (In Review: package patch rehearsal)
+└── GNE-244 PLATFORM-05 Package patch 升级演练 (Done, PR #42)
 
 GNE-230 DELIVERY
 ├── GNE-245 DELIVERY-01 单仓 CI 覆盖与 package 交付门禁
@@ -247,7 +247,9 @@ minimum entry consuming package public exports. No DB migration, CF/Hono
 adapter, product business object, or deployment setup was added. Local
 verification passed with `pnpm test:package-boundaries`, `pnpm typecheck`,
 `pnpm test`, `pnpm lint`, `pnpm build`, `HEAD /reference-product` returning
-`200 OK`, and `git diff --check`. `GNE-244` is now `In Review` in Linear.
+`200 OK`, and `git diff --check`. PR #42 was merged, Vercel Production
+deployment completed successfully, the reviewer confirmed the page opened, and
+`GNE-244` plus parent `GNE-229` are Done in Linear.
 
 GNE-231 PRODUCT
 ├── GNE-251 PRODUCT-01 猫咪档案、照护计划、任务、提交数据模型

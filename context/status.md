@@ -153,6 +153,17 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   added. Local verification passed with `pnpm test:package-boundaries`,
   `pnpm typecheck`, `pnpm test`, `pnpm lint`, `pnpm build`,
   `HEAD /reference-product` returning `200 OK`, and `git diff --check`.
+- Completed GNE-244 after PR #42 was merged. Main CI passed, Vercel Production
+  deployment reported `success`, the deployment URL redirected to Vercel SSO as
+  expected for the protected deployment, and the reviewer confirmed the page
+  opened. `GNE-229` PLATFORM is Done in Linear because `GNE-240` through
+  `GNE-244` are all complete.
+- Advanced GNE-230 DELIVERY with scope limited to package化后的新增交付风险.
+  GNE-245 through GNE-248 are Done in Linear and documented as checklist gates:
+  CI/package boundary coverage, Reference Product env delta, migration-rule
+  continuity, and minimum app/package/db version facts. GNE-250 deployed smoke
+  remains Backlog and `not_run / blocked by later MVP3 parents` until PRODUCT /
+  ACCESS / CAPABILITY create the minimum deployed business path.
 - Prepared the current tree for public-repo review by adding an MIT License,
   expanding ignore rules for local secrets/build artifacts/logs, documenting
   the README license and brand-asset boundary, and replacing current-doc real
@@ -266,11 +277,16 @@ Boundaries still not claimed as verified production facts:
 - `GNE-241` MVP3 PLATFORM-02 core/ui/platform/db 最小公开入口
 - `GNE-242` MVP3 PLATFORM-03 apps/web 与 Reference Product 消费 Package
 - `GNE-243` MVP3 PLATFORM-04 package build/typecheck/boundary 检查
+- `GNE-244` MVP3 PLATFORM-05 Package patch 升级演练
+- `GNE-229` MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
+- `GNE-245` MVP3 DELIVERY-01 单仓 CI 覆盖与 package 交付门禁
+- `GNE-246` MVP3 DELIVERY-02 Reference Product 环境差异确认
+- `GNE-247` MVP3 DELIVERY-03 Reference Product migration 规范延续
+- `GNE-248` MVP3 DELIVERY-04 app/package/db 最小版本定位
 
 ## In Progress Issues
 
-- `GNE-229` MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
-- `GNE-244` MVP3 PLATFORM-05 [VERIFY] Package patch 升级演练
+- `GNE-230` MVP3-03 DELIVERY [DEPLOY] Package 化后的交付门禁与部署回归
 
 ## In Review Issues
 
@@ -280,20 +296,25 @@ None.
 
 MVP2 foundation parents are complete locally and in Linear: Integrations,
 Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed
-baseline. `GNE-228` PLAN is Done. MVP3 is now in `GNE-229` PLATFORM. `GNE-240`
+baseline. `GNE-228` PLAN is Done. `GNE-229` PLATFORM is Done. `GNE-240`
 is Done after PR #37 and records the accepted package boundary. `GNE-241` is
 Done after PR #38 and adds minimal public entries for `@xwlc/platform` and
 `@xwlc/db`. `GNE-242` is Done after PR #40 and proves package consumption from
 existing `apps/web` chains and the Reference Product minimum entry while using
 the MVP3 target `@xwlc/*` namespace. `GNE-243` is Done and turned the
 package/import/runtime/privacy boundary into a machine-checkable CI gate.
-`GNE-244` is the active package patch rehearsal. Production payment remains
-deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until
-provider configuration and redeploy.
+`GNE-244` is Done after the package patch rehearsal, PR #42 merge, main CI, and
+Vercel Production deployment observation. `GNE-229` PLATFORM is Done; the next
+MVP3 parent is `GNE-230` DELIVERY. GNE-230 is active and should not repeat
+MVP1/MVP2 deployment setup; GNE-245 through GNE-248 are Done for the
+package-consumption CI/env/migration/version gates, while deployed smoke stays
+deferred to GNE-250 after PRODUCT / ACCESS / CAPABILITY. Production payment
+remains deferred to `GNE-201`. Real-provider AI production smoke remains
+`not_run` until provider configuration and redeploy.
 
 ## Next Steps
 
-1. Keep `v0.2.0` as the MVP2 baseline. For MVP3 implementation, pull latest `main` from GitHub and create a fresh task branch; do not reuse the pre-tag Auth/payment branches.
+1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, continue on the current branch unless the Repo Owner explicitly asks for a new branch; do not reuse pre-tag Auth/payment branches.
 2. Before changing GitHub repository visibility to Public, merge the current
    open-source preparation branch through the normal PR path. Historical
    Supabase staging identifiers, Creem test object IDs, and operator-email
@@ -303,7 +324,7 @@ provider configuration and redeploy.
 4. Before any future online release or production gate, apply repository Supabase migrations through the reviewed workflow; do not rely on dashboard-only schema edits.
 5. Configure Supabase Auth URL settings for the deployed validation domain that is actually used; production Auth URL settings become a separate gate only when a true production Supabase project exists.
 6. Configure Vercel env entries from `.env.example` and `context/environment-matrix.md`, keeping server-only Supabase, Payment, AI, Email, Storage, and SMS secrets out of `NEXT_PUBLIC_`; redeploy after any env change before using the deployment as evidence.
-7. Start MVP3 from `GNE-228 MVP3-01 PLAN`, then follow `GNE-229` through `GNE-234`. The route validates a Reference Product consuming platform packages; it does not continue the old Product Validation Kit CP chain.
+7. Continue MVP3 from `GNE-230 DELIVERY`; `GNE-228 PLAN` and `GNE-229 PLATFORM` are Done. The route validates a Reference Product consuming platform packages; it does not continue the old Product Validation Kit CP chain.
 8. Keep MVP3 on the 小团队 WIP rule: one parent issue carries the main implementation at a time; child issues stay under their parent issue and should not be assigned to the MVP3 milestone view or given Linear labels. Use the milestone diagrams and parent issue sections as the starting point for newcomer onboarding and reviewer acceptance.
 9. During `GNE-228`, keep the confirmed PLAN decisions visible: Linear + repo evidence sync, short task branches from `main`, single monorepo with package boundaries, current Supabase as reference/staging/test only, Supabase + Vercel mainline, Cloudflare/Hono adapter-readiness only, and AI/Billing mock/no-op/sandbox/test only.
 10. Treat the PLAN gate as failed if product-specific cat-care objects enter platform packages, if work starts from old pre-`v0.2.0` branches, if child issues are executed out of sequence without an explicit decision, if production Supabase/live payment/real AI become MVP3 blockers, if private tokens/private content appear in evidence, or if the final Reviewer path cannot connect page/data/RLS/deploy/analytics/CI/version evidence.

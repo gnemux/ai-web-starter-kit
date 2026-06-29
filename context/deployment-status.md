@@ -21,12 +21,12 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 | --- | --- |
 | Latest production status | partial smoke pass for PostHog production event reception and required shared properties; full Production Smoke Path not recorded |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | unknown |
+| Latest production commit | `2bd2572` for the latest recorded Vercel deployment; canonical Production URL still protected/owner-verified only |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. AI production smoke is `not_run` until a real provider is configured and deployed. The current live Production deployment was observed before the region change and still reported Vercel Function region `iad1`; the `sin1` config is not live until merged and redeployed. |
+| Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. AI production smoke is `not_run` until a real provider is configured and deployed. GNE-250 deployed Reference Product smoke is `not_run` until PRODUCT / ACCESS / CAPABILITY create the minimum deployed business path. |
 | Next owner action | Before online release, verify Supabase Auth URL configuration, apply any missing reviewed Supabase migrations to the target project, confirm Vercel Production env entries, merge and redeploy the Vercel Function region config, verify the next deployment reports `regions=["sin1"]`, then run the full Production Smoke Path. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
@@ -135,7 +135,10 @@ Record configured/missing/unknown only. Do not record values.
 
 ## Latest Production Deployment
 
-No Production deployment result has been recorded in this file yet.
+Latest recorded Vercel Production deployment: 2026-06-29 15:21 CST, commit
+`2bd2572`, deployment status `success`. Direct smoke against the generated
+Vercel deployment URL redirected to Vercel SSO, so this is deployment/build
+evidence, not a full public Production Smoke Path pass.
 
 ## Latest Preview Deployment
 
@@ -146,6 +149,10 @@ No Preview deployment result has been recorded in this file yet.
 No full Production Smoke Path has been recorded in this file yet. AI production
 smoke is also not recorded as passed; GNE-160 defines the repository-level
 checklist and budget guard only.
+
+GNE-250 deployed Reference Product smoke is `not_run / blocked by later MVP3
+parents` until PRODUCT, ACCESS, and CAPABILITY provide the minimum business path
+and RLS/provider evidence.
 
 ## Current Release Configuration Notes
 

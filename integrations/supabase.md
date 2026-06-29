@@ -110,7 +110,7 @@ The local CLI can be linked to a shared remote Supabase project only after the t
 
 ```bash
 supabase login
-supabase link --project-ref nglilxhkuqzswbwitbdu
+supabase link --project-ref <staging-project-ref>
 ```
 
 Rules:
@@ -124,8 +124,8 @@ Rules:
 
 Current staging:
 
-- Project ref: `nglilxhkuqzswbwitbdu`
-- API URL: `https://nglilxhkuqzswbwitbdu.supabase.co`
+- Project ref: `<staging-project-ref>`
+- API URL: `<staging-supabase-api-url>`
 - Originally documented applied migrations:
   - `20260618070613_create_data_template`
   - `20260618070813_harden_data_template`
@@ -159,7 +159,7 @@ Required GitHub configuration:
 
 - GitHub Environment: `staging`
 - Secret `SUPABASE_ACCESS_TOKEN`: Supabase personal access token with access to the staging project.
-- Secret `STAGING_PROJECT_ID`: staging Supabase project ref, currently `nglilxhkuqzswbwitbdu`.
+- Secret `STAGING_PROJECT_ID`: staging Supabase project ref, currently `<staging-project-ref>`.
 - Secret `STAGING_DB_PASSWORD`: staging database password.
 - Optional repository or environment variable `SUPABASE_CLI_VERSION`: pin the Supabase CLI version. If omitted, the workflow uses `latest`.
 

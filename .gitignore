@@ -1,6 +1,8 @@
 node_modules/
+.pnpm-store/
 .next/
 out/
+build/
 dist/
 coverage/
 .turbo/
@@ -8,6 +10,11 @@ coverage/
 .env
 .env.*
 !.env.example
+logs/
 *.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 *.tsbuildinfo
 .DS_Store

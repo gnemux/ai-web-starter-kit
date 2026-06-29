@@ -158,6 +158,12 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   expected for the protected deployment, and the reviewer confirmed the page
   opened. `GNE-229` PLATFORM is Done in Linear because `GNE-240` through
   `GNE-244` are all complete.
+- Advanced GNE-230 DELIVERY with scope limited to package化后的新增交付风险.
+  GNE-245 through GNE-248 are Done in Linear and documented as checklist gates:
+  CI/package boundary coverage, Reference Product env delta, migration-rule
+  continuity, and minimum app/package/db version facts. GNE-250 deployed smoke
+  remains Backlog and `not_run / blocked by later MVP3 parents` until PRODUCT /
+  ACCESS / CAPABILITY create the minimum deployed business path.
 - Prepared the current tree for public-repo review by adding an MIT License,
   expanding ignore rules for local secrets/build artifacts/logs, documenting
   the README license and brand-asset boundary, and replacing current-doc real
@@ -273,10 +279,14 @@ Boundaries still not claimed as verified production facts:
 - `GNE-243` MVP3 PLATFORM-04 package build/typecheck/boundary 检查
 - `GNE-244` MVP3 PLATFORM-05 Package patch 升级演练
 - `GNE-229` MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
+- `GNE-245` MVP3 DELIVERY-01 单仓 CI 覆盖与 package 交付门禁
+- `GNE-246` MVP3 DELIVERY-02 Reference Product 环境差异确认
+- `GNE-247` MVP3 DELIVERY-03 Reference Product migration 规范延续
+- `GNE-248` MVP3 DELIVERY-04 app/package/db 最小版本定位
 
 ## In Progress Issues
 
-None.
+- `GNE-230` MVP3-03 DELIVERY [DEPLOY] Package 化后的交付门禁与部署回归
 
 ## In Review Issues
 
@@ -295,13 +305,16 @@ the MVP3 target `@xwlc/*` namespace. `GNE-243` is Done and turned the
 package/import/runtime/privacy boundary into a machine-checkable CI gate.
 `GNE-244` is Done after the package patch rehearsal, PR #42 merge, main CI, and
 Vercel Production deployment observation. `GNE-229` PLATFORM is Done; the next
-MVP3 parent is `GNE-230` DELIVERY. Production payment remains deferred to
-`GNE-201`. Real-provider AI production smoke remains `not_run` until provider
-configuration and redeploy.
+MVP3 parent is `GNE-230` DELIVERY. GNE-230 is active and should not repeat
+MVP1/MVP2 deployment setup; GNE-245 through GNE-248 are Done for the
+package-consumption CI/env/migration/version gates, while deployed smoke stays
+deferred to GNE-250 after PRODUCT / ACCESS / CAPABILITY. Production payment
+remains deferred to `GNE-201`. Real-provider AI production smoke remains
+`not_run` until provider configuration and redeploy.
 
 ## Next Steps
 
-1. Keep `v0.2.0` as the MVP2 baseline. For MVP3 implementation, pull latest `main` from GitHub and create a fresh task branch; do not reuse the pre-tag Auth/payment branches.
+1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, continue on the current branch unless the Repo Owner explicitly asks for a new branch; do not reuse pre-tag Auth/payment branches.
 2. Before changing GitHub repository visibility to Public, merge the current
    open-source preparation branch through the normal PR path. Historical
    Supabase staging identifiers, Creem test object IDs, and operator-email

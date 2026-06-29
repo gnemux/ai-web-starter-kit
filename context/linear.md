@@ -221,14 +221,29 @@ GNE-229 PLATFORM
 └── GNE-244 PLATFORM-05 Package patch 升级演练 (Done, PR #42)
 
 GNE-230 DELIVERY
-├── GNE-245 DELIVERY-01 单仓 CI 覆盖与 package 交付门禁
-├── GNE-246 DELIVERY-02 Reference Product 环境差异确认
-├── GNE-247 DELIVERY-03 Reference Product migration 规范延续
-├── GNE-248 DELIVERY-04 app/package/db 最小版本定位
-└── GNE-250 DELIVERY-06 部署环境 smoke 复现
+├── GNE-245 DELIVERY-01 单仓 CI 覆盖与 package 交付门禁 (Done)
+├── GNE-246 DELIVERY-02 Reference Product 环境差异确认 (Done)
+├── GNE-247 DELIVERY-03 Reference Product migration 规范延续 (Done)
+├── GNE-248 DELIVERY-04 app/package/db 最小版本定位 (Done)
+└── GNE-250 DELIVERY-06 部署环境 smoke 复现 (Backlog; deferred until PRODUCT / ACCESS / CAPABILITY)
 
 GNE-249 DELIVERY-05 已取消独立执行并并入 GNE-230：交付失败处理原则
 属于父任务门禁，不再作为单独子任务推进。
+
+GNE-230 implementation note: DELIVERY is active and is being kept to the new
+package-consumption delivery risks only. GNE-245 through GNE-248 are Done and
+covered by `specs/deploy/acceptance.md`, `specs/deploy/test-plan.md`,
+`context/environment-matrix.md`, and `context/deployment-status.md`: the repo
+stays single-monorepo, CI runs install/lint/typecheck/test/build on PRs and
+`main`, root `pnpm test` includes package-boundary checks, Reference Product
+introduces no new environment variables for the current package-consumption
+entry, no Reference Product migration is needed yet, and the GNE-244 rehearsal
+provides minimum app/package/db version facts through PR #42, merge commit
+`2bd2572`, `@xwlc/*` `0.1.1`, no DB migration, CI/build evidence, Vercel
+Production deployment success, and local `/reference-product` smoke `200 OK`.
+GNE-250 remains intentionally `not_run / blocked by later MVP3 parents` until
+PRODUCT, ACCESS, and CAPABILITY create a deployable business path with data/RLS
+and provider evidence.
 
 GNE-243 implementation note: package/import/runtime/privacy boundary checks now
 run through `scripts/verify-package-boundaries.mjs`, exposed as

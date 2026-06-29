@@ -206,6 +206,23 @@ Current cloud Supabase should be described as `reference / staging / test`.
 Create a separate Production Supabase project only before real users, live
 payment, real AI cost, or formal production data are introduced.
 
+## MVP3 Reference Product Environment Delta
+
+GNE-230 DELIVERY confirms that the current Reference Product package-consumption
+entry does not require new environment variables. Existing environment rules are
+still sufficient for the current MVP3 DELIVERY scope:
+
+- `apps/web` consumes `@xwlc/*` packages inside the existing monorepo and Vercel
+  project.
+- Current cloud Supabase remains reference/staging/test; true Production
+  Supabase is `not_run / not enabled in MVP3`.
+- Vercel Production and Preview entries remain separate even when they
+  temporarily point at the same reference/staging providers.
+- Payment stays sandbox/test-mode only; live payment remains outside MVP3.
+- AI stays mock/no-op unless a later CAPABILITY issue explicitly configures a
+  reviewed provider mode.
+- No new public or server-only env key is needed for GNE-245 through GNE-248.
+
 Supabase public browser keys:
 
 - Prefer `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for newer projects when it has a real value.

@@ -4,8 +4,10 @@
 
 ```text
 apps/web      -> Next.js application
-packages/ui  -> reusable UI components
 packages/core -> shared domain models and pure logic
+packages/ui  -> reusable UI components
+packages/platform -> runtime-agnostic platform contracts and ports
+packages/db  -> database boundary, RLS, and schema-version contracts
 ```
 
 ## Layering
@@ -65,12 +67,14 @@ MVP3 uses the 4-package convention:
 - `@xwlc/db`: migrations, RLS conventions, database access contracts, and Schema
   Version.
 
-Current code is in a transition state: the repository still exposes
-`@starter/core` from `packages/core` and `@starter/ui` from `packages/ui`, while
-`packages/platform` and `packages/db` have not been created yet. GNE-240 defines
-the target package boundary and dependency direction only. Package renaming,
-new package entry points, product consumption, boundary scripts, and patch
-upgrade evidence belong to GNE-241 through GNE-244.
+Current code is in a transition state: the repository exposes
+`@starter/core`, `@starter/ui`, `@starter/platform`, and `@starter/db` as the
+current workspace package names, while `@xwlc/core`, `@xwlc/ui`,
+`@xwlc/platform`, and `@xwlc/db` remain the MVP3 target convention. GNE-240
+defined the target package boundary and dependency direction only. GNE-241 adds
+the minimal public entries for `platform` and `db` under the current transition
+names. Product consumption, boundary scripts, package rename/alias decisions,
+and patch upgrade evidence belong to GNE-242 through GNE-244.
 
 The GNE-240 boundary is runtime-agnostic by default. Common packages must not
 directly depend on Next.js, Vercel, Cloudflare, or Hono request/response types.
@@ -85,6 +89,12 @@ result contracts, owner-check helpers, auth error types, and RLS expectations.
 The current Supabase SSR integration and cookie/session refresh mechanics remain
 in the Next.js/Vercel app adapter. A future Hono/Cloudflare adapter can map its
 own request/cookie/env objects into the same contracts.
+
+In GNE-241, `packages/platform` and `packages/db` are contract packages, not
+runtime adapters. They do not import Supabase admin clients, Next.js request
+objects, Vercel helpers, Hono context, or Cloudflare Worker objects. That keeps
+the current Supabase + Vercel path stable while preserving a future
+Cloudflare/Hono adapter path.
 
 Reference Product cat-care objects such as cats, care plans, care tasks,
 submissions, product prompts, and product events must stay outside the platform

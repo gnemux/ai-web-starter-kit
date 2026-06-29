@@ -70,6 +70,18 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
+  packages/db:
+    devDependencies:
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+
+  packages/platform:
+    devDependencies:
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+
   packages/ui:
     dependencies:
       react:

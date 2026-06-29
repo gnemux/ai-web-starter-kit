@@ -14,11 +14,31 @@ Current repository packages:
 | -- | -- | -- |
 | `@starter/core` | `packages/core` | transitional name for future `@xwlc/core` |
 | `@starter/ui` | `packages/ui` | transitional name for future `@xwlc/ui` |
-| not present | `packages/platform` | future `@xwlc/platform` |
-| not present | `packages/db` | future `@xwlc/db` |
+| `@starter/platform` | `packages/platform` | transitional name for future `@xwlc/platform` |
+| `@starter/db` | `packages/db` | transitional name for future `@xwlc/db` |
 
-GNE-240 does not rename `@starter/*` to `@xwlc/*`. The rename or alias strategy
-belongs to GNE-241/GNE-242 after the public entry points are agreed.
+GNE-241 creates the new package public entry points under the current
+`@starter/*` transition naming. It does not rename existing packages to
+`@xwlc/*`, does not migrate the app to consume the new packages, and does not
+add runtime/provider adapters. The target `@xwlc/*` convention remains the MVP3
+package direction after the public contracts and product consumption path are
+validated.
+
+## GNE-241 Public Entries
+
+GNE-241 keeps the public entries intentionally small:
+
+| Package | Public entry | Owns in GNE-241 |
+| -- | -- | -- |
+| `@starter/core` | `packages/core/src/index.ts` | existing provider-free service contracts, auth inputs, billing, payment, AI, provider descriptors |
+| `@starter/ui` | `packages/ui/src/index.tsx` | existing reusable UI primitives |
+| `@starter/platform` | `packages/platform/src/index.ts` | runtime-agnostic actor/session/auth-result contracts, owner/email checks, email verification port, analytics event port, outbox port |
+| `@starter/db` | `packages/db/src/index.ts` | schema version contracts, RLS policy names, owner/token scope helpers, migration/RLS evidence shapes |
+
+The new packages expose contracts and pure helpers only. Supabase SSR clients,
+service-role access, webhook verification, PostHog SDK calls, provider SDKs,
+Next.js routes, Vercel deployment behavior, and future Hono/Cloudflare Worker
+objects remain adapter concerns outside these public entries.
 
 ## Target Package Responsibilities
 
@@ -155,7 +175,11 @@ GNE-243 should convert this list into a machine-checkable boundary rule.
 ## Handoff To Later Child Issues
 
 - GNE-241 creates or adjusts minimal public package entry points.
-- GNE-242 proves the Reference Product consumes public package entry points.
+- GNE-242 proves public package consumption from existing `apps/web` and the
+  Reference Product. It must audit Payment/Billing, AI Credit usage, webhooks,
+  and Supabase SSR cookie/session adapter as `uses_public_contract`,
+  `adapter_only_ok`, or `gap_deferred` instead of treating high-risk chains as
+  out of sight.
 - GNE-243 adds build/typecheck/boundary checks.
 - GNE-244 records patch-upgrade evidence.
 

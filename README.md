@@ -82,3 +82,12 @@ http://localhost:3000
 ```
 
 如果 `3000` 端口已被占用，Next.js 会自动选择下一个可用端口。
+
+## License
+
+This repository's source code is released under the MIT License. See
+`LICENSE` for details.
+
+The project name, XWLC brand identity, logo, brand assets, product imagery, and
+other trademark-like materials are not included in the MIT License grant unless
+explicitly stated otherwise.

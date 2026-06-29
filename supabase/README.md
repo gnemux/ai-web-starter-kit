@@ -65,7 +65,7 @@ supabase db reset
 
 ```bash
 supabase login
-supabase link --project-ref nglilxhkuqzswbwitbdu
+supabase link --project-ref <staging-project-ref>
 ```
 
 规则：
@@ -79,7 +79,7 @@ supabase link --project-ref nglilxhkuqzswbwitbdu
 
 当前 staging:
 
-- Project ref: `nglilxhkuqzswbwitbdu`
-- API URL: `https://nglilxhkuqzswbwitbdu.supabase.co`
+- Project ref: `<staging-project-ref>`
+- API URL: `<staging-supabase-api-url>`
 - 已应用 migrations：`create_data_template`、`harden_data_template`、`revoke_public_rls_auto_enable`
 - 安全 advisors 已清零；性能 advisors 只剩新表索引尚未被业务查询使用的 INFO 级提示。

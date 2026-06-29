@@ -44,7 +44,7 @@
 - 2026-06-20: Reproduced the protected-page logout race from `/account`, then changed the sign-out server action to redirect to `/` immediately after a successful Supabase sign out so `/dashboard` and `/account` cannot redirect first to `/login?next=...`.
 - 2026-06-20: Reproduced the landing login regression where public routes stalled after logout-related Auth changes. Fixed proxy behavior so only protected routes call Supabase `getClaims()`, added bounded public-shell account lookup, restarted the local dev server, and browser verified the landing header Login link navigates to `/login` with no console errors.
 - If Supabase Auth email confirmation is enabled, verify that sign up reports a confirmation-pending state instead of assuming an immediate session.
-- When PostHog env is configured, confirm safe Auth events in PostHog using the test email `1851884@qq.com`.
+- When PostHog env is configured, confirm safe Auth events in PostHog using the test email `<test-operator-email>`.
 - Confirm Auth events use `signup_started`, `user_signed_up`, `login_started`, `user_logged_in`, `auth_login_failed`, `user_logged_out`, and `user_profile_updated`.
 - Confirm each Auth event includes `app`, `mvp_stage`, `market`, `env`, `version`, and `module=auth`.
 - Confirm no event contains passwords, OTPs, magic links, OAuth codes, Supabase tokens, session cookies, or raw provider payloads.

@@ -113,7 +113,7 @@ NEXT_PUBLIC_JIGUANG_APP_KEY=
 - Vercel Production and Preview entries must be configured separately. Redeploy after changing analytics env keys before using that deployment as production or preview evidence.
 - M4 Auth uses Supabase Auth as the source of truth and PostHog only for product analytics.
 - Every event should carry the shared MVP factory properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
-- For local M4 testing, the current operator account can be identified with the GitHub-bound email `1851884@qq.com` after successful login.
+- For local M4 testing, the current operator account can be identified with the GitHub-bound email `<test-operator-email>` after successful login.
 - Never send passwords, OTPs, session cookies, Supabase tokens, service role keys, or raw provider payloads to PostHog.
 - Never send prompt text, generated text, provider secrets, payment card data, webhook raw payloads, or personal secrets to PostHog.
 - Map auth failures into safe categories such as `validation_error`, `provider_error`, and `rate_limited`.

@@ -32,9 +32,9 @@ MVP2 不做以下事情:
 
 | 内部价格 ID | 当前含义 | 类型 | 金额 | 币种 | 周期 | Creem 对应对象 | 验证状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `plus_monthly` | Plus 月订阅 | recurring | 9.00 | USD | month | Product ID: `prod_7YlXijrX6eeQjeoQyyhByr` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
-| `pro_monthly` | Pro 月订阅 | recurring | 19.00 | USD | month | Product ID: `prod_3TvLvuLXmwQseX16nFNyQE` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
-| `ai_credit_pack_100k` | AI 额度包 100k credits | one_time | 9.00 | USD | none | Product ID: `prod_4IRFjMpu3pxY5eK75y8BP7` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
+| `plus_monthly` | Plus 月订阅 | recurring | 9.00 | USD | month | Product ID: `<creem-test-plus-monthly-product-id>` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
+| `pro_monthly` | Pro 月订阅 | recurring | 19.00 | USD | month | Product ID: `<creem-test-pro-monthly-product-id>` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
+| `ai_credit_pack_100k` | AI 额度包 100k credits | one_time | 9.00 | USD | none | Product ID: `<creem-test-ai-credit-pack-product-id>` | 产品已创建，test checkout 支付已在 Creem dashboard 出现 |
 
 ## Creem 产品创建记录
 
@@ -42,7 +42,7 @@ MVP2 不做以下事情:
 
 - 产品名称: AI Web Starter Kit Pro
 - 产品描述: 一个面向 AI Web 应用的 SaaS 模板工程，包含登录、数据模型、订阅权益、支付流程、AI 额度和数据分析等基础能力，帮助团队更快验证产品想法并上线 MVP。
-- Creem Product ID: `prod_3TvLvuLXmwQseX16nFNyQE`
+- Creem Product ID: `<creem-test-pro-monthly-product-id>`
 - 产品图片: 已使用 16:9 产品展示图 `integrations/assets/xwlc-product-banner-1600x900.png`
 - 税收类别: 数字商品或服务
 - 价格包含税费: no
@@ -59,7 +59,7 @@ MVP2 不做以下事情:
 
 - 产品名称: AI Web Starter Kit Plus
 - 产品描述: AI Web Starter Kit 的 Plus 套餐，用于验证较低层级订阅权益、订单、订阅和 webhook 映射。
-- Creem Product ID: `prod_7YlXijrX6eeQjeoQyyhByr`
+- Creem Product ID: `<creem-test-plus-monthly-product-id>`
 - 价格: 9.00 USD / month
 - 是否支持测试 checkout: yes
 - 备注: 仅 test mode 验证，不代表生产收款可用。
@@ -68,7 +68,7 @@ MVP2 不做以下事情:
 
 - 产品名称: AI Credit Pack 100K
 - 产品描述: 一次性购买的 AI Credit Pack，用于验证非订阅型额度包支付、权益授予和 credit ledger 增量。
-- Creem Product ID: `prod_4IRFjMpu3pxY5eK75y8BP7`
+- Creem Product ID: `<creem-test-ai-credit-pack-product-id>`
 - 价格: 9.00 USD one-time
 - 是否支持一次性价格: yes
 - 是否支持测试 checkout: yes
@@ -95,7 +95,7 @@ Method: POST
 Test endpoint: https://test-api.creem.io/v1/checkouts
 Production endpoint: https://api.creem.io/v1/checkouts
 Request body observed:
-  product_id: prod_3TvLvuLXmwQseX16nFNyQE
+  product_id: <creem-test-pro-monthly-product-id>
   success_url: supported by official docs
 Auth header:
   x-api-key: server-only secret
@@ -202,9 +202,9 @@ PAYMENT_LIVE_ENABLED=false
 PAYMENT_PROVIDER_SECRET=
 PAYMENT_WEBHOOK_SECRET=
 CREEM_WEBHOOK_ENDPOINT=
-CREEM_PLUS_MONTHLY_PRODUCT_ID=prod_7YlXijrX6eeQjeoQyyhByr
-CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE
-CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=prod_4IRFjMpu3pxY5eK75y8BP7
+CREEM_PLUS_MONTHLY_PRODUCT_ID=<creem-test-plus-monthly-product-id>
+CREEM_PRO_MONTHLY_PRODUCT_ID=<creem-test-pro-monthly-product-id>
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=<creem-test-ai-credit-pack-product-id>
 ```
 
 安全边界:
@@ -271,7 +271,7 @@ KYC / account review observation on 2026-06-22:
 
 | Provider | Account | Product allowed | Test mode | Webhook | Env needed | Payout | Risks | Decision |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Creem | Test dashboard 可访问，test mode 可开启，Developers / API keys / Webhooks 可访问；production KYC/account review 因缺少真实垂直产品暂停 | 已创建 Plus / Pro subscription 和 AI credit pack test products；Pro Product ID: `prod_3TvLvuLXmwQseX16nFNyQE` | 已确认 test mode 与 production mode 隔离；官方 test checkout endpoint 为 `https://test-api.creem.io/v1/checkouts`；`GNE-100` 已验证 test checkout、test payment 和跳转链路 | 已创建 Webhook；支持 13 个事件；签名 header 为 `creem-signature`；`GNE-100` 已验证 public Vercel HTTPS endpoint 收到 `checkout.completed` 并返回 200 | `PAYMENT_PROVIDER=creem`、`PAYMENT_MODE=test`、`PAYMENT_LIVE_ENABLED=false`；`PAYMENT_PROVIDER_SECRET` / `CREEM_API_KEY` server-only；`PAYMENT_WEBHOOK_SECRET` server-only；`CREEM_PLUS_MONTHLY_PRODUCT_ID`、`CREEM_PRO_MONTHLY_PRODUCT_ID`、`CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID` | 未作为 MVP2 通过项；production KYC 前置于 payout/settlement，后置到 `GNE-201` | production KYC 要求明确真实产品、prohibited products 确认、account review checklist 确认；被拒后 3 个月不能再次 review；不能使用 production key/live payment | `Go test mode` 已完成；`GNE-100` test-mode-only spike Done；生产支付进入 `GNE-201` |
+| Creem | Test dashboard 可访问，test mode 可开启，Developers / API keys / Webhooks 可访问；production KYC/account review 因缺少真实垂直产品暂停 | 已创建 Plus / Pro subscription 和 AI credit pack test products；Pro Product ID: `<creem-test-pro-monthly-product-id>` | 已确认 test mode 与 production mode 隔离；官方 test checkout endpoint 为 `https://test-api.creem.io/v1/checkouts`；`GNE-100` 已验证 test checkout、test payment 和跳转链路 | 已创建 Webhook；支持 13 个事件；签名 header 为 `creem-signature`；`GNE-100` 已验证 public Vercel HTTPS endpoint 收到 `checkout.completed` 并返回 200 | `PAYMENT_PROVIDER=creem`、`PAYMENT_MODE=test`、`PAYMENT_LIVE_ENABLED=false`；`PAYMENT_PROVIDER_SECRET` / `CREEM_API_KEY` server-only；`PAYMENT_WEBHOOK_SECRET` server-only；`CREEM_PLUS_MONTHLY_PRODUCT_ID`、`CREEM_PRO_MONTHLY_PRODUCT_ID`、`CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID` | 未作为 MVP2 通过项；production KYC 前置于 payout/settlement，后置到 `GNE-201` | production KYC 要求明确真实产品、prohibited products 确认、account review checklist 确认；被拒后 3 个月不能再次 review；不能使用 production key/live payment | `Go test mode` 已完成；`GNE-100` test-mode-only spike Done；生产支付进入 `GNE-201` |
 
 | Checklist 项 | 结论 | 说明 |
 | --- | --- | --- |
@@ -337,10 +337,10 @@ pnpm payment:creem:test-checkout
 PAYMENT_PROVIDER=creem
 PAYMENT_MODE=test
 PAYMENT_LIVE_ENABLED=false
-PAYMENT_PROVIDER_SECRET=your_creem_test_api_key
-CREEM_PLUS_MONTHLY_PRODUCT_ID=prod_7YlXijrX6eeQjeoQyyhByr
-CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE
-CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=prod_4IRFjMpu3pxY5eK75y8BP7
+PAYMENT_PROVIDER_SECRET=<creem-test-api-key>
+CREEM_PLUS_MONTHLY_PRODUCT_ID=<creem-test-plus-monthly-product-id>
+CREEM_PRO_MONTHLY_PRODUCT_ID=<creem-test-pro-monthly-product-id>
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=<creem-test-ai-credit-pack-product-id>
 CREEM_CHECKOUT_SUCCESS_URL=https://your-preview-or-production-url/account/payment/result?status=success&price_id=pro_monthly
 ```
 
@@ -370,9 +370,9 @@ CREEM_CHECKOUT_SUCCESS_URL=https://your-preview-or-production-url/account/paymen
 
 | Price ID | Creem Product ID | Checkout ID | Checkout URL | Script result | Human payment/dashboard check |
 | --- | --- | --- | --- | --- | --- |
-| `plus_monthly` | `prod_7YlXijrX6eeQjeoQyyhByr` | `ch_4PCEWBF9V6nP859SFuDinQ` | `https://creem.io/test/checkout/prod_7YlXijrX6eeQjeoQyyhByr/ch_4PCEWBF9V6nP859SFuDinQ` | `200`, `pending` | pass: Creem dashboard shows paid subscription payment |
-| `pro_monthly` | `prod_3TvLvuLXmwQseX16nFNyQE` | `ch_1jjUTUzHiQQ0K8UYR0BPgD` | `https://creem.io/test/checkout/prod_3TvLvuLXmwQseX16nFNyQE/ch_1jjUTUzHiQQ0K8UYR0BPgD` | `200`, `pending` | pass: Creem dashboard shows paid subscription payment |
-| `ai_credit_pack_100k` | `prod_4IRFjMpu3pxY5eK75y8BP7` | `ch_6bP1Uct3WHrt6FyeAKa699` | `https://creem.io/test/checkout/prod_4IRFjMpu3pxY5eK75y8BP7/ch_6bP1Uct3WHrt6FyeAKa699` | `200`, `pending` | pass: Creem dashboard shows paid one-time payment |
+| `plus_monthly` | `<creem-test-plus-monthly-product-id>` | `<creem-test-plus-checkout-id>` | `https://creem.io/test/checkout/<creem-test-plus-monthly-product-id>/<creem-test-plus-checkout-id>` | `200`, `pending` | pass: Creem dashboard shows paid subscription payment |
+| `pro_monthly` | `<creem-test-pro-monthly-product-id>` | `<creem-test-pro-checkout-id>` | `https://creem.io/test/checkout/<creem-test-pro-monthly-product-id>/<creem-test-pro-checkout-id>` | `200`, `pending` | pass: Creem dashboard shows paid subscription payment |
+| `ai_credit_pack_100k` | `<creem-test-ai-credit-pack-product-id>` | `<creem-test-ai-credit-pack-checkout-id>` | `https://creem.io/test/checkout/<creem-test-ai-credit-pack-product-id>/<creem-test-ai-credit-pack-checkout-id>` | `200`, `pending` | pass: Creem dashboard shows paid one-time payment |
 
 ### 2026-06-23 PAYMENT-08 webhook and product evidence
 

@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 
-import { Badge, Button } from "@starter/ui";
+import { Badge, Button } from "@xwlc/ui";
 
 import { UsageIcon } from "@/components/app-icons";
 

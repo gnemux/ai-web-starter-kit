@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 
-import { Button } from "@starter/ui";
+import { Button } from "@xwlc/ui";
 
 import { resetAnalytics, trackEvent } from "@/lib/analytics/client";
 import { signOutAction, type SignOutState } from "@/app/account/actions";

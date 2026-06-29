@@ -3,8 +3,8 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import type { AuthMode, ServiceErrorCode } from "@starter/core";
-import { Button } from "@starter/ui";
+import type { AuthMode, ServiceErrorCode } from "@xwlc/core";
+import { Button } from "@xwlc/ui";
 
 import {
   identifyAuthUser,

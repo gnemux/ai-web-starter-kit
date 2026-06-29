@@ -1,4 +1,4 @@
-import type { AnalyticsBaseProperties } from "@starter/core";
+import type { AnalyticsBaseProperties } from "@xwlc/core";
 
 const DEFAULT_APP_NAME = "XWLC";
 const DEFAULT_MVP_STAGE = "mvp1";

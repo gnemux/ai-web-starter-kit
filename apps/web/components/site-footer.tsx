@@ -1,4 +1,4 @@
-import { BrandMark } from "@starter/ui";
+import { BrandMark } from "@xwlc/ui";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
 import type { Locale } from "@/lib/i18n";

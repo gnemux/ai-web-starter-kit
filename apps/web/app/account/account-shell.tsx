@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { AppShell, BrandMark } from "@starter/ui";
+import { AppShell, BrandMark } from "@xwlc/ui";
 
 import { AccountMenu } from "@/components/account-menu";
 import {

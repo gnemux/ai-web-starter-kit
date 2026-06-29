@@ -11,7 +11,7 @@ import {
   serviceError,
   serviceOk,
   type ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
 
 import { getSupabasePublicConfig } from "./config";
 import type { Database } from "./database.types";

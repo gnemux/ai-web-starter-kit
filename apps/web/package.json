@@ -1,5 +1,5 @@
 {
-  "name": "@starter/web",
+  "name": "@xwlc/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,8 +10,10 @@
     "test": "echo \"No tests yet\""
   },
   "dependencies": {
-    "@starter/core": "workspace:*",
-    "@starter/ui": "workspace:*",
+    "@xwlc/core": "workspace:*",
+    "@xwlc/db": "workspace:*",
+    "@xwlc/platform": "workspace:*",
+    "@xwlc/ui": "workspace:*",
     "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.108.2",
     "next": "^15.3.0",

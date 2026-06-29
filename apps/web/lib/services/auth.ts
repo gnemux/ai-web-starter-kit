@@ -10,7 +10,12 @@ import {
   type ServiceResult,
   type UpdateUserProfileInput,
   type UserProfile
-} from "@starter/core";
+} from "@xwlc/core";
+import {
+  requireVerifiedEmail,
+  type PlatformActor,
+  type PlatformResult
+} from "@xwlc/platform";
 import { cookies } from "next/headers";
 
 import {
@@ -116,18 +121,22 @@ export async function signInWithPasswordFromFormData(
     return mapAuthError(error);
   }
 
-  if (!data.user.email_confirmed_at) {
+  const actor = mapPlatformActor({
+    id: data.user.id,
+    email: data.user.email ?? inputResult.data.email,
+    emailVerified: Boolean(data.user.email_confirmed_at)
+  });
+  const verifiedEmailResult = requireVerifiedEmail(actor);
+
+  if (!verifiedEmailResult.ok) {
     await clientResult.data.auth.signOut();
 
-    return serviceError(
-      "forbidden",
-      "Confirm this email before signing in."
-    );
+    return mapPlatformAuthError(verifiedEmailResult);
   }
 
   const user = mapAuthUser({
-    id: data.user.id,
-    email: data.user.email ?? inputResult.data.email
+    id: actor.id,
+    email: actor.email ?? inputResult.data.email
   });
   const profileResult = await ensureProfile(clientResult.data, user.id);
 
@@ -429,6 +438,32 @@ function mapAuthUser(user: { id: string; email: string }): AuthenticatedUser {
     id: user.id,
     email: user.email
   };
+}
+
+function mapPlatformActor(input: {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+}): PlatformActor {
+  return {
+    id: input.id,
+    type: "user",
+    email: input.email,
+    emailVerified: input.emailVerified
+  };
+}
+
+function mapPlatformAuthError(
+  result: Extract<PlatformResult<unknown>, { ok: false }>
+): ServiceResult<never> {
+  if (result.code === "email_verification_required") {
+    return serviceError(
+      "forbidden",
+      "Confirm this email before signing in."
+    );
+  }
+
+  return serviceError("forbidden", result.message);
 }
 
 function isExistingEmailSignup(

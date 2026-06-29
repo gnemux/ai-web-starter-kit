@@ -5,7 +5,7 @@ import {
   Panel,
   SectionHeader,
   StatusBadge
-} from "@starter/ui";
+} from "@xwlc/ui";
 import { redirect } from "next/navigation";
 
 import { getDictionary } from "@/lib/i18n";

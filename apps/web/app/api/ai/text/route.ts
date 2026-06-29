@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import type { ServiceErrorCode } from "@starter/core";
+import type { ServiceErrorCode } from "@xwlc/core";
 
 import { generateAiTextFromJson } from "@/lib/services/ai";
 

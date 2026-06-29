@@ -67,14 +67,12 @@ MVP3 uses the 4-package convention:
 - `@xwlc/db`: migrations, RLS conventions, database access contracts, and Schema
   Version.
 
-Current code is in a transition state: the repository exposes
-`@starter/core`, `@starter/ui`, `@starter/platform`, and `@starter/db` as the
-current workspace package names, while `@xwlc/core`, `@xwlc/ui`,
-`@xwlc/platform`, and `@xwlc/db` remain the MVP3 target convention. GNE-240
-defined the target package boundary and dependency direction only. GNE-241 adds
-the minimal public entries for `platform` and `db` under the current transition
-names. Product consumption, boundary scripts, package rename/alias decisions,
-and patch upgrade evidence belong to GNE-242 through GNE-244.
+Current code now uses the MVP3 target package namespace directly:
+`@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`. GNE-240 defined
+the target package boundary and dependency direction. GNE-241 added the minimal
+public entries for `platform` and `db`. GNE-242 removes the old `@starter/*`
+workspace namespace and proves consumption from the app/product side. Boundary
+scripts and patch upgrade evidence belong to GNE-243 and GNE-244.
 
 The GNE-240 boundary is runtime-agnostic by default. Common packages must not
 directly depend on Next.js, Vercel, Cloudflare, or Hono request/response types.
@@ -95,6 +93,15 @@ runtime adapters. They do not import Supabase admin clients, Next.js request
 objects, Vercel helpers, Hono context, or Cloudflare Worker objects. That keeps
 the current Supabase + Vercel path stable while preserving a future
 Cloudflare/Hono adapter path.
+
+In GNE-242, package consumption is proven by app-side consumers rather than by
+moving pages into packages. Existing `apps/web` services may adapt provider data
+into public contracts such as `PlatformActor` or `DbAccessScope`; Reference
+Product entry points may consume those contracts from the app/product side.
+Payment, AI Credit usage, webhooks, and Supabase SSR cookie/session code remain
+runtime/app adapters unless a later issue introduces a narrower facade. This is
+intentional: reusable packages stay clean, and a future Cloudflare/Hono adapter
+can map its own request/cookie/env objects into the same contracts.
 
 Reference Product cat-care objects such as cats, care plans, care tasks,
 submissions, product prompts, and product events must stay outside the platform

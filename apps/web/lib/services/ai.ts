@@ -17,7 +17,7 @@ import {
   type AiUsageRecordStatus,
   type AiServiceReason,
   type ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
 
 import { trackServerEvent } from "@/lib/analytics/server";
 import {

@@ -6,13 +6,13 @@ GNE-241 is a minimal public-entry task. Required checks:
 
 1. Confirm `packages/platform` and `packages/db` exist as workspace packages.
 2. Confirm each package exposes a single public entry from `src/index.ts`.
-3. Confirm `@starter/platform` and `@starter/db` compile without importing
+3. Confirm `@xwlc/platform` and `@xwlc/db` compile without importing
    Next.js, Vercel, Hono, Cloudflare runtime objects, Supabase admin clients, or
    service-role helpers.
 4. Confirm product-specific Reference Product object names stay out of
    `packages/platform` and `packages/db`.
-5. Confirm the package naming strategy remains transitional: `@starter/*`
-   exists in code, while `@xwlc/*` remains the MVP3 target convention.
+5. Confirm workspace package names and app imports use `@xwlc/*`, and the old
+   `@starter/*` workspace namespace is not reintroduced.
 6. Run `pnpm install --lockfile-only --ignore-scripts` if the workspace lockfile
    needs the new importers.
 7. Run `pnpm typecheck`.

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import type { ServiceErrorCode } from "@starter/core";
+import type { ServiceErrorCode } from "@xwlc/core";
 
 import { createPaymentCheckout } from "@/lib/services/payment";
 

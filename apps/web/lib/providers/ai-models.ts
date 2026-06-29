@@ -5,7 +5,7 @@ import {
   resolveAiModelConfig,
   type AiModelConfig,
   type ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
 
 export const aiModelCatalog = [
   {

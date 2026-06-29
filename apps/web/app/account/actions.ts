@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import type { AuthActionPayload, ServiceResult, UserProfile } from "@starter/core";
+import type { AuthActionPayload, ServiceResult, UserProfile } from "@xwlc/core";
 
 import {
   signOutCurrentUser,

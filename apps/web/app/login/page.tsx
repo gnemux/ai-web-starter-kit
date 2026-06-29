@@ -1,5 +1,5 @@
-import type { AuthMode } from "@starter/core";
-import { Badge, BrandMark, Button, Panel } from "@starter/ui";
+import type { AuthMode } from "@xwlc/core";
+import { Badge, BrandMark, Button, Panel } from "@xwlc/ui";
 
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";

@@ -1,4 +1,4 @@
-import { serviceError, serviceOk, type ServiceResult } from "@starter/core";
+import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
 export type SupabasePublicConfig = {
   url: string;

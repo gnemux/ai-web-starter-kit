@@ -6,7 +6,7 @@ import type {
   AiGenerateTextResponse,
   DemoItem,
   ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
 
 import { generateAiTextFromFormData } from "@/lib/services/ai";
 import { createDemoItemFromFormData } from "@/lib/services/demo-items";

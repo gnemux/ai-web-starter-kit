@@ -117,12 +117,12 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   product-object boundaries, runtime-agnostic rules, and Auth contract vs
   adapter split are now the accepted PLATFORM boundary.
 - Started `GNE-241` by creating contract-only public entries for
-  `@starter/platform` and `@starter/db`. These entries define runtime-agnostic
+  `@xwlc/platform` and `@xwlc/db`. These entries define runtime-agnostic
   actor/session/auth-result, owner/email checks, email verification,
   analytics/outbox, schema version, RLS policy, owner/token scope, and DB
-  evidence contracts. They do not rename packages to `@xwlc/*`, migrate the
-  app to consume them, add migrations, implement CF/Hono, or move Supabase
-  adapter code out of the app.
+  evidence contracts. GNE-242 then moved the workspace namespace to `@xwlc/*`
+  and proved app-side consumption. The package work still does not add
+  migrations, implement CF/Hono, or move Supabase adapter code out of the app.
 - Local GNE-241 verification passed with `pnpm typecheck`,
   `pnpm test:release-boundaries`, `git diff --check`, and targeted boundary
   searches over `packages/platform` plus `packages/db` for runtime/provider
@@ -236,19 +236,19 @@ Boundaries still not claimed as verified production facts:
 - `GNE-160` AI-09
 - `GNE-209` release-final regression bucket
 - `GNE-240` MVP3 PLATFORM-01 Package 边界与依赖方向
+- `GNE-241` MVP3 PLATFORM-02 core/ui/platform/db 最小公开入口
 
 ## In Progress Issues
 
 - `GNE-229` MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
-- `GNE-241` MVP3 PLATFORM-02 core/ui/platform/db 最小公开入口
 
 ## In Review Issues
 
-- None.
+- `GNE-242` MVP3 PLATFORM-03 apps/web 与 Reference Product 消费 Package
 
 ## In Progress
 
-MVP2 foundation parents are complete locally and in Linear: Integrations, Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed baseline. `GNE-228` PLAN is Done. MVP3 is now in `GNE-229` PLATFORM. `GNE-240` is Done after PR #37 and records the accepted package boundary. `GNE-241` is in progress to add minimal public entries. Current repo packages use the transition names `@starter/core`, `@starter/ui`, `@starter/platform`, and `@starter/db`; `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db` remain the MVP3 target convention. Product consumption, boundary checks, package rename/alias decisions, and patch evidence belong to later PLATFORM child issues. Production payment remains deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
+MVP2 foundation parents are complete locally and in Linear: Integrations, Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed baseline. `GNE-228` PLAN is Done. MVP3 is now in `GNE-229` PLATFORM. `GNE-240` is Done after PR #37 and records the accepted package boundary. `GNE-241` is Done after PR #38 and adds minimal public entries for `@xwlc/platform` and `@xwlc/db`. `GNE-242` is in review to prove package consumption from existing `apps/web` chains and the Reference Product minimum entry, and to remove the old `@starter/*` workspace namespace in favor of the MVP3 target `@xwlc/*` namespace. Boundary checks and patch evidence belong to later PLATFORM child issues. Production payment remains deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
 
 ## Next Steps
 
@@ -261,7 +261,7 @@ MVP2 foundation parents are complete locally and in Linear: Integrations, Billin
 7. Keep MVP3 on the 小团队 WIP rule: one parent issue carries the main implementation at a time; child issues stay under their parent issue and should not be assigned to the MVP3 milestone view or given Linear labels. Use the milestone diagrams and parent issue sections as the starting point for newcomer onboarding and reviewer acceptance.
 8. During `GNE-228`, keep the confirmed PLAN decisions visible: Linear + repo evidence sync, short task branches from `main`, single monorepo with package boundaries, current Supabase as reference/staging/test only, Supabase + Vercel mainline, Cloudflare/Hono adapter-readiness only, and AI/Billing mock/no-op/sandbox/test only.
 9. Treat the PLAN gate as failed if product-specific cat-care objects enter platform packages, if work starts from old pre-`v0.2.0` branches, if child issues are executed out of sequence without an explicit decision, if production Supabase/live payment/real AI become MVP3 blockers, if private tokens/private content appear in evidence, or if the final Reviewer path cannot connect page/data/RLS/deploy/analytics/CI/version evidence.
-10. In `GNE-229`, keep the MVP3 target convention to `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`, while current code may use `@starter/*` transition names until the rename/alias decision is explicitly made. Product-specific cat-care objects must stay outside platform packages.
+10. In `GNE-229`, keep the MVP3 target convention to `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`; current code should not reintroduce the old `@starter/*` workspace namespace. Product-specific cat-care objects must stay outside platform packages.
 11. In `GNE-230`, require the minimum delivery gate: product repo can install packages, CI runs, Supabase reference/staging migrations run, Vercel validation deploys, version evidence is visible, and smoke tests pass. Use forward fix / expand-contract for database changes instead of promising DB rollback.
 12. In `GNE-232`, verify private-link lifecycle and risks: creation, use, expiry, revocation, repeated access, repeated submit, forwarded links, guessed tokens, raw-token log leakage, and anonymous abuse prevention.
 13. In `GNE-233`, keep the internal order Audit / Correlation ID -> Outbox -> AI draft with human review -> Entitlement / Usage -> Sandbox / Test Mode -> Health / Trace / Metrics. Do not let AI or Payment work block the PRODUCT or ACCESS minimum path.

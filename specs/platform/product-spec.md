@@ -32,8 +32,9 @@ boundary, MVP3 could accidentally:
 
 - Define the MVP3 four-package target: `@xwlc/core`, `@xwlc/ui`,
   `@xwlc/platform`, and `@xwlc/db`.
-- Record the current transitional state: existing package names are still
-  `@starter/core` and `@starter/ui`; `platform` and `db` are not created yet.
+- Record the current package state: workspace package names use `@xwlc/core`,
+  `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`; the old `@starter/*`
+  workspace namespace is not part of the MVP3 target.
 - Make allowed and forbidden dependency directions reviewable.
 - Define the runtime-agnostic boundary so common packages do not expose
   Next.js, Vercel, Cloudflare, or Hono request/response types.

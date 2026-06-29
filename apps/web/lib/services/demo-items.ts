@@ -6,7 +6,12 @@ import {
   type DemoItem,
   type DemoItemsPayload,
   type ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
+import {
+  createOwnerScope,
+  type DbAccessScope,
+  type DbBoundaryResult
+} from "@xwlc/db";
 
 import {
   createSupabaseServerClient,
@@ -15,6 +20,7 @@ import {
 import type { Database } from "../supabase/database.types";
 
 type DemoItemRow = Database["public"]["Tables"]["demo_items"]["Row"];
+type OwnerDbAccessScope = DbAccessScope & Readonly<{ ownerId: string }>;
 
 export async function listDemoItems(): Promise<
   ServiceResult<DemoItemsPayload>
@@ -25,10 +31,10 @@ export async function listDemoItems(): Promise<
     return clientResult;
   }
 
-  const userIdResult = await getAuthenticatedUserId(clientResult.data);
+  const ownerScopeResult = await getAuthenticatedOwnerScope(clientResult.data);
 
-  if (!userIdResult.ok) {
-    return userIdResult;
+  if (!ownerScopeResult.ok) {
+    return ownerScopeResult;
   }
 
   const { data, error } = await clientResult.data
@@ -36,7 +42,7 @@ export async function listDemoItems(): Promise<
     .select(
       "id, owner_id, title, notes, visibility, status, created_at, updated_at"
     )
-    .or(`owner_id.eq.${userIdResult.data},visibility.eq.public`)
+    .or(`owner_id.eq.${ownerScopeResult.data.ownerId},visibility.eq.public`)
     .order("created_at", { ascending: false })
     .limit(20);
 
@@ -74,16 +80,16 @@ export async function createDemoItem(
     return clientResult;
   }
 
-  const userIdResult = await getAuthenticatedUserId(clientResult.data);
+  const ownerScopeResult = await getAuthenticatedOwnerScope(clientResult.data);
 
-  if (!userIdResult.ok) {
-    return userIdResult;
+  if (!ownerScopeResult.ok) {
+    return ownerScopeResult;
   }
 
   const { data, error } = await clientResult.data
     .from("demo_items")
     .insert({
-      owner_id: userIdResult.data,
+      owner_id: ownerScopeResult.data.ownerId,
       title: input.title,
       notes: input.notes,
       visibility: input.visibility
@@ -100,9 +106,9 @@ export async function createDemoItem(
   return serviceOk(mapDemoItem(data));
 }
 
-async function getAuthenticatedUserId(
+async function getAuthenticatedOwnerScope(
   supabase: AppSupabaseClient
-): Promise<ServiceResult<string>> {
+): Promise<ServiceResult<OwnerDbAccessScope>> {
   const { data, error } = await supabase.auth.getClaims();
   const userId = data?.claims?.sub;
 
@@ -113,7 +119,25 @@ async function getAuthenticatedUserId(
     );
   }
 
-  return serviceOk(userId);
+  const scopeResult = createOwnerScope(userId, userId);
+
+  if (!scopeResult.ok) {
+    return mapDbBoundaryError(scopeResult);
+  }
+
+  return serviceOk({
+    ...scopeResult.data,
+    ownerId: userId
+  });
+}
+
+function mapDbBoundaryError(
+  result: Extract<DbBoundaryResult<unknown>, { ok: false }>
+): ServiceResult<never> {
+  return serviceError(
+    result.code === "scope_mismatch" ? "forbidden" : "unauthorized",
+    result.message
+  );
 }
 
 function mapDemoItem(row: DemoItemRow): DemoItem {

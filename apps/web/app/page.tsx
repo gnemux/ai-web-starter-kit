@@ -1,4 +1,4 @@
-import { Badge, BrandMark, Button } from "@starter/ui";
+import { Badge, BrandMark, Button } from "@xwlc/ui";
 
 import { AccountMenu } from "@/components/account-menu";
 import { ArrowRightIcon } from "@/components/app-icons";

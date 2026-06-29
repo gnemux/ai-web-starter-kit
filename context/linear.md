@@ -260,12 +260,12 @@ GNE-234 VERIFY
 └── GNE-274 VERIFY-07 产品扩展判定
 ```
 
-GNE-240 owns detailed package dependency rules for the GNE-229 parent. Current
-repo packages use the transition names `@starter/core`, `@starter/ui`,
-`@starter/platform`, and `@starter/db`; `@xwlc/core`, `@xwlc/ui`,
-`@xwlc/platform`, and `@xwlc/db` remain the MVP3 target convention. GNE-240 did
-not rename packages or create `packages/platform` / `packages/db`; GNE-241
-creates those minimal public entries as contracts only. The durable rules live in
+GNE-240 owns detailed package dependency rules for the GNE-229 parent. GNE-242
+uses the MVP3 target namespace directly: `@xwlc/core`, `@xwlc/ui`,
+`@xwlc/platform`, and `@xwlc/db`. The old `@starter/*` workspace namespace is no
+longer the implementation target. GNE-240 did not create `packages/platform` /
+`packages/db`; GNE-241 created those minimal public entries as contracts only.
+The durable rules live in
 `specs/platform/*`: product-specific cat-care objects stay out of platform
 packages, package consumers use public exports rather than internal paths,
 browser code must not import server-only modules, provider SDK / service-role
@@ -292,6 +292,16 @@ must receive a package-contract audit conclusion: `uses_public_contract`,
 adapters that should stay in `apps/web`; `gap_deferred` must name the later
 issue or stage. MVP5 owns live payment production readiness, not a blanket
 excuse to leave MVP3 package-contract usage unexamined.
+
+GNE-242 implementation keeps the same boundary: existing `apps/web` code can
+consume package public exports without moving MVP1/MVP2 pages into
+`packages/*`. The first app consumers are demo data owner scope via
+`@xwlc/db` and Auth email-verification checks via `@xwlc/platform`. The
+Reference Product minimum entry lives on the app/product side and consumes
+`@xwlc/platform`, `@xwlc/db`, and `@xwlc/ui` public exports. Payment,
+AI Credit usage, webhook, and Supabase SSR cookie/session behavior are audited
+in `specs/platform/acceptance.md` instead of being broadly rewritten in this
+child issue.
 
 The 30-minute Reviewer Runbook lives in `GNE-234 VERIFY`, not as a standalone
 issue. It is the final verification script for page flow, Supabase data/RLS,

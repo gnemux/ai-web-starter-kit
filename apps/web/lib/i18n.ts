@@ -125,6 +125,27 @@ export const dictionaries = {
         }
       ]
     },
+    referenceProduct: {
+      subtitle: "Reference Product Consumer",
+      badge: "MVP3 package consumer",
+      eyebrow: "产品侧入口",
+      title: "Reference Product 最小入口",
+      description:
+        "这个入口只验证产品侧可以通过公开 Package 消费通用底座能力，不实现完整业务闭环，也不把产品对象放进通用 Package。",
+      contractTitle: "Package 消费证据",
+      contractDescription:
+        "Auth 和 DB 只通过 @xwlc/platform 与 @xwlc/db 的公开入口读取通用契约，Next/Supabase adapter 仍留在 app 侧。",
+      facts: {
+        auth: "Auth contract",
+        db: "DB contract",
+        scope: "匿名边界",
+        schema: "Schema checkpoint"
+      },
+      status: {
+        verified_owner: "公开入口可消费",
+        blocked: "需检查"
+      }
+    },
     login: {
       subtitle: "eXtensible Web Launch Core",
       badge: "Supabase Auth",
@@ -604,6 +625,27 @@ export const dictionaries = {
           description: "Progress, completion, or trust appears here."
         }
       ]
+    },
+    referenceProduct: {
+      subtitle: "Reference Product Consumer",
+      badge: "MVP3 package consumer",
+      eyebrow: "Product-side entry",
+      title: "Reference Product minimum entry",
+      description:
+        "This entry only verifies that a product-side module can consume the foundation through public packages. It does not implement the full business loop or put product objects into common packages.",
+      contractTitle: "Package consumption evidence",
+      contractDescription:
+        "Auth and DB read common contracts only through @xwlc/platform and @xwlc/db public entries. Next/Supabase adapters remain on the app side.",
+      facts: {
+        auth: "Auth contract",
+        db: "DB contract",
+        scope: "Anonymous boundary",
+        schema: "Schema checkpoint"
+      },
+      status: {
+        verified_owner: "Public entry consumed",
+        blocked: "Needs review"
+      }
     },
     login: {
       subtitle: "eXtensible Web Launch Core",

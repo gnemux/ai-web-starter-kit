@@ -17,10 +17,16 @@ importers:
 
   apps/web:
     dependencies:
-      '@starter/core':
+      '@xwlc/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@starter/ui':
+      '@xwlc/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@xwlc/platform':
+        specifier: workspace:*
+        version: link:../../packages/platform
+      '@xwlc/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@supabase/ssr':

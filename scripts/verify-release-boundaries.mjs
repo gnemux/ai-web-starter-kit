@@ -48,8 +48,10 @@ const signIn = section(
 );
 expect(
   signIn.includes("email_confirmed_at") &&
+    signIn.includes("requireVerifiedEmail") &&
     signIn.includes("auth.signOut()") &&
-    signIn.includes('"forbidden"'),
+    signIn.includes("mapPlatformAuthError") &&
+    authService.includes('serviceError(\n      "forbidden"'),
   "Sign-in must reject and sign out unconfirmed Supabase Auth users."
 );
 

@@ -1,4 +1,4 @@
-import { type DemoItem } from "@starter/core";
+import { type DemoItem } from "@xwlc/core";
 import {
   AppShell,
   BrandMark,
@@ -7,7 +7,7 @@ import {
   Panel,
   SectionHeader,
   StatusBadge
-} from "@starter/ui";
+} from "@xwlc/ui";
 import { redirect } from "next/navigation";
 
 import { AccountMenu } from "@/components/account-menu";

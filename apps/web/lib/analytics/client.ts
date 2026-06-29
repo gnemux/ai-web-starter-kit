@@ -6,7 +6,7 @@ import type {
   AuthAnalyticsEvent,
   AuthAnalyticsProperties,
   AuthenticatedUser
-} from "@starter/core";
+} from "@xwlc/core";
 
 import { getAnalyticsBaseProperties, readOptionalPublicEnv } from "./config";
 

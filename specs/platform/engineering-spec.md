@@ -10,19 +10,17 @@ package creation begin in later child issues only after this boundary is stable.
 
 Current repository packages:
 
-| Current package | Current folder | MVP3 target role |
+| Current package | Current folder | MVP3 role |
 | -- | -- | -- |
-| `@starter/core` | `packages/core` | transitional name for future `@xwlc/core` |
-| `@starter/ui` | `packages/ui` | transitional name for future `@xwlc/ui` |
-| `@starter/platform` | `packages/platform` | transitional name for future `@xwlc/platform` |
-| `@starter/db` | `packages/db` | transitional name for future `@xwlc/db` |
+| `@xwlc/core` | `packages/core` | provider-free contracts and pure logic |
+| `@xwlc/ui` | `packages/ui` | reusable UI primitives |
+| `@xwlc/platform` | `packages/platform` | runtime-agnostic platform contracts and ports |
+| `@xwlc/db` | `packages/db` | database boundary and RLS contracts |
 
-GNE-241 creates the new package public entry points under the current
-`@starter/*` transition naming. It does not rename existing packages to
-`@xwlc/*`, does not migrate the app to consume the new packages, and does not
-add runtime/provider adapters. The target `@xwlc/*` convention remains the MVP3
-package direction after the public contracts and product consumption path are
-validated.
+GNE-241 created the new package public entry points. GNE-242 removes the old
+`@starter/*` workspace namespace and uses the MVP3 target `@xwlc/*` namespace
+directly while proving app/product consumption. Runtime/provider adapters remain
+outside reusable package public entries.
 
 ## GNE-241 Public Entries
 
@@ -30,10 +28,10 @@ GNE-241 keeps the public entries intentionally small:
 
 | Package | Public entry | Owns in GNE-241 |
 | -- | -- | -- |
-| `@starter/core` | `packages/core/src/index.ts` | existing provider-free service contracts, auth inputs, billing, payment, AI, provider descriptors |
-| `@starter/ui` | `packages/ui/src/index.tsx` | existing reusable UI primitives |
-| `@starter/platform` | `packages/platform/src/index.ts` | runtime-agnostic actor/session/auth-result contracts, owner/email checks, email verification port, analytics event port, outbox port |
-| `@starter/db` | `packages/db/src/index.ts` | schema version contracts, RLS policy names, owner/token scope helpers, migration/RLS evidence shapes |
+| `@xwlc/core` | `packages/core/src/index.ts` | existing provider-free service contracts, auth inputs, billing, payment, AI, provider descriptors |
+| `@xwlc/ui` | `packages/ui/src/index.tsx` | existing reusable UI primitives |
+| `@xwlc/platform` | `packages/platform/src/index.ts` | runtime-agnostic actor/session/auth-result contracts, owner/email checks, email verification port, analytics event port, outbox port |
+| `@xwlc/db` | `packages/db/src/index.ts` | schema version contracts, RLS policy names, owner/token scope helpers, migration/RLS evidence shapes |
 
 The new packages expose contracts and pure helpers only. Supabase SSR clients,
 service-role access, webhook verification, PostHog SDK calls, provider SDKs,
@@ -125,13 +123,6 @@ import type { ServiceResult } from "@xwlc/core";
 import { Button } from "@xwlc/ui";
 import { getCurrentEntitlement } from "@xwlc/platform";
 import { schemaVersion } from "@xwlc/db";
-```
-
-Transitional examples that are acceptable before package renaming:
-
-```ts
-import type { ServiceResult } from "@starter/core";
-import { Button } from "@starter/ui";
 ```
 
 Forbidden examples:

@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { Button } from "@starter/ui";
+import { Button } from "@xwlc/ui";
 
 import {
   createDemoItemAction,

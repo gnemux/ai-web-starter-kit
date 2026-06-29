@@ -18,7 +18,7 @@ import {
   type PaymentReviewState,
   type PaymentWebhookAcknowledgement,
   type ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
 import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
 import { trackServerEvent } from "@/lib/analytics/server";

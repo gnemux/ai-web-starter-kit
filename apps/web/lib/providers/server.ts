@@ -14,7 +14,7 @@ import {
   type ServiceResult,
   type SmsProvider,
   type StorageProvider
-} from "@starter/core";
+} from "@xwlc/core";
 
 import { getProviderDescriptor } from "./catalog";
 

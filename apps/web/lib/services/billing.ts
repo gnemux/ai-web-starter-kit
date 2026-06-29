@@ -18,7 +18,7 @@ import {
   type BillingUsageLedgerEntry,
   type BillingSubscription,
   type ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
 import { randomUUID } from "crypto";
 
 import {

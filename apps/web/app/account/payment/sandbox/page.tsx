@@ -1,11 +1,11 @@
-import { Button, ErrorState, Panel, StatusBadge } from "@starter/ui";
+import { Button, ErrorState, Panel, StatusBadge } from "@xwlc/ui";
 import {
   getBillingPlan,
   getBillingPrice,
   type BillingAllowance,
   type BillingFeatureKey,
   type BillingPlan
-} from "@starter/core";
+} from "@xwlc/core";
 
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";

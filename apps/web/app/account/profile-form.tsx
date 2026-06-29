@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect } from "react";
 
-import { Button } from "@starter/ui";
+import { Button } from "@xwlc/ui";
 
 import { trackEvent } from "@/lib/analytics/client";
 

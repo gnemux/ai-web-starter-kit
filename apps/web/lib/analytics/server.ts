@@ -6,7 +6,7 @@ import type {
   AnalyticsBaseProperties,
   PaymentAnalyticsEvent,
   PaymentAnalyticsProperties
-} from "@starter/core";
+} from "@xwlc/core";
 import { headers } from "next/headers";
 
 import { getAnalyticsBaseProperties, readOptionalPublicEnv } from "./config";

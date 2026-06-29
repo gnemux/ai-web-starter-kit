@@ -6,7 +6,7 @@ import {
   isBillingCheckoutPriceId,
   isPaymentCheckoutResultStatus,
   type ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
 
 import {
   createPaymentCheckoutFromFormData,

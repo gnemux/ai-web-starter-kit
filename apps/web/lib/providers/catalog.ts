@@ -1,7 +1,7 @@
 import type {
   ProviderCapability,
   ProviderDescriptor
-} from "@starter/core";
+} from "@xwlc/core";
 
 export const providerCatalog = [
   {

@@ -1,7 +1,7 @@
 import {
   Panel,
   SectionHeader
-} from "@starter/ui";
+} from "@xwlc/ui";
 
 import {
   AccountAppShell,

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import type { AuthActionPayload, AuthMode, ServiceResult } from "@starter/core";
+import type { AuthActionPayload, AuthMode, ServiceResult } from "@xwlc/core";
 
 import {
   signInWithPasswordFromFormData,

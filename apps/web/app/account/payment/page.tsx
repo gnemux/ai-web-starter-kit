@@ -5,14 +5,14 @@ import {
   Panel,
   SectionHeader,
   StatusBadge
-} from "@starter/ui";
+} from "@xwlc/ui";
 import {
   defaultBillingPlans,
   compareBillingPlans,
   type BillingAllowance,
   type BillingPlanId,
   type PaymentCheckoutOption
-} from "@starter/core";
+} from "@xwlc/core";
 
 import type { Dictionary } from "@/lib/i18n";
 import { getDictionary } from "@/lib/i18n";

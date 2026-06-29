@@ -4,7 +4,7 @@ import {
   ErrorState,
   Panel,
   SectionHeader
-} from "@starter/ui";
+} from "@xwlc/ui";
 import {
   compareBillingPlans,
   defaultBillingPlans,
@@ -16,7 +16,7 @@ import {
   type BillingPlan,
   type BillingPrice,
   type ServiceResult
-} from "@starter/core";
+} from "@xwlc/core";
 
 import type { Dictionary } from "@/lib/i18n";
 import type { BillingActivity } from "@/lib/services/billing";

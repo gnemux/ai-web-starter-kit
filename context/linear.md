@@ -234,7 +234,11 @@ GNE-243 implementation note: package/import/runtime/privacy boundary checks now
 run through `scripts/verify-package-boundaries.mjs`, exposed as
 `pnpm test:package-boundaries`, and included in the root `pnpm test` chain used
 by GitHub PR CI. Local verification passed with `pnpm test:package-boundaries`,
-`pnpm typecheck`, `pnpm test`, `pnpm build`, and `git diff --check`.
+`pnpm typecheck`, `pnpm test`, `pnpm build`, and `git diff --check`. A temporary
+negative sample using `@xwlc/platform/src/index` was verified to fail the
+boundary check, then removed; rerunning `pnpm test:package-boundaries` passed.
+The branch `codex/gne-243-package-boundary-checks` was pushed for review, and
+`GNE-243` is now `In Review` in Linear.
 
 GNE-231 PRODUCT
 ├── GNE-251 PRODUCT-01 猫咪档案、照护计划、任务、提交数据模型

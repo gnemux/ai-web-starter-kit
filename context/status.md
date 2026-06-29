@@ -141,7 +141,9 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   dependencies, client-side service-role/server-only access, and explicit raw
   token/raw prompt/private submission telemetry fields. Local GNE-243
   verification passed with `pnpm test:package-boundaries`, `pnpm typecheck`,
-  `pnpm test`, `pnpm build`, and `git diff --check`.
+  `pnpm test`, `pnpm build`, and `git diff --check`. A temporary negative sample
+  using `@xwlc/platform/src/index` was verified to fail the boundary check, then
+  removed; rerunning `pnpm test:package-boundaries` passed.
 - Prepared the current tree for public-repo review by adding an MIT License,
   expanding ignore rules for local secrets/build artifacts/logs, documenting
   the README license and brand-asset boundary, and replacing current-doc real
@@ -257,6 +259,9 @@ Boundaries still not claimed as verified production facts:
 ## In Progress Issues
 
 - `GNE-229` MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
+
+## In Review Issues
+
 - `GNE-243` MVP3 PLATFORM-04 [CI] package build/typecheck/boundary 检查
 
 ## In Progress
@@ -268,8 +273,10 @@ is Done after PR #37 and records the accepted package boundary. `GNE-241` is
 Done after PR #38 and adds minimal public entries for `@xwlc/platform` and
 `@xwlc/db`. `GNE-242` is Done after PR #40 and proves package consumption from
 existing `apps/web` chains and the Reference Product minimum entry while using
-the MVP3 target `@xwlc/*` namespace. `GNE-243` is in progress to turn the
-package/import/runtime/privacy boundary into a machine-checkable CI gate.
+the MVP3 target `@xwlc/*` namespace. `GNE-243` has turned the
+package/import/runtime/privacy boundary into a machine-checkable CI gate and is
+now in Linear review after branch `codex/gne-243-package-boundary-checks` was
+pushed.
 Patch upgrade evidence still belongs to later `GNE-244`. Production payment
 remains deferred to `GNE-201`. Real-provider AI production smoke remains
 `not_run` until provider configuration and redeploy.

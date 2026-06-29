@@ -92,7 +92,7 @@ separate PR #34 branch rather than reopening `GNE-209`.
 MVP3 Reference Product：双底座架构与 Package 消费验证
 ├── GNE-228 MVP3-01 PLAN [DOC/ARCH] 范围、双底座架构与失败标准
 ├── GNE-229 MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
-├── GNE-230 MVP3-03 DELIVERY [DEPLOY] 多仓 CI/CD、环境治理与版本迁移
+├── GNE-230 MVP3-03 DELIVERY [DEPLOY] Package 化后的交付门禁与部署回归
 ├── GNE-231 MVP3-04 PRODUCT [APP/DATA] 主人侧 Reference Product 最小业务闭环
 ├── GNE-232 MVP3-05 ACCESS [SECURITY] 私密分享、匿名访问与提交边界
 ├── GNE-233 MVP3-06 CAPABILITY [AI/BILLING/OUTBOX/AUDIT] 平台能力接入真实业务
@@ -200,10 +200,11 @@ parent chain remains linear: `GNE-228` blocks `GNE-229`, `GNE-229` blocks
 `GNE-230`, `GNE-230` blocks `GNE-231`, `GNE-231` blocks `GNE-232`, `GNE-232`
 blocks `GNE-233`, and `GNE-233` blocks `GNE-234`. No labels were added.
 
-Several overlap-prone child issues have explicit boundaries: `GNE-248` builds
-the version evidence mechanism while `GNE-272` aggregates final evidence;
-`GNE-249` defines recovery principles while `GNE-273` writes the final v0.3.0
-decision; `GNE-255` covers Product page analytics while `GNE-266` covers
+Several overlap-prone child issues have explicit boundaries: `GNE-248` defines
+the minimum app/package/db version-location method while `GNE-272` aggregates
+final evidence; `GNE-249` was canceled and merged into `GNE-230` so delivery
+failure handling stays a parent-level gate instead of a standalone operations
+track; `GNE-255` covers Product page analytics while `GNE-266` covers
 cross-capability PostHog correlation; `GNE-260` implements ACCESS security
 rules/audit while `GNE-270` independently reruns final security negative
 verification.
@@ -213,19 +214,31 @@ GNE-228 PLAN
 └── No active child issues; PLAN scope, diagrams, ADR, and WIP rules live in the parent issue and milestone.
 
 GNE-229 PLATFORM
-├── GNE-240 PLATFORM-01 Package 边界与依赖方向 (In Review, PR #37)
-├── GNE-241 PLATFORM-02 core/ui/platform/db 最小公开入口
-├── GNE-242 PLATFORM-03 apps/web 与 Reference Product 消费 Package
-├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查
+├── GNE-240 PLATFORM-01 Package 边界与依赖方向 (Done, PR #37)
+├── GNE-241 PLATFORM-02 core/ui/platform/db 最小公开入口 (Done, PR #38)
+├── GNE-242 PLATFORM-03 apps/web 与 Reference Product 消费 Package (Done, PR #40)
+├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查 (In progress: repo machine gate)
 └── GNE-244 PLATFORM-05 Package patch 升级演练
 
 GNE-230 DELIVERY
-├── GNE-245 DELIVERY-01 多仓/单仓阶段策略与 CI 入口
-├── GNE-246 DELIVERY-02 Vercel 环境矩阵
-├── GNE-247 DELIVERY-03 Supabase migration 与 schema version
-├── GNE-248 DELIVERY-04 package/app/db version 对齐
-├── GNE-249 DELIVERY-05 回滚/前滚原则与 Reviewer 证据清单
-└── GNE-250 DELIVERY-06 真实 Reference Product 部署复现记录
+├── GNE-245 DELIVERY-01 单仓 CI 覆盖与 package 交付门禁
+├── GNE-246 DELIVERY-02 Reference Product 环境差异确认
+├── GNE-247 DELIVERY-03 Reference Product migration 规范延续
+├── GNE-248 DELIVERY-04 app/package/db 最小版本定位
+└── GNE-250 DELIVERY-06 部署环境 smoke 复现
+
+GNE-249 DELIVERY-05 已取消独立执行并并入 GNE-230：交付失败处理原则
+属于父任务门禁，不再作为单独子任务推进。
+
+GNE-243 implementation note: package/import/runtime/privacy boundary checks now
+run through `scripts/verify-package-boundaries.mjs`, exposed as
+`pnpm test:package-boundaries`, and included in the root `pnpm test` chain used
+by GitHub PR CI. Local verification passed with `pnpm test:package-boundaries`,
+`pnpm typecheck`, `pnpm test`, `pnpm build`, and `git diff --check`. A temporary
+negative sample using `@xwlc/platform/src/index` was verified to fail the
+boundary check, then removed; rerunning `pnpm test:package-boundaries` passed.
+The branch `codex/gne-243-package-boundary-checks` was pushed for review, and
+`GNE-243` is now `In Review` in Linear.
 
 GNE-231 PRODUCT
 ├── GNE-251 PRODUCT-01 猫咪档案、照护计划、任务、提交数据模型
@@ -514,7 +527,7 @@ GNE-193 MVP4 INTEGRATIONS-00 [INTEGRATIONS] 海外/国内双模式 adapter、env
 
 GNE-228 MVP3-01 PLAN [DOC/ARCH] 范围、双底座架构与失败标准
 GNE-229 MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
-GNE-230 MVP3-03 DELIVERY [DEPLOY] 多仓 CI/CD、环境治理与版本迁移
+GNE-230 MVP3-03 DELIVERY [DEPLOY] Package 化后的交付门禁与部署回归
 GNE-231 MVP3-04 PRODUCT [APP/DATA] 主人侧 Reference Product 最小业务闭环
 GNE-232 MVP3-05 ACCESS [SECURITY] 私密分享、匿名访问与提交边界
 GNE-233 MVP3-06 CAPABILITY [AI/BILLING/OUTBOX/AUDIT] 平台能力接入真实业务
@@ -535,13 +548,14 @@ cat profile -> create care plan -> publish plan -> generate private link ->
 anonymous sitter opens link -> sitter submits completion / note / exception ->
 owner views result -> Supabase/Vercel/PostHog/GitHub evidence matches the page.
 
-MVP3 delivery boundary: `GNE-230` owns the minimum delivery gate: product repo
-can install `@xwlc/*` packages, GitHub CI runs, Supabase staging migrations run,
-Vercel staging deploys, version info exposes Commit SHA / Package Version /
-Schema Version / Deployment URL, and smoke tests pass. Migration order is
-Platform Migration -> Product Migration -> Deploy -> Smoke. Database rollback is
-not promised; prefer app rollback, package downgrade, feature flags, and forward
-fix / expand-contract database changes.
+MVP3 delivery boundary: `GNE-230` is not a new deployment system and should not
+repeat MVP1/MVP2 GitHub/Vercel/Supabase setup. It owns the package化后的交付门禁:
+`apps/web` can consume `@xwlc/*`, CI catches package/import/boundary failures,
+Reference Product migrations continue through repo migrations, deployed smoke
+can reproduce the minimum product path, and failures can be classified as
+app/package/env/migration/RLS/provider. Database rollback is not promised;
+prefer app rollback, package contract fixes, feature flags, and forward fix /
+expand-contract database changes.
 
 MVP3 access boundary: `GNE-232` owns private-link and anonymous command
 security. Token values must be high-entropy, stored only as non-reversible

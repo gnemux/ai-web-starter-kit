@@ -30,7 +30,8 @@
 - [x] Existing `apps/web` and Reference Product consume package public exports,
   with Payment/Billing, AI Credit usage, webhook, and Supabase SSR adapter
   package-contract audit results. Completed in GNE-242.
-- [ ] Boundary rules are machine checked. Deferred to GNE-243.
+- [x] Boundary rules are machine checked by `pnpm test:package-boundaries`.
+  Completed in GNE-243.
 - [ ] Patch upgrade evidence exists. Deferred to GNE-244.
 
 ## GNE-241 Verification Snapshot
@@ -75,3 +76,35 @@
 - Local HTTP smoke passed: `/reference-product` returned `200`, `/login`
   returned `200`, and unauthenticated `/dashboard` returned `307` to
   `/login?next=/dashboard`.
+
+## GNE-243 Package Boundary Checks
+
+`scripts/verify-package-boundaries.mjs` is the machine gate for the MVP3 package
+boundary. It checks:
+
+- `@xwlc/core` does not import provider SDKs, Supabase SDKs, Next.js, Vercel,
+  Hono, Cloudflare runtime objects, or request/response runtime types.
+- `@xwlc/platform` and `@xwlc/db` do not import Next/Vercel/Hono/Cloudflare
+  runtime request/response APIs or `@supabase/ssr`.
+- reusable packages do not contain Reference Product business table names:
+  `cats`, `care_plans`, `care_tasks`, or `care_submissions`.
+- `apps/web` does not deep import package internals through
+  `@xwlc/*/src/*` or `@xwlc/*/internal/*`.
+- client components do not reference server-only modules or Supabase
+  service-role secrets.
+- telemetry-facing files do not contain explicit raw-token, raw-prompt, or
+  private-submission-text fields.
+
+## GNE-243 Verification Snapshot
+
+- `pnpm test:package-boundaries` passes locally.
+- The root `pnpm test` chain includes `pnpm test:package-boundaries`, so the
+  existing GitHub PR CI `Test` step runs the package boundary gate without a
+  separate workflow change.
+- `pnpm typecheck` passes and includes `@xwlc/core`, `@xwlc/db`,
+  `@xwlc/platform`, `@xwlc/ui`, and `@xwlc/web`.
+- `pnpm test` passes and runs AI safety, release-boundary, package-boundary,
+  and package test tasks.
+- `pnpm build` passes and includes the package builds plus the Next.js app
+  build.
+- `git diff --check` passes.

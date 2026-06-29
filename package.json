@@ -8,10 +8,11 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "test:ai-safety": "node scripts/verify-ai-safety.mjs",
+    "test:package-boundaries": "node scripts/verify-package-boundaries.mjs",
     "test:release-boundaries": "node scripts/verify-release-boundaries.mjs",
     "typecheck": "turbo typecheck",
     "payment:creem:test-checkout": "node integrations/scripts/creem-test-checkout.mjs",
-    "test": "pnpm test:ai-safety && pnpm test:release-boundaries && turbo test"
+    "test": "pnpm test:ai-safety && pnpm test:release-boundaries && pnpm test:package-boundaries && turbo test"
   },
   "devDependencies": {
     "turbo": "^2.5.0",

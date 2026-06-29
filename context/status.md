@@ -135,6 +135,13 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   GNE-242, but they must be audited as `uses_public_contract`,
   `adapter_only_ok`, or `gap_deferred`; live-payment production readiness still
   belongs to GNE-201/MVP5.
+- Started GNE-243 by adding `scripts/verify-package-boundaries.mjs` and wiring
+  it into the root `pnpm test` chain. The check guards package public-entry
+  imports, Reference Product business-object leakage, runtime-specific package
+  dependencies, client-side service-role/server-only access, and explicit raw
+  token/raw prompt/private submission telemetry fields. Local GNE-243
+  verification passed with `pnpm test:package-boundaries`, `pnpm typecheck`,
+  `pnpm test`, `pnpm build`, and `git diff --check`.
 - Prepared the current tree for public-repo review by adding an MIT License,
   expanding ignore rules for local secrets/build artifacts/logs, documenting
   the README license and brand-asset boundary, and replacing current-doc real
@@ -250,14 +257,22 @@ Boundaries still not claimed as verified production facts:
 ## In Progress Issues
 
 - `GNE-229` MVP3-02 PLATFORM [ARCH] 基座 Package 化与产品消费
-
-## In Review Issues
-
-- `GNE-242` MVP3 PLATFORM-03 apps/web 与 Reference Product 消费 Package
+- `GNE-243` MVP3 PLATFORM-04 [CI] package build/typecheck/boundary 检查
 
 ## In Progress
 
-MVP2 foundation parents are complete locally and in Linear: Integrations, Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed baseline. `GNE-228` PLAN is Done. MVP3 is now in `GNE-229` PLATFORM. `GNE-240` is Done after PR #37 and records the accepted package boundary. `GNE-241` is Done after PR #38 and adds minimal public entries for `@xwlc/platform` and `@xwlc/db`. `GNE-242` is in review to prove package consumption from existing `apps/web` chains and the Reference Product minimum entry, and to remove the old `@starter/*` workspace namespace in favor of the MVP3 target `@xwlc/*` namespace. Boundary checks and patch evidence belong to later PLATFORM child issues. Production payment remains deferred to `GNE-201`. Real-provider AI production smoke remains `not_run` until provider configuration and redeploy.
+MVP2 foundation parents are complete locally and in Linear: Integrations,
+Billing, Payment, AI, and Analytics. GitHub tag `v0.2.0` is the MVP2 sealed
+baseline. `GNE-228` PLAN is Done. MVP3 is now in `GNE-229` PLATFORM. `GNE-240`
+is Done after PR #37 and records the accepted package boundary. `GNE-241` is
+Done after PR #38 and adds minimal public entries for `@xwlc/platform` and
+`@xwlc/db`. `GNE-242` is Done after PR #40 and proves package consumption from
+existing `apps/web` chains and the Reference Product minimum entry while using
+the MVP3 target `@xwlc/*` namespace. `GNE-243` is in progress to turn the
+package/import/runtime/privacy boundary into a machine-checkable CI gate.
+Patch upgrade evidence still belongs to later `GNE-244`. Production payment
+remains deferred to `GNE-201`. Real-provider AI production smoke remains
+`not_run` until provider configuration and redeploy.
 
 ## Next Steps
 

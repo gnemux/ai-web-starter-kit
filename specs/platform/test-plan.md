@@ -51,16 +51,27 @@ GNE-240 is a boundary/spec task. Required checks:
    product/business code.
 7. Run `git diff --check`.
 
-## Later GNE-243 Machine Checks
+## GNE-243 Machine Checks
 
-GNE-243 should turn these checks into scripts or CI coverage:
+GNE-243 turns the package boundary rules into `pnpm test:package-boundaries`.
+Required checks:
 
-- package internal path imports are rejected;
-- product object names are rejected inside reusable platform packages;
-- server-only modules are not imported by browser/client code;
-- common packages do not import `next/server`, `next/headers`, `NextRequest`,
-  `NextResponse`, `@vercel/*`, Hono context, or Cloudflare runtime request types;
-- package build/typecheck runs for each workspace package.
+1. Run `pnpm test:package-boundaries`.
+2. Confirm package internal path imports are rejected:
+   `@xwlc/*/src/*` and `@xwlc/*/internal/*` must not appear in `apps/web`.
+3. Confirm Reference Product business table names are rejected inside reusable
+   packages: `cats`, `care_plans`, `care_tasks`, and `care_submissions`.
+4. Confirm client components do not import `server-only` or reference Supabase
+   service-role secrets.
+5. Confirm `@xwlc/core` does not import provider SDKs, Supabase SDKs, Next.js,
+   Vercel, Hono, or Cloudflare runtime objects.
+6. Confirm `@xwlc/platform` and `@xwlc/db` do not import `next/server`,
+   `next/headers`, `NextRequest`, `NextResponse`, `@vercel/*`, Hono context,
+   Cloudflare runtime request types, or `@supabase/ssr`.
+7. Confirm telemetry-facing files do not introduce explicit raw-token,
+   raw-prompt, or private-submission-text fields.
+8. Run `pnpm typecheck` so package build/typecheck still covers each workspace
+   package through Turbo.
 
 ## Not Run In GNE-240
 

@@ -217,7 +217,7 @@ GNE-229 PLATFORM
 ├── GNE-240 PLATFORM-01 Package 边界与依赖方向 (Done, PR #37)
 ├── GNE-241 PLATFORM-02 core/ui/platform/db 最小公开入口 (Done, PR #38)
 ├── GNE-242 PLATFORM-03 apps/web 与 Reference Product 消费 Package (Done, PR #40)
-├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查
+├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查 (In progress: repo machine gate)
 └── GNE-244 PLATFORM-05 Package patch 升级演练
 
 GNE-230 DELIVERY
@@ -229,6 +229,12 @@ GNE-230 DELIVERY
 
 GNE-249 DELIVERY-05 已取消独立执行并并入 GNE-230：交付失败处理原则
 属于父任务门禁，不再作为单独子任务推进。
+
+GNE-243 implementation note: package/import/runtime/privacy boundary checks now
+run through `scripts/verify-package-boundaries.mjs`, exposed as
+`pnpm test:package-boundaries`, and included in the root `pnpm test` chain used
+by GitHub PR CI. Local verification passed with `pnpm test:package-boundaries`,
+`pnpm typecheck`, `pnpm test`, `pnpm build`, and `git diff --check`.
 
 GNE-231 PRODUCT
 ├── GNE-251 PRODUCT-01 猫咪档案、照护计划、任务、提交数据模型

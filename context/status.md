@@ -25,7 +25,7 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
 - Completed M2 DATA with specs, local Supabase config, migration, seed guidance, shared TypeScript data model types, and RLS verification.
 - Synced M2 DATA Linear issues to Done.
 - Documented Supabase remote link and Auth environment rules for collaborators.
-- Applied M2 DATA migrations to Supabase staging project `nglilxhkuqzswbwitbdu`.
+- Applied M2 DATA migrations to Supabase staging project `<staging-project-ref>`.
 - Hardened staging after Supabase advisors by fixing `set_updated_at` search path, optimizing RLS policies, and revoking public execution of `rls_auto_enable()`.
 - Completed M3 API with reusable service result types, Supabase client/server helper boundaries, a demo `demo_items` service path, dashboard service example, and local verification.
 - Added Linear issue `GNE-163` so M4 Auth includes PostHog analytics instrumentation.
@@ -134,6 +134,14 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   GNE-242, but they must be audited as `uses_public_contract`,
   `adapter_only_ok`, or `gap_deferred`; live-payment production readiness still
   belongs to GNE-201/MVP5.
+- Prepared the current tree for public-repo review by adding an MIT License,
+  expanding ignore rules for local secrets/build artifacts/logs, documenting
+  the README license and brand-asset boundary, and replacing current-doc real
+  staging Supabase identifiers, Creem test object IDs, and operator email
+  evidence with placeholders. Repo Owner accepted the remaining historical
+  Supabase staging identifiers, Creem test object IDs, and operator-email
+  evidence as non-blocking for public visibility, so no Git history rewrite is
+  planned for this open-source preparation branch.
 
 ## Verification Snapshot
 
@@ -253,24 +261,29 @@ MVP2 foundation parents are complete locally and in Linear: Integrations, Billin
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For MVP3 implementation, pull latest `main` from GitHub and create a fresh task branch; do not reuse the pre-tag Auth/payment branches.
-2. Treat the current cloud Supabase project as reference/staging/test for MVP3 validation. Production Supabase is not enabled during MVP3; if a template asks for Production evidence, record `not_run / not enabled in MVP3`.
-3. Before any future online release or production gate, apply repository Supabase migrations through the reviewed workflow; do not rely on dashboard-only schema edits.
-4. Configure Supabase Auth URL settings for the deployed validation domain that is actually used; production Auth URL settings become a separate gate only when a true production Supabase project exists.
-5. Configure Vercel env entries from `.env.example` and `context/environment-matrix.md`, keeping server-only Supabase, Payment, AI, Email, Storage, and SMS secrets out of `NEXT_PUBLIC_`; redeploy after any env change before using the deployment as evidence.
-6. Start MVP3 from `GNE-228 MVP3-01 PLAN`, then follow `GNE-229` through `GNE-234`. The route validates a Reference Product consuming platform packages; it does not continue the old Product Validation Kit CP chain.
-7. Keep MVP3 on the 小团队 WIP rule: one parent issue carries the main implementation at a time; child issues stay under their parent issue and should not be assigned to the MVP3 milestone view or given Linear labels. Use the milestone diagrams and parent issue sections as the starting point for newcomer onboarding and reviewer acceptance.
-8. During `GNE-228`, keep the confirmed PLAN decisions visible: Linear + repo evidence sync, short task branches from `main`, single monorepo with package boundaries, current Supabase as reference/staging/test only, Supabase + Vercel mainline, Cloudflare/Hono adapter-readiness only, and AI/Billing mock/no-op/sandbox/test only.
-9. Treat the PLAN gate as failed if product-specific cat-care objects enter platform packages, if work starts from old pre-`v0.2.0` branches, if child issues are executed out of sequence without an explicit decision, if production Supabase/live payment/real AI become MVP3 blockers, if private tokens/private content appear in evidence, or if the final Reviewer path cannot connect page/data/RLS/deploy/analytics/CI/version evidence.
-10. In `GNE-229`, keep the MVP3 target convention to `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`; current code should not reintroduce the old `@starter/*` workspace namespace. Product-specific cat-care objects must stay outside platform packages.
-11. In `GNE-230`, require the minimum delivery gate: product repo can install packages, CI runs, Supabase reference/staging migrations run, Vercel validation deploys, version evidence is visible, and smoke tests pass. Use forward fix / expand-contract for database changes instead of promising DB rollback.
-12. In `GNE-232`, verify private-link lifecycle and risks: creation, use, expiry, revocation, repeated access, repeated submit, forwarded links, guessed tokens, raw-token log leakage, and anonymous abuse prevention.
-13. In `GNE-233`, keep the internal order Audit / Correlation ID -> Outbox -> AI draft with human review -> Entitlement / Usage -> Sandbox / Test Mode -> Health / Trace / Metrics. Do not let AI or Payment work block the PRODUCT or ACCESS minimum path.
-14. In `GNE-234`, execute the 30-minute Reviewer Runbook, then produce the final v0.3.0 decision: whether the package-consumption approach is valid, which capabilities enter XWLC v0.3.0, which need rework, and whether the next real product can start from v0.3.0.
-15. Before activating each MVP3 child issue, check whether it satisfies the milestone's minimum child-issue construction template: target, rationale, possible file/directories, outputs, non-goals, reviewer verification, documentation sync, and not_run/risk records.
-16. Use `GNE-201` for any production payment, live payment, merchant settlement, refund, reconciliation, invoice, or real user payment planning.
-17. Treat `GNE-75 FUTURE GROWTH-00` as a future/backlog horizontal growth parent. Do not attach it to MVP3 Reference Product, MVP4, MVP5, or MVP6 unless a later product-growth decision explicitly reopens that scope.
-18. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-19. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md`; future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+2. Before changing GitHub repository visibility to Public, merge the current
+   open-source preparation branch through the normal PR path. Historical
+   Supabase staging identifiers, Creem test object IDs, and operator-email
+   evidence are accepted by the Repo Owner as non-blocking; no history rewrite
+   is planned for this visibility switch.
+3. Treat the current cloud Supabase project as reference/staging/test for MVP3 validation. Production Supabase is not enabled during MVP3; if a template asks for Production evidence, record `not_run / not enabled in MVP3`.
+4. Before any future online release or production gate, apply repository Supabase migrations through the reviewed workflow; do not rely on dashboard-only schema edits.
+5. Configure Supabase Auth URL settings for the deployed validation domain that is actually used; production Auth URL settings become a separate gate only when a true production Supabase project exists.
+6. Configure Vercel env entries from `.env.example` and `context/environment-matrix.md`, keeping server-only Supabase, Payment, AI, Email, Storage, and SMS secrets out of `NEXT_PUBLIC_`; redeploy after any env change before using the deployment as evidence.
+7. Start MVP3 from `GNE-228 MVP3-01 PLAN`, then follow `GNE-229` through `GNE-234`. The route validates a Reference Product consuming platform packages; it does not continue the old Product Validation Kit CP chain.
+8. Keep MVP3 on the 小团队 WIP rule: one parent issue carries the main implementation at a time; child issues stay under their parent issue and should not be assigned to the MVP3 milestone view or given Linear labels. Use the milestone diagrams and parent issue sections as the starting point for newcomer onboarding and reviewer acceptance.
+9. During `GNE-228`, keep the confirmed PLAN decisions visible: Linear + repo evidence sync, short task branches from `main`, single monorepo with package boundaries, current Supabase as reference/staging/test only, Supabase + Vercel mainline, Cloudflare/Hono adapter-readiness only, and AI/Billing mock/no-op/sandbox/test only.
+10. Treat the PLAN gate as failed if product-specific cat-care objects enter platform packages, if work starts from old pre-`v0.2.0` branches, if child issues are executed out of sequence without an explicit decision, if production Supabase/live payment/real AI become MVP3 blockers, if private tokens/private content appear in evidence, or if the final Reviewer path cannot connect page/data/RLS/deploy/analytics/CI/version evidence.
+11. In `GNE-229`, keep the MVP3 target convention to `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`; current code should not reintroduce the old `@starter/*` workspace namespace. Product-specific cat-care objects must stay outside platform packages.
+12. In `GNE-230`, require the minimum delivery gate: product repo can install packages, CI runs, Supabase reference/staging migrations run, Vercel validation deploys, version evidence is visible, and smoke tests pass. Use forward fix / expand-contract for database changes instead of promising DB rollback.
+13. In `GNE-232`, verify private-link lifecycle and risks: creation, use, expiry, revocation, repeated access, repeated submit, forwarded links, guessed tokens, raw-token log leakage, and anonymous abuse prevention.
+14. In `GNE-233`, keep the internal order Audit / Correlation ID -> Outbox -> AI draft with human review -> Entitlement / Usage -> Sandbox / Test Mode -> Health / Trace / Metrics. Do not let AI or Payment work block the PRODUCT or ACCESS minimum path.
+15. In `GNE-234`, execute the 30-minute Reviewer Runbook, then produce the final v0.3.0 decision: whether the package-consumption approach is valid, which capabilities enter XWLC v0.3.0, which need rework, and whether the next real product can start from v0.3.0.
+16. Before activating each MVP3 child issue, check whether it satisfies the milestone's minimum child-issue construction template: target, rationale, possible file/directories, outputs, non-goals, reviewer verification, documentation sync, and not_run/risk records.
+17. Use `GNE-201` for any production payment, live payment, merchant settlement, refund, reconciliation, invoice, or real user payment planning.
+18. Treat `GNE-75 FUTURE GROWTH-00` as a future/backlog horizontal growth parent. Do not attach it to MVP3 Reference Product, MVP4, MVP5, or MVP6 unless a later product-growth decision explicitly reopens that scope.
+19. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
+20. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md`; future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
 
 ## Risks
 

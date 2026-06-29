@@ -147,9 +147,9 @@ For `GNE-100 PAYMENT-08`, local ignored env may persistently use:
 PAYMENT_PROVIDER=creem
 PAYMENT_MODE=test
 PAYMENT_LIVE_ENABLED=false
-CREEM_PLUS_MONTHLY_PRODUCT_ID=prod_7YlXijrX6eeQjeoQyyhByr
-CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE
-CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=prod_4IRFjMpu3pxY5eK75y8BP7
+CREEM_PLUS_MONTHLY_PRODUCT_ID=<creem-test-plus-monthly-product-id>
+CREEM_PRO_MONTHLY_PRODUCT_ID=<creem-test-pro-monthly-product-id>
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=<creem-test-ai-credit-pack-product-id>
 ```
 
 The Creem test API key must stay in local ignored env or a controlled secret manager as `PAYMENT_PROVIDER_SECRET`. Do not put it in `.env.example`, Git, Linear, screenshots, browser-visible code, or public PR text. Vercel Production should stay on `PAYMENT_PROVIDER=sandbox` until the MVP5 production-payment gate.
@@ -164,9 +164,9 @@ PAYMENT_MODE=test
 PAYMENT_LIVE_ENABLED=false
 PAYMENT_PROVIDER_SECRET=<Creem test API key, server-only>
 PAYMENT_WEBHOOK_SECRET=<Creem webhook signing secret, server-only>
-CREEM_PLUS_MONTHLY_PRODUCT_ID=prod_7YlXijrX6eeQjeoQyyhByr
-CREEM_PRO_MONTHLY_PRODUCT_ID=prod_3TvLvuLXmwQseX16nFNyQE
-CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=prod_4IRFjMpu3pxY5eK75y8BP7
+CREEM_PLUS_MONTHLY_PRODUCT_ID=<creem-test-plus-monthly-product-id>
+CREEM_PRO_MONTHLY_PRODUCT_ID=<creem-test-pro-monthly-product-id>
+CREEM_AI_CREDIT_PACK_100K_PRODUCT_ID=<creem-test-ai-credit-pack-product-id>
 CREEM_CHECKOUT_SUCCESS_URL=https://ai-web-starter-kit-web.vercel.app/account/payment/result?status=success
 ```
 

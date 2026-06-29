@@ -36,8 +36,8 @@ supabase db reset
 
 团队维护一个共享的 staging Supabase 项目，用于多人联调和接近线上环境的验收。
 
-- 当前 staging project ref: `nglilxhkuqzswbwitbdu`
-- 当前 staging API URL: `https://nglilxhkuqzswbwitbdu.supabase.co`
+- 当前 staging project ref: `<staging-project-ref>`
+- 当前 staging API URL: `<staging-supabase-api-url>`
 - 普通开发者不要直接在 staging Dashboard 建表或改表。
 - 只有合并后的 migration 才能进入 staging。
 - staging 可以由 CI 或 Supabase Maintainer 执行迁移。
@@ -82,7 +82,7 @@ supabase db reset
 
 ```bash
 supabase login
-supabase link --project-ref nglilxhkuqzswbwitbdu
+supabase link --project-ref <staging-project-ref>
 ```
 
 如果 CLI 要求输入 remote Postgres password，只能在本机交互输入或使用本机未提交的安全凭据管理方式。不要把密码写入命令历史、脚本、文档或 `.env.example`。

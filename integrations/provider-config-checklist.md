@@ -83,13 +83,13 @@ Secret and real-value searches:
 
 ```bash
 rg -n "sk_|sb_secret_|service_role|webhook secret|api key|token|password|secret key" README.md context integrations specs .env.example apps/web/lib/providers
-rg -n "nglilxhkuqzswbwitbdu|https://nglilxhkuqzswbwitbdu\\.supabase\\.co" .env.example
+rg -n 'https://[a-z0-9]{15,30}\.supabase\.co|SUPABASE_PROJECT_REF=[a-z0-9]{15,30}|Project ref: `?[a-z0-9]{15,30}`?' README.md context integrations specs supabase .env.example
 ```
 
 Expected results:
 
 - Secret keyword hits are placeholder, rule, or checklist text only.
-- `.env.example` does not contain the shared Supabase project ref or API URL.
+- No repository docs or environment templates contain a real Supabase project ref or API URL.
 - No real provider key, webhook secret, service-role key, access token, private provider payload, customer data, or account screenshot is committed.
 
 ## Runtime Smoke Checks

@@ -47,7 +47,7 @@ M2 does not expose a page. Browser checks belong to M3 API and M4 Auth once serv
 - `public.user_profiles` and `public.demo_items` were verified with RLS enabled.
 - `authenticated` grants were verified for the required table operations.
 - A rollback-only SQL check verified owner-only profile reads, owner demo item reads, authenticated public-read demo item reads, and blocked non-owner updates.
-- Staging project `nglilxhkuqzswbwitbdu` received `create_data_template`, `harden_data_template`, and `revoke_public_rls_auto_enable` migrations.
+- Staging project `<staging-project-ref>` received `create_data_template`, `harden_data_template`, and `revoke_public_rls_auto_enable` migrations.
 - Staging security advisors returned no lints after hardening.
 - Staging performance advisors only reported expected unused-index INFO entries for new `demo_items` indexes.
 

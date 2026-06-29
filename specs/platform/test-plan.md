@@ -73,6 +73,23 @@ Required checks:
 8. Run `pnpm typecheck` so package build/typecheck still covers each workspace
    package through Turbo.
 
+## GNE-244 Patch Upgrade Checks
+
+GNE-244 is the package patch-upgrade rehearsal. Required checks:
+
+1. Record the package versions before the patch.
+2. Apply a non-breaking patch through public package exports.
+3. Record the package versions after the patch.
+4. Confirm the Reference Product minimum entry still consumes package public
+   exports without deep imports.
+5. Run `pnpm test:package-boundaries`.
+6. Run `pnpm typecheck`.
+7. Run `pnpm test`.
+8. Run `pnpm build`.
+9. Smoke `/reference-product` locally and record the HTTP result.
+10. If the patch fails, record rollback or forward-fix evidence instead of
+    marking the rehearsal as passed.
+
 ## Not Run In GNE-240
 
 - Runtime UI smoke: not required because no runtime code changes.

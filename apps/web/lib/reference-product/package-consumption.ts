@@ -1,6 +1,7 @@
 import {
   createAnonymousTokenScope,
-  defineSchemaVersion
+  defineSchemaVersion,
+  formatSchemaVersion
 } from "@xwlc/db";
 import {
   requireAuthenticatedActor,
@@ -47,6 +48,6 @@ export function getReferenceProductPackageConsumption(): ReferenceProductPackage
     authContract: "uses_public_contract",
     dbContract: "uses_public_contract",
     packageScope: "reference_product_minimum_entry",
-    schemaVersion: schemaVersion.id
+    schemaVersion: formatSchemaVersion(schemaVersion)
   };
 }

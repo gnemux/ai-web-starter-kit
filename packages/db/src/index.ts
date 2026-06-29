@@ -42,6 +42,10 @@ export function defineSchemaVersion(
   return { id, description, appliedAt };
 }
 
+export function formatSchemaVersion(version: SchemaVersion): string {
+  return version.appliedAt ? `${version.id} @ ${version.appliedAt}` : version.id;
+}
+
 export function createOwnerScope(actorId: string, ownerId: string): DbBoundaryResult<DbAccessScope> {
   if (!actorId || !ownerId) {
     return {

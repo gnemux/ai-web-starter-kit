@@ -32,7 +32,7 @@
   package-contract audit results. Completed in GNE-242.
 - [x] Boundary rules are machine checked by `pnpm test:package-boundaries`.
   Completed in GNE-243.
-- [ ] Patch upgrade evidence exists. Deferred to GNE-244.
+- [x] Patch upgrade evidence exists. Completed in GNE-244.
 
 ## GNE-241 Verification Snapshot
 
@@ -108,3 +108,38 @@ boundary. It checks:
 - `pnpm build` passes and includes the package builds plus the Next.js app
   build.
 - `git diff --check` passes.
+
+## GNE-244 Package Patch Upgrade Evidence
+
+GNE-244 is a real local patch-upgrade rehearsal, not a dry-run.
+
+| Package | Before | After |
+| --- | --- | --- |
+| `@xwlc/core` | `0.1.0` | `0.1.1` |
+| `@xwlc/ui` | `0.1.0` | `0.1.1` |
+| `@xwlc/platform` | `0.1.0` | `0.1.1` |
+| `@xwlc/db` | `0.1.0` | `0.1.1` |
+
+Patch content:
+
+- `@xwlc/db` added the public `formatSchemaVersion` helper.
+- The Reference Product minimum entry consumes that helper through the
+  `@xwlc/db` public export.
+- No package internal imports, runtime-specific adapters, product-specific
+  cat-care objects, or provider SDKs were added to reusable packages.
+- No DB migration or schema change was added.
+
+GNE-244 verification snapshot:
+
+- `pnpm test:package-boundaries` passed.
+- `pnpm typecheck` passed and included `@xwlc/core@0.1.1`,
+  `@xwlc/db@0.1.1`, `@xwlc/platform@0.1.1`, `@xwlc/ui@0.1.1`, and
+  `@xwlc/web@0.1.0`.
+- `pnpm test` passed and reran AI safety, release-boundary, package-boundary,
+  and package test tasks.
+- `pnpm lint` passed.
+- `pnpm build` passed and included `/reference-product` in the Next.js route
+  table.
+- Local HTTP smoke passed: `HEAD /reference-product` returned `200 OK` on
+  `http://127.0.0.1:3006/reference-product`.
+- Rollback/forward-fix path was not used because the patch and smoke passed.

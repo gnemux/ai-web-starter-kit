@@ -217,8 +217,8 @@ GNE-229 PLATFORM
 ├── GNE-240 PLATFORM-01 Package 边界与依赖方向 (Done, PR #37)
 ├── GNE-241 PLATFORM-02 core/ui/platform/db 最小公开入口 (Done, PR #38)
 ├── GNE-242 PLATFORM-03 apps/web 与 Reference Product 消费 Package (Done, PR #40)
-├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查 (In progress: repo machine gate)
-└── GNE-244 PLATFORM-05 Package patch 升级演练
+├── GNE-243 PLATFORM-04 package build/typecheck/boundary 检查 (Done, PR #41)
+└── GNE-244 PLATFORM-05 Package patch 升级演练 (In Review: package patch rehearsal)
 
 GNE-230 DELIVERY
 ├── GNE-245 DELIVERY-01 单仓 CI 覆盖与 package 交付门禁
@@ -237,8 +237,17 @@ by GitHub PR CI. Local verification passed with `pnpm test:package-boundaries`,
 `pnpm typecheck`, `pnpm test`, `pnpm build`, and `git diff --check`. A temporary
 negative sample using `@xwlc/platform/src/index` was verified to fail the
 boundary check, then removed; rerunning `pnpm test:package-boundaries` passed.
-The branch `codex/gne-243-package-boundary-checks` was pushed for review, and
-`GNE-243` is now `In Review` in Linear.
+The branch `codex/gne-243-package-boundary-checks` was merged as PR #41, and
+`GNE-243` is Done in Linear.
+
+GNE-244 implementation note: the package patch rehearsal bumps `@xwlc/core`,
+`@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db` from `0.1.0` to `0.1.1`, adds the
+public `@xwlc/db` `formatSchemaVersion` helper, and keeps the Reference Product
+minimum entry consuming package public exports. No DB migration, CF/Hono
+adapter, product business object, or deployment setup was added. Local
+verification passed with `pnpm test:package-boundaries`, `pnpm typecheck`,
+`pnpm test`, `pnpm lint`, `pnpm build`, `HEAD /reference-product` returning
+`200 OK`, and `git diff --check`. `GNE-244` is now `In Review` in Linear.
 
 GNE-231 PRODUCT
 ├── GNE-251 PRODUCT-01 猫咪档案、照护计划、任务、提交数据模型

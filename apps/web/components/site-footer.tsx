@@ -12,7 +12,9 @@ type SiteFooterLabels = {
     home: string;
     signUp: string;
     login: string;
+    demo: string;
     dashboard: string;
+    referenceProduct: string;
     account: string;
     billing: string;
     usage: string;
@@ -47,7 +49,7 @@ export function SiteFooter({
     { href: "/", label: labels.productLinks.home },
     { href: "/login?mode=signup", label: labels.productLinks.signUp },
     { href: "/login", label: labels.productLinks.login },
-    { href: "/dashboard", label: labels.productLinks.dashboard },
+    { href: "/reference-product", label: labels.productLinks.referenceProduct },
     { href: "/account", label: labels.productLinks.account },
     { href: "/account/billing", label: labels.productLinks.billing },
     { href: "/account/usage", label: labels.productLinks.usage }

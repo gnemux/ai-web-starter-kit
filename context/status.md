@@ -172,8 +172,126 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   Supabase staging identifiers, Creem test object IDs, and operator-email
   evidence as non-blocking for public visibility, so no Git history rewrite is
   planned for this open-source preparation branch.
+- Started GNE-231 PRODUCT on current `main` per repo-owner instruction, despite
+  the normal task-branch rule. The corrected Reference Product direction is a
+  CatCare product entry, not a generic starter page with explanatory cards:
+  `/` is now product-first, `/login` uses CatCare account context, and
+  `/reference-product` is the protected owner workspace. The original foundation
+  demo remains reachable through `/demo`, `/demo/login`, and `/dashboard`.
+  CatCare's protected workspace hides `/dashboard` from primary nav and account
+  menu so product flow and foundation validation are not mixed.
+  Product data uses new cats, care
+  plans, care tasks, and care submissions tables; common packages and database
+  foundation capabilities are consumed rather than polluted with product
+  objects. Deep product-specific entitlement, payment, AI Credit, AI draft,
+  Audit, Outbox, and PostHog wiring remains under GNE-233; anonymous share
+  tokens and sitter access remain under GNE-232.
+- Started GNE-278 PRODUCT-00 as the active GNE-231 gate after reviewing the
+  uploaded 10-screen CatCare high-fidelity handoff. The current decision is to
+  pause further expansion of the GNE-251/GNE-252 implementation shape until the
+  routine-first page map, state matrix, field split, share-link state machine,
+  anonymous minimum surface, AI/Billing return flow, paid-user surfaces, and
+  evidence list are reflected in specs and Linear. Generated design-guidance
+  boards now live at
+  `specs/reference-product/prototypes/catcare-gne-278-flow-board-v2.png` and
+  `specs/reference-product/prototypes/catcare-gne-278-paid-user-states-v3.png`;
+  the binding spec lives at `specs/reference-product/gne-278-product-flow.md`.
+  The product model now includes lightweight daily events and food/treat/care
+  items as AI generation inputs. CatCare MVP3 pricing is USD-first for the
+  overseas Reference Product; any CNY symbols in generated prototype images are
+  stale visual details and should not drive implementation.
+  The current bilingual PRODUCT-00 prototype is
+  `specs/reference-product/prototypes/catcare-gne-278-flow-board-v6.png`, and
+  it records route flow, menu active rules, button prerequisites, and mutually
+  exclusive controls.
 
 ## Verification Snapshot
+
+Latest MVP3 PRODUCT-00 design-gate update:
+
+- Reviewed the uploaded CatCare prototype handoff README and 10 reference
+  screens.
+- Generated a corrected routine-first 12-screen flow board with imagegen and
+  saved it under
+  `specs/reference-product/prototypes/catcare-gne-278-flow-board-v2.png`.
+- Generated a paid-user state board with imagegen and saved it under
+  `specs/reference-product/prototypes/catcare-gne-278-paid-user-states-v3.png`.
+- Generated the current bilingual v6 flow board with imagegen and saved it
+  under `specs/reference-product/prototypes/catcare-gne-278-flow-board-v6.png`.
+- Applied the GNE-251 PRODUCT02 8-table CatCare data model migration to the
+  linked remote Supabase test project through linked SQL after direct Postgres
+  CLI paths failed with TLS EOF.
+- Verified the remote PRODUCT02 tables: all 8 tables exist, RLS is enabled, 4
+  owner policies exist per table, `authenticated` / `service_role` grants are
+  present, REST Data API returns `200 ok` for each table, and migration history
+  records version `20260629075823`.
+- Updated Reference Product specs to make GNE-278 the page-map/prototype gate
+  before expanding owner-side implementation.
+- Applied the PM flow correction: PRODUCT now has a short first-run activation
+  path where cat profile + recurring routine + scenario can generate the first
+  AI/mock checklist. Food/care items and event history remain important
+  product-loop inputs, but they are optional enrichments rather than blockers
+  before the first value moment.
+- GNE-278 was synced to Linear as Done after the PM correction. GNE-251 remains
+  In Progress while the current branch stays unpushed and PRODUCT-01 UI/SYSTEM
+  remains separate under GNE-280; remote PRODUCT02 schema/RLS/REST evidence is
+  now captured in Linear and project specs.
+- PRODUCT02 implementation now extends the Reference Product migration and
+  TypeScript database types for `cats`, `care_routines`,
+  `care_routine_items`, `care_items`, `care_events`, `care_plans`,
+  `care_tasks`, and `care_submissions`. Existing app service selects were kept
+  compatible with the expanded row shape.
+- PM correction added: GNE-251 data-model acceptance is gated by real CatCare
+  shell pages (Landing, login/register, authenticated default workspace,
+  account/billing/usage entries), while full high-fidelity owner workflow stays
+  in GNE-252/GNE-253.
+- GNE-251 UI gate is now implemented locally: Landing CTA no longer routes to
+  foundation demo, `/login` defaults to `/reference-product`, account/payment
+  shells hide `/dashboard` from nav and account menu, and footer product links
+  keep CatCare/account/billing/AI Credit without `/demo` or `/dashboard`.
+- Current PR scope is classified as a historical `GNE-251 PRODUCT-02 DATA`
+  exception because it started before `GNE-280 PRODUCT-01 UI/SYSTEM` was
+  inserted. The mixed Landing/login/nav/footer/i18n/account-shell work is
+  temporary data-verification shell work and must not be counted as GNE-280
+  Done. The Reference Product actions/forms/page creation and publish behavior
+  are temporary data-verification UI and must not be counted as GNE-252 Done.
+  No ACCESS or CAPABILITY implementation is included in this PR.
+- Product opportunity added to MVP3 KNOW: accumulated daily events can later
+  power paid text/video recap generation for social sharing. It is future
+  CAPABILITY/GROWTH, not MVP3 core.
+- No branch, commit, or push was created.
+
+Latest MVP3 PRODUCT local verification:
+
+- `supabase db reset --local` is currently blocked by local Colima/VZ:
+  `failed to run attach disk "colima", in use by instance "colima"`.
+  Non-destructive recovery attempts were made with `colima stop`,
+  `colima start`, stale helper-process cleanup, `LIMA_HOME=... limactl list`,
+  and direct `limactl start colima`; the disk lock persisted.
+- Because local DB reset is blocked, local rebuild verification remains
+  pending. Remote linked Supabase SQL/RLS/REST verification has passed and is
+  recorded as current PRODUCT02 data-model evidence.
+- Remote Supabase app credentials are configured in ignored local env and REST
+  connectivity is valid. The PRODUCT02 migration was applied to the linked
+  remote test project through linked SQL because direct Postgres CLI sessions
+  (`db push`, `migration repair`, and supplied direct DB URL) still fail from
+  this machine with TLS EOF. PostgREST schema was reloaded, all 8 PRODUCT02
+  tables return REST `200 ok`, and migration history records version
+  `20260629075823`.
+- `pnpm test:package-boundaries` passed.
+- `pnpm typecheck` passed.
+- `pnpm lint` passed.
+- `pnpm build` passed.
+- `git diff --check` passed.
+- Local HTTP smoke on `http://127.0.0.1:3006` passed for `/` GET -> 200,
+  `/login?next=/reference-product` GET -> 200, `/reference-product` signed out
+  -> 307, `/account` signed out -> 307, `/account/billing` signed out -> 307,
+  and `/account/usage` signed out -> 307.
+- Dev server is running at `http://127.0.0.1:3006`.
+- HTTP smoke passed: `/` -> 200, `/login?next=/reference-product` -> 200,
+  `/reference-product` signed out -> 307 to `/login?next=/reference-product`.
+- Full authenticated browser smoke with local signup/cat/plan creation was not
+  rerun after the PRODUCT02 schema expansion because local Supabase is blocked.
 
 Latest local release-hardening verification:
 

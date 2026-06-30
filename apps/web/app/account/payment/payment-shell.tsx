@@ -35,10 +35,13 @@ export async function PaymentShell({
           email={accountResult.data.user.email}
           labels={copy.common.accountMenu}
           name={userLabel}
+          showDashboard={false}
         />
       }
       brand={<BrandMark subtitle={copy.account.shellSubtitle} />}
-      navItems={getWorkspaceNavItems(copy, "billing")}
+      navItems={getWorkspaceNavItems(copy, "billing", {
+        includeDashboard: false
+      })}
       user={{
         name: userLabel,
         role: accountResult.data.user.email

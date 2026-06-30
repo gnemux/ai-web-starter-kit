@@ -52,10 +52,13 @@ export function AccountAppShell({
           email={context.account.user.email}
           labels={context.copy.common.accountMenu}
           name={context.userLabel}
+          showDashboard={false}
         />
       }
       brand={<BrandMark subtitle={context.copy.account.shellSubtitle} />}
-      navItems={getWorkspaceNavItems(context.copy, activeNav)}
+      navItems={getWorkspaceNavItems(context.copy, activeNav, {
+        includeDashboard: false
+      })}
       user={{
         name: context.userLabel,
         role: context.account.user.email

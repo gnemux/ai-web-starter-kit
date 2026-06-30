@@ -17,21 +17,23 @@ export default async function HomePage() {
     currentAccount?.profile?.displayName ||
     currentAccount?.user.email ||
     copy.common.accountMenu.signedIn;
-  const primaryHref = currentAccount ? "/dashboard" : "/login?mode=signup";
+  const primaryHref = currentAccount
+    ? "/reference-product"
+    : "/login?mode=signup&next=/reference-product";
   const primaryLabel = currentAccount
-    ? copy.common.dashboard
+    ? copy.home.primaryActionSignedIn
     : copy.home.primaryAction;
-  const secondaryHref = currentAccount ? "/account" : "/login";
+  const secondaryHref = currentAccount ? "/reference-product" : "#product-flow";
   const secondaryLabel = currentAccount
-    ? copy.common.account
+    ? copy.home.secondaryActionSignedIn
     : copy.home.secondaryAction;
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-950">
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex min-h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <BrandMark subtitle={copy.common.brandSubtitle} />
-          <div className="flex justify-end">
+          <BrandMark subtitle={copy.home.brandSubtitle} />
+          <div className="flex items-center justify-end gap-3">
             {currentAccount ? (
               <AccountMenu
                 avatarUrl={currentAccount.profile?.avatarUrl}
@@ -40,7 +42,7 @@ export default async function HomePage() {
                 name={currentAccountLabel}
               />
             ) : (
-              <Button href="/login" variant="secondary">
+              <Button href="/login?next=/reference-product" variant="secondary">
                 {copy.common.login}
               </Button>
             )}
@@ -48,17 +50,17 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <section className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl flex-col items-center justify-center px-4 pt-8 pb-16 text-center sm:px-6 lg:px-8">
-        <div className="flex max-w-3xl flex-col items-center">
-          <Badge tone="neutral">{copy.home.badge}</Badge>
-          <h1 className="mt-5 max-w-3xl text-3xl font-semibold leading-[1.14] tracking-normal text-slate-950 sm:text-4xl lg:text-5xl">
+      <section className="mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(26rem,1.1fr)] lg:px-8">
+        <div className="min-w-0">
+          <Badge tone="ready">{copy.home.badge}</Badge>
+          <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-[1.1] tracking-normal text-slate-950 sm:text-5xl">
             {copy.home.title}
             <span className="block text-cyan-700">{copy.home.titleAccent}</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 tracking-normal text-slate-600 sm:text-lg">
+          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
             {copy.home.description}
           </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button href={primaryHref} icon={<ArrowRightIcon />}>
               {primaryLabel}
             </Button>
@@ -66,17 +68,31 @@ export default async function HomePage() {
               {secondaryLabel}
             </Button>
           </div>
-          <p className="mt-5 text-sm font-medium text-slate-600">
-            {copy.home.trustLine}
-          </p>
-          <p className="mt-3 text-xs font-semibold uppercase tracking-normal text-slate-400">
-            {copy.home.metaLine}
-          </p>
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {copy.home.stats.map((stat) => (
+              <div
+                className="rounded-lg border border-slate-200 bg-white p-4"
+                key={stat.label}
+              >
+                <p className="text-2xl font-semibold text-slate-950">
+                  {stat.value}
+                </p>
+                <p className="mt-1 text-sm leading-5 text-slate-500">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-10 grid w-full max-w-6xl gap-5 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-stretch">
-          <LandingPreview labels={copy.home.preview} />
-          <LandingCallouts items={copy.home.callouts} />
+        <ProductPreview labels={copy.home.preview} />
+      </section>
+
+      <section className="border-t border-slate-200 bg-white" id="product-flow">
+        <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+          {copy.home.callouts.map((item) => (
+            <CalloutCard item={item} key={item.title} />
+          ))}
         </div>
       </section>
     </main>
@@ -89,136 +105,110 @@ type LandingCallout = {
 };
 
 type LandingPreviewLabels = {
-  activity: string;
-  description: string;
-  label: string;
-  primaryPanel: string;
-  secondaryPanel: string;
-  status: string;
-  statusValue: string;
+  account: string;
+  activePlan: string;
+  aiCredit: string;
+  billing: string;
+  cat: string;
+  handoff: string;
+  note: string;
+  plan: string;
+  publish: string;
+  result: string;
+  taskOne: string;
+  taskTwo: string;
   title: string;
 };
 
-function LandingCallouts({ items }: { items: readonly LandingCallout[] }) {
-  return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-      {items.map((item) => (
-        <CalloutCard item={item} key={item.title} />
-      ))}
-    </div>
-  );
-}
-
 function CalloutCard({ item }: { item: LandingCallout }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 text-left">
-      <div className="flex items-start gap-3">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-950 text-xs font-semibold text-white">
-          {item.title.slice(0, 1)}
-        </span>
-        <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-slate-950">
-            {item.title}
-          </h2>
-          <p className="mt-1 text-sm leading-5 text-slate-500">
-            {item.description}
-          </p>
-        </div>
-      </div>
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <h2 className="text-sm font-semibold text-slate-950">{item.title}</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-500">
+        {item.description}
+      </p>
     </div>
   );
 }
 
-function LandingPreview({ labels }: { labels: LandingPreviewLabels }) {
+function ProductPreview({ labels }: { labels: LandingPreviewLabels }) {
   return (
     <div className="overflow-hidden rounded-lg border border-slate-200 bg-white text-left shadow-sm shadow-slate-900/[0.04]">
-      <div className="flex min-h-12 items-center justify-between gap-4 border-b border-slate-200 bg-slate-50 px-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex shrink-0 gap-1.5" aria-hidden="true">
-            <span className="h-2.5 w-2.5 rounded-sm bg-slate-300" />
-            <span className="h-2.5 w-2.5 rounded-sm bg-slate-300" />
-            <span className="h-2.5 w-2.5 rounded-sm bg-slate-300" />
+      <div className="border-b border-slate-200 bg-slate-950 p-5 text-white">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-normal text-cyan-200">
+              CatCare Studio
+            </p>
+            <h2 className="mt-2 text-xl font-semibold">{labels.title}</h2>
           </div>
-          <p className="truncate text-xs font-semibold uppercase text-slate-500">
-            {labels.label}
-          </p>
+          <Badge tone="ready">{labels.publish}</Badge>
         </div>
-        <p className="hidden shrink-0 text-xs font-semibold text-cyan-700 sm:block">
-          {labels.statusValue}
-        </p>
       </div>
 
-      <div className="grid gap-0 lg:grid-cols-[12rem_1fr]">
-        <aside className="border-b border-slate-200 bg-white p-4 lg:border-b-0 lg:border-r">
-          <p className="text-xs font-semibold uppercase text-slate-400">
-            {labels.status}
+      <div className="grid gap-0 lg:grid-cols-[15rem_minmax(0,1fr)]">
+        <aside className="border-b border-slate-200 bg-slate-50 p-4 lg:border-b-0 lg:border-r">
+          <p className="text-xs font-semibold uppercase tracking-normal text-slate-400">
+            {labels.account}
           </p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
-            {labels.statusValue}
+            {labels.cat}
           </p>
-          <div className="mt-6 grid gap-2" aria-hidden="true">
-            <span className="h-9 rounded-md bg-slate-950" />
-            <span className="h-9 rounded-md bg-slate-100" />
-            <span className="h-9 rounded-md bg-slate-100" />
+          <div className="mt-5 grid gap-3">
+            <MiniFact label={labels.billing} value="Plus" />
+            <MiniFact label={labels.aiCredit} value="84k" />
           </div>
         </aside>
 
         <div className="p-5 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <h2 className="text-lg font-semibold text-slate-950">
-                {labels.title}
-              </h2>
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_10rem]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-normal text-slate-400">
+                {labels.activePlan}
+              </p>
+              <h3 className="mt-2 text-lg font-semibold text-slate-950">
+                {labels.plan}
+              </h3>
               <p className="mt-2 text-sm leading-6 text-slate-500">
-                {labels.description}
+                {labels.note}
               </p>
             </div>
-            <div className="shrink-0 rounded-md border border-slate-200 px-3 py-2">
-              <p className="text-xs font-semibold uppercase text-slate-400">
-                {labels.activity}
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs font-semibold uppercase tracking-normal text-slate-400">
+                {labels.result}
               </p>
-              <div className="mt-2 flex gap-1" aria-hidden="true">
-                <span className="h-1.5 w-8 rounded-full bg-cyan-600" />
-                <span className="h-1.5 w-6 rounded-full bg-slate-200" />
-                <span className="h-1.5 w-5 rounded-full bg-slate-200" />
-              </div>
+              <p className="mt-2 text-sm font-semibold text-slate-950">
+                {labels.handoff}
+              </p>
             </div>
           </div>
 
-          <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_15rem]">
-            <section className="min-h-56 border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-sm font-semibold text-slate-700">
-                  {labels.primaryPanel}
-                </h3>
-                <span className="h-7 w-20 rounded-md bg-white" aria-hidden="true" />
-              </div>
-              <div className="mt-6 grid gap-3" aria-hidden="true">
-                <span className="h-3 w-3/5 rounded-full bg-slate-300" />
-                <span className="h-3 w-4/5 rounded-full bg-slate-200" />
-                <span className="h-3 w-2/3 rounded-full bg-slate-200" />
-              </div>
-              <div className="mt-8 grid min-h-24 grid-cols-3 gap-3" aria-hidden="true">
-                <span className="border border-slate-200 bg-white" />
-                <span className="border border-slate-200 bg-white" />
-                <span className="border border-slate-200 bg-white" />
-              </div>
-            </section>
-
-            <section className="border border-slate-200 p-4">
-              <h3 className="text-sm font-semibold text-slate-700">
-                {labels.secondaryPanel}
-              </h3>
-              <div className="mt-5 grid gap-3" aria-hidden="true">
-                <span className="h-9 rounded-md bg-slate-950" />
-                <span className="h-9 rounded-md bg-slate-100" />
-                <span className="h-2 w-4/5 rounded-full bg-slate-200" />
-                <span className="h-2 w-3/5 rounded-full bg-slate-200" />
-              </div>
-            </section>
+          <div className="mt-6 grid gap-3">
+            <TaskRow label="01" text={labels.taskOne} />
+            <TaskRow label="02" text={labels.taskTwo} />
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function MiniFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-slate-200 bg-white p-3">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="mt-1 text-base font-semibold text-slate-950">{value}</p>
+    </div>
+  );
+}
+
+function TaskRow({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white text-xs font-semibold text-slate-500">
+        {label}
+      </span>
+      <p className="text-sm leading-6 text-slate-700">{text}</p>
     </div>
   );
 }

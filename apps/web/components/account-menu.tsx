@@ -14,6 +14,7 @@ import {
   BillingIcon,
   ChevronDownIcon,
   DashboardIcon,
+  OverviewIcon,
   SignOutIcon,
   UsageIcon
 } from "@/components/app-icons";
@@ -25,6 +26,7 @@ type AccountMenuLabels = {
   billing: string;
   dashboard: string;
   label: string;
+  referenceProduct: string;
   signedIn: string;
   signOut: string;
   usage: string;
@@ -35,12 +37,14 @@ export function AccountMenu({
   avatarUrl,
   email,
   labels,
-  name
+  name,
+  showDashboard = true
 }: {
   avatarUrl?: string | null;
   email: string;
   labels: AccountMenuLabels;
   name: string;
+  showDashboard?: boolean;
 }) {
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -128,10 +132,17 @@ export function AccountMenu({
             <p className="mt-0.5 truncate text-xs text-slate-500">{email}</p>
           </div>
           <div className="p-1.5">
+            {showDashboard ? (
+              <AccountMenuLink
+                href="/dashboard"
+                icon={<DashboardIcon />}
+                label={labels.dashboard}
+              />
+            ) : null}
             <AccountMenuLink
-              href="/dashboard"
-              icon={<DashboardIcon />}
-              label={labels.dashboard}
+              href="/reference-product"
+              icon={<OverviewIcon />}
+              label={labels.referenceProduct}
             />
             <AccountMenuLink
               href="/account"

@@ -40,6 +40,7 @@ export const dictionaries = {
       },
       nav: {
         dashboard: "工作台",
+        referenceProduct: "照护产品",
         account: "账户",
         profile: "个人资料",
         billing: "套餐",
@@ -49,6 +50,7 @@ export const dictionaries = {
         label: "账户菜单",
         signedIn: "已登录",
         dashboard: "工作台",
+        referenceProduct: "照护产品",
         account: "个人资料",
         billing: "套餐",
         usage: "AI",
@@ -65,7 +67,9 @@ export const dictionaries = {
           home: "首页",
           signUp: "注册",
           login: "登录",
+          demo: "底座 Demo",
           dashboard: "工作台",
+          referenceProduct: "照护产品",
           account: "个人资料",
           billing: "套餐",
           usage: "AI"
@@ -88,42 +92,102 @@ export const dictionaries = {
       }
     },
     home: {
-      badge: "产品点位 · 第一屏",
-      title: "一句清晰的产品主张",
-      titleAccent: "承接一个真实场景",
-      description: "面向一个明确场景，交付一个可感知的结果。",
-      primaryAction: "开始使用",
-      secondaryAction: "登录",
-      trustLine: "适用于早期验证、团队协作与持续迭代",
-      metaLine: "身份 · 数据 · 服务层 · 部署",
+      brandSubtitle: "CatCare handoff workspace",
+      badge: "猫咪临时照护",
+      title: "临时照看猫咪，",
+      titleAccent: "不用再靠聊天记录交代",
+      description:
+        "为主人准备猫咪档案、照护计划、交接发布和结果回收。账户、套餐、支付和 AI Credit 沿用底座能力，猫咪照护数据独立建模。",
+      primaryAction: "创建照护计划",
+      primaryActionSignedIn: "进入照护工作台",
+      secondaryAction: "查看使用流程",
+      secondaryActionSignedIn: "进入照护工作台",
+      demoLink: "底座 Demo",
+      trustLine: "适用于寄养、朋友代看、短期上门照护",
+      metaLine: "猫咪档案 · 照护计划 · 发布交接 · 提交回收",
+      stats: [
+        {
+          value: "1",
+          label: "主人账户"
+        },
+        {
+          value: "4",
+          label: "照护流程"
+        },
+        {
+          value: "AI",
+          label: "摘要和提醒预留"
+        }
+      ],
       preview: {
-        activity: "最近更新",
-        description: "一条主要任务正在推进。",
-        label: "产品界面",
-        primaryPanel: "关键结果",
-        secondaryPanel: "下一步动作",
-        status: "当前状态",
-        statusValue: "稳定运行",
-        title: "核心工作区"
+        account: "主人账户",
+        activePlan: "当前交接",
+        aiCredit: "AI Credit",
+        billing: "照护套餐",
+        cat: "Mochi",
+        handoff: "等待提交",
+        note: "门禁卡放在玄关抽屉，异常时先电话联系主人。",
+        plan: "周末寄养照护",
+        publish: "已发布",
+        result: "结果回收",
+        taskOne: "晚上 8 点喂食，干粮 30g，水碗换新水。",
+        taskTwo: "睡前确认猫砂盆，异常情况记录备注。",
+        title: "猫咪照护计划"
       },
       callouts: [
         {
-          title: "核心场景",
-          description: "用户在这里看到主要问题。"
+          title: "建档",
+          description: "记录猫咪习惯、饮食、禁忌和临时注意事项。"
         },
         {
-          title: "用户价值",
-          description: "一句话说明可以获得的结果。"
+          title: "计划",
+          description: "把照护任务、日期和交接说明整理成一张卡。"
         },
         {
-          title: "关键动作",
-          description: "让下一步操作足够明确。"
+          title: "发布",
+          description: "主人发布交接，后续可接私密分享和权限控制。"
         },
         {
-          title: "结果反馈",
-          description: "展示完成、进度或可信信号。"
+          title: "回收",
+          description: "照看完成、备注和异常都会回到主人侧看板。"
         }
       ]
+    },
+    demo: {
+      subtitle: "eXtensible Web Launch Core",
+      badge: "Foundation Demo",
+      title: "底座能力 Demo",
+      description:
+        "这里保留 starter kit 原有验证入口，用于检查登录、工作台、demo 数据、AI 草稿、套餐、支付和 AI Credit 等底座能力。CatCare 产品从首页和照护工作台进入。",
+      signIn: "登录查看 Demo",
+      openDashboard: "打开工作台",
+      productLink: "返回 CatCare",
+      backToDemo: "返回 Demo",
+      cards: [
+        {
+          title: "账户与工作台",
+          description: "验证 Supabase Auth、受保护页面和账户菜单。"
+        },
+        {
+          title: "Demo 数据链路",
+          description: "通过 demo item 检查页面、Server Action、service、Supabase 和 RLS。"
+        },
+        {
+          title: "商业化能力",
+          description: "复用套餐、支付、AI Credit 和 AI 草稿验证面，不把它们复制进产品页面。"
+        }
+      ],
+      login: {
+        subtitle: "eXtensible Web Launch Core",
+        badge: "底座账户",
+        title: "登录底座 Demo",
+        description:
+          "这个入口保留原有 demo 语境，默认登录后进入 `/dashboard`。认证仍复用同一套 Auth 服务。",
+        welcomeBack: "欢迎回来",
+        startWithEmail: "创建 Demo 账户",
+        accessDashboard: "进入 Demo 工作台",
+        providerNote: "邮箱密码用于当前环境的底座 Demo 账户。"
+      }
     },
     referenceProduct: {
       subtitle: "Reference Product Consumer",
@@ -144,20 +208,138 @@ export const dictionaries = {
       status: {
         verified_owner: "公开入口可消费",
         blocked: "需检查"
+      },
+      owner: {
+        shellSubtitle: "Cat Care Reference Product",
+        eyebrow: "主人侧照护产品",
+        title: "猫咪照护计划",
+        description:
+          "把喂食、用药、门禁钥匙和异常处理放进一份交接单。照看者完成后，主人回到这里查看结果。",
+        packageGate: "系统状态",
+        packageGateDescription:
+          "账户和数据服务可用；照护业务对象保留在产品侧，方便后续扩展成独立猫咪照护产品。",
+        serviceErrorTitle: "照护产品暂不可用",
+        metrics: {
+          cats: "猫咪档案",
+          drafts: "草稿计划",
+          published: "已发布"
+        },
+        catForm: {
+          title: "猫咪档案",
+          description: "先记录猫咪的基础信息，后续计划都归属到这只猫。",
+          name: "猫咪名字",
+          namePlaceholder: "例如：Mochi",
+          notes: "照护备注",
+          notesPlaceholder: "饮食、性格、禁忌或临时注意事项。",
+          submit: "保存猫咪",
+          submitting: "保存中...",
+          success: "猫咪档案已保存。",
+          hint: "这些信息只属于当前主人账户。"
+        },
+        planForm: {
+          title: "新建照护计划",
+          description:
+            "创建一个可发布的照护计划，至少包含一项照护任务。",
+          cat: "选择猫咪",
+          titleLabel: "计划标题",
+          titlePlaceholder: "例如：周末寄养照护",
+          startOn: "开始日期",
+          endOn: "结束日期",
+          handoffNotes: "交接说明",
+          handoffPlaceholder: "门禁、钥匙、紧急联系人或整体交接信息。",
+          taskTitle: "第一项任务",
+          taskTitlePlaceholder: "例如：晚上 8 点喂食",
+          taskInstructions: "任务说明",
+          taskInstructionsPlaceholder: "份量、位置、完成标准或异常处理方式。",
+          submit: "创建计划",
+          submitting: "创建中...",
+          success: "照护计划已创建。",
+          hint: "创建后可以在照护计划卡片发布。",
+          noCats: "请先创建猫咪档案。"
+        },
+        planList: {
+          title: "照护计划",
+          description:
+            "主人在这里查看自己的计划状态、任务和照看提交结果。",
+          emptyTitle: "还没有照护计划",
+          emptyDescription: "先创建猫咪档案，再添加第一份照护计划。",
+          hasSubmissions: "已有提交",
+          noSubmissions: "等待提交",
+          unknownCat: "未知猫咪",
+          openDate: "未定",
+          publish: "发布计划",
+          tasks: "任务",
+          submissions: "提交结果",
+          submissionsEmpty:
+            "当前还没有照看者提交。发布分享后，完成记录会回到这里。"
+        },
+        capabilities: {
+          title: "产品账户",
+          description:
+            "管理主人资料、照护套餐、支付入口和 AI 辅助额度。",
+          account: "主人账户",
+          billing: "照护套餐 / 账单",
+          usage: "AI Credit / 用量",
+          connected: "已接入",
+          planned: "待开放",
+          accountAction: "查看账户",
+          billingAction: "查看套餐",
+          usageAction: "查看用量",
+          billingDescription:
+            "发布第一份计划后，这里会承接照护套餐和支付动作。",
+          usageDescription:
+            "照护摘要、提醒文案和异常整理会使用这里的 AI Credit。"
+        },
+        status: {
+          draft: "草稿",
+          published: "已发布",
+          reviewed: "已查看",
+          closed: "已关闭"
+        },
+        submissionStatus: {
+          completed: "完成",
+          note: "备注",
+          exception: "异常"
+        },
+        errors: {
+          general: "照护产品暂时无法保存，请检查表单后重试。",
+          name: "请输入 1 到 80 个字符的名字。",
+          notes: "备注不能超过 2000 个字符。",
+          catId: "请选择有效猫咪。",
+          title: "请输入 1 到 120 个字符的标题。",
+          endOn: "结束日期不能早于开始日期。",
+          handoffNotes: "交接说明不能超过 2000 个字符。",
+          taskTitle: "请输入 1 到 120 个字符的任务标题。",
+          taskInstructions: "任务说明不能超过 2000 个字符。"
+        }
       }
     },
     login: {
-      subtitle: "eXtensible Web Launch Core",
-      badge: "Supabase Auth",
-      title: "登录后继续使用",
+      subtitle: "CatCare handoff workspace",
+      badge: "主人账户",
+      title: "登录后管理猫咪照护",
       description:
-        "这里保留最小可复用账户流程：邮箱密码登录、注册、会话校验和安全事件记录。",
+        "使用同一套账户系统进入猫咪照护产品。注册后会直接回到照护工作台，原底座 Demo 仍可单独查看。",
+      sideTitle: "把临时照护交接变成一份清楚可执行的清单",
+      sideDescription:
+        "主人先建立猫咪档案和日常习惯，再生成临时照护计划。照看者按步骤完成，结果回到主人工作台。",
+      securityLine: "账户、套餐、支付和 AI Credit 沿用底座能力；猫咪照护数据保留在产品侧。",
       createAccount: "创建账户",
       welcomeBack: "欢迎回来",
-      startWithEmail: "使用邮箱注册",
-      accessDashboard: "登录账户",
-      providerNote: "请使用当前环境配置的 Supabase Auth 项目。",
+      startWithEmail: "创建主人账户",
+      accessDashboard: "进入照护工作台",
+      providerNote: "邮箱密码用于当前环境的猫咪照护产品账户。",
       confirmationFailed: "确认链接无法验证。如账号已完成确认，请直接登录。",
+      productPoints: [
+        {
+          title: "照护计划归属于主人账户",
+          description: "登录后创建的猫咪档案和计划只属于当前主人。"
+        },
+        {
+          title: "套餐和 AI Credit 会接入同一账户",
+          description: "支付、用量和 AI 辅助额度沿用底座能力，产品侧保留自己的业务语境。"
+        }
+      ],
       form: {
         email: "邮箱",
         password: "密码",
@@ -541,6 +723,7 @@ export const dictionaries = {
       },
       nav: {
         dashboard: "Dashboard",
+        referenceProduct: "Care product",
         account: "Account",
         profile: "Profile",
         billing: "Plans",
@@ -550,6 +733,7 @@ export const dictionaries = {
         label: "Account menu",
         signedIn: "Signed in",
         dashboard: "Dashboard",
+        referenceProduct: "Care product",
         account: "Profile",
         billing: "Plans",
         usage: "AI",
@@ -566,7 +750,9 @@ export const dictionaries = {
           home: "Home",
           signUp: "Sign up",
           login: "Log in",
+          demo: "Foundation demo",
           dashboard: "Dashboard",
+          referenceProduct: "Care product",
           account: "Profile",
           billing: "Plans",
           usage: "AI"
@@ -589,42 +775,102 @@ export const dictionaries = {
       }
     },
     home: {
-      badge: "Product surface · First screen",
-      title: "A clear product promise",
-      titleAccent: "for one real scenario",
-      description: "Focused on one audience, one job, and one visible outcome.",
-      primaryAction: "Start now",
-      secondaryAction: "Log in",
-      trustLine: "Built for early validation, team workflows, and continuous iteration",
-      metaLine: "Identity · Data · Service layer · Deployment",
+      brandSubtitle: "CatCare handoff workspace",
+      badge: "Temporary cat care",
+      title: "Hand off cat care",
+      titleAccent: "without a messy chat thread",
+      description:
+        "Give owners cat profiles, care plans, published handoffs, and returned results. Account, billing, payment, and AI Credit reuse the foundation while cat-care data gets its own model.",
+      primaryAction: "Create care plan",
+      primaryActionSignedIn: "Open care workspace",
+      secondaryAction: "View care flow",
+      secondaryActionSignedIn: "Open care workspace",
+      demoLink: "Foundation demo",
+      trustLine: "Built for boarding, friend care, and short home visits",
+      metaLine: "Cat profile · Care plan · Handoff · Result return",
+      stats: [
+        {
+          value: "1",
+          label: "Owner account"
+        },
+        {
+          value: "4",
+          label: "Care steps"
+        },
+        {
+          value: "AI",
+          label: "Summary and reminder slot"
+        }
+      ],
       preview: {
-        activity: "Recent activity",
-        description: "A primary task is moving through the workspace.",
-        label: "Product surface",
-        primaryPanel: "Key outcome",
-        secondaryPanel: "Next action",
-        status: "Current state",
-        statusValue: "Running steadily",
-        title: "Core workspace"
+        account: "Owner account",
+        activePlan: "Current handoff",
+        aiCredit: "AI Credit",
+        billing: "Care plan",
+        cat: "Mochi",
+        handoff: "Awaiting result",
+        note: "Door card is in the entry drawer. Call the owner first for exceptions.",
+        plan: "Weekend boarding care",
+        publish: "Published",
+        result: "Result return",
+        taskOne: "Feed at 8 PM: 30g dry food and fresh water.",
+        taskTwo: "Check the litter box before bed and record exceptions.",
+        title: "Cat care plan"
       },
       callouts: [
         {
-          title: "Core scene",
-          description: "The main user problem is visible here."
+          title: "Profile",
+          description: "Capture habits, food, restrictions, and short-term notes."
         },
         {
-          title: "User value",
-          description: "A concise result the user can recognize."
+          title: "Plan",
+          description: "Turn care tasks, dates, and handoff notes into one card."
         },
         {
-          title: "Primary action",
-          description: "The next step stays clear and reachable."
+          title: "Publish",
+          description: "Owners publish the handoff; private sharing can attach later."
         },
         {
-          title: "Outcome signal",
-          description: "Progress, completion, or trust appears here."
+          title: "Return",
+          description: "Completed tasks, notes, and exceptions return to the owner board."
         }
       ]
+    },
+    demo: {
+      subtitle: "eXtensible Web Launch Core",
+      badge: "Foundation Demo",
+      title: "Foundation capability demo",
+      description:
+        "This keeps the starter kit's original validation entry for auth, dashboard, demo data, AI drafts, plans, payment, and AI Credit. CatCare starts from the homepage and care workspace.",
+      signIn: "Sign in to demo",
+      openDashboard: "Open dashboard",
+      productLink: "Back to CatCare",
+      backToDemo: "Back to demo",
+      cards: [
+        {
+          title: "Account and workspace",
+          description: "Validate Supabase Auth, protected pages, and the account menu."
+        },
+        {
+          title: "Demo data path",
+          description: "Check the page, Server Action, service, Supabase, and RLS chain through demo items."
+        },
+        {
+          title: "Commercial capabilities",
+          description: "Reuse plans, payment, AI Credit, and AI draft review surfaces without copying them into the product pages."
+        }
+      ],
+      login: {
+        subtitle: "eXtensible Web Launch Core",
+        badge: "Foundation account",
+        title: "Sign in to the foundation demo",
+        description:
+          "This entry keeps the original demo context and returns to `/dashboard` by default. Auth still reuses the same shared service.",
+        welcomeBack: "Welcome back",
+        startWithEmail: "Create demo account",
+        accessDashboard: "Open demo dashboard",
+        providerNote: "Email and password sign in to the current foundation demo environment."
+      }
     },
     referenceProduct: {
       subtitle: "Reference Product Consumer",
@@ -645,21 +891,139 @@ export const dictionaries = {
       status: {
         verified_owner: "Public entry consumed",
         blocked: "Needs review"
+      },
+      owner: {
+        shellSubtitle: "Cat Care Reference Product",
+        eyebrow: "Owner care product",
+        title: "Cat care plans",
+        description:
+          "Put feeding, medication, door access, and exception handling into one handoff plan. After the sitter finishes, the owner reviews the results here.",
+        packageGate: "System status",
+        packageGateDescription:
+          "Account and data services are available; care objects stay product-owned so the product can grow independently.",
+        serviceErrorTitle: "Care product unavailable",
+        metrics: {
+          cats: "Cat profiles",
+          drafts: "Draft plans",
+          published: "Published"
+        },
+        catForm: {
+          title: "Cat profile",
+          description: "Start with the cat's basic care context. Plans attach to this cat.",
+          name: "Cat name",
+          namePlaceholder: "Mochi",
+          notes: "Care notes",
+          notesPlaceholder: "Food, temperament, restrictions, or short-term notes.",
+          submit: "Save cat",
+          submitting: "Saving...",
+          success: "Cat profile saved.",
+          hint: "These details stay scoped to the current owner account."
+        },
+        planForm: {
+          title: "New care plan",
+          description:
+            "Create a publishable care plan with at least one care task.",
+          cat: "Cat",
+          titleLabel: "Plan title",
+          titlePlaceholder: "Weekend boarding care",
+          startOn: "Start date",
+          endOn: "End date",
+          handoffNotes: "Handoff notes",
+          handoffPlaceholder: "Door code, keys, emergency contact, or general handoff context.",
+          taskTitle: "First task",
+          taskTitlePlaceholder: "Feed at 8 PM",
+          taskInstructions: "Task instructions",
+          taskInstructionsPlaceholder: "Amount, location, completion standard, or exception handling.",
+          submit: "Create plan",
+          submitting: "Creating...",
+          success: "Care plan created.",
+          hint: "After creation, publish the plan from its care card.",
+          noCats: "Create a cat profile first."
+        },
+        planList: {
+          title: "Care plans",
+          description:
+            "Owners review their plan status, tasks, and sitter submission results here.",
+          emptyTitle: "No care plans yet",
+          emptyDescription: "Create a cat profile, then add the first care plan.",
+          hasSubmissions: "Has submissions",
+          noSubmissions: "Awaiting submissions",
+          unknownCat: "Unknown cat",
+          openDate: "Open",
+          publish: "Publish plan",
+          tasks: "Tasks",
+          submissions: "Submission results",
+          submissionsEmpty:
+            "No sitter submissions yet. Once a share is sent, completed records return here."
+        },
+        capabilities: {
+          title: "Product account",
+          description:
+            "Manage owner profile, care plan billing, payment entry, and AI assistance credit.",
+          account: "Owner account",
+          billing: "Care plans / billing",
+          usage: "AI Credit / usage",
+          connected: "Connected",
+          planned: "Coming soon",
+          accountAction: "View account",
+          billingAction: "View plans",
+          usageAction: "View usage",
+          billingDescription:
+            "After the first plan is published, this area can carry care-plan billing and payment actions.",
+          usageDescription:
+            "Care summaries, reminder drafts, and exception cleanup use this AI Credit area."
+        },
+        status: {
+          draft: "Draft",
+          published: "Published",
+          reviewed: "Reviewed",
+          closed: "Closed"
+        },
+        submissionStatus: {
+          completed: "Completed",
+          note: "Note",
+          exception: "Exception"
+        },
+        errors: {
+          general: "The care product could not save this yet. Check the form and retry.",
+          name: "Enter a name from 1 to 80 characters.",
+          notes: "Notes must stay under 2000 characters.",
+          catId: "Choose a valid cat.",
+          title: "Enter a title from 1 to 120 characters.",
+          endOn: "End date cannot be before start date.",
+          handoffNotes: "Handoff notes must stay under 2000 characters.",
+          taskTitle: "Enter a task title from 1 to 120 characters.",
+          taskInstructions: "Task instructions must stay under 2000 characters."
+        }
       }
     },
     login: {
-      subtitle: "eXtensible Web Launch Core",
-      badge: "Supabase Auth",
-      title: "Continue after login",
+      subtitle: "CatCare handoff workspace",
+      badge: "Owner account",
+      title: "Sign in to manage cat care",
       description:
-        "This keeps the reusable account flow small: email/password login, signup, session validation, and safe event tracking.",
+        "Use the shared account system to enter the cat-care product. New signups return to the care workspace, while the foundation demo stays available separately.",
+      sideTitle: "Turn a temporary care handoff into a clear, executable checklist",
+      sideDescription:
+        "Owners set up cat profiles and daily routines, then generate a temporary care plan. Sitters follow the steps and results return to the owner workspace.",
+      securityLine: "Account, billing, payment, and AI Credit reuse the foundation; cat-care data stays product-owned.",
       createAccount: "Create account",
       welcomeBack: "Welcome back",
-      startWithEmail: "Start with email",
-      accessDashboard: "Sign in",
-      providerNote: "Use the Supabase Auth project configured for this environment.",
+      startWithEmail: "Create owner account",
+      accessDashboard: "Open care workspace",
+      providerNote: "Email and password sign in to the current cat-care product environment.",
       confirmationFailed:
         "The confirmation link could not be verified. If the account is already confirmed, sign in directly.",
+      productPoints: [
+        {
+          title: "Care plans belong to the owner account",
+          description: "Cat profiles and plans created after login are scoped to this owner."
+        },
+        {
+          title: "Billing and AI Credit attach to the same account",
+          description: "Payment, usage, and AI assistance reuse the foundation while keeping product semantics."
+        }
+      ],
       form: {
         email: "Email",
         password: "Password",

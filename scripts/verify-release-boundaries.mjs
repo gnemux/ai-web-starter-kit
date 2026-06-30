@@ -101,8 +101,12 @@ expect(
     authForm.includes("state?.mode === mode") &&
     authForm.includes("state.mode === submittedMode") &&
     authForm.includes("setHasSubmittedCurrentMode(false)") &&
-    authForm.includes("router.replace(buildModeUrl(nextMode, nextPath))"),
-  "Auth form state must stay scoped to the submitted login/signup mode."
+    authForm.includes(
+      "router.replace(buildModeUrl(nextMode, nextPath, modePath, defaultNextPath))"
+    ) &&
+    authForm.includes("modePath: string") &&
+    authForm.includes("defaultNextPath: string"),
+  "Auth form state must stay scoped to the submitted login/signup mode and preserve product-specific login routes."
 );
 
 expect(

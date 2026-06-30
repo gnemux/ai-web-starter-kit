@@ -41,14 +41,18 @@ type AuthFormErrorLabels = {
 };
 
 export function AuthForm({
+  defaultNextPath = "/reference-product",
   errorLabels,
   initialMode,
   labels,
+  modePath = "/login",
   nextPath
 }: {
+  defaultNextPath?: string;
   errorLabels: AuthFormErrorLabels;
   initialMode: AuthMode;
   labels: AuthFormLabels;
+  modePath?: string;
   nextPath: string;
 }) {
   const router = useRouter();
@@ -122,7 +126,7 @@ export function AuthForm({
   return (
     <form
       action={formAction}
-      className="mt-6 space-y-4"
+      className="space-y-5"
       onSubmit={(event) => {
         const formData = new FormData(event.currentTarget);
         const submitted = String(formData.get("mode") ?? "signin") as AuthMode;
@@ -141,15 +145,37 @@ export function AuthForm({
       <input name="mode" type="hidden" value={mode} />
       <input name="next" type="hidden" value={nextPath} />
 
-      <div>
-        <p className="text-sm font-semibold text-cyan-700">
-          {isSignUp ? labels.createAccount : labels.welcomeBack}
+      <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1">
+        <button
+          className={`min-h-10 rounded-md text-sm font-semibold transition ${
+            !isSignUp
+              ? "bg-white text-teal-700 shadow-sm"
+              : "text-slate-500 hover:text-slate-950"
+          }`}
+          onClick={() => switchMode("signin")}
+          type="button"
+        >
+          {labels.signIn}
+        </button>
+        <button
+          className={`min-h-10 rounded-md text-sm font-semibold transition ${
+            isSignUp
+              ? "bg-white text-teal-700 shadow-sm"
+              : "text-slate-500 hover:text-slate-950"
+          }`}
+          onClick={() => switchMode("signup")}
+          type="button"
+        >
+          {labels.createAccount}
+        </button>
+      </div>
+
+      <div className="rounded-lg border border-teal-100 bg-teal-50/70 p-4">
+        <p className="text-sm font-semibold text-teal-800">
+          {isSignUp ? labels.startWithEmail : labels.welcomeBack}
         </p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-normal text-slate-950">
-          {isSignUp ? labels.startWithEmail : labels.accessDashboard}
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-500">
-          {labels.providerNote}
+        <p className="mt-1 text-sm leading-6 text-teal-900/70">
+          {isSignUp ? labels.newHere : labels.accessDashboard}
         </p>
       </div>
 
@@ -159,9 +185,10 @@ export function AuthForm({
         </label>
         <input
           autoComplete="email"
-          className="mt-2 min-h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+          className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
           id="email"
           name="email"
+          placeholder="name@example.com"
           required
           type="email"
         />
@@ -176,9 +203,10 @@ export function AuthForm({
         </label>
         <input
           autoComplete={isSignUp ? "new-password" : "current-password"}
-          className="mt-2 min-h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+          className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
           id="password"
           name="password"
+          placeholder="••••••••"
           required
           type="password"
         />
@@ -209,22 +237,15 @@ export function AuthForm({
         </div>
       ) : null}
 
-      <Button className="w-full" type="submit">
+      <Button className="min-h-12 w-full bg-teal-700 hover:bg-teal-800" type="submit">
         {isPending ? labels.working : isSignUp ? labels.createAccount : labels.signIn}
       </Button>
 
       <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
         <span>{isSignUp ? labels.alreadyHaveAccount : labels.newHere}</span>
         <button
-          className="font-medium text-cyan-700 hover:text-cyan-900"
-          onClick={() => {
-            const nextMode = isSignUp ? "signin" : "signup";
-
-            setMode(nextMode);
-            setSubmittedMode(nextMode);
-            setHasSubmittedCurrentMode(false);
-            router.replace(buildModeUrl(nextMode, nextPath));
-          }}
+          className="font-medium text-teal-700 hover:text-teal-900"
+          onClick={() => switchMode(isSignUp ? "signin" : "signup")}
           type="button"
         >
           {isSignUp ? labels.switchToSignIn : labels.switchToSignUp}
@@ -232,22 +253,38 @@ export function AuthForm({
       </div>
     </form>
   );
+
+  function switchMode(nextMode: AuthMode) {
+    if (nextMode === mode) {
+      return;
+    }
+
+    setMode(nextMode);
+    setSubmittedMode(nextMode);
+    setHasSubmittedCurrentMode(false);
+    router.replace(buildModeUrl(nextMode, nextPath, modePath, defaultNextPath));
+  }
 }
 
-function buildModeUrl(mode: AuthMode, nextPath: string) {
+function buildModeUrl(
+  mode: AuthMode,
+  nextPath: string,
+  modePath: string,
+  defaultNextPath: string
+) {
   const params = new URLSearchParams();
 
   if (mode === "signup") {
     params.set("mode", "signup");
   }
 
-  if (nextPath !== "/dashboard") {
+  if (nextPath !== defaultNextPath) {
     params.set("next", nextPath);
   }
 
   const query = params.toString();
 
-  return query ? `/login?${query}` : "/login";
+  return query ? `${modePath}?${query}` : modePath;
 }
 
 function getGeneralErrorLabel(

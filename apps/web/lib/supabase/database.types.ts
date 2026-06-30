@@ -339,6 +339,474 @@ export type Database = {
         };
         Relationships: [];
       };
+      cats: {
+        Row: {
+          id: string;
+          owner_id: string;
+          name: string;
+          life_stage: "kitten" | "adult" | "senior" | "unknown" | null;
+          breed: string | null;
+          safety_notes: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          name: string;
+          life_stage?: "kitten" | "adult" | "senior" | "unknown" | null;
+          breed?: string | null;
+          safety_notes?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          name?: string;
+          life_stage?: "kitten" | "adult" | "senior" | "unknown" | null;
+          breed?: string | null;
+          safety_notes?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_routines: {
+        Row: {
+          id: string;
+          owner_id: string;
+          cat_id: string;
+          title: string;
+          source: "manual" | "template" | "ai_assisted";
+          is_default: boolean;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          cat_id: string;
+          title?: string;
+          source?: "manual" | "template" | "ai_assisted";
+          is_default?: boolean;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          cat_id?: string;
+          title?: string;
+          source?: "manual" | "template" | "ai_assisted";
+          is_default?: boolean;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_routine_items: {
+        Row: {
+          id: string;
+          routine_id: string;
+          category:
+            | "meal"
+            | "water"
+            | "litter"
+            | "medicine"
+            | "treat"
+            | "play"
+            | "environment"
+            | "other";
+          title: string;
+          frequency: string;
+          time_hint: string | null;
+          instructions: string | null;
+          enabled: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          routine_id: string;
+          category:
+            | "meal"
+            | "water"
+            | "litter"
+            | "medicine"
+            | "treat"
+            | "play"
+            | "environment"
+            | "other";
+          title: string;
+          frequency?: string;
+          time_hint?: string | null;
+          instructions?: string | null;
+          enabled?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          routine_id?: string;
+          category?:
+            | "meal"
+            | "water"
+            | "litter"
+            | "medicine"
+            | "treat"
+            | "play"
+            | "environment"
+            | "other";
+          title?: string;
+          frequency?: string;
+          time_hint?: string | null;
+          instructions?: string | null;
+          enabled?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_items: {
+        Row: {
+          id: string;
+          owner_id: string;
+          cat_id: string;
+          item_type:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "litter"
+            | "supply"
+            | "other";
+          name: string;
+          default_amount: string | null;
+          default_frequency: string | null;
+          instructions: string | null;
+          visible_to_sitter: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          cat_id: string;
+          item_type:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "litter"
+            | "supply"
+            | "other";
+          name: string;
+          default_amount?: string | null;
+          default_frequency?: string | null;
+          instructions?: string | null;
+          visible_to_sitter?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          cat_id?: string;
+          item_type?:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "litter"
+            | "supply"
+            | "other";
+          name?: string;
+          default_amount?: string | null;
+          default_frequency?: string | null;
+          instructions?: string | null;
+          visible_to_sitter?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_events: {
+        Row: {
+          id: string;
+          owner_id: string;
+          cat_id: string;
+          event_type:
+            | "feeding"
+            | "treat"
+            | "health"
+            | "medicine"
+            | "vet"
+            | "travel"
+            | "behavior"
+            | "environment"
+            | "other";
+          title: string;
+          note: string | null;
+          related_item_name: string | null;
+          severity: "normal" | "watch" | "urgent";
+          occurred_on: string | null;
+          started_on: string | null;
+          ended_on: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          cat_id: string;
+          event_type:
+            | "feeding"
+            | "treat"
+            | "health"
+            | "medicine"
+            | "vet"
+            | "travel"
+            | "behavior"
+            | "environment"
+            | "other";
+          title: string;
+          note?: string | null;
+          related_item_name?: string | null;
+          severity?: "normal" | "watch" | "urgent";
+          occurred_on?: string | null;
+          started_on?: string | null;
+          ended_on?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          cat_id?: string;
+          event_type?:
+            | "feeding"
+            | "treat"
+            | "health"
+            | "medicine"
+            | "vet"
+            | "travel"
+            | "behavior"
+            | "environment"
+            | "other";
+          title?: string;
+          note?: string | null;
+          related_item_name?: string | null;
+          severity?: "normal" | "watch" | "urgent";
+          occurred_on?: string | null;
+          started_on?: string | null;
+          ended_on?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_plans: {
+        Row: {
+          id: string;
+          owner_id: string;
+          cat_id: string;
+          routine_id: string | null;
+          title: string;
+          status: "draft" | "published" | "reviewed" | "closed";
+          scenario:
+            | "business_trip"
+            | "weekend_away"
+            | "friend_visit"
+            | "other";
+          generation_source: "manual" | "template" | "ai_mock";
+          ai_input_summary: Json;
+          start_on: string | null;
+          end_on: string | null;
+          handoff_notes: string | null;
+          generated_at: string | null;
+          published_at: string | null;
+          reviewed_at: string | null;
+          closed_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          cat_id: string;
+          routine_id?: string | null;
+          title: string;
+          status?: "draft" | "published" | "reviewed" | "closed";
+          scenario?:
+            | "business_trip"
+            | "weekend_away"
+            | "friend_visit"
+            | "other";
+          generation_source?: "manual" | "template" | "ai_mock";
+          ai_input_summary?: Json;
+          start_on?: string | null;
+          end_on?: string | null;
+          handoff_notes?: string | null;
+          generated_at?: string | null;
+          published_at?: string | null;
+          reviewed_at?: string | null;
+          closed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          cat_id?: string;
+          routine_id?: string | null;
+          title?: string;
+          status?: "draft" | "published" | "reviewed" | "closed";
+          scenario?:
+            | "business_trip"
+            | "weekend_away"
+            | "friend_visit"
+            | "other";
+          generation_source?: "manual" | "template" | "ai_mock";
+          ai_input_summary?: Json;
+          start_on?: string | null;
+          end_on?: string | null;
+          handoff_notes?: string | null;
+          generated_at?: string | null;
+          published_at?: string | null;
+          reviewed_at?: string | null;
+          closed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_tasks: {
+        Row: {
+          id: string;
+          plan_id: string;
+          category:
+            | "meal"
+            | "water"
+            | "litter"
+            | "medicine"
+            | "treat"
+            | "play"
+            | "environment"
+            | "observe"
+            | "other";
+          title: string;
+          instructions: string | null;
+          time_hint: string | null;
+          frequency: string | null;
+          source: "routine" | "care_item" | "event" | "owner" | "ai_suggestion";
+          source_ref: string | null;
+          sort_order: number;
+          required: boolean;
+          enabled: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          plan_id: string;
+          category?:
+            | "meal"
+            | "water"
+            | "litter"
+            | "medicine"
+            | "treat"
+            | "play"
+            | "environment"
+            | "observe"
+            | "other";
+          title: string;
+          instructions?: string | null;
+          time_hint?: string | null;
+          frequency?: string | null;
+          source?: "routine" | "care_item" | "event" | "owner" | "ai_suggestion";
+          source_ref?: string | null;
+          sort_order?: number;
+          required?: boolean;
+          enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          plan_id?: string;
+          category?:
+            | "meal"
+            | "water"
+            | "litter"
+            | "medicine"
+            | "treat"
+            | "play"
+            | "environment"
+            | "observe"
+            | "other";
+          title?: string;
+          instructions?: string | null;
+          time_hint?: string | null;
+          frequency?: string | null;
+          source?: "routine" | "care_item" | "event" | "owner" | "ai_suggestion";
+          source_ref?: string | null;
+          sort_order?: number;
+          required?: boolean;
+          enabled?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_submissions: {
+        Row: {
+          id: string;
+          owner_id: string;
+          plan_id: string;
+          task_id: string | null;
+          submitted_by_label: string;
+          status: "completed" | "note" | "exception";
+          note: string | null;
+          abnormal: boolean;
+          idempotency_key: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          plan_id: string;
+          task_id?: string | null;
+          submitted_by_label: string;
+          status: "completed" | "note" | "exception";
+          note?: string | null;
+          abnormal?: boolean;
+          idempotency_key?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          plan_id?: string;
+          task_id?: string | null;
+          submitted_by_label?: string;
+          status?: "completed" | "note" | "exception";
+          note?: string | null;
+          abnormal?: boolean;
+          idempotency_key?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       payment_events: {
         Row: {
           id: string;

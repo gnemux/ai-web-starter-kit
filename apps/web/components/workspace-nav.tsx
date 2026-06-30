@@ -4,21 +4,34 @@ import {
   AccountIcon,
   BillingIcon,
   DashboardIcon,
+  OverviewIcon,
   UsageIcon
 } from "./app-icons";
 
-export type WorkspaceNavKey = "dashboard" | "profile" | "billing" | "usage";
+export type WorkspaceNavKey =
+  | "dashboard"
+  | "referenceProduct"
+  | "profile"
+  | "billing"
+  | "usage";
 
 export function getWorkspaceNavItems(
   copy: Dictionary,
-  activeItem: WorkspaceNavKey
+  activeItem: WorkspaceNavKey,
+  options: { includeDashboard?: boolean } = {}
 ) {
-  return [
+  const items = [
     {
       href: "/dashboard",
       label: copy.common.nav.dashboard,
       active: activeItem === "dashboard",
       icon: <DashboardIcon />
+    },
+    {
+      href: "/reference-product",
+      label: copy.common.nav.referenceProduct,
+      active: activeItem === "referenceProduct",
+      icon: <OverviewIcon />
     },
     {
       href: "/account",
@@ -39,4 +52,8 @@ export function getWorkspaceNavItems(
       icon: <UsageIcon />
     }
   ];
+
+  return options.includeDashboard === false
+    ? items.filter((item) => item.href !== "/dashboard")
+    : items;
 }

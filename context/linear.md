@@ -267,11 +267,104 @@ deployment completed successfully, the reviewer confirmed the page opened, and
 `GNE-244` plus parent `GNE-229` are Done in Linear.
 
 GNE-231 PRODUCT
-├── GNE-251 PRODUCT-01 猫咪档案、照护计划、任务、提交数据模型
-├── GNE-252 PRODUCT-02 主人侧创建/编辑/发布流程
-├── GNE-253 PRODUCT-03 主人侧结果查看和状态变化
-├── GNE-254 PRODUCT-04 Supabase RLS 验收 SQL 与 seed 数据
-└── GNE-255 PRODUCT-05 基础事件和页面级验收
+├── GNE-278 PRODUCT-00 CatCare 高保真产品旅程、页面地图与付费触发点
+├── GNE-280 PRODUCT-01 [UI/SYSTEM] V6 原型转标准 SaaS UI
+├── GNE-251 PRODUCT-02 [DATA] 猫咪档案、喂养习惯、用品、事件、照护计划、任务、提交数据模型
+├── GNE-252 PRODUCT-03 主人侧创建/编辑/发布流程
+├── GNE-253 PRODUCT-04 主人侧结果查看和状态变化
+├── GNE-254 PRODUCT-05 Supabase RLS 验收 SQL 与 seed 数据
+└── GNE-255 PRODUCT-06 基础事件和页面级验收
+
+GNE-278 implementation note: PRODUCT execution now runs through PRODUCT-00 as
+the page-map and prototype gate before more GNE-251/GNE-252 implementation is
+expanded. The accepted visual source is the 10-screen CatCare prototype handoff
+under `/Users/wangwei/Downloads/CatCare_上一版高保真原型_10屏_含Codex交接`.
+The corrected local spec is
+`specs/reference-product/gne-278-product-flow.md`. The generated high-fidelity
+boards are
+`specs/reference-product/prototypes/catcare-gne-278-flow-board-v2.png` for the
+routine-first product flow and
+`specs/reference-product/prototypes/catcare-gne-278-paid-user-states-v3.png`
+for paid-user states. The product now separates cat identity from reusable
+daily care routines, then generates a temporary care checklist from routine +
+scenario + dates. Paid state must appear in value-consuming product surfaces
+such as dashboard, routine optimization, generated checklist, private share,
+owner results, and billing; it must not appear on the anonymous sitter page.
+The product model also includes lightweight daily events and food/treat/care
+items as AI generation inputs, but they are not first-run blockers. The PM
+correction is a short activation path: cat profile + recurring routine +
+scenario -> AI/mock generated checklist -> share -> sitter submit -> owner
+results/paywall. Food/care items and event history improve checklist quality and
+retention after the first value moment. MVP3 CatCare pricing is USD-first;
+prototype CNY symbols are stale visual details and must not be implemented.
+The current bilingual PRODUCT-00 prototype is
+`specs/reference-product/prototypes/catcare-gne-278-flow-board-v6.png`; it is
+the visual reference for route flow, menu active rules, button prerequisites,
+and mutually exclusive controls.
+The generated boards are design guidance; route names, field definitions, token
+safety, and issue boundaries are governed by the Markdown spec and Linear issue
+text.
+GNE-278 is Done in Linear. GNE-251 is active and now owns the PRODUCT02 schema
+expansion for `cats`, `care_routines`, `care_routine_items`, `care_items`,
+`care_events`, `care_plans`, `care_tasks`, and `care_submissions`. GNE-251
+has remote Supabase evidence: the linked test project has all 8 tables, RLS
+enabled, 4 owner policies per table, `authenticated` / `service_role` grants,
+REST `200 ok` for each table after schema reload, and migration history version
+`20260629075823` recorded. Local `supabase db reset` remains blocked by a
+Colima/VZ disk lock; this is an environment blocker, not a project-code failure.
+GNE-251 data verification is also gated by a real CatCare page shell:
+Landing, login/register, authenticated default workspace, and
+account/billing/usage entries must be product-context pages, not generic
+starter/demo UI. Full high-fidelity owner workflow remains GNE-252/GNE-253.
+Current PRODUCT01 UI gate status: Landing primary CTA now enters CatCare
+signup/workspace, Landing secondary CTA stays inside the CatCare flow,
+`/login` is the CatCare shell defaulting to `/reference-product`, and
+`/account`, `/account/billing`, `/account/usage`, payment shell, account menu,
+and footer product links no longer expose `/dashboard` or `/demo` as part of
+the CatCare product flow. The foundation demo routes remain reachable directly
+at `/demo`, `/demo/login`, and `/dashboard`.
+Current PR scope classification: this branch started before `GNE-280`
+PRODUCT-01 UI/SYSTEM was inserted, so it is a historical execution exception.
+The PR should be described as `GNE-251 PRODUCT-02 DATA` plus minimal
+data-verification UI only. It does not complete `GNE-280` UI/SYSTEM or
+`GNE-252` APP. Landing/login/nav/footer/i18n and account shell changes are
+UI/SYSTEM-shaped and must be re-standardized in a separate `GNE-280` PR if this
+branch is merged as-is. Reference Product actions/forms/page creation and
+publish behavior are APP-shaped and must be treated as temporary data
+verification, not final `GNE-252` completion.
+New PM note: accumulated daily events can later power a paid text/video recap
+for social sharing (domestic: Moments/Xiaohongshu/Douyin; overseas: X/YouTube).
+This is a valid future CAPABILITY/GROWTH monetization candidate, not MVP3 core.
+
+GNE-231 implementation note: PRODUCT is active on current `main` per repo-owner
+instruction, despite the normal task-branch rule. The corrected product boundary
+is: GNE-231 must provide a real CatCare product entry, not a generic starter page
+with explanatory cards. The page-side product surface includes the CatCare
+homepage, CatCare login/signup context, owner workspace, owner data model, forms,
+publish state, result/submission slots, and visible account / billing-payment /
+AI Credit capability entries. The existing foundation demo remains available
+through `/demo`, `/demo/login`, and `/dashboard`; it is not the Reference
+Product first screen. `/login` is the CatCare product login shell, while
+`/demo/login` preserves the old demo shell and reuses the same Auth service.
+CatCare's protected workspace must not show `/dashboard` in its primary nav or
+account menu; `/dashboard` remains reachable only as a foundation demo route.
+GNE-233 owns the deep product-specific wiring for
+entitlements, payment actions, AI Credit consumption, AI draft behavior, Audit,
+Outbox, and PostHog correlation. The current implementation keeps cat-care
+objects in `apps/web`, adds product tables through a Supabase migration, and
+does not create a Cloudflare/Hono adapter or move product objects into
+`packages/*`. `share_tokens` is deferred to GNE-232 ACCESS so token scope,
+expiry, revocation, replay behavior, anonymous visibility, and token-hash safety
+are designed together instead of pre-allocating an unused token table in PRODUCT.
+Local 2026-06-29 verification passed with `pnpm test:package-boundaries`,
+`pnpm typecheck`, `pnpm lint`, `pnpm build`, `git diff --check`, and browser
+smoke for `/`, `/login`, and `/reference-product`: CatCare product-first copy,
+retained foundation demo entry, signup, cat creation, care-plan creation,
+publish state, account/billing/usage capability links, and 390px mobile
+no-horizontal-overflow. Remote 2026-06-30 verification applied the 8-table
+PRODUCT02 migration to the linked Supabase test project through linked SQL
+because direct Postgres CLI sessions failed with TLS EOF; SQL/RLS/grant checks
+and REST Data API smoke passed.
 
 GNE-232 ACCESS
 ├── GNE-256 ACCESS-01 share token scope、有效期、撤销和重放规则

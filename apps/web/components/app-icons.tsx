@@ -33,6 +33,16 @@ export function DashboardIcon({ className = "h-4 w-4" }: IconProps) {
   );
 }
 
+export function HomeIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M4.5 11.2 12 5l7.5 6.2" />
+      <path d="M6.5 10.8v7.4c0 .9.7 1.6 1.6 1.6h7.8c.9 0 1.6-.7 1.6-1.6v-7.4" />
+      <path d="M10 19.8v-4.2c0-1.1.9-2 2-2s2 .9 2 2v4.2" />
+    </svg>
+  );
+}
+
 export function SpecsIcon({ className = "h-4 w-4" }: IconProps) {
   return (
     <svg className={className} {...iconProps}>
@@ -61,6 +71,100 @@ export function AccountIcon({ className = "h-4 w-4" }: IconProps) {
     <svg className={className} {...iconProps}>
       <path d="M12 12.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
       <path d="M5 20a7 7 0 0 1 14 0" />
+    </svg>
+  );
+}
+
+export function CatIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M7 8 5.5 4.5 9 6" />
+      <path d="m17 8 1.5-3.5L15 6" />
+      <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0 6.5 6.5 0 0 0-13 0z" />
+      <path d="M9.2 12.2h.01" />
+      <path d="M14.8 12.2h.01" />
+      <path d="M12 13.2v1.2" />
+      <path d="M10.5 15.3c.8.6 2.2.6 3 0" />
+    </svg>
+  );
+}
+
+export function BowlIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M5 11.5h14l-1.2 4.2a4 4 0 0 1-3.8 2.8h-4a4 4 0 0 1-3.8-2.8z" />
+      <path d="M7.5 8.5c1-1 2-1 3 0s2 1 3 0 2-1 3 0" />
+      <path d="M8 21h8" />
+    </svg>
+  );
+}
+
+export function CalendarCheckIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M5 5.5h14v14H5z" />
+      <path d="M8 3.5v4" />
+      <path d="M16 3.5v4" />
+      <path d="M5 9h14" />
+      <path d="m8.5 14.5 2 2 5-5" />
+    </svg>
+  );
+}
+
+export function ChecklistIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M7 4.5h10v15H7z" />
+      <path d="M9.5 8h5" />
+      <path d="m9 12 1 1 2-2" />
+      <path d="m9 16 1 1 2-2" />
+      <path d="M14 12h1.5" />
+      <path d="M14 16h1.5" />
+    </svg>
+  );
+}
+
+export function EventIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M12 5v14" />
+      <path d="M7 7.5h10" />
+      <path d="M7 12h10" />
+      <path d="M7 16.5h10" />
+      <path d="M5 7.5h.01" />
+      <path d="M5 12h.01" />
+      <path d="M5 16.5h.01" />
+    </svg>
+  );
+}
+
+export function ShareIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M8.5 13.5 15.5 17" />
+      <path d="m15.5 7-7 3.5" />
+      <path d="M6.5 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+      <path d="M17.5 9.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+      <path d="M17.5 19.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
+    </svg>
+  );
+}
+
+export function SparkleIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5z" />
+      <path d="m18 15 .7 2.3L21 18l-2.3.7L18 21l-.7-2.3L15 18l2.3-.7z" />
+      <path d="m5.5 14 .5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5z" />
+    </svg>
+  );
+}
+
+export function BellIcon({ className = "h-4 w-4" }: IconProps) {
+  return (
+    <svg className={className} {...iconProps}>
+      <path d="M6.5 10.5a5.5 5.5 0 0 1 11 0v3.5l1.5 2.5H5l1.5-2.5z" />
+      <path d="M10 19a2.3 2.3 0 0 0 4 0" />
     </svg>
   );
 }

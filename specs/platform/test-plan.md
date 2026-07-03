@@ -86,7 +86,7 @@ GNE-244 is the package patch-upgrade rehearsal. Required checks:
 6. Run `pnpm typecheck`.
 7. Run `pnpm test`.
 8. Run `pnpm build`.
-9. Smoke `/reference-product` locally and record the HTTP result.
+9. Smoke `/catcare` locally and record the HTTP result.
 10. If the patch fails, record rollback or forward-fix evidence instead of
     marking the rehearsal as passed.
 

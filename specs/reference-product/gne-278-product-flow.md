@@ -51,15 +51,14 @@ Accepted as visual direction:
 - `09_账单与权益_Billing_Entitlements.png`
 - `10_异常与边界状态_Error_Boundary_States.png`
 
-Generated GNE-278 flow board:
+Generated GNE-278 prototype set:
 
-- v1: `specs/reference-product/prototypes/catcare-gne-278-flow-board-v1.png`
-- v2: `specs/reference-product/prototypes/catcare-gne-278-flow-board-v2.png`
-- paid states: `specs/reference-product/prototypes/catcare-gne-278-paid-user-states-v3.png`
-- current v6: `specs/reference-product/prototypes/catcare-gne-278-flow-board-v6.png`
+- current split-screen reference:
+  `specs/reference-product/prototypes/v6-regenerated-normalized/`
 
-Current implementation guidance should follow v6 plus this Markdown spec. Older
-boards are historical references.
+Current visual implementation guidance should follow the regenerated split
+screens plus this Markdown spec. Discarded prototype drafts and older boards
+were removed and must not drive implementation.
 
 ## Prototype Review
 
@@ -134,20 +133,21 @@ Do not copy literally:
 | Route | Active nav | Purpose | Owner |
 | --- | --- | --- | --- |
 | `/` | none | Product landing, value, flow, pricing, CTA. | PRODUCT |
-| `/login` | none | CatCare auth context, default return to `/reference-product`. | PRODUCT + Auth |
-| `/reference-product` | 工作台 | Empty and active owner dashboard. | PRODUCT |
-| `/reference-product/cats` | 猫咪档案 | Cat list and entry to create/edit. | PRODUCT |
-| `/reference-product/cats/new` | 猫咪档案 | Create a cat profile. | PRODUCT |
-| `/reference-product/cats/[id]` | 猫咪档案 | View/edit a cat profile. | PRODUCT |
-| `/reference-product/routines` | 日常习惯 | Routine list and templates. | PRODUCT |
-| `/reference-product/routines/[cat_id]` | 日常习惯 | Reusable daily care routine for a cat. | PRODUCT |
-| `/reference-product/events` | 日常记录 | Lightweight daily events across cats. | PRODUCT |
-| `/reference-product/events/new` | 日常记录 | Add feeding, treat, health, behavior, or environment event. | PRODUCT |
-| `/reference-product/items` | 食物用品 | Food, treats, medicine, litter, and care item inventory. | PRODUCT |
-| `/reference-product/plans` | 照护计划 | Plan list across draft, published, reviewed, closed. | PRODUCT |
-| `/reference-product/plans/new` | 照护计划 | Scenario/date selection and generated checklist review. | PRODUCT |
-| `/reference-product/plans/[id]` | 照护计划 | Plan detail, publish state, share entry. | PRODUCT, ACCESS entry |
-| `/reference-product/plans/[id]/results` | 结果查看 | Owner sees submissions and AI paywall/generation entry. | PRODUCT, CAPABILITY entry |
+| `/login` | none | CatCare auth context, default return to `/catcare`. | PRODUCT + Auth |
+| `/catcare` | 工作台 | Empty and active owner dashboard. | PRODUCT |
+| `/reference-product` | none | Legacy engineering URL, redirects to `/catcare`. | Compatibility |
+| `/catcare/cats` | 猫咪档案 | Cat list and entry to create/edit. | PRODUCT |
+| `/catcare/cats/new` | 猫咪档案 | Create a cat profile. | PRODUCT |
+| `/catcare/cats/[id]` | 猫咪档案 | View/edit a cat profile. | PRODUCT |
+| `/catcare/routines` | 日常习惯 | Routine list and templates. | PRODUCT |
+| `/catcare/routines/[cat_id]` | 日常习惯 | Reusable daily care routine for a cat. | PRODUCT |
+| `/catcare/events` | 日常记录 | Lightweight daily events across cats. | PRODUCT |
+| `/catcare/events/new` | 日常记录 | Add feeding, treat, health, behavior, or environment event. | PRODUCT |
+| `/catcare/items` | 食物用品 | Food, treats, medicine, litter, and care item inventory. | PRODUCT |
+| `/catcare/plans` | 照护计划 | Plan list across draft, published, reviewed, closed. | PRODUCT |
+| `/catcare/plans/new` | 照护计划 | Scenario/date selection and generated checklist review. | PRODUCT |
+| `/catcare/plans/[id]` | 照护计划 | Plan detail, publish state, share entry. | PRODUCT, ACCESS entry |
+| `/catcare/plans/[id]/results` | 结果查看 | Owner sees submissions and AI paywall/generation entry. | PRODUCT, CAPABILITY entry |
 | `/account` | 账单与权益 | Shared account profile in product context. | Shared capability |
 | `/account/billing` | 账单与权益 | Shared billing, sandbox checkout, entitlement facts. | Shared capability |
 | `/account/usage` | 账单与权益 | Shared AI Credit and usage ledger facts. | Shared capability |
@@ -253,13 +253,13 @@ Mutually exclusive controls:
 
 Menu active rules:
 
-- `/reference-product`: 工作台 / Dashboard.
-- `/reference-product/cats*`: 猫咪档案 / Cat Profile.
-- `/reference-product/routines*`: 喂养习惯 / Recurring Routine.
-- `/reference-product/items*`: 食物用品 / Food & Care Items.
-- `/reference-product/events*`: 事件记录 / Events.
-- `/reference-product/plans*`: 照护计划 / Care Plans.
-- `/reference-product/plans/[id]/results`: 结果查看 / Results.
+- `/catcare`: 工作台 / Dashboard.
+- `/catcare/cats*`: 猫咪档案 / Cat Profile.
+- `/catcare/routines*`: 喂养习惯 / Recurring Routine.
+- `/catcare/items*`: 食物用品 / Food & Care Items.
+- `/catcare/events*`: 事件记录 / Events.
+- `/catcare/plans*`: 照护计划 / Care Plans.
+- `/catcare/plans/[id]/results`: 结果查看 / Results.
 - `/account`, `/account/billing`, `/account/usage`: 账单权益 / Billing.
 - `/s/[token]`: no owner navigation.
 
@@ -439,11 +439,18 @@ Sitter task progress:
 - `task_id`
 - `share_token_id`
 - `status`: `todo`, `done`, `issue`
+- `started_at` for duration-based tasks such as play or companionship
+- `completed_at` for each completed task
+- `duration_minutes` when start/end evidence matters
 - `note`
+- `photo_evidence_placeholder` for MVP3 UI only; real upload/storage is later
 - `saved_at`
 
 Progress autosaves per task. Final submission is idempotent and summarizes the
-saved progress.
+saved progress. The anonymous sitter surface is a task check-in workflow, not a
+single bulk checklist: feeding, water, litter, and observation tasks record a
+completion timestamp; play/companionship tasks record start/end or duration;
+photo evidence is optional in MVP3 UI and must not imply live storage support.
 
 ## Share Link State Machine
 
@@ -474,6 +481,7 @@ Visible to sitter:
 - Task titles, time windows, and instructions.
 - Required care notes.
 - Link expiry status.
+- Current task completion state and the sitter's own saved check-in timeline.
 
 Hidden from sitter:
 
@@ -486,6 +494,9 @@ Hidden from sitter:
 Submission whitelist:
 
 - Per-task completion status.
+- Per-task start/end timestamps when relevant.
+- Per-task completion timestamp.
+- Optional per-task photo evidence placeholder in MVP3 UI only.
 - Optional task note.
 - Overall note.
 - Abnormal flag.
@@ -655,8 +666,8 @@ GNE-251 is a data-model issue, but its acceptance must be reviewed inside a
 real CatCare product shell:
 
 - `/` is CatCare Landing, not generic starter.
-- `/login` is CatCare login/register and returns to `/reference-product`.
-- `/reference-product` is the authenticated CatCare default workspace.
+- `/login` is CatCare login/register and returns to `/catcare`.
+- `/catcare` is the authenticated CatCare default workspace.
 - `/account`, `/account/billing`, and `/account/usage` are visible as CatCare
   account/billing/usage capability entries.
 

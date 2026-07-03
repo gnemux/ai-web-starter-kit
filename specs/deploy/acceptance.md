@@ -62,7 +62,7 @@ Record these facts for each MVP3 deployed or reviewed Reference Product check:
 - [x] The GNE-244 rehearsal provides a concrete version-fact example:
   PR #42, merge commit `2bd2572`, `@xwlc/*` package version `0.1.1`, no DB
   migration, passing CI/build, Vercel Production deployment `success`, and local
-  `/reference-product` smoke `200 OK`.
+  `/catcare` smoke `200 OK`.
 - [x] No package registry, release train, complex version panel, or separate
   package publish flow is introduced.
 

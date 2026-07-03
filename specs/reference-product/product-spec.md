@@ -9,8 +9,11 @@ prototype review, state matrix, routine/event/checklist model, share-link state
 machine, paid-user surfaces, USD pricing standard, and capability handoff live
 in `specs/reference-product/gne-278-product-flow.md`.
 
-The current visual reference is
-`specs/reference-product/prototypes/catcare-gne-278-flow-board-v6.png`.
+The current visual reference is the regenerated split-screen set at
+`specs/reference-product/prototypes/v6-regenerated-normalized/`. These assets
+guide layout, hierarchy, and route mapping; implementation must still check
+exact product behavior, text, and state boundaries against
+`specs/reference-product/gne-278-product-flow.md`.
 
 ## User
 
@@ -58,7 +61,7 @@ First-run activation path:
 ```text
 / product landing
 -> /login
--> /reference-product owner dashboard
+-> /catcare owner dashboard
 -> create cat profile
 -> set reusable daily care routine
 -> choose temporary-care scenario and dates
@@ -74,7 +77,7 @@ Full product loop:
 ```text
 / product landing
 -> /login
--> /reference-product owner dashboard
+-> /catcare owner dashboard
 -> create cat profile
 -> set reusable daily care routine
 -> optionally maintain food/care items and daily event history
@@ -96,14 +99,15 @@ drop-off.
 ## Route Map
 
 - `/`: CatCare product homepage.
-- `/login`: CatCare login/signup shell, defaulting to `/reference-product`.
-- `/reference-product`: protected CatCare owner workspace.
-- `/reference-product/cats`, `/reference-product/cats/new`, `/reference-product/cats/[id]`: CatCare cat profile surfaces.
-- `/reference-product/routines`, `/reference-product/routines/[cat_id]`: reusable daily care routine surfaces.
-- `/reference-product/items`: food, treats, medicine, litter, and care item inventory.
-- `/reference-product/events`, `/reference-product/events/new`: lightweight event and health timeline.
-- `/reference-product/plans`, `/reference-product/plans/new`, `/reference-product/plans/[id]`: generated temporary checklist surfaces.
-- `/reference-product/plans/[id]/results`: owner result and AI/paywall entry surface.
+- `/login`: CatCare login/signup shell, defaulting to `/catcare`.
+- `/catcare`: protected CatCare owner workspace.
+- `/reference-product`: legacy MVP3 engineering URL, redirects to `/catcare`.
+- `/catcare/cats`, `/catcare/cats/new`, `/catcare/cats/[id]`: CatCare cat profile surfaces.
+- `/catcare/routines`, `/catcare/routines/[cat_id]`: reusable daily care routine surfaces.
+- `/catcare/items`: food, treats, medicine, litter, and care item inventory.
+- `/catcare/events`, `/catcare/events/new`: lightweight event and health timeline.
+- `/catcare/plans`, `/catcare/plans/new`, `/catcare/plans/[id]`: generated temporary checklist surfaces.
+- `/catcare/plans/[id]/results`: owner result and AI/paywall entry surface.
 - `/demo`: foundation demo entry for reviewing starter-kit capabilities.
 - `/demo/login`: foundation demo login shell, defaulting to `/dashboard`.
 - `/dashboard`: protected foundation demo workspace.
@@ -112,7 +116,7 @@ drop-off.
 
 ## Requirements
 
-- `/reference-product` is protected and preserves login return context.
+- `/catcare` is protected and preserves login return context.
 - PRODUCT data-model verification happens inside the CatCare product shell:
   Landing, login/register, authenticated default workspace, and
   account/billing/usage entries must already be product-context pages.

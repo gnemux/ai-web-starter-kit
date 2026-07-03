@@ -236,7 +236,7 @@ export const defaultBillingPrices: BillingPrice[] = [
     id: "pro_monthly",
     planId: "pro",
     type: "recurring",
-    amountCents: 1900,
+    amountCents: 900,
     currency: "usd",
     interval: "month",
     providerPriceId: null
@@ -245,7 +245,7 @@ export const defaultBillingPrices: BillingPrice[] = [
     id: "ai_credit_pack_100k",
     planId: null,
     type: "one_time",
-    amountCents: 900,
+    amountCents: 500,
     currency: "usd",
     interval: null,
     creditFeatureKey: "ai_tokens",

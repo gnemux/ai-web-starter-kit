@@ -5,6 +5,7 @@ out/
 build/
 dist/
 coverage/
+artifacts/
 .turbo/
 .vercel/
 .env

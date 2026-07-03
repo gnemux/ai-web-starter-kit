@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   const accountResult = await getCurrentAccount();
 
   if (!accountResult.ok) {
-    redirect("/login?next=/dashboard");
+    redirect("/demo/login?next=/dashboard");
   }
 
   const aiReviewResult = getAiTextReviewState();
@@ -46,10 +46,11 @@ export default async function DashboardPage() {
           email={accountResult.data.user.email}
           labels={copy.common.accountMenu}
           name={userLabel}
+          surface="demo"
         />
       }
       brand={<BrandMark subtitle={copy.dashboard.shellSubtitle} />}
-      navItems={getWorkspaceNavItems(copy, "dashboard")}
+      navItems={getWorkspaceNavItems(copy, "dashboard", { surface: "demo" })}
       user={{
         name: userLabel,
         role: accountResult.data.user.email

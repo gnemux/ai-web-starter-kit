@@ -51,7 +51,7 @@
 | --- | --- | --- | --- |
 | Existing app demo data owner scope | `uses_public_contract` | `apps/web/lib/services/demo-items.ts` maps the current Supabase-authenticated user through `@xwlc/db` `createOwnerScope` before querying or inserting owner-scoped rows. | None. |
 | Existing app Auth email verification gate | `uses_public_contract` | `apps/web/lib/services/auth.ts` maps Supabase user data into a runtime-agnostic `PlatformActor` and calls `@xwlc/platform` `requireVerifiedEmail` before creating the app user payload. | None. |
-| Reference Product minimum entry | `uses_public_contract` | `apps/web/lib/reference-product/package-consumption.ts` and `apps/web/app/reference-product/page.tsx` consume `@xwlc/platform`, `@xwlc/db`, and `@xwlc/ui` public exports without product objects entering reusable packages. | PRODUCT issues own the full cat-care business loop. |
+| Reference Product minimum entry | `uses_public_contract` | `apps/web/lib/catcare/package-consumption.ts` and `apps/web/app/catcare/page.tsx` consume `@xwlc/platform`, `@xwlc/db`, and `@xwlc/ui` public exports without product objects entering reusable packages. | PRODUCT issues own the full cat-care business loop. |
 | Payment / Billing facts | `uses_public_contract` | Current Payment/Billing services continue using `@xwlc/core` payment, billing, entitlement, ledger, and service-result contracts. Provider checkout, webhook processing, and billing facts remain app-owned service code in MVP3. | `GNE-233` for capability integration; `GNE-201` for live payment, proration, invoices, refunds, reconciliation. |
 | AI Credit usage | `uses_public_contract` | `apps/web/lib/services/ai.ts` uses `@xwlc/core` AI model, generation, usage, and Credit gate contracts while provider mode remains mock/no-op/sandbox for MVP3. | `GNE-233`; real-provider reservation/commit/release is not part of GNE-242. |
 | Payment webhook route | `adapter_only_ok` | `apps/web/app/api/payment/webhook/route.ts` remains the Next.js route adapter; behavior stays in app payment services and core contracts instead of moving runtime request/response types into reusable packages. | `GNE-243` should machine-check runtime boundaries; `GNE-201` owns live payment hardening. |
@@ -61,19 +61,19 @@
 
 - Existing app consumption paths use package public exports only:
   `@xwlc/db`, `@xwlc/platform`, `@xwlc/core`, and `@xwlc/ui`.
-- Reference Product minimum entry is available at `/reference-product` for
+- Reference Product minimum entry is available at `/catcare` for
   package-consumption review; it does not implement the cat-care business loop.
 - No migrations were added in GNE-242.
 - `packages/platform` and `packages/db` remain runtime-agnostic contract
   packages and contain no Reference Product business objects.
 - `pnpm typecheck` passed.
-- `pnpm build` passed and included `/reference-product` in the Next.js route
+- `pnpm build` passed and included `/catcare` in the Next.js route
   table.
 - `pnpm test:release-boundaries` passed after the sign-in boundary check was
   updated to recognize the `@xwlc/platform` `requireVerifiedEmail` contract.
 - `pnpm test:ai-safety` passed.
 - `git diff --check` passed.
-- Local HTTP smoke passed: `/reference-product` returned `200`, `/login`
+- Local HTTP smoke passed: `/catcare` returned `200`, `/login`
   returned `200`, and unauthenticated `/dashboard` returned `307` to
   `/login?next=/dashboard`.
 
@@ -138,8 +138,8 @@ GNE-244 verification snapshot:
 - `pnpm test` passed and reran AI safety, release-boundary, package-boundary,
   and package test tasks.
 - `pnpm lint` passed.
-- `pnpm build` passed and included `/reference-product` in the Next.js route
+- `pnpm build` passed and included `/catcare` in the Next.js route
   table.
-- Local HTTP smoke passed: `HEAD /reference-product` returned `200 OK` on
-  `http://127.0.0.1:3006/reference-product`.
+- Local HTTP smoke passed: `HEAD /catcare` returned `200 OK` on
+  `http://127.0.0.1:3006/catcare`.
 - Rollback/forward-fix path was not used because the patch and smoke passed.

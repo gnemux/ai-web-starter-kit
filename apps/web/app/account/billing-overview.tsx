@@ -21,7 +21,7 @@ import {
 import type { Dictionary } from "@/lib/i18n";
 import type { BillingActivity } from "@/lib/services/billing";
 
-const featureOrder: BillingFeatureKey[] = [
+export const featureOrder: BillingFeatureKey[] = [
   "projects",
   "pages",
   "leads",
@@ -369,7 +369,7 @@ function CreditPackReview({
   );
 }
 
-function PlanRecords({
+export function PlanRecords({
   activityResult,
   billingResult,
   labels
@@ -607,7 +607,7 @@ function CreditBreakdownFact({
   );
 }
 
-function getAiCreditBreakdown(snapshot: BillingEntitlementSnapshot) {
+export function getAiCreditBreakdown(snapshot: BillingEntitlementSnapshot) {
   const allowance = snapshot.entitlements.ai_tokens;
   const total = getQuantityTotal(allowance);
   const used = getQuantityUsed(allowance);
@@ -633,7 +633,7 @@ function getQuantityUsed(allowance: BillingAllowance) {
   return allowance.kind === "quantity" ? allowance.used ?? 0 : 0;
 }
 
-function getPlanPrice(planId: BillingPlan["id"]) {
+export function getPlanPrice(planId: BillingPlan["id"]) {
   return defaultBillingPrices.find((price) => price.planId === planId);
 }
 
@@ -651,7 +651,7 @@ function formatSubscriptionStatus(
   return labels.subscriptionStatuses[status];
 }
 
-function formatAllowance(
+export function formatAllowance(
   allowance: BillingAllowance,
   labels: Dictionary["account"]["billing"]
 ) {
@@ -672,7 +672,7 @@ function formatAllowance(
   return `${formatNumber(allowance.quantity)} ${unit}`;
 }
 
-function formatMoney(amountCents: number, currency: string) {
+export function formatMoney(amountCents: number, currency: string) {
   return new Intl.NumberFormat("en-US", {
     currency: currency.toUpperCase(),
     style: "currency"
@@ -687,7 +687,7 @@ function formatOrderAmount(amountCents: number, currency: string) {
   return formatMoney(amountCents, currency);
 }
 
-function formatPlanPrice(
+export function formatPlanPrice(
   price: BillingPrice | undefined,
   labels: Dictionary["account"]["billing"]
 ) {
@@ -737,7 +737,7 @@ function formatRecordDate(value: string) {
   }).format(date);
 }
 
-function formatNumber(value: number) {
+export function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 

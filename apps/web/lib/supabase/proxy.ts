@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSupabasePublicConfig } from "./config";
 import type { Database } from "./database.types";
 
-const protectedPathPrefixes = ["/account", "/dashboard"];
+const protectedPathPrefixes = ["/account", "/catcare", "/dashboard", "/demo/account"];
 
 export async function updateSession(request: NextRequest) {
   const config = getSupabasePublicConfig();
@@ -49,7 +49,9 @@ export async function updateSession(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
 
-    loginUrl.pathname = "/login";
+    loginUrl.pathname = isDemoPath(request.nextUrl.pathname)
+      ? "/demo/login"
+      : "/login";
     loginUrl.search = "";
     loginUrl.searchParams.set("next", nextPath);
 
@@ -61,4 +63,8 @@ export async function updateSession(request: NextRequest) {
 
 function isProtectedPath(pathname: string): boolean {
   return protectedPathPrefixes.some((prefix) => pathname.startsWith(prefix));
+}
+
+function isDemoPath(pathname: string): boolean {
+  return pathname === "/dashboard" || pathname.startsWith("/demo/account");
 }

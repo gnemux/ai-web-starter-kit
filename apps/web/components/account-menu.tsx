@@ -14,7 +14,7 @@ import {
   BillingIcon,
   ChevronDownIcon,
   DashboardIcon,
-  OverviewIcon,
+  HomeIcon,
   SignOutIcon,
   UsageIcon
 } from "@/components/app-icons";
@@ -26,7 +26,7 @@ type AccountMenuLabels = {
   billing: string;
   dashboard: string;
   label: string;
-  referenceProduct: string;
+  catcare: string;
   signedIn: string;
   signOut: string;
   usage: string;
@@ -38,12 +38,14 @@ export function AccountMenu({
   email,
   labels,
   name,
-  showDashboard = true
+  surface = "catcare",
+  showDashboard = false
 }: {
   avatarUrl?: string | null;
   email: string;
   labels: AccountMenuLabels;
   name: string;
+  surface?: "catcare" | "demo";
   showDashboard?: boolean;
 }) {
   const menuId = useId();
@@ -132,33 +134,55 @@ export function AccountMenu({
             <p className="mt-0.5 truncate text-xs text-slate-500">{email}</p>
           </div>
           <div className="p-1.5">
-            {showDashboard ? (
-              <AccountMenuLink
-                href="/dashboard"
-                icon={<DashboardIcon />}
-                label={labels.dashboard}
-              />
-            ) : null}
-            <AccountMenuLink
-              href="/reference-product"
-              icon={<OverviewIcon />}
-              label={labels.referenceProduct}
-            />
-            <AccountMenuLink
-              href="/account"
-              icon={<AccountIcon />}
-              label={labels.account}
-            />
-            <AccountMenuLink
-              href="/account/billing"
-              icon={<BillingIcon />}
-              label={labels.billing}
-            />
-            <AccountMenuLink
-              href="/account/usage"
-              icon={<UsageIcon />}
-              label={labels.usage}
-            />
+            {surface === "demo" ? (
+              <>
+                <AccountMenuLink
+                  href="/dashboard"
+                  icon={<DashboardIcon />}
+                  label={labels.dashboard}
+                />
+                <AccountMenuLink
+                  href="/demo/account"
+                  icon={<AccountIcon />}
+                  label={labels.account}
+                />
+                <AccountMenuLink
+                  href="/demo/account/billing"
+                  icon={<BillingIcon />}
+                  label={labels.billing}
+                />
+                <AccountMenuLink
+                  href="/demo/account/usage"
+                  icon={<UsageIcon />}
+                  label={labels.usage}
+                />
+              </>
+            ) : (
+              <>
+                {showDashboard ? (
+                  <AccountMenuLink
+                    href="/dashboard"
+                    icon={<HomeIcon className="h-5 w-5" />}
+                    label={labels.dashboard}
+                  />
+                ) : null}
+                <AccountMenuLink
+                  href="/catcare"
+                  icon={<HomeIcon className="h-5 w-5" />}
+                  label={labels.dashboard}
+                />
+                <AccountMenuLink
+                  href="/account"
+                  icon={<AccountIcon className="h-5 w-5" />}
+                  label={labels.account}
+                />
+                <AccountMenuLink
+                  href="/account/billing"
+                  icon={<BillingIcon className="h-5 w-5" />}
+                  label={labels.billing}
+                />
+              </>
+            )}
             <form action={formAction} onSubmit={handleSignOutSubmit}>
               <button
                 className="flex min-h-10 w-full items-center gap-3 rounded-md px-3 text-left text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500 disabled:cursor-not-allowed disabled:opacity-60"
@@ -166,7 +190,7 @@ export function AccountMenu({
                 role="menuitem"
                 type="submit"
               >
-                <SignOutIcon className="h-4 w-4 shrink-0" />
+                <SignOutIcon className="h-5 w-5 shrink-0" />
                 <span className="truncate">
                   {isPending ? labels.working : labels.signOut}
                 </span>
@@ -220,7 +244,7 @@ function AccountMenuLink({
       href={href}
       role="menuitem"
     >
-      <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center [&_img]:h-5 [&_img]:w-5 [&_svg]:h-5 [&_svg]:w-5">
         {icon}
       </span>
       <span className="truncate">{label}</span>

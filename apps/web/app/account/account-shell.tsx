@@ -1,16 +1,12 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { AppShell, BrandMark } from "@xwlc/ui";
-
-import { AccountMenu } from "@/components/account-menu";
-import {
-  getWorkspaceNavItems,
-  type WorkspaceNavKey
-} from "@/components/workspace-nav";
+import type { WorkspaceNavKey } from "@/components/workspace-nav";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
+
+import { CatCareAppShell } from "../catcare/catcare-shell";
 
 export async function getAccountPageContext(nextPath = "/account") {
   const locale = await getRequestLocale();
@@ -29,6 +25,7 @@ export async function getAccountPageContext(nextPath = "/account") {
     account: accountResult.data,
     copy,
     displayName,
+    locale,
     userLabel
   };
 }
@@ -38,34 +35,18 @@ type AccountPageContext = Awaited<ReturnType<typeof getAccountPageContext>>;
 export function AccountAppShell({
   activeNav,
   children,
-  context
+  context,
+  topBar
 }: {
   activeNav: WorkspaceNavKey;
   children: ReactNode;
   context: AccountPageContext;
+  topBar?: ReactNode;
 }) {
   return (
-    <AppShell
-      action={
-        <AccountMenu
-          avatarUrl={context.account.profile?.avatarUrl}
-          email={context.account.user.email}
-          labels={context.copy.common.accountMenu}
-          name={context.userLabel}
-          showDashboard={false}
-        />
-      }
-      brand={<BrandMark subtitle={context.copy.account.shellSubtitle} />}
-      navItems={getWorkspaceNavItems(context.copy, activeNav, {
-        includeDashboard: false
-      })}
-      user={{
-        name: context.userLabel,
-        role: context.account.user.email
-      }}
-    >
+    <CatCareAppShell activeNav={activeNav} context={context} topBar={topBar}>
       {children}
-    </AppShell>
+    </CatCareAppShell>
   );
 }
 

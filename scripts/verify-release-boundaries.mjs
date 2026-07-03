@@ -29,6 +29,11 @@ function section(source, start, end) {
 const authService = read("apps/web/lib/services/auth.ts");
 const authConfirmRoute = read("apps/web/app/auth/confirm/route.ts");
 const authForm = read("apps/web/app/login/auth-form.tsx");
+const homePage = read("apps/web/app/page.tsx");
+const dashboardPage = read("apps/web/app/dashboard/page.tsx");
+const catcareRedirectPage = read(
+  "apps/web/app/reference-product/[[...path]]/page.tsx"
+);
 const billingService = read("apps/web/lib/services/billing.ts");
 const paymentService = read("apps/web/lib/services/payment.ts");
 const paymentCheckoutPage = read("apps/web/app/account/payment/checkout/page.tsx");
@@ -113,8 +118,14 @@ expect(
   supabaseProxy.includes(
     "const nextPath = `${request.nextUrl.pathname}${request.nextUrl.search}`"
   ) &&
-    supabaseProxy.includes('loginUrl.searchParams.set("next", nextPath)'),
-  "Protected-route login redirects must preserve the original pathname and query string."
+    supabaseProxy.includes('loginUrl.searchParams.set("next", nextPath)') &&
+    supabaseProxy.includes('loginUrl.pathname = isDemoPath(request.nextUrl.pathname)') &&
+    supabaseProxy.includes('"/catcare"') &&
+    dashboardPage.includes('redirect("/demo/login?next=/dashboard")') &&
+    homePage.includes('"/login?mode=signup&next=/catcare"') &&
+    authForm.includes('defaultNextPath = "/catcare"') &&
+    catcareRedirectPage.includes('redirect(`/catcare${suffix}`)'),
+  "Protected-route login redirects must preserve the original pathname, keep Demo routes on Demo login, and keep CatCare as the canonical product route."
 );
 
 expect(

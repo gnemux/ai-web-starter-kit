@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import type { AuthMode, ServiceErrorCode } from "@xwlc/core";
@@ -11,7 +11,7 @@ import {
   trackEvent
 } from "@/lib/analytics/client";
 
-import { submitAuthAction, type AuthFormState } from "./actions";
+import type { AuthFormState } from "./actions";
 
 type AuthFormLabels = {
   accessDashboard: string;
@@ -28,6 +28,15 @@ type AuthFormLabels = {
   providerNote: string;
   startWithEmail: string;
   welcomeBack: string;
+  rememberMe?: string;
+  forgotPassword?: string;
+};
+
+type OAuthLabels = {
+  apple: string;
+  google: string;
+  title: string;
+  unavailable: string;
 };
 
 type AuthFormErrorLabels = {
@@ -41,12 +50,13 @@ type AuthFormErrorLabels = {
 };
 
 export function AuthForm({
-  defaultNextPath = "/reference-product",
+  defaultNextPath = "/catcare",
   errorLabels,
   initialMode,
   labels,
   modePath = "/login",
-  nextPath
+  nextPath,
+  oauthLabels
 }: {
   defaultNextPath?: string;
   errorLabels: AuthFormErrorLabels;
@@ -54,16 +64,15 @@ export function AuthForm({
   labels: AuthFormLabels;
   modePath?: string;
   nextPath: string;
+  oauthLabels?: OAuthLabels;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [submittedMode, setSubmittedMode] = useState<AuthMode>(initialMode);
   const [hasSubmittedCurrentMode, setHasSubmittedCurrentMode] = useState(false);
   const handledStateRef = useRef<AuthFormState>(null);
-  const [state, formAction, isPending] = useActionState<
-    AuthFormState,
-    FormData
-  >(submitAuthAction, null);
+  const [state, setState] = useState<AuthFormState>(null);
+  const [isPending, setIsPending] = useState(false);
   const isSignUp = mode === "signup";
   const visibleState =
     hasSubmittedCurrentMode &&
@@ -125,13 +134,15 @@ export function AuthForm({
 
   return (
     <form
-      action={formAction}
       className="space-y-5"
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
+        event.preventDefault();
+
         const formData = new FormData(event.currentTarget);
         const submitted = String(formData.get("mode") ?? "signin") as AuthMode;
         setSubmittedMode(submitted);
         setHasSubmittedCurrentMode(true);
+        setIsPending(true);
         trackEvent(
           submitted === "signup" ? "signup_started" : "login_started",
           {
@@ -140,16 +151,38 @@ export function AuthForm({
             next_path: nextPath
           }
         );
+
+        try {
+          const response = await fetch("/login/auth", {
+            body: formData,
+            method: "POST"
+          });
+          const nextState = (await response.json()) as AuthFormState;
+          setState(nextState);
+        } catch {
+          setState({
+            mode: submitted,
+            result: {
+              ok: false,
+              error: {
+                code: "system_error",
+                message: "Unable to complete authentication."
+              }
+            }
+          });
+        } finally {
+          setIsPending(false);
+        }
       }}
     >
       <input name="mode" type="hidden" value={mode} />
       <input name="next" type="hidden" value={nextPath} />
 
-      <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1">
+      <div className="grid grid-cols-2 border-b border-slate-200">
         <button
-          className={`min-h-10 rounded-md text-sm font-semibold transition ${
+          className={`min-h-14 border-b-2 text-lg font-semibold transition ${
             !isSignUp
-              ? "bg-white text-teal-700 shadow-sm"
+              ? "border-teal-700 text-teal-700"
               : "text-slate-500 hover:text-slate-950"
           }`}
           onClick={() => switchMode("signin")}
@@ -158,9 +191,9 @@ export function AuthForm({
           {labels.signIn}
         </button>
         <button
-          className={`min-h-10 rounded-md text-sm font-semibold transition ${
+          className={`min-h-14 border-b-2 text-lg font-semibold transition ${
             isSignUp
-              ? "bg-white text-teal-700 shadow-sm"
+              ? "border-teal-700 text-teal-700"
               : "text-slate-500 hover:text-slate-950"
           }`}
           onClick={() => switchMode("signup")}
@@ -170,14 +203,7 @@ export function AuthForm({
         </button>
       </div>
 
-      <div className="rounded-lg border border-teal-100 bg-teal-50/70 p-4">
-        <p className="text-sm font-semibold text-teal-800">
-          {isSignUp ? labels.startWithEmail : labels.welcomeBack}
-        </p>
-        <p className="mt-1 text-sm leading-6 text-teal-900/70">
-          {isSignUp ? labels.newHere : labels.accessDashboard}
-        </p>
-      </div>
+      {oauthLabels ? <OAuthOptions labels={oauthLabels} /> : null}
 
       <div>
         <label className="text-sm font-medium text-slate-700" htmlFor="email">
@@ -185,7 +211,7 @@ export function AuthForm({
         </label>
         <input
           autoComplete="email"
-          className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+          className="mt-2 min-h-16 w-full rounded-xl border border-slate-200 bg-white px-5 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
           id="email"
           name="email"
           placeholder="name@example.com"
@@ -203,7 +229,7 @@ export function AuthForm({
         </label>
         <input
           autoComplete={isSignUp ? "new-password" : "current-password"}
-          className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+          className="mt-2 min-h-16 w-full rounded-xl border border-slate-200 bg-white px-5 text-base text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
           id="password"
           name="password"
           placeholder="••••••••"
@@ -237,20 +263,32 @@ export function AuthForm({
         </div>
       ) : null}
 
-      <Button className="min-h-12 w-full bg-teal-700 hover:bg-teal-800" type="submit">
+      {labels.rememberMe || labels.forgotPassword ? (
+        <div className="flex items-center justify-between gap-3 text-sm">
+          {labels.rememberMe ? (
+            <label className="inline-flex items-center gap-2 font-medium text-slate-600">
+              <input
+                className="h-4 w-4 accent-teal-700"
+                defaultChecked
+                type="checkbox"
+              />
+              {labels.rememberMe}
+            </label>
+          ) : (
+            <span />
+          )}
+          {labels.forgotPassword ? (
+            <span className="font-medium text-teal-700">
+              {labels.forgotPassword}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
+      <Button className="min-h-16 w-full rounded-xl bg-teal-700 text-lg hover:bg-teal-800" type="submit">
         {isPending ? labels.working : isSignUp ? labels.createAccount : labels.signIn}
       </Button>
 
-      <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
-        <span>{isSignUp ? labels.alreadyHaveAccount : labels.newHere}</span>
-        <button
-          className="font-medium text-teal-700 hover:text-teal-900"
-          onClick={() => switchMode(isSignUp ? "signin" : "signup")}
-          type="button"
-        >
-          {isSignUp ? labels.switchToSignIn : labels.switchToSignUp}
-        </button>
-      </div>
     </form>
   );
 
@@ -264,6 +302,33 @@ export function AuthForm({
     setHasSubmittedCurrentMode(false);
     router.replace(buildModeUrl(nextMode, nextPath, modePath, defaultNextPath));
   }
+}
+
+function OAuthOptions({ labels }: { labels: OAuthLabels }) {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3">
+        {[labels.google, labels.apple].map((label) => (
+          <button
+            className="flex min-h-16 cursor-not-allowed items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-400"
+            disabled
+            key={label}
+            type="button"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm text-slate-500">
+              {label.includes("Google") ? "G" : ""}
+            </span>
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-sm text-slate-400">
+        <span className="h-px bg-slate-200" />
+        <span>{labels.title}</span>
+        <span className="h-px bg-slate-200" />
+      </div>
+    </div>
+  );
 }
 
 function buildModeUrl(

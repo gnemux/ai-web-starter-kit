@@ -1,5 +1,4 @@
-import { BrandMark } from "@xwlc/ui";
-
+import { CatCareBrand } from "@/components/catcare-brand";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import type { Locale } from "@/lib/i18n";
 
@@ -14,7 +13,7 @@ type SiteFooterLabels = {
     login: string;
     demo: string;
     dashboard: string;
-    referenceProduct: string;
+    catcare: string;
     account: string;
     billing: string;
     usage: string;
@@ -49,7 +48,7 @@ export function SiteFooter({
     { href: "/", label: labels.productLinks.home },
     { href: "/login?mode=signup", label: labels.productLinks.signUp },
     { href: "/login", label: labels.productLinks.login },
-    { href: "/reference-product", label: labels.productLinks.referenceProduct },
+    { href: "/catcare", label: labels.productLinks.catcare },
     { href: "/account", label: labels.productLinks.account },
     { href: "/account/billing", label: labels.productLinks.billing },
     { href: "/account/usage", label: labels.productLinks.usage }
@@ -63,7 +62,7 @@ export function SiteFooter({
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_2fr]">
           <div className="min-w-0">
-            <BrandMark subtitle={languageLabels.brandSubtitle} />
+            <CatCareBrand subtitle={languageLabels.brandSubtitle} />
             <p className="mt-4 max-w-md text-sm leading-6 text-slate-500">
               {labels.description}
             </p>

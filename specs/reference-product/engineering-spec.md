@@ -6,11 +6,11 @@ GNE-231 adds the Reference Product homepage, login context, owner-side data mode
 
 ## Affected Areas
 
-- `apps/web/app/reference-product`
+- `apps/web/app/catcare`
 - `apps/web/app/page.tsx`
 - `apps/web/app/login`
 - `apps/web/app/demo`
-- `apps/web/lib/reference-product`
+- `apps/web/lib/catcare`
 - `apps/web/lib/supabase/database.types.ts`
 - `apps/web/lib/i18n.ts`
 - `apps/web/components/account-menu.tsx`
@@ -25,7 +25,7 @@ GNE-231 adds the Reference Product homepage, login context, owner-side data mode
 ```text
 CatCare homepage
 -> CatCare login/signup context
--> protected /reference-product workspace
+-> protected /catcare workspace
 -> app-side Reference Product Server Actions
 -> app-side Reference Product service
 -> Supabase client adapter in apps/web
@@ -125,7 +125,7 @@ The product pages may import public contracts from `@xwlc/core`, `@xwlc/ui`, `@x
 ## UI States
 
 - Homepage: visitors see a CatCare product proposition and product-shaped preview, with a secondary foundation demo link.
-- Login: users sign in or sign up in CatCare context and default back to `/reference-product`.
+- Login: users sign in or sign up in CatCare context and default back to `/catcare`.
 - Demo entry: reviewers can open `/demo` and `/demo/login` to validate foundation-demo flows without leaving the old UI implied by `/dashboard` as the product entry.
 - Workspace default: signed-in owner sees profile/routine/checklist entry points, plan state, and product account capability entries.
 - Empty: no plan list shows a product empty state.

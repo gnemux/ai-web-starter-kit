@@ -19,11 +19,14 @@
 
 ## Browser / E2E Checks
 
-- Path: `/reference-product` while signed out.
-  - Expected result: redirects to `/login?next=/reference-product`.
+- Path: `/catcare` while signed out.
+  - Expected result: redirects to `/login?next=/catcare`.
+- Path: `/reference-product` and `/reference-product/plans/demo/results`.
+  - Expected result: redirects to the matching `/catcare` route as a legacy
+    compatibility shim.
 - Path: `/`.
   - Expected result: CatCare product homepage is the first screen, with primary CTA to CatCare signup/workspace and secondary CTA to the CatCare flow section.
-- Path: `/login?next=/reference-product`.
+- Path: `/login?next=/catcare`.
   - Expected result: CatCare login/signup context renders and keeps the requested return path.
 - Path: `/account/billing` and `/account/usage`.
   - Expected result: product reviewers can reach plan/payment and AI Credit
@@ -34,8 +37,20 @@
   - Expected result: foundation demo entry renders and points to `/dashboard` or `/demo/login?next=/dashboard`.
 - Path: `/demo/login?next=/dashboard`.
   - Expected result: foundation demo login/signup context renders, reuses AuthForm, and keeps the requested demo return path.
-- Path: `/reference-product` while signed in.
+- Path: `/dashboard` while signed out.
+  - Expected result: redirects to `/demo/login?next=/dashboard`.
+- Path: `/demo/account`, `/demo/account/billing`, and `/demo/account/usage` while signed out.
+  - Expected result: redirect to `/demo/login` with the original demo return path preserved.
+- Path: Demo account menu while signed in.
+  - Expected result: profile, billing/order records, and usage stay under `/demo/account*`; the Demo menu does not link to `/catcare`.
+- Path: `/catcare` while signed in.
   - Expected result: page renders owner product UI, empty state, cat form, plan form, plan list, and account/billing/usage entries.
+- Path: `/catcare/cats`, `/catcare/routines`,
+  `/catcare/items`, `/catcare/events`,
+  `/catcare/plans`, and `/catcare/plans/[id]/results`
+  while signed out.
+  - Expected result: redirects to `/login` with the original CatCare return
+    path preserved.
 - Path: create cat, create plan, publish plan.
   - Expected result: plan appears in the list and changes from draft to published.
 
@@ -44,11 +59,12 @@
 - Review `specs/reference-product/gne-278-product-flow.md` before changing
   PRODUCT implementation. It is the current page-map and prototype gate.
 - Compare implementation pages against
-  `specs/reference-product/prototypes/catcare-gne-278-flow-board-v6.png` for
+  `specs/reference-product/prototypes/v6-regenerated-normalized/` for
   the current bilingual interaction flow, while treating text and numbers as
   non-binding placeholders.
 - Review mobile and desktop layouts for text overflow.
 - Check that `/account`, `/account/billing`, and `/account/usage` remain separate shared account surfaces for now.
+- Check that CatCare navigation does not link to `/dashboard`, and Demo navigation does not link to `/catcare` or CatCare account pages.
 - Check that page copy does not imply anonymous access, AI Credit consumption, or product billing are complete in GNE-231.
 - Check that paid status appears in value-consuming product surfaces, not only
   Billing, and never appears on the anonymous sitter page.
@@ -68,19 +84,85 @@
 - Check that menu active state follows the PRODUCT-00 route map and `/s/[token]`
   never renders owner navigation.
 - Check that button enable/disable states match prerequisites in PRODUCT-00.
-- Check that the current PR description labels this as a historical
-  `GNE-251 PRODUCT-02 DATA` exception and explicitly says GNE-280 UI/SYSTEM and
-  GNE-252 APP remain separate follow-up PRs.
+- Check that the current PR description labels the active issue accurately.
+  GNE-280 UI/SYSTEM work must not be described as completing GNE-251 DATA or
+  GNE-252 APP, and vice versa.
 
 ## Latest Run
+
+2026-06-30:
+
+- Passed `pnpm test:package-boundaries`, `pnpm test:release-boundaries`,
+  `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`, and
+  `git diff --check` after the
+  GNE-280 route-boundary update, `/catcare` route migration, CatCare skeleton
+  routes, CatCare billing UI update, and CatCare Landing/Login visual asset
+  addition at `apps/web/public/catcare/hero-handoff.png`.
+- Local dev server ran on `http://127.0.0.1:3006`.
+- HTTP smoke passed:
+  `/` -> 200,
+  `/demo` -> 200,
+  `/demo/account` signed out -> 307 to `/demo/login?next=%2Fdemo%2Faccount`,
+  `/demo/account/billing` signed out -> 307 to
+  `/demo/login?next=%2Fdemo%2Faccount%2Fbilling`,
+  `/demo/account/usage` signed out -> 307 to
+  `/demo/login?next=%2Fdemo%2Faccount%2Fusage`,
+  `/dashboard` signed out -> 307 to `/demo/login?next=/dashboard`,
+  `/login?next=/catcare` -> 200,
+  `/demo/login?next=/dashboard` -> 200,
+  `/account` signed out -> 307 to `/login?next=/account`,
+  `/account/billing` signed out -> 307 to `/login?next=/account/billing`,
+  `/catcare` signed out -> 307 to
+  `/login?next=/catcare`,
+  `/catcare/cats` signed out -> 307 to
+  `/login?next=%2Fcatcare%2Fcats`,
+  `/catcare/routines` signed out -> 307 to
+  `/login?next=%2Fcatcare%2Froutines`,
+  `/catcare/items` signed out -> 307 to
+  `/login?next=%2Fcatcare%2Fitems`,
+  `/catcare/events` signed out -> 307 to
+  `/login?next=%2Fcatcare%2Fevents`,
+  `/catcare/plans` signed out -> 307 to
+  `/login?next=%2Fcatcare%2Fplans`,
+  `/catcare/plans/demo/results` signed out -> 307 to
+  `/login?next=%2Fcatcare%2Fplans%2Fdemo%2Fresults`,
+  `/reference-product` -> 307 to `/catcare`,
+  `/reference-product/plans/demo/results` -> 307 to
+  `/catcare/plans/demo/results`.
+- In-app browser control timed out during DOM-level visual verification, while
+  dev server logs confirmed `/` returned `200`; signed-in visual screenshot
+  verification remains pending.
+
+2026-06-30 GNE-280 UI critique follow-up:
+
+- Accepted the product/UI critique that GNE-280 must cover product-grade
+  Landing, Login, `/catcare`, `/account/billing`, and `/account/usage`, while
+  full CRUD, real AI generation, anonymous share-token security, and
+  Order/Entitlement return remain later issue scope.
+- `/catcare` now shows the product loop: cat/routine context -> AI-generated
+  temporary checklist -> private sitter handoff -> owner review and paid recap.
+- `/catcare/cats|routines|items|events|plans|results` skeleton pages now show
+  product preview cards instead of a generic empty placeholder.
+- `/account/usage` now carries CatCare AI Credit context without adding new
+  billing or AI execution logic.
+- Passed `pnpm typecheck`, `pnpm lint`, `pnpm test:release-boundaries`,
+  `pnpm test:package-boundaries`, and `git diff --check`.
+- HTTP smoke passed on `http://127.0.0.1:3006`:
+  `/` -> 200,
+  `/login?next=/catcare` -> 200,
+  `/catcare` -> 307 to `/login?next=%2Fcatcare`,
+  `/catcare/routines` -> 307 to `/login?next=%2Fcatcare%2Froutines`,
+  `/catcare/events` -> 307 to `/login?next=%2Fcatcare%2Fevents`,
+  `/account/usage` -> 307 to `/login?next=/account/usage`,
+  `/account/billing` -> 307 to `/login?next=/account/billing`.
 
 2026-06-29:
 
 - Passed `pnpm test:package-boundaries`, `pnpm typecheck`, `pnpm lint`,
   `pnpm build`, and `git diff --check` after PRODUCT02 schema/type expansion.
 - Passed local HTTP smoke with the dev server on `http://127.0.0.1:3006`:
-  `/` GET -> 200, `/login?next=/reference-product` GET -> 200,
-  `/reference-product` signed out -> 307 to `/login?next=/reference-product`,
+  `/` GET -> 200, `/login?next=/catcare` GET -> 200,
+  `/catcare` signed out -> 307 to `/login?next=/catcare`,
   `/account` signed out -> 307 to `/login?next=/account`,
   `/account/billing` signed out -> 307 to `/login?next=/account/billing`,
   `/account/usage` signed out -> 307 to `/login?next=/account/usage`.

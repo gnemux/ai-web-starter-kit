@@ -35,6 +35,7 @@ export default async function DemoHomePage() {
                 email={currentAccount.user.email}
                 labels={copy.common.accountMenu}
                 name={accountLabel}
+                surface="demo"
               />
             ) : (
               <Button href="/demo/login?next=/dashboard" variant="secondary">

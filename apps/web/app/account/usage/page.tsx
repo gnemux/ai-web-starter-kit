@@ -1,29 +1,27 @@
 import {
-  getCurrentBillingActivity,
-  getCurrentBillingEntitlements
-} from "@/lib/services/billing";
+  Badge,
+  Panel
+} from "@xwlc/ui";
+
+import { getCurrentBillingEntitlements } from "@/lib/services/billing";
 
 import {
   AccountAppShell,
   AccountPageHeader,
   getAccountPageContext
 } from "../account-shell";
-import { UsageOverview, type UsageReviewState } from "../billing-overview";
 
-type AccountUsagePageProps = {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-};
-
-export default async function AccountUsagePage({
-  searchParams
-}: AccountUsagePageProps) {
-  const params = await searchParams;
-  const [context, billingResult, activityResult] = await Promise.all([
+export default async function AccountUsagePage() {
+  const [context, billingResult] = await Promise.all([
     getAccountPageContext("/account/usage"),
-    getCurrentBillingEntitlements(),
-    getCurrentBillingActivity()
+    getCurrentBillingEntitlements()
   ]);
   const { copy } = context;
+  const snapshot = billingResult.ok ? billingResult.data : null;
+  const isPro = snapshot?.planId === "pro";
+  const creditSummary = isPro
+    ? copy.account.billing.catcareDisplay.proCreditSummary
+    : copy.account.billing.catcareDisplay.freeCreditSummary;
 
   return (
     <AccountAppShell activeNav="usage" context={context}>
@@ -34,36 +32,55 @@ export default async function AccountUsagePage({
           title={copy.account.usage.title}
         />
 
-        <UsageOverview
-          activityResult={activityResult}
-          billingResult={billingResult}
-          labels={copy.account.billing}
-          usageReview={getUsageReviewState(params)}
-        />
+        <Panel className="border-teal-100 bg-[#f5fbfa]">
+          <Badge tone="in-progress">CatCare AI</Badge>
+          <h2 className="mt-4 text-2xl font-semibold tracking-normal text-slate-950">
+            {copy.account.usage.productTitle}
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+            {copy.account.usage.productDescription}
+          </p>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            {copy.account.usage.productFacts.map((fact) => (
+              <div
+                className="rounded-md border border-teal-100 bg-white p-3 text-sm font-medium leading-6 text-slate-700"
+                key={fact}
+              >
+                {fact}
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel className="border-teal-100 bg-white">
+          <div className="grid gap-4 md:grid-cols-[0.85fr_1fr]">
+            <div className="rounded-md bg-slate-950 p-6 text-white">
+              <p className="text-sm font-semibold text-slate-300">
+                {copy.account.billing.planCreditRemaining}
+              </p>
+              <p className="mt-3 text-5xl font-semibold tracking-normal">
+                {creditSummary}
+              </p>
+              <p className="mt-3 text-sm text-slate-300">
+                {copy.account.billing.features.ai_tokens}
+              </p>
+            </div>
+            <div className="grid content-center gap-3 text-sm font-semibold text-slate-700">
+              <div className="rounded-md border border-slate-100 bg-slate-50 p-4">
+                {copy.account.billing.packCreditRemaining}:{" "}
+                {copy.account.billing.catcareDisplay.creditPackEmpty}
+              </div>
+              <div className="rounded-md border border-slate-100 bg-slate-50 p-4">
+                {copy.account.billing.creditConsumed}:{" "}
+                {copy.account.billing.catcareDisplay.creditPackEmpty}
+              </div>
+              <div className="rounded-md border border-teal-100 bg-[#f5fbfa] p-4 text-teal-800">
+                {copy.account.billing.catcareSandboxNotice}
+              </div>
+            </div>
+          </div>
+        </Panel>
       </div>
     </AccountAppShell>
   );
-}
-
-function getUsageReviewState(
-  params: Record<string, string | string[] | undefined>
-): UsageReviewState {
-  const result = getParam(params.usage_result);
-
-  if (!result) {
-    return null;
-  }
-
-  return {
-    consumed: getParam(params.consumed) ?? "0",
-    featureKey: getParam(params.feature_key) ?? "ai_tokens",
-    plan: getParam(params.plan) ?? "unknown",
-    reason: getParam(params.reason) ?? "unknown",
-    remaining: getParam(params.remaining) ?? "unknown",
-    result
-  };
-}
-
-function getParam(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value;
 }

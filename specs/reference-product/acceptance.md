@@ -17,7 +17,7 @@
 
 ## Technical Checks
 
-- [ ] `supabase db reset` succeeds from repository migrations.
+- [x] `supabase db reset` succeeds from repository migrations.
 - [x] Product tables have RLS enabled and owner policies in the linked remote
   test Supabase project.
 - [x] `pnpm test:package-boundaries` passes.
@@ -44,11 +44,9 @@
   entries must not be generic starter/demo UI.
 - [x] Future daily-event recap monetization is recorded as a valid
   CAPABILITY/GROWTH candidate, not as MVP3 core scope.
-- [x] Current PR scope is classified as a historical GNE-251 PRODUCT-02 DATA
-  exception: mixed UI/APP work is allowed only as minimal data-verification
-  shell and does not complete GNE-280 UI/SYSTEM or GNE-252 APP.
-- [x] GNE-280 reopened as the active UI/SYSTEM issue after PR #44; GNE-252 was
-  returned to Backlog because PR #44 does not complete final owner-side APP.
+- [x] Historical PR #44 scope was limited to PRODUCT-02 DATA verification;
+  GNE-280, GNE-252, GNE-288, GNE-253, GNE-254, and GNE-255 now carry the
+  later UI/SYSTEM, APP, ARCH, DB/TEST, and ANALYTICS/QA completion evidence.
 
 ## PR Scope Classification
 

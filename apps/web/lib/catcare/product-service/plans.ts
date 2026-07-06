@@ -35,6 +35,7 @@ import {
   normalizePlanVisitCount,
   normalizeTaskTimeHint,
   readCatCarePlanDetailCache,
+  trackCatCareProductEvent,
   withPlanVisitCount,
   withRelatedItemInstruction,
   withTaskScopeTitle,
@@ -176,6 +177,16 @@ export async function createCatCarePlanFromFormData(
 
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
+  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_created", {
+    care_event_count: planTasksResult.data.eventCount,
+    cat_count: selectedCats.length,
+    item_count: planTasksResult.data.itemCount,
+    plan_status: plan.status,
+    routine_count: planTasksResult.data.routineCount,
+    scenario: inputResult.data.scenario,
+    source: plan.generation_source,
+    task_count: tasks.length
+  });
 
   return serviceOk({
     ...mapPlan(plan),
@@ -406,6 +417,10 @@ export async function updateCatCarePlanTasksFromFormData(
 
     clearCatCarePlanSummaryCache(ownerResult.data);
     clearCatCarePlanDetailCache(ownerResult.data, planId);
+    void trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
+      enabled_task_count: nextTasks.filter((task) => task.enabled).length,
+      task_count: nextTasks.length
+    });
 
     return serviceOk({
       handoffNotes: planUpdateResult.data.handoff_notes,
@@ -435,6 +450,10 @@ export async function updateCatCarePlanTasksFromFormData(
 
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
+  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
+    enabled_task_count: (tasksResult.data ?? []).filter((task) => task.enabled).length,
+    task_count: tasksResult.data?.length ?? 0
+  });
 
   return serviceOk({
     handoffNotes: planUpdateResult.data.handoff_notes,
@@ -838,6 +857,10 @@ export async function publishCatCarePlan(
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
+  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_published", {
+    enabled_task_count: count ?? 0,
+    plan_status: data.status
+  });
 
   return serviceOk({
     ...mapPlan(data),
@@ -883,6 +906,9 @@ export async function closeCatCarePlan(
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
+  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_closed", {
+    plan_status: data.status
+  });
 
   return serviceOk({
     ...mapPlan(data),
@@ -963,6 +989,9 @@ export async function deleteCatCarePlan(
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
+  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_deleted", {
+    plan_status: plan.status
+  });
 
   return serviceOk({ id: planId });
 }
@@ -1078,4 +1107,3 @@ export async function getCatCarePlanItemOptions(): Promise<ServiceResult<string[
 
   return serviceOk(Array.from(new Set(itemsResult.data.map((item) => item.name))));
 }
-

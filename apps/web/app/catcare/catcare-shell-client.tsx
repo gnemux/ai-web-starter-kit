@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 import { AccountMenu } from "@/components/account-menu";
 import { BellIcon } from "@/components/app-icons";
@@ -12,6 +12,7 @@ import {
   getWorkspaceNavItems,
   type WorkspaceNavKey
 } from "@/components/workspace-nav";
+import { trackCatCareEvent } from "@/lib/analytics/client";
 import type { Dictionary, Locale } from "@/lib/i18n";
 
 export function CatCareShellClient({
@@ -40,12 +41,34 @@ export function CatCareShellClient({
   const pathname = usePathname();
   const router = useRouter();
   const currentNav = activeNav ?? getActiveNav(pathname);
+  const lastTrackedPathname = useRef<string | null>(null);
   const navItems = getWorkspaceNavItems(copy, currentNav, {
     includeDashboard: false
   });
   const title =
     navItems.find((item) => item.active)?.label ??
     (locale === "en" ? "CatCare" : "CatCare");
+
+  useEffect(() => {
+    const pageKey = getAnalyticsPageKey(pathname, currentNav);
+
+    if (lastTrackedPathname.current === pathname) {
+      return;
+    }
+
+    lastTrackedPathname.current = pathname;
+    trackCatCareEvent(
+      pageKey === "results_detail"
+        ? "catcare_results_opened"
+        : "catcare_page_viewed",
+      {
+        is_detail: pageKey.endsWith("_detail"),
+        page_key: pageKey,
+        status: "viewed",
+        surface: "owner"
+      }
+    );
+  }, [currentNav, pathname]);
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#fbf8f3] text-slate-950">
@@ -65,6 +88,13 @@ export function CatCareShellClient({
                 }`}
                 href={item.href}
                 key={item.href}
+                onClick={() =>
+                  trackCatCareEvent("catcare_navigation_clicked", {
+                    from_page_key: getAnalyticsPageKey(pathname, currentNav),
+                    surface: "owner",
+                    target_page_key: getAnalyticsNavKey(item.href)
+                  })
+                }
                 onFocus={() => router.prefetch(item.href)}
                 onPointerEnter={() => router.prefetch(item.href)}
               >
@@ -163,6 +193,13 @@ export function CatCareShellClient({
                   }`}
                   href={item.href}
                   key={item.href}
+                  onClick={() =>
+                    trackCatCareEvent("catcare_navigation_clicked", {
+                      from_page_key: getAnalyticsPageKey(pathname, currentNav),
+                      surface: "owner",
+                      target_page_key: getAnalyticsNavKey(item.href)
+                    })
+                  }
                   onFocus={() => router.prefetch(item.href)}
                   onPointerEnter={() => router.prefetch(item.href)}
                 >
@@ -217,4 +254,35 @@ function getActiveNav(pathname: string): WorkspaceNavKey {
   }
 
   return "catcare";
+}
+
+function getAnalyticsPageKey(
+  pathname: string,
+  currentNav: WorkspaceNavKey
+): string {
+  if (pathname.endsWith("/results") && pathname.startsWith("/catcare/plans/")) {
+    return "results_detail";
+  }
+
+  if (pathname.startsWith("/catcare/plans/") && currentNav === "plans") {
+    return "plan_detail";
+  }
+
+  if (pathname.startsWith("/catcare/cats/") && currentNav === "cats") {
+    return "cat_detail";
+  }
+
+  return currentNav;
+}
+
+function getAnalyticsNavKey(href: string): string {
+  if (href === "/account/billing") {
+    return "billing";
+  }
+
+  if (href === "/catcare") {
+    return "catcare";
+  }
+
+  return href.replace("/catcare/", "");
 }

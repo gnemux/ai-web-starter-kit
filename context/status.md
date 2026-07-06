@@ -640,9 +640,9 @@ Latest `GNE-288` product-service architecture update on 2026-07-06:
 
 Latest `GNE-253` owner UX/results scope update on 2026-07-06:
 
-- GNE-253 is `PRODUCT-05 [APP/UX]` after GNE-288. The local branch is ready for
-  PR review and close-out once GitHub CI, merge, and deployment verification
-  pass.
+- GNE-253 `PRODUCT-05 [APP/UX]` is complete after GNE-288. PR #49 merged on
+  2026-07-06 at merge commit `1190f64`; GitHub CI passed; Vercel Production
+  deployment `5329868439` completed with `success`.
 - Phase 1 must complete the owner-side plan confirmation UX baseline before
   expanding results: summarize plan confirmation by dates, cats, visit count,
   visit batches, key handoff notes, compact task editing, and execution

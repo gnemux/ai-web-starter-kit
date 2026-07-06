@@ -26,7 +26,7 @@ export default async function CatCareResultsPage() {
               结果查看
             </h1>
             <p className="mt-2 text-sm leading-6 text-[#526177]">
-              查看计划提交状态和后续 AI 复盘入口。匿名提交和 live AI 不在 GNE-252 范围。
+              查看主人侧计划状态、提交入口预览和后续 AI 复盘入口。匿名提交、分享链接和 live AI 不在本阶段范围。
             </p>
           </div>
           <CatCarePanel>
@@ -52,6 +52,7 @@ export default async function CatCareResultsPage() {
 function ResultPlanCard({ plan }: { plan: CatCarePlan }) {
   const status = getPlanStatusMeta(plan.status);
   const submissionCount = plan.submissionCount ?? plan.submissions.length;
+  const resultLabel = getResultLabel(plan, submissionCount);
 
   return (
     <Link
@@ -64,9 +65,7 @@ function ResultPlanCard({ plan }: { plan: CatCarePlan }) {
             {formatPlanDisplayTitle(plan)}
           </h2>
           <p className="mt-1 text-sm font-semibold text-[#526177]">
-            {submissionCount > 0
-              ? `${submissionCount} 条提交`
-              : "暂无照看者提交"}
+            {resultLabel}
           </p>
           <p className="mt-1 text-sm font-semibold text-[#526177]">
             照护猫咪：{formatPlanCatNames(plan)}
@@ -82,6 +81,22 @@ function ResultPlanCard({ plan }: { plan: CatCarePlan }) {
       </span>
     </Link>
   );
+}
+
+function getResultLabel(plan: CatCarePlan, submissionCount: number) {
+  if (submissionCount > 0) {
+    return `${submissionCount} 条提交待查看`;
+  }
+
+  if (plan.status === "closed") {
+    return "已关闭，暂无提交记录";
+  }
+
+  if (plan.status === "draft") {
+    return "计划待发布";
+  }
+
+  return "等待真实提交";
 }
 
 function getPlanStatusMeta(status: CatCarePlan["status"]) {

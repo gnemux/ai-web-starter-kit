@@ -323,6 +323,13 @@ Latest MVP3 PRODUCT-00 design-gate update:
 - Product opportunity added to MVP3 KNOW: accumulated daily events can later
   power paid text/video recap generation for social sharing. It is future
   CAPABILITY/GROWTH, not MVP3 core.
+- GNE-280 handoff and parallel-work guidance now lives in
+  `context/catcare-parallel-handoff.md`. Future CatCare PRODUCT/ACCESS/
+  CAPABILITY threads should read it before editing pages, icon assets, product
+  shell files, or Linear issue scope. It records the accepted prototype-to-page
+  workflow, CatCare icon asset workflow, shared-file locks, and safe three-lane
+  parallel split. A mirrored Linear document is attached to `GNE-231`:
+  https://linear.app/gnemux/document/catcare-product-并行推进交接gne-280-后-92ccd8117db2
 
 Latest MVP3 PRODUCT local verification:
 
@@ -556,6 +563,32 @@ Latest `GNE-280` local UI verification on 2026-07-01:
 - Current self-assessment versus normalized prototypes: Landing ~88-90%,
   Login ~87-89%, Dashboard ~84-86%, Billing/Usage ~75-80%. GNE-280 should not
   close until Dashboard and Billing/Usage are closer to the split prototypes.
+
+Latest `GNE-252` product-quality and architecture update on 2026-07-06:
+
+- CatCare owner flow now treats same-page create/edit/delete/publish/close
+  operations as local product interactions: local server action, local UI state
+  update, and CatCare toast feedback where the user remains on the same page.
+- `redirect()` and broad `revalidatePath()` remain acceptable only for true
+  route transitions, such as creating a new care plan and opening its detail
+  page.
+- The CatCare performance practice is now recorded in
+  `specs/reference-product/catcare-ui-guidelines.md` and
+  `context/catcare-parallel-handoff.md`: batch Supabase reads, invalidate the
+  smallest useful product cache, do not query in per-card/per-task loops, and
+  keep toast feedback outside unmounting cards/modals.
+- Boundary decision: CatCare-only toast styling, action icons, autocomplete
+  dictionaries, plan schedule heuristics, product dictionaries, and item/routine
+  semantics stay in the app/product layer. They should not move to `packages/*`
+  until a second product needs the same behavior without CatCare semantics.
+- Structure decision: `apps/web/lib/catcare/product-service.ts` remains the
+  current service boundary for GNE-252 owner-flow acceptance, but MVP3 should
+  not keep building on the 5k-line service file. Add a dedicated PRODUCT
+  architecture follow-up after GNE-252 acceptance and complete it before GNE-253
+  results expansion, GNE-232 ACCESS share-link implementation, or GNE-233
+  CAPABILITY AI/Billing gates add more CatCare branches. Split it by cats,
+  routines, items, events, plans, and catalog/cache while keeping CatCare
+  business types out of `packages/*`.
 
 ## Next Steps
 

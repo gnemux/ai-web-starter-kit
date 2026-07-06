@@ -3,9 +3,9 @@ import {
   type BillingEntitlementSnapshot,
   type ServiceResult
 } from "@xwlc/core";
+import Link from "next/link";
 
 import {
-  CatCareAddCatIcon,
   CatCareAiCreditIcon,
   CatCareAiChecklistIcon,
   CatCareCareEventsIcon,
@@ -13,6 +13,7 @@ import {
   CatCareCarePlanMetricIcon,
   CatCareCatCountIcon,
   CatCareFeedingRoutineIcon,
+  CatCarePetSuppliesIcon,
   CatCarePendingIcon,
   CatCareProfileIcon,
   CatCareShareLinkIcon
@@ -21,51 +22,39 @@ import {
   CatCareHeroImage,
   CatCareMetricCard
 } from "@/components/catcare-ui";
-import { LanguageSwitcher } from "@/components/language-switcher";
-import { getDictionary, type Locale } from "@/lib/i18n";
+import { getDictionary } from "@/lib/i18n";
 import { getCurrentBillingEntitlements } from "@/lib/services/billing";
 import {
   getCatCareWorkspace,
-  type CatCareCat,
-  type CatCarePlan
+  type CatCareCatSummary
 } from "@/lib/catcare/product-service";
 
-import { CatCareAppShell, getCatCarePageContext } from "./catcare-shell";
+import { getCatCareContentContext } from "./catcare-shell";
+import { CatCarePlusCircleIcon } from "./catcare-action-icons";
 
 export default async function CatCarePage() {
-  const context = await getCatCarePageContext("/catcare");
-  const { account, copy } = context;
-  const [workspaceResult, billingResult] = await Promise.all([
+  const [context, workspaceResult, billingResult] = await Promise.all([
+    getCatCareContentContext(),
     getCatCareWorkspace(),
     getCurrentBillingEntitlements()
   ]);
-  const currentPlanId = billingResult.ok ? billingResult.data.planId : "free";
-  const creditLabel = billingResult.ok
-    ? formatCatCareAiSummaryLabel(currentPlanId, copy.account.billing)
-    : copy.catcare.owner.dashboard.creditUnavailable;
+  const { copy } = context;
 
   return (
-    <CatCareAppShell
-      activeNav="catcare"
-      context={context}
-      topBar={
-        <CatCareTopBar
-          creditLabel={creditLabel}
-          languageLabels={copy.common}
-          labels={copy.catcare.owner}
-          locale={context.locale}
-          planLabel={copy.account.billing.planNames[currentPlanId]}
-        />
-      }
-    >
+    <>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
         {workspaceResult.ok ? (
           <CatCareWorkspace
             cats={workspaceResult.data.cats}
             billingLabels={copy.account.billing}
             billingResult={billingResult}
+            eventCount={workspaceResult.data.eventCount}
+            itemCount={workspaceResult.data.itemCount}
             labels={copy.catcare.owner}
-            plans={workspaceResult.data.plans}
+            planCount={workspaceResult.data.planCount}
+            publishedPlanCount={workspaceResult.data.publishedPlanCount}
+            routineCount={workspaceResult.data.routineCount}
+            submissionCount={workspaceResult.data.submissionCount}
           />
         ) : (
           <ErrorState
@@ -75,44 +64,7 @@ export default async function CatCarePage() {
           />
         )}
       </div>
-    </CatCareAppShell>
-  );
-}
-
-function CatCareTopBar({
-  creditLabel,
-  languageLabels,
-  labels,
-  locale,
-  planLabel
-}: {
-  creditLabel: string;
-  languageLabels: ReturnType<typeof getDictionary>["common"];
-  labels: ReturnType<typeof getDictionary>["catcare"]["owner"];
-  locale: Locale;
-  planLabel: string;
-}) {
-  return (
-    <div className="flex min-w-0 items-center justify-between gap-6">
-      <h1 className="truncate text-3xl font-semibold tracking-normal text-slate-950">
-        {labels.dashboard.topTitle}
-      </h1>
-      <div className="flex shrink-0 items-center gap-6">
-        <span className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
-          <span>{labels.dashboard.currentPlanLabel}</span>
-          <span className="rounded-full bg-slate-100 px-4 py-2 text-base text-slate-950">
-            {planLabel}
-          </span>
-        </span>
-        <span className="inline-flex items-center gap-3 text-sm font-semibold text-slate-600">
-          <span>{labels.dashboard.aiCreditLabel}</span>
-          <span className="max-w-[8rem] truncate rounded-full bg-[#e6f7f2] px-4 py-2 text-base font-semibold text-teal-800">
-            {creditLabel}
-          </span>
-        </span>
-        <LanguageSwitcher labels={languageLabels} locale={locale} />
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -120,24 +72,40 @@ function CatCareWorkspace({
   billingLabels,
   billingResult,
   cats,
+  eventCount,
+  itemCount,
   labels,
-  plans
+  planCount,
+  publishedPlanCount,
+  routineCount,
+  submissionCount
 }: {
   billingLabels: ReturnType<typeof getDictionary>["account"]["billing"];
   billingResult: ServiceResult<BillingEntitlementSnapshot>;
-  cats: CatCareCat[];
+  cats: CatCareCatSummary[];
+  eventCount: number;
+  itemCount: number;
   labels: ReturnType<typeof getDictionary>["catcare"]["owner"];
-  plans: CatCarePlan[];
+  planCount: number;
+  publishedPlanCount: number;
+  routineCount: number;
+  submissionCount: number;
 }) {
-  const submissionCount = plans.reduce(
-    (total, plan) => total + plan.submissions.length,
-    0
-  );
   const currentPlan = billingResult.ok ? billingResult.data.planId : "free";
   const creditLabel = billingResult.ok
     ? formatCatCareAiSummaryLabel(currentPlan, billingLabels)
     : labels.dashboard.creditUnavailable;
-  const onboarding = getOnboardingProgress(cats, plans);
+  const onboarding = getOnboardingProgress({
+    cats,
+    eventCount,
+    itemCount,
+    planCount,
+    publishedPlanCount,
+    routineCount
+  });
+  const firstCatQuery = cats[0]?.id
+    ? `?cat_id=${encodeURIComponent(cats[0].id)}`
+    : "";
 
   return (
     <div className="grid gap-5">
@@ -147,29 +115,40 @@ function CatCareWorkspace({
       />
 
       <ActivationPanel
+        firstCatId={cats[0]?.id}
+        hasCats={cats.length > 0}
         labels={labels}
         onboarding={onboarding}
       />
 
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        <CatCareMetricCard
-          icon={<CatCareCatCountIcon className="h-8 w-8" />}
-          label={labels.metrics.cats}
-          sublabel={labels.dashboard.catsSublabel}
-          value={cats.length}
-        />
-        <CatCareMetricCard
-          icon={<CatCareCarePlanMetricIcon className="h-8 w-8" />}
-          label={labels.metrics.published}
-          sublabel={labels.dashboard.plansSublabel}
-          value={plans.length}
-        />
-        <CatCareMetricCard
-          icon={<CatCarePendingIcon className="h-8 w-8" />}
-          label={labels.planList.noSubmissions}
-          sublabel={labels.dashboard.pendingSublabel}
-          value={submissionCount}
-        />
+        <Link className="block transition hover:-translate-y-0.5" href="/catcare/cats">
+          <CatCareMetricCard
+            icon={<CatCareCatCountIcon className="h-8 w-8" />}
+            label={labels.metrics.cats}
+            sublabel={labels.dashboard.catsSublabel}
+            value={cats.length}
+          />
+        </Link>
+        <Link
+          className="block transition hover:-translate-y-0.5"
+          href={`/catcare/plans${firstCatQuery}`}
+        >
+          <CatCareMetricCard
+            icon={<CatCareCarePlanMetricIcon className="h-8 w-8" />}
+            label={labels.metrics.published}
+            sublabel={labels.dashboard.plansSublabel}
+            value={planCount}
+          />
+        </Link>
+        <Link className="block transition hover:-translate-y-0.5" href="/catcare/results">
+          <CatCareMetricCard
+            icon={<CatCarePendingIcon className="h-8 w-8" />}
+            label={labels.planList.noSubmissions}
+            sublabel={labels.dashboard.pendingSublabel}
+            value={submissionCount}
+          />
+        </Link>
         <CatCareMetricCard
           icon={<CatCareAiCreditIcon className="h-8 w-8" />}
           label={labels.metrics.aiCredit}
@@ -180,10 +159,8 @@ function CatCareWorkspace({
 
       <Button
         className="min-h-14 w-full justify-center rounded-xl bg-teal-700 text-base hover:bg-teal-800"
-        href="/catcare/cats"
-        icon={
-          <CatCareAddCatIcon className="h-8 w-8 brightness-0 invert" />
-        }
+        href="/catcare/cats/new"
+        icon={<CatCarePlusCircleIcon />}
       >
         {labels.dashboard.addCatCta}
       </Button>
@@ -221,45 +198,56 @@ function DashboardHero({
 }
 
 function ActivationPanel({
+  firstCatId,
+  hasCats,
   labels,
   onboarding
 }: {
+  firstCatId?: string;
+  hasCats: boolean;
   labels: ReturnType<typeof getDictionary>["catcare"]["owner"];
   onboarding: OnboardingProgress;
 }) {
+  const catQuery = firstCatId ? `?cat_id=${encodeURIComponent(firstCatId)}` : "";
   const steps = [
     {
       action: labels.catForm.submit,
-      href: "/catcare/cats",
+      href: hasCats ? "/catcare/cats" : "/catcare/cats/new",
       icon: <CatCareProfileIcon />,
       title: labels.sections.cats.title
     },
     {
       action: labels.sections.routines.primary,
-      href: "/catcare/routines",
+      href: `/catcare/routines${catQuery}`,
       icon: <CatCareFeedingRoutineIcon />,
       title: labels.sections.routines.title
     },
     {
+      action: labels.sections.items.primary,
+      href: `/catcare/items${catQuery}`,
+      icon: <CatCarePetSuppliesIcon />,
+      title: labels.sections.items.title
+    },
+    {
       action: labels.sections.events.primary,
-      href: "/catcare/events",
+      href: `/catcare/events${catQuery}`,
       icon: <CatCareCareEventsIcon />,
       title: labels.sections.events.title
     },
     {
       action: labels.hero.primary.replace("用 AI ", "").replace(" with AI", ""),
-      href: "/catcare/plans",
+      href: `/catcare/plans${catQuery}`,
       icon: <CatCareAiChecklistIcon />,
       title: labels.dashboard.aiChecklist
     },
     {
       action: labels.planList.publish,
-      href: "/catcare/plans",
+      href: `/catcare/plans${catQuery}`,
       icon: <CatCareShareLinkIcon />,
       title: labels.dashboard.publishShare
     }
   ];
-  const stepCountLabel = labels.dashboard.workflowStepCount.replace(/^4/, "5");
+  const stepCountLabel = labels.dashboard.workflowStepCount.replace(/^4/, "6");
 
   return (
     <section
@@ -282,10 +270,10 @@ function ActivationPanel({
         />
       </div>
 
-      <div className="mt-8 grid grid-cols-5 gap-0">
+      <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-6 lg:gap-0">
         {steps.map((step, index) => (
-          <a
-            className="group relative grid min-h-32 justify-items-center rounded-2xl text-center outline-none transition hover:text-teal-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300/60"
+          <Link
+            className="group relative grid min-h-32 cursor-pointer justify-items-center rounded-2xl text-center outline-none transition hover:text-teal-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300/60"
             href={step.href}
             key={step.title}
           >
@@ -304,7 +292,7 @@ function ActivationPanel({
             <p className="mt-1 whitespace-nowrap text-base leading-6 text-slate-500">
               {step.action}
             </p>
-          </a>
+          </Link>
         ))}
       </div>
     </section>
@@ -316,15 +304,30 @@ type OnboardingProgress = {
   percent: number;
 };
 
-function getOnboardingProgress(
-  cats: CatCareCat[],
-  plans: CatCarePlan[]
-): OnboardingProgress {
-  const completed =
-    (cats.length > 0 ? 1 : 0) +
-    (plans.length > 0 ? 1 : 0) +
-    (plans.some((plan) => plan.status === "published") ? 1 : 0);
-  const percent = Math.round((completed / 5) * 100);
+function getOnboardingProgress({
+  cats,
+  eventCount,
+  itemCount,
+  planCount,
+  publishedPlanCount,
+  routineCount
+}: {
+  cats: CatCareCatSummary[];
+  eventCount: number;
+  itemCount: number;
+  planCount: number;
+  publishedPlanCount: number;
+  routineCount: number;
+}): OnboardingProgress {
+  const completedSteps = [
+    cats.length > 0,
+    routineCount > 0,
+    itemCount > 0,
+    eventCount > 0 || planCount > 0,
+    planCount > 0,
+    publishedPlanCount > 0
+  ].filter(Boolean).length;
+  const percent = Math.round((completedSteps / 6) * 100);
 
   return {
     label: `${percent}%`,

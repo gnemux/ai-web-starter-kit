@@ -1,21 +1,21 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { AccountMenu } from "@/components/account-menu";
-import { BellIcon } from "@/components/app-icons";
-import { CatCareBrand } from "@/components/catcare-brand";
-import {
-  getWorkspaceNavItems,
-  type WorkspaceNavKey
-} from "@/components/workspace-nav";
+import type { WorkspaceNavKey } from "@/components/workspace-nav";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
+import { getCurrentBillingEntitlements } from "@/lib/services/billing";
+
+import { CatCareShellClient } from "./catcare-shell-client";
 
 export async function getCatCarePageContext(nextPath = "/catcare") {
   const locale = await getRequestLocale();
   const copy = getDictionary(locale);
-  const accountResult = await getCurrentAccount();
+  const [accountResult, billingResult] = await Promise.all([
+    getCurrentAccount(),
+    getCurrentBillingEntitlements()
+  ]);
 
   if (!accountResult.ok) {
     redirect(`/login?next=${encodeURIComponent(nextPath)}`);
@@ -27,15 +27,34 @@ export async function getCatCarePageContext(nextPath = "/catcare") {
     accountResult.data.user.email ||
     copy.catcare.owner.eyebrow;
 
+  const planId = billingResult.ok ? billingResult.data.planId : "free";
+
   return {
     account: accountResult.data,
+    billingPlanLabel: copy.account.billing.planNames[planId],
+    creditLabel: formatCatCareAiSummaryLabel(planId, copy.account.billing),
     copy,
     locale,
     userLabel
   };
 }
 
-type CatCarePageContext = Awaited<ReturnType<typeof getCatCarePageContext>>;
+export async function getCatCareContentContext() {
+  const locale = await getRequestLocale();
+
+  return {
+    copy: getDictionary(locale),
+    locale
+  };
+}
+
+type CatCarePageContext = Pick<
+  Awaited<ReturnType<typeof getCatCarePageContext>>,
+  "account" | "copy" | "locale" | "userLabel"
+> & {
+  billingPlanLabel?: string;
+  creditLabel?: string;
+};
 
 export function CatCareAppShell({
   activeNav,
@@ -48,98 +67,28 @@ export function CatCareAppShell({
   context: CatCarePageContext;
   topBar?: ReactNode;
 }) {
-  const navItems = getWorkspaceNavItems(context.copy, activeNav, {
-    includeDashboard: false
-  });
-
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#fbf8f3] text-slate-950">
-      <div className="mx-auto flex min-h-screen max-w-[1536px] rounded-none bg-white shadow-sm shadow-slate-900/[0.04] lg:my-2 lg:min-h-[calc(100vh-1rem)] lg:rounded-2xl lg:border lg:border-slate-200">
-        <aside className="hidden w-[252px] shrink-0 border-r border-slate-200 bg-white lg:flex lg:flex-col">
-          <div className="px-8 py-8">
-            <CatCareBrand href="/catcare" />
-          </div>
-          <nav aria-label="CatCare" className="grid gap-2 px-6">
-            {navItems.map((item) => (
-              <a
-                aria-current={item.active ? "page" : undefined}
-                className={`relative flex min-h-14 items-center gap-4 rounded-2xl px-4 text-sm font-semibold transition ${
-                  item.active
-                    ? "bg-[#dff4ee] text-teal-900 shadow-sm shadow-teal-900/[0.06]"
-                    : "text-slate-600 hover:bg-[#f2fbf8] hover:text-slate-950"
-                }`}
-                href={item.href}
-                key={item.href}
-              >
-                {item.active ? (
-                  <span
-                    aria-hidden="true"
-                    className="absolute bottom-2 left-0 top-2 w-1 rounded-r-full bg-teal-700"
-                  />
-                ) : null}
-                <span
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full [&_img]:h-7 [&_img]:w-7 [&_svg]:h-7 [&_svg]:w-7 ${
-                    item.active
-                      ? "bg-[#cdeee5] text-teal-900"
-                      : "bg-[#e6f7f2] text-teal-700"
-                  }`}
-                >
-                  {item.icon}
-                </span>
-                <span className="min-w-0 truncate">{item.label}</span>
-              </a>
-            ))}
-          </nav>
-        </aside>
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="border-b border-slate-200 bg-white">
-            <div className="flex min-h-[88px] items-center gap-4 px-4 sm:px-6 lg:px-10">
-              <div className="lg:hidden">
-                <CatCareBrand href="/catcare" />
-              </div>
-              {topBar ? <div className="hidden min-w-0 flex-1 lg:block">{topBar}</div> : null}
-              <div className="ml-auto flex shrink-0 items-center gap-3">
-                <span className="relative hidden h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 sm:flex">
-                  <BellIcon className="h-6 w-6" />
-                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                    3
-                  </span>
-                </span>
-                <AccountMenu
-                  avatarUrl={context.account.profile?.avatarUrl}
-                  email={context.account.user.email}
-                  labels={context.copy.common.accountMenu}
-                  name={context.userLabel}
-                  showDashboard={false}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2 border-t border-slate-100 px-4 py-3 sm:grid-cols-4 lg:hidden">
-              {navItems.map((item) => (
-                <a
-                  aria-current={item.active ? "page" : undefined}
-                  className={`flex min-h-11 min-w-0 items-center gap-2 rounded-lg px-3 text-sm font-semibold ${
-                    item.active
-                      ? "bg-teal-50 text-teal-800"
-                      : "text-slate-500 hover:bg-slate-50"
-                  }`}
-                  href={item.href}
-                  key={item.href}
-                >
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center [&_img]:h-5 [&_img]:w-5 [&_svg]:h-5 [&_svg]:w-5">
-                    {item.icon}
-                  </span>
-                  <span className="min-w-0 truncate">{item.label}</span>
-                </a>
-              ))}
-            </div>
-          </header>
-          <main className="min-w-0 flex-1 bg-[#fbf8f3] px-4 py-6 sm:px-6 lg:px-8">
-            {children}
-          </main>
-        </div>
-      </div>
-    </div>
+    <CatCareShellClient
+      activeNav={activeNav}
+      avatarUrl={context.account.profile?.avatarUrl}
+      billingPlanLabel={context.billingPlanLabel}
+      copy={context.copy}
+      creditLabel={context.creditLabel}
+      email={context.account.user.email}
+      locale={context.locale}
+      topBar={topBar}
+      userLabel={context.userLabel}
+    >
+      {children}
+    </CatCareShellClient>
   );
+}
+
+function formatCatCareAiSummaryLabel(
+  planId: string,
+  labels: ReturnType<typeof getDictionary>["account"]["billing"]
+) {
+  return planId === "pro"
+    ? labels.catcareDisplay.proCreditSummary
+    : labels.catcareDisplay.freeCreditSummary;
 }

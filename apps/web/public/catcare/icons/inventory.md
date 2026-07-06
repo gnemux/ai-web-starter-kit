@@ -6,6 +6,13 @@ Current frontend source: `apps/web/public/catcare/icons/traced/`.
 Prototype crops are retained in `apps/web/public/catcare/icons/prototype/` as
 trace sources.
 
+Routine task icons currently use normalized PNG crops directly:
+`prototype/routine-dry-food.png`, `prototype/routine-canned.png`,
+`prototype/routine-treat.png`, `prototype/routine-water.png`,
+`prototype/routine-litter.png`, and `prototype/routine-play.png`. They are
+product-layer task illustrations cropped from `05-recurring-routine.png`, not
+shared action icons.
+
 | Traced SVG | Semantic wrappers | Primary usage | Prototype reference |
 | --- | --- | --- | --- |
 | `traced/dashboard.svg` | `CatCareDashboardIcon` | sidebar dashboard, fallback flow icon | repaired from `03-onboarding-dashboard.png` selected state |
@@ -28,6 +35,14 @@ trace sources.
 | `traced/credit-pack-15.svg` | `CatCareCreditPack15Icon` | 12 USD credit pack tile | `13-billing-entitlements.png` credit pack tile |
 | `traced/credit-pack-30.svg` | `CatCareCreditPack30Icon` | 29 USD credit pack tile | `13-billing-entitlements.png` credit pack tile |
 | `traced/credit-pack-100.svg` | `CatCareCreditPack100Icon` | 59 USD credit pack tile | `13-billing-entitlements.png` credit pack tile |
+| `traced/arrow-left.svg` | `CatCareArrowLeftIcon` | owner flow back actions | semantic source PNG, then potrace |
+| `traced/calendar.svg` | `CatCareCalendarIcon` | date controls | semantic source PNG, then potrace |
+| `traced/chevron-down.svg` | `CatCareChevronDownIcon` | select and autocomplete controls | semantic source PNG, then potrace |
+| `traced/edit.svg` | `CatCareEditIcon` | edit actions | semantic source PNG, then potrace |
+| `traced/save.svg` | `CatCareSaveIcon` | save draft actions | semantic source PNG, then potrace |
+| `traced/search.svg` | `CatCareSearchIcon` | autocomplete controls | semantic source PNG, then potrace |
+| `traced/trash.svg` | `CatCareTrashIcon` | destructive owner actions | semantic source PNG, then potrace |
+| `traced/upload.svg` | `CatCareUploadIcon` | photo upload actions | semantic source PNG, then potrace |
 
 Missing final design source: no Figma SVG export is present in the repository.
 The old hand-drawn cat face SVGs were removed because they did not match the

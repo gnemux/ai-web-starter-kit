@@ -271,6 +271,7 @@ GNE-231 PRODUCT
 ├── GNE-280 PRODUCT-01 [UI/SYSTEM] V6 原型转标准 SaaS UI
 ├── GNE-251 PRODUCT-02 [DATA] 猫咪档案、喂养习惯、用品、事件、照护计划、任务、提交数据模型
 ├── GNE-252 PRODUCT-03 主人侧创建/编辑/发布流程
+├── GNE-TBD PRODUCT-03R CatCare 服务层拆分与局部更新边界收敛
 ├── GNE-253 PRODUCT-04 主人侧结果查看和状态变化
 ├── GNE-254 PRODUCT-05 Supabase RLS 验收 SQL 与 seed 数据
 └── GNE-255 PRODUCT-06 基础事件和页面级验收
@@ -319,6 +320,17 @@ later PRODUCT issues unless explicitly re-scoped.
 New PM note: accumulated daily events can later power a paid text/video recap
 for social sharing (domestic: Moments/Xiaohongshu/Douyin; overseas: X/YouTube).
 This is a valid future CAPABILITY/GROWTH monetization candidate, not MVP3 core.
+
+GNE-TBD PRODUCT-03R planning note: create a dedicated MVP3 PRODUCT architecture
+follow-up after GNE-252 owner-flow acceptance. It should be a child of
+`GNE-231`, blocked by `GNE-252`, and block `GNE-253`, `GNE-232`, and
+`GNE-233`. Scope: split `apps/web/lib/catcare/product-service.ts` by cats,
+routines, items, events, plans, and catalog/cache; preserve current behavior;
+keep CatCare business types, dictionaries, icons, and product semantics out of
+`packages/*`; keep `/demo`, `/demo/login`, `/dashboard`, and `/demo/account*`
+unaffected. Linear MCP creation failed locally on 2026-07-06 due to MCP
+handshake failure, so replace `GNE-TBD` with the real issue identifier after
+the Linear issue is created.
 
 GNE-280 is the active PRODUCT-01 UI/SYSTEM task. The first accepted boundary
 decision is to keep the MVP1/MVP2 foundation demo, but isolate it as a demo

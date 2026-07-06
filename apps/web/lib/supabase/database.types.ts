@@ -344,8 +344,12 @@ export type Database = {
           id: string;
           owner_id: string;
           name: string;
+          gender: "male" | "female" | "unknown" | null;
+          birth_date: string | null;
           life_stage: "kitten" | "adult" | "senior" | "unknown" | null;
           breed: string | null;
+          weight_kg: number | null;
+          photo_url: string | null;
           safety_notes: string | null;
           notes: string | null;
           created_at: string;
@@ -355,8 +359,12 @@ export type Database = {
           id?: string;
           owner_id: string;
           name: string;
+          gender?: "male" | "female" | "unknown" | null;
+          birth_date?: string | null;
           life_stage?: "kitten" | "adult" | "senior" | "unknown" | null;
           breed?: string | null;
+          weight_kg?: number | null;
+          photo_url?: string | null;
           safety_notes?: string | null;
           notes?: string | null;
           created_at?: string;
@@ -366,8 +374,12 @@ export type Database = {
           id?: string;
           owner_id?: string;
           name?: string;
+          gender?: "male" | "female" | "unknown" | null;
+          birth_date?: string | null;
           life_stage?: "kitten" | "adult" | "senior" | "unknown" | null;
           breed?: string | null;
+          weight_kg?: number | null;
+          photo_url?: string | null;
           safety_notes?: string | null;
           notes?: string | null;
           created_at?: string;
@@ -477,6 +489,171 @@ export type Database = {
         };
         Relationships: [];
       };
+      catcare_product_catalog: {
+        Row: {
+          id: string;
+          item_type:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "supplement"
+            | "litter"
+            | "supply"
+            | "other";
+          brand: string | null;
+          product_name: string;
+          display_name: string;
+          aliases: string[];
+          country_region: string | null;
+          source: "seed" | "manual" | "import";
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          item_type:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "supplement"
+            | "litter"
+            | "supply"
+            | "other";
+          brand?: string | null;
+          product_name: string;
+          display_name: string;
+          aliases?: string[];
+          country_region?: string | null;
+          source?: "seed" | "manual" | "import";
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          item_type?:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "supplement"
+            | "litter"
+            | "supply"
+            | "other";
+          brand?: string | null;
+          product_name?: string;
+          display_name?: string;
+          aliases?: string[];
+          country_region?: string | null;
+          source?: "seed" | "manual" | "import";
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      owner_item_library: {
+        Row: {
+          id: string;
+          owner_id: string;
+          catalog_product_id: string | null;
+          item_type:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "supplement"
+            | "litter"
+            | "supply"
+            | "other";
+          display_name: string;
+          brand: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          catalog_product_id?: string | null;
+          item_type:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "supplement"
+            | "litter"
+            | "supply"
+            | "other";
+          display_name: string;
+          brand?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          catalog_product_id?: string | null;
+          item_type?:
+            | "dry_food"
+            | "wet_food"
+            | "treat"
+            | "medicine"
+            | "supplement"
+            | "litter"
+            | "supply"
+            | "other";
+          display_name?: string;
+          brand?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      cat_item_assignments: {
+        Row: {
+          id: string;
+          owner_id: string;
+          cat_id: string;
+          owner_item_id: string;
+          default_amount: string | null;
+          default_frequency: string | null;
+          instructions: string | null;
+          visible_to_sitter: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          cat_id: string;
+          owner_item_id: string;
+          default_amount?: string | null;
+          default_frequency?: string | null;
+          instructions?: string | null;
+          visible_to_sitter?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          cat_id?: string;
+          owner_item_id?: string;
+          default_amount?: string | null;
+          default_frequency?: string | null;
+          instructions?: string | null;
+          visible_to_sitter?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       care_items: {
         Row: {
           id: string;
@@ -487,6 +664,7 @@ export type Database = {
             | "wet_food"
             | "treat"
             | "medicine"
+            | "supplement"
             | "litter"
             | "supply"
             | "other";
@@ -507,6 +685,7 @@ export type Database = {
             | "wet_food"
             | "treat"
             | "medicine"
+            | "supplement"
             | "litter"
             | "supply"
             | "other";
@@ -527,6 +706,7 @@ export type Database = {
             | "wet_food"
             | "treat"
             | "medicine"
+            | "supplement"
             | "litter"
             | "supply"
             | "other";

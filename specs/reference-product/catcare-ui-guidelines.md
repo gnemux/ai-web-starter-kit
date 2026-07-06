@@ -119,9 +119,22 @@ and do not replace `apps/web/public/catcare/icons/icon-spec.md`.
 - Page components own layout and interaction state.
 - `apps/web/app/catcare/actions.ts` owns server actions and should distinguish
   local in-page actions from route-transition actions.
-- `apps/web/lib/catcare/product-service.ts` is the current service boundary.
-  If it grows further, split by domain before adding new feature areas:
-  cats, routines, items, events, plans, catalog/cache.
+- `apps/web/lib/catcare/product-service.ts` is a compatibility barrel, not the
+  implementation body. New CatCare service work should enter the domain file
+  under `apps/web/lib/catcare/product-service/`.
+- Current domain split:
+  `workspace.ts`, `cats.ts`, `routines.ts`, `items.ts`, `events.ts`, and
+  `plans.ts` own owner-facing reads and mutations by product area.
+- Shared product service types live in `product-service/types.ts`; select
+  strings, cache TTLs, and default routine definitions live in
+  `product-service/constants.ts`.
+- `product-service/core.ts` is the internal shared helper layer for cache
+  loaders, normalizers, mappers, analytics helpers, and cross-domain utilities.
+  Do not add page-specific mutations there; add them to the relevant domain
+  service and import shared helpers from `core.ts`.
+- When a new feature needs data from multiple domains, prefer a small
+  read-composition function in the relevant domain or `workspace.ts`; do not
+  re-create a monolithic service file.
 - Avoid adding a new abstraction only to prepare for a future product. Keep the
   product component local until there is a second real consumer.
 

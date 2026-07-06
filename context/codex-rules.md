@@ -33,6 +33,19 @@ For each feature:
 5. verify
 6. update status
 
+Before implementation starts, restate the active issue or request scope, the
+explicit non-goals, the smallest useful plan, and the acceptance evidence that
+will prove the work. If the task is only an investigation or direct answer, say
+that and do not invent implementation steps.
+
+Completion must be evidence-based. Do not report "done" unless the response
+names the changed surface, the verification actually run, and any missing
+checks with reasons. UI-affecting work must include browser/screenshot or
+equivalent visual evidence when the user needs to judge layout or fidelity.
+Critical product tasks must self-review against prototype fidelity, route/user
+flow, package/product boundaries, data/API behavior, and tests before asking for
+review.
+
 ## Engineering Decision Rules
 
 For implementation tradeoffs, use `context/engineering-decision-rules.md`.

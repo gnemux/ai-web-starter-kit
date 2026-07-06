@@ -2606,6 +2606,7 @@ export function mapSubmission(row: CareSubmissionRow): CatCareSubmission {
     taskId: row.task_id,
     submittedByLabel: row.submitted_by_label,
     status: row.status,
+    abnormal: row.abnormal,
     note: row.note,
     createdAt: row.created_at
   };

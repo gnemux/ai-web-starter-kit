@@ -356,6 +356,17 @@ history cleanup. `/s/[token]`, anonymous sitter submit/view, share token
 tables, live AI, live payment, real entitlement deduction, and CatCare business
 objects in `packages/*` remain out of scope.
 
+GNE-253 completion note: the owner-side UX/results lane is ready for PR review.
+Plan confirmation and execution-calendar UX were compacted earlier in the
+issue, and owner result pages now use real `care_submissions` rows when
+available. Plans with no real sitter submissions show pending/closed empty
+states instead of fake feedback. Local evidence includes `pnpm typecheck`,
+`pnpm lint`, `pnpm test:package-boundaries`,
+`pnpm test:release-boundaries`, `pnpm test`, `pnpm build`,
+`git diff --check`, and browser checks on `/catcare/results` plus published and
+closed owner result detail pages. ACCESS remains the next-stage owner/anonymous
+share-link and sitter-submission boundary.
+
 GNE-280 is the active PRODUCT-01 UI/SYSTEM task. The first accepted boundary
 decision is to keep the MVP1/MVP2 foundation demo, but isolate it as a demo
 surface instead of mixing it with CatCare. Demo-owned routes are `/demo`,

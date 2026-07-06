@@ -181,6 +181,7 @@ export type CatCareSubmission = {
   taskId: string | null;
   submittedByLabel: string;
   status: CareSubmissionStatus;
+  abnormal: boolean;
   note: string | null;
   createdAt: string;
 };

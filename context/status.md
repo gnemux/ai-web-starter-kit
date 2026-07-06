@@ -388,6 +388,34 @@ Latest MVP3 PRODUCT local verification:
 - Full authenticated browser smoke with local signup/cat/plan creation was not
   rerun after the PRODUCT02 schema expansion because local Supabase is blocked.
 
+Latest GNE-253 owner-result update:
+
+- Continued GNE-253 from the owner-side results/status lane, not ACCESS. The
+  current implementation keeps `/s/[token]`, anonymous sitter pages, share
+  token tables, live AI, live payment, and real entitlement/credit deduction out
+  of scope.
+- Added an app-layer CatCare result-summary helper for owner-visible plan
+  states. It interprets real `care_submissions` rows, including the `abnormal`
+  flag, and keeps the result timeline empty when no real submissions exist so
+  the owner page does not pretend preview data is actual feedback. The helper
+  stays under `apps/web/app/catcare/plans/` and does not move CatCare business
+  objects into `packages/*`.
+- Reworked `/catcare/plans/[id]/results` so the page leads with result status,
+  completed/attention/pending counts, owner handoff notes, and result entries.
+  The original execution calendar is now a secondary review section instead of
+  dominating the result page.
+- Updated `/catcare/results` copy and plan-card labels so the list stays
+  lightweight and does not pretend summary-only data contains full submission
+  details.
+- Local verification for this update passed `pnpm typecheck`, `pnpm lint`,
+  `pnpm test:package-boundaries`, `pnpm test:release-boundaries`, and
+  `git diff --check`.
+- Follow-up local verification passed `pnpm test`, `pnpm build`, and browser
+  checks on `http://localhost:3001/catcare/results` plus two owner result
+  detail pages. The published plan without submissions showed `待真实提交`; the
+  closed plan without submissions showed `已关闭未执行`; both result timelines
+  stayed empty instead of rendering owner preview tasks as real sitter feedback.
+
 Latest local release-hardening verification:
 
 - `pnpm typecheck` passed.
@@ -612,7 +640,9 @@ Latest `GNE-288` product-service architecture update on 2026-07-06:
 
 Latest `GNE-253` owner UX/results scope update on 2026-07-06:
 
-- GNE-253 is now `PRODUCT-05 [APP/UX]` and is In Progress after GNE-288.
+- GNE-253 is `PRODUCT-05 [APP/UX]` after GNE-288. The local branch is ready for
+  PR review and close-out once GitHub CI, merge, and deployment verification
+  pass.
 - Phase 1 must complete the owner-side plan confirmation UX baseline before
   expanding results: summarize plan confirmation by dates, cats, visit count,
   visit batches, key handoff notes, compact task editing, and execution
@@ -633,9 +663,15 @@ Latest `GNE-253` owner UX/results scope update on 2026-07-06:
   the HTML `hidden` attribute with Tailwind `grid` was fixed by synchronizing
   `display: none`; browser verification confirmed the URL, selected tab, and
   visible panel all change without a route reload.
+- Owner result pages now distinguish real submissions from owner-side preview
+  data. `care_submissions.abnormal` is mapped through the CatCare service layer;
+  result summaries use real submission rows when present and otherwise show
+  pending/closed empty states without generating fake feedback.
 - Latest local checks for this patch: `pnpm typecheck`, `pnpm lint`,
   `pnpm test:package-boundaries`, `pnpm test:release-boundaries`,
-  `pnpm test`, `pnpm build`, and `git diff --check` passed.
+  `pnpm test`, `pnpm build`, and `git diff --check` passed. Browser checks on
+  `/catcare/results`, a published owner result detail page, and a closed owner
+  result detail page passed with no horizontal overflow.
 
 ## Next Steps
 

@@ -22,9 +22,10 @@ Completed under `GNE-231 PRODUCT`:
 Next PRODUCT work:
 
 - `GNE-252 PRODUCT-03`: owner create/edit/publish flow.
-- `GNE-253 PRODUCT-04`: owner results and state changes.
-- `GNE-254 PRODUCT-05`: Supabase RLS acceptance SQL and seed data.
-- `GNE-255 PRODUCT-06`: page analytics and page-level acceptance.
+- `GNE-288 PRODUCT-04`: CatCare service split and local-update boundary cleanup.
+- `GNE-253 PRODUCT-05`: owner results and state changes.
+- `GNE-254 PRODUCT-06`: Supabase RLS acceptance SQL and seed data.
+- `GNE-255 PRODUCT-07`: page analytics and page-level acceptance.
 
 ACCESS (`GNE-232`) and CAPABILITY (`GNE-233`) are still Backlog. They can do
 contract/spec work in parallel, but implementation must not outrun PRODUCT
@@ -39,7 +40,7 @@ account pages at the same time.
 Recommended safe split:
 
 1. Thread A: `GNE-252 PRODUCT-03` owner flow implementation.
-2. Thread B: `GNE-253 PRODUCT-04` owner results skeleton and status model, using
+2. Thread B: `GNE-253 PRODUCT-05` owner results skeleton and status model, using
    seed/mock owner-visible submissions until ACCESS produces real anonymous
    submissions.
 3. Thread C: `GNE-254/GNE-255` acceptance work: seed/RLS evidence, page smoke,

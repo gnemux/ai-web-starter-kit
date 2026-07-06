@@ -272,7 +272,7 @@ GNE-231 PRODUCT
 ├── GNE-251 PRODUCT-02 [DATA] 猫咪档案、喂养习惯、用品、事件、照护计划、任务、提交数据模型
 ├── GNE-252 PRODUCT-03 主人侧创建/编辑/发布流程
 ├── GNE-288 PRODUCT-04 [ARCH] CatCare 服务层拆分与局部更新边界收敛
-├── GNE-253 PRODUCT-05 主人侧结果查看和状态变化
+├── GNE-253 PRODUCT-05 [APP/UX] 主人侧计划确认、结果查看和状态变化
 ├── GNE-254 PRODUCT-06 Supabase RLS 验收 SQL 与 seed 数据
 └── GNE-255 PRODUCT-07 基础事件和页面级验收
 
@@ -343,6 +343,18 @@ entry points. No CatCare business object, product dictionary, icon, or product
 service implementation was moved into `packages/*`. Local verification passed
 with `pnpm typecheck`, `pnpm lint`, `pnpm test:package-boundaries`,
 `pnpm test:release-boundaries`, `pnpm build`, and `git diff --check`.
+
+GNE-253 PRODUCT-05 scope update: this issue is now the owner-side
+APP/UX continuation after GNE-252 and GNE-288. It does not reopen GNE-252 and
+does not introduce ACCESS. Phase 1 must first pull the GNE-252 owner plan
+confirmation and execution-calendar UX to an 85+ baseline: summarize plans by
+date range, cats, visit count, visit batches, key handoff notes, compact task
+editing, and date/time/multi-time control consistency. Phase 2 then expands
+owner-visible results and state changes: pending/published/closed/completed
+states, owner result hierarchy, owner-only mock submission/status display, and
+history cleanup. `/s/[token]`, anonymous sitter submit/view, share token
+tables, live AI, live payment, real entitlement deduction, and CatCare business
+objects in `packages/*` remain out of scope.
 
 GNE-280 is the active PRODUCT-01 UI/SYSTEM task. The first accepted boundary
 decision is to keep the MVP1/MVP2 foundation demo, but isolate it as a demo

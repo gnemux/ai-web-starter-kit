@@ -19,6 +19,7 @@ import {
 } from "../actions";
 import type { CatCarePlan, CatCareTask } from "@/lib/catcare/product-service";
 import { PlanScheduleView } from "./plan-schedule-view";
+import { PlanConfirmationSummary } from "./plan-confirmation-summary";
 import { PlanTaskSaveForm } from "./plan-task-save-form-client";
 
 type PlanMutationResult =
@@ -150,7 +151,7 @@ export function PlanDetailClient({
             </div>
           </div>
 
-          <PlanCoverageSummary plan={visiblePlan} />
+          <PlanConfirmationSummary canEdit={canPublish} plan={visiblePlan} />
 
           {canPublish ? (
             <PlanTaskSaveForm
@@ -199,7 +200,7 @@ export function PlanDetailClient({
                 <dd className="text-[#101a32]">CatCare mock</dd>
               </div>
               <div className="flex justify-between gap-4">
-                <dt>待确认任务</dt>
+                <dt>{canPublish ? "待确认任务" : "生成任务"}</dt>
                 <dd className="text-[#101a32]">{visiblePlan.tasks.length} 项</dd>
               </div>
               <div className="flex justify-between gap-4">
@@ -211,10 +212,10 @@ export function PlanDetailClient({
 
           <CatCarePanel>
             <h2 className="text-xl font-semibold text-[#101a32]">
-              分享链接
+              分享入口
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#526177]">
-              发布后应一键复制给照看者。当前 GNE-252 只保留主人侧结果，匿名分享页将在 ACCESS 阶段接入。
+              真实照看者分享页和匿名提交将在 ACCESS 阶段接入；本阶段只保留主人侧确认与结果查看。
             </p>
           </CatCarePanel>
         </aside>
@@ -225,50 +226,6 @@ export function PlanDetailClient({
 
 function isLegacyPrepareTask(task: CatCareTask) {
   return task.source === "care_item" || task.title.includes("：准备 ");
-}
-
-function PlanCoverageSummary({ plan }: { plan: CatCarePlan }) {
-  const dayCount = getPlanDayCount(plan);
-  const requiredCount = plan.tasks.filter((task) => task.required).length;
-  const optionalCount = plan.tasks.length - requiredCount;
-
-  return (
-    <div className="mt-6 grid gap-3 sm:grid-cols-3">
-      <div className="rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">
-        <p className="text-xs font-semibold text-[#75839a]">照护范围</p>
-        <p className="mt-2 text-base font-semibold text-[#101a32]">
-          {formatPlanCatNames(plan)}
-        </p>
-      </div>
-      <div className="rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">
-        <p className="text-xs font-semibold text-[#75839a]">计划天数</p>
-        <p className="mt-2 text-base font-semibold text-[#101a32]">
-          {dayCount ? `${dayCount} 天` : "未设日期"}
-        </p>
-      </div>
-      <div className="rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">
-        <p className="text-xs font-semibold text-[#75839a]">生成任务</p>
-        <p className="mt-2 text-base font-semibold text-[#101a32]">
-          {requiredCount} 必做 / {optionalCount} 可选
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function getPlanDayCount(plan: CatCarePlan) {
-  if (!plan.startOn || !plan.endOn) {
-    return 0;
-  }
-
-  const start = new Date(`${plan.startOn}T00:00:00Z`).getTime();
-  const end = new Date(`${plan.endOn}T00:00:00Z`).getTime();
-
-  if (Number.isNaN(start) || Number.isNaN(end) || end < start) {
-    return 0;
-  }
-
-  return Math.floor((end - start) / 86_400_000) + 1;
 }
 
 function formatPlanDisplayTitle(plan: CatCarePlan) {

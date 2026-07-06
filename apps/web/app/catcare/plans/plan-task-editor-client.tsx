@@ -33,6 +33,11 @@ export function PlanTaskEditor({
 
   return (
     <div className="grid gap-4">
+      <div className="grid gap-2 sm:grid-cols-3">
+        <TaskEditorMetric label="将执行" value={`${activeTasks.length} 项`} />
+        <TaskEditorMetric label="暂不执行" value={`${inactiveTasks.length} 项`} />
+        <TaskEditorMetric label="可新增" value="临时任务" />
+      </div>
       <div className="grid gap-2">
         {activeTasks.map((task, index) => (
           <TaskEditorRow
@@ -82,6 +87,15 @@ export function PlanTaskEditor({
         initialTime={newTaskInitialTime}
         itemOptions={itemOptions}
       />
+    </div>
+  );
+}
+
+function TaskEditorMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-[#e2e6ee] bg-white px-4 py-3">
+      <p className="text-xs font-semibold text-[#75839a]">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-[#101a32]">{value}</p>
     </div>
   );
 }

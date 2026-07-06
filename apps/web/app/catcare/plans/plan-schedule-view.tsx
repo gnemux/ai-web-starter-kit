@@ -6,6 +6,12 @@ import type { CatCarePlan } from "@/lib/catcare/product-service";
 
 import { CatCareXIcon } from "../catcare-action-icons";
 import { buildPlanSchedule, type PlanScheduleEntry } from "./plan-schedule";
+import {
+  getCategoryLabel,
+  getCategoryStyle,
+  isAttentionEntry,
+  parseTaskTitle
+} from "./plan-task-display";
 
 export function PlanScheduleView({
   description,
@@ -46,7 +52,7 @@ export function PlanScheduleView({
         <HandoffBrief entries={firstDay.entries} handoffNotes={plan.handoffNotes} />
       ) : null}
 
-      <div className="mt-5 grid items-start gap-4 xl:grid-cols-2">
+      <div className="mt-5 grid items-start gap-3 xl:grid-cols-2">
         {schedule.map((day) => {
           const summary = summarizeDay(day.entries);
 
@@ -57,7 +63,7 @@ export function PlanScheduleView({
             >
               <div className="border-b border-[#e2e6ee] bg-[#fbfdfc] px-4 py-4">
                 <div className="flex items-start justify-between gap-3">
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-lg font-semibold text-[#101a32]">
                       {formatDateLabel(day.date)}
                     </h3>
@@ -65,26 +71,49 @@ export function PlanScheduleView({
                       {day.date}
                     </p>
                   </div>
-                  <span className="rounded-full bg-[#f2fbf8] px-3 py-1 text-xs font-semibold text-[#07847f]">
-                    {day.entries.length} 项
-                  </span>
-                </div>
-
-                <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                  <SummaryPill label="到访批次" value={`${summary.visitCount} 次`} />
-                  <SummaryPill label="执行任务" value={`${summary.actionCount} 项`} />
-                  <SummaryPill label="关注事项" value={`${summary.attentionCount} 项`} />
+                  <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                    <span className="rounded-full bg-[#e6f7f2] px-3 py-1 text-xs font-semibold text-[#07847f]">
+                      {summary.visitCount} 次到访
+                    </span>
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
+                      {day.entries.length} 项
+                    </span>
+                  </div>
                 </div>
 
                 {summary.highlights.length > 0 ? (
-                  <div className="mt-4 rounded-xl bg-white p-3 ring-1 ring-[#edf1f5]">
+                  <div className="mt-4 rounded-xl bg-white px-3 py-2 ring-1 ring-[#edf1f5]">
                     <p className="text-xs font-semibold text-[#75839a]">
                       今日重点
                     </p>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-[#101a32]">
-                      {summary.highlights.join("、")}
+                    <p className="mt-1 text-sm font-semibold leading-6 text-[#101a32]">
+                      {formatDayHighlights(summary.highlights)}
                     </p>
                   </div>
+                ) : null}
+
+                {summary.visits.length > 0 ? (
+                  <div className="mt-3 grid gap-2">
+                    {summary.visits.slice(0, 3).map((visit) => (
+                      <div
+                        className="flex min-w-0 items-center gap-3 rounded-xl bg-white px-3 py-2 ring-1 ring-[#edf1f5]"
+                        key={visit.timeLabel}
+                      >
+                        <span className="shrink-0 rounded-full bg-[#e6f7f2] px-3 py-1 text-xs font-semibold text-[#07847f]">
+                          {visit.timeLabel}
+                        </span>
+                        <p className="min-w-0 truncate text-sm font-semibold text-[#101a32]">
+                          {visit.summary}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                {summary.attentionCount > 0 ? (
+                  <p className="mt-3 text-xs font-semibold text-[#75839a]">
+                    含 {summary.attentionCount} 项观察/交接事项
+                  </p>
                 ) : null}
               </div>
 
@@ -95,7 +124,7 @@ export function PlanScheduleView({
                     onClick={() => setSelectedDate(day.date)}
                     type="button"
                   >
-                    查看当天任务
+                    查看当天安排
                   </button>
                 </div>
               ) : (
@@ -138,7 +167,7 @@ function HandoffBrief({
           交接说明与到访安排
         </h3>
         <p className="text-sm font-semibold leading-6 text-[#526177]">
-          先看主人交代，再按第一次执行日的到访批次执行；后续日期以执行日历为准。
+          照看者先看主人交代，再按每天的到访卡片执行。
         </p>
       </div>
       {handoffNotes ? (
@@ -273,6 +302,9 @@ function TaskLine({ entry }: { entry: PlanScheduleEntry }) {
             {title.owner}
           </span>
         ) : null}
+        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getCategoryStyle(entry.task.category)}`}>
+          {getCategoryLabel(entry.task.category)}
+        </span>
         <p
           className={`min-w-0 text-sm font-semibold leading-6 ${
             entry.task.required ? "text-[#101a32]" : "text-[#526177]"
@@ -298,15 +330,32 @@ function summarizeDay(entries: PlanScheduleEntry[]) {
   ).size;
   const highlights = actionEntries
     .filter((entry) => entry.task.required)
-    .slice(0, 4)
-    .map((entry) => parseTaskTitle(entry.task.title).action);
+    .map((entry) => ({
+      category: getCategoryLabel(entry.task.category),
+      title: parseTaskTitle(entry.task.title).action
+    }));
+  const visits = groupScheduleEntries(actionEntries).map((group) => ({
+    summary: formatVisitCardSummary(group.entries),
+    timeLabel: group.timeLabel
+  }));
 
   return {
     actionCount: actionEntries.length,
     attentionCount: attentionEntries.length,
-    highlights: Array.from(new Set(highlights)),
+    highlights: dedupeHighlights(highlights),
+    visits,
     visitCount
   };
+}
+
+function dedupeHighlights(
+  highlights: Array<{ category: string; title: string }>
+) {
+  return Array.from(
+    new Map(
+      highlights.map((item) => [`${item.category}:${item.title}`, item])
+    ).values()
+  );
 }
 
 function buildDaySections(entries: PlanScheduleEntry[]) {
@@ -336,6 +385,40 @@ function formatBriefActions(entries: PlanScheduleEntry[]) {
   return `完成${visible.join("、")}`;
 }
 
+function formatDayHighlights(
+  highlights: Array<{ category: string; title: string }>
+) {
+  const counts = new Map<string, number>();
+
+  for (const item of highlights) {
+    counts.set(item.category, (counts.get(item.category) ?? 0) + 1);
+  }
+
+  const categories = Array.from(counts.entries())
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 3)
+    .map(([category, count]) => `${category} ${count} 项`);
+  const titles = Array.from(new Set(highlights.map((item) => item.title))).slice(0, 3);
+
+  if (categories.length > 0 && titles.length > 0) {
+    return `${categories.join("、")}；重点：${titles.join("、")}`;
+  }
+
+  return titles.join("、");
+}
+
+function formatVisitCardSummary(entries: PlanScheduleEntry[]) {
+  const actions = Array.from(
+    new Set(entries.map((entry) => parseTaskTitle(entry.task.title).action))
+  );
+
+  if (actions.length <= 3) {
+    return actions.join("、");
+  }
+
+  return `${actions.slice(0, 3).join("、")}等 ${actions.length} 项`;
+}
+
 function groupScheduleEntries(
   entries: PlanScheduleEntry[]
 ) {
@@ -356,27 +439,6 @@ function groupScheduleEntries(
   }
 
   return groups;
-}
-
-function isAttentionEntry(entry: PlanScheduleEntry) {
-  return (
-    entry.task.source === "event" ||
-    entry.task.category === "observe" ||
-    entry.task.title.includes("准备 ")
-  );
-}
-
-function parseTaskTitle(title: string) {
-  const separatorIndex = title.indexOf("：");
-
-  if (separatorIndex < 1) {
-    return { action: title, owner: null };
-  }
-
-  return {
-    action: title.slice(separatorIndex + 1).trim(),
-    owner: title.slice(0, separatorIndex).trim()
-  };
 }
 
 function formatDateLabel(date: string) {

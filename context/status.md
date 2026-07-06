@@ -610,6 +610,33 @@ Latest `GNE-288` product-service architecture update on 2026-07-06:
   behavior to the relevant domain module rather than growing a monolithic
   service file again.
 
+Latest `GNE-253` owner UX/results scope update on 2026-07-06:
+
+- GNE-253 is now `PRODUCT-05 [APP/UX]` and is In Progress after GNE-288.
+- Phase 1 must complete the owner-side plan confirmation UX baseline before
+  expanding results: summarize plan confirmation by dates, cats, visit count,
+  visit batches, key handoff notes, compact task editing, and execution
+  calendar hierarchy.
+- Phase 2 covers owner-visible result/status work: pending/published/closed/
+  completed states, owner result hierarchy, owner-only mock submissions, and
+  history cleanup.
+- ACCESS remains out of scope: no `/s/[token]`, anonymous sitter submit/view,
+  share-token table, live AI, live payment, or real credit/entitlement
+  deduction.
+- Current local implementation improves the owner confirmation/results baseline:
+  plan detail now uses a compact confirmation summary, execution calendar day
+  cards group work by visit batches and attention items, task editing shows
+  active/inactive/new-task counts, and reusable task display helpers keep
+  category/action formatting consistent.
+- The CatCare routine page now preloads all current cat routine panels and
+  switches selected cats locally. A hidden-panel regression caused by combining
+  the HTML `hidden` attribute with Tailwind `grid` was fixed by synchronizing
+  `display: none`; browser verification confirmed the URL, selected tab, and
+  visible panel all change without a route reload.
+- Latest local checks for this patch: `pnpm typecheck`, `pnpm lint`,
+  `pnpm test:package-boundaries`, `pnpm test:release-boundaries`,
+  `pnpm test`, `pnpm build`, and `git diff --check` passed.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, continue on the current branch unless the Repo Owner explicitly asks for a new branch; do not reuse pre-tag Auth/payment branches.

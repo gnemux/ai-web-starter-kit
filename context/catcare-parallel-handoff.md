@@ -23,7 +23,7 @@ Next PRODUCT work:
 
 - `GNE-252 PRODUCT-03`: owner create/edit/publish flow.
 - `GNE-288 PRODUCT-04`: CatCare service split and local-update boundary cleanup.
-- `GNE-253 PRODUCT-05`: owner results and state changes.
+- `GNE-253 PRODUCT-05`: owner plan confirmation UX, owner results, and state changes.
 - `GNE-254 PRODUCT-06`: Supabase RLS acceptance SQL and seed data.
 - `GNE-255 PRODUCT-07`: page analytics and page-level acceptance.
 
@@ -40,9 +40,9 @@ account pages at the same time.
 Recommended safe split:
 
 1. Thread A: `GNE-252 PRODUCT-03` owner flow implementation.
-2. Thread B: `GNE-253 PRODUCT-05` owner results skeleton and status model, using
-   seed/mock owner-visible submissions until ACCESS produces real anonymous
-   submissions.
+2. Thread B: `GNE-253 PRODUCT-05` owner plan confirmation UX baseline first,
+   then owner results skeleton and status model, using seed/mock owner-visible
+   submissions until ACCESS produces real anonymous submissions.
 3. Thread C: `GNE-254/GNE-255` acceptance work: seed/RLS evidence, page smoke,
    screenshots, and PostHog page-event contract.
 
@@ -98,25 +98,35 @@ Do not:
 - Replace the GNE-280 shell or icon system unless the issue explicitly requires
   a product-wide UI fix.
 
-### Thread B: PRODUCT Results (`GNE-253`)
+### Thread B: PRODUCT Owner UX And Results (`GNE-253`)
 
 Goal:
 
-Make owner-visible results and state changes coherent before ACCESS produces
-real sitter submissions.
+First make owner plan confirmation and execution-calendar UX coherent enough
+for an 85+ owner-side baseline, then make owner-visible results and state
+changes coherent before ACCESS produces real sitter submissions.
 
 Primary routes:
 
+- `/catcare/plans/[id]`
 - `/catcare/results`
 - `/catcare/plans/[id]/results`
 
 Allowed input:
 
+- Existing owner-created cats, routines, items, events, plans, and tasks from
+  `GNE-252`.
 - Existing `care_submissions` table from `GNE-251`.
 - Seed/mock owner-visible submissions for UI and state verification.
 
 Must expose:
 
+- Plan confirmation as an owner-facing care plan summary, not a raw task admin
+  list.
+- Visit count and visit batches as the primary organization for generated
+  tasks.
+- Compact task editing and execution-calendar hierarchy by date, visit batch,
+  and task.
 - Empty results.
 - Pending submission.
 - Received submission.
@@ -126,6 +136,7 @@ Must expose:
 Do not:
 
 - Implement anonymous submit.
+- Implement `/s/[token]` or share-token persistence.
 - Treat AI result as business fact.
 - Deduct credits.
 - Create order/entitlement side effects.
@@ -171,6 +182,8 @@ quality, and icon/illustration direction. Text, routes, pricing, and business
 states must still be checked against Markdown specs and Linear issue bodies.
 CatCare UI implementation details such as controls, buttons, tags, destructive
 actions, and family-item semantics must follow `catcare-ui-guidelines.md`.
+That file is the canonical CatCare product UI/data practice document; this
+handoff records issue-specific execution notes and should not fork those rules.
 
 Use this conversion order:
 
@@ -194,6 +207,9 @@ Use this rule for PRODUCT pages:
 
 1. If the user stays on the same page, prefer a local server action returning
    structured data, update local UI state, and show the CatCare toast.
+   Same-page tabs, filters, selected-cat switches, and bounded owner views
+   should preload/cache the needed page data and switch locally instead of
+   forcing a full route reload.
 2. If the operation creates a new workflow destination, such as first creating a
    care plan and opening its detail page, `redirect()` is acceptable.
 3. If a mutation changes multiple owner-level facts, invalidate the smallest
@@ -213,8 +229,8 @@ Current product-level implementation anchors:
 - Product UI controls: `apps/web/app/catcare/owner-flow-components.tsx`
 - CatCare service/cache boundary: `apps/web/lib/catcare/product-service.ts`
 
-Do not promote these to `packages/*` during GNE-252. Promote only after a second
-product needs the same behavior without CatCare semantics.
+Do not promote these to `packages/*` during MVP3 PRODUCT work. Promote only
+after a second product needs the same behavior without CatCare semantics.
 
 ## Code Structure Follow-Up
 

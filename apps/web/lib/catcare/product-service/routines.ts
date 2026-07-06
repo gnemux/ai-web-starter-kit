@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "../../supabase/server";
 
 import {
   CatCareRoutine,
+  CatCareRoutineWorkspacePreload,
   CatCareRoutineWorkspace,
   ROUTINE_ITEM_SELECT,
   ROUTINE_SELECT,
@@ -115,6 +116,113 @@ export async function getCatCareRoutineWorkspace(
     routineSourceCats,
     selectedCat,
     routine: routineResult.data
+  });
+}
+
+export async function getCatCareRoutineWorkspacePreload(
+  catId?: string
+): Promise<ServiceResult<CatCareRoutineWorkspacePreload>> {
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const ownerResult = await getAuthenticatedOwnerId(clientResult.data);
+
+  if (!ownerResult.ok) {
+    return ownerResult;
+  }
+
+  const catsResult = await loadCatSummaries(clientResult.data, ownerResult.data);
+
+  if (!catsResult.ok) {
+    return catsResult;
+  }
+
+  const cats = catsResult.data;
+  const selectedCat = cats.find((cat) => cat.id === catId) ?? cats[0] ?? null;
+
+  if (!selectedCat) {
+    return serviceOk({
+      cats,
+      items: [],
+      itemsByCatId: {},
+      libraryItems: [],
+      routine: null,
+      routineByCatId: {},
+      routineSourceCats: [],
+      routineSourceCatsByCatId: {},
+      selectedCat: null
+    });
+  }
+
+  const [routineResults, careItemResults, libraryItemsResult, sourceCatIdsResult] = await Promise.all([
+    Promise.all(cats.map((cat) => loadDefaultRoutine(clientResult.data, ownerResult.data, cat.id))),
+    Promise.all(
+      cats.map((cat) =>
+        loadCatCareAssignedItems(clientResult.data, ownerResult.data, cat.id, {
+          limit: 8
+        })
+      )
+    ),
+    loadOwnerLibraryItems(clientResult.data, ownerResult.data),
+    loadRoutineSourceCatIds(clientResult.data, ownerResult.data)
+  ]);
+
+  for (const result of routineResults) {
+    if (!result.ok) {
+      return result;
+    }
+  }
+
+  for (const result of careItemResults) {
+    if (!result.ok) {
+      return result;
+    }
+  }
+
+  if (!libraryItemsResult.ok) {
+    return libraryItemsResult;
+  }
+
+  if (!sourceCatIdsResult.ok) {
+    return sourceCatIdsResult;
+  }
+
+  const routines = routineResults.map((result) => (result.ok ? result.data : null));
+  const careItems = careItemResults.map((result) => (result.ok ? result.data : []));
+  const routineByCatId = Object.fromEntries(
+    cats.map((cat, index) => [cat.id, routines[index] ?? null])
+  );
+  const itemsByCatId = Object.fromEntries(
+    cats.map((cat, index) => [cat.id, careItems[index] ?? []])
+  );
+  const selectedItems = itemsByCatId[selectedCat.id] ?? [];
+  const allAssignedItems = Object.values(itemsByCatId).flat();
+  const libraryItems = libraryItemsResult.data.length > 0
+    ? libraryItemsResult.data
+    : dedupeLibraryItems(allAssignedItems.map(mapAssignedItemToLibraryItem));
+  const routineCatIds = new Set(sourceCatIdsResult.data);
+  const routineSourceCatsByCatId = Object.fromEntries(
+    cats.map((targetCat) => [
+      targetCat.id,
+      cats
+        .filter((cat) => cat.id !== targetCat.id && routineCatIds.has(cat.id))
+        .map((cat) => ({ id: cat.id, name: cat.name }))
+    ])
+  );
+
+  return serviceOk({
+    cats,
+    items: selectedItems,
+    itemsByCatId,
+    libraryItems,
+    routine: routineByCatId[selectedCat.id] ?? null,
+    routineByCatId,
+    routineSourceCats: routineSourceCatsByCatId[selectedCat.id] ?? [],
+    routineSourceCatsByCatId,
+    selectedCat
   });
 }
 
@@ -450,4 +558,3 @@ export async function saveCatCareRoutineFromFormData(
     items: (itemsResult.data ?? []).map(mapRoutineItem)
   });
 }
-

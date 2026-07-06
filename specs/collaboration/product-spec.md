@@ -65,6 +65,7 @@ kick off Linear task
 - AI Coding Agent 开始任何代码或文档修改前必须检查当前分支和工作区状态。
 - AI Coding Agent should treat `v0.2.0` as the last stable release marker. If local `main` is behind `origin/main` or does not contain `v0.2.0`, fetch/pull before implementation.
 - AI Coding Agent 实现 MVP 功能时必须优先选择最小可工作的改动；不得无必要引入新依赖、新抽象或大型组件库；但安全、支付、Auth、数据库代码不能以“最小”为理由省略校验、幂等、日志、权限、RLS、Webhook 校验或环境隔离。
+- 最小可工作改动不能牺牲已经确认的产品交互、局部更新、数据一致性、可访问性基础或高保真 UI 要求；如果最小改法会让同页操作退化为整页刷新、丢失用户输入或破坏产品规范，它不算可验收实现。
 - AI Coding Agent 如果发现当前在 `main` 且需要实现新任务，应先从 `main` 新开本地分支。
 - AI Coding Agent 如果发现当前在旧任务分支、已 merge 分支或与新任务不匹配的分支，应提示用户并建议先切回 `main` 再新开分支。
 - AI Coding Agent 如果工作区已有未提交变更，不得擅自切分支、覆盖或丢弃，应先说明状态并保护已有变更。

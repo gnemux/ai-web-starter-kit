@@ -62,6 +62,25 @@
     path preserved.
 - Path: create cat, create plan, publish plan.
   - Expected result: plan appears in the list and changes from draft to published.
+- GNE-255 analytics QA matrix:
+  - Landing and `/login?next=/catcare` render CatCare context; auth events stay
+    in the existing auth analytics module.
+  - Signed-in owner shell pages `/catcare`, `/catcare/cats`,
+    `/catcare/routines`, `/catcare/items`, `/catcare/events`,
+    `/catcare/plans`, `/catcare/results`, `/account/billing`, and
+    `/account/usage` emit CatCare page-level events with shared
+    `app/env/module/version` properties and normalized `page_key`; raw ids,
+    notes, titles, emails, and tokens must not be sent.
+  - CatCare shell navigation emits `catcare_navigation_clicked` with
+    normalized source and target page keys.
+  - Owner plan actions emit non-sensitive events:
+    `catcare_plan_created`, `catcare_plan_tasks_updated`,
+    `catcare_plan_published`, `catcare_plan_closed`, and
+    `catcare_plan_deleted`.
+  - Existing owner cat/routine events remain in scope:
+    `catcare_cat_created`, `catcare_cat_updated`, `catcare_cat_deleted`,
+    `catcare_routine_started`, `catcare_routine_copied`, and
+    `catcare_routine_saved`.
 
 ## Manual Verification
 
@@ -98,6 +117,32 @@
   GNE-252 APP, and vice versa.
 
 ## Latest Run
+
+2026-07-06 GNE-255 analytics QA:
+
+- Scope verified: owner-side CatCare page-level analytics, CatCare shell
+  navigation analytics, owner plan-action analytics events, and page-level
+  smoke coverage for the current CatCare SaaS UI.
+- Non-goals preserved: no ACCESS share token or anonymous submission flow, no
+  PRODUCT-03/04 feature buildout, no live AI/payment/real entitlement behavior,
+  and no PostHog event treated as business truth.
+- Passed `git diff --check`, `pnpm test:package-boundaries`,
+  `pnpm typecheck`, `pnpm lint`, and `pnpm build`.
+- Local web ran on `http://127.0.0.1:3003` against the linked Supabase test
+  env. Temporary Auth user `gne255-owner@example.test` logged in through
+  `/login?next=/catcare`.
+- In-app browser smoke passed with no console errors for `/catcare`,
+  `/catcare/cats`, `/catcare/routines`, `/catcare/items`, `/catcare/events`,
+  `/catcare/plans`, `/catcare/results`, `/account/billing`, and
+  `/account/usage`; screenshot captured at
+  `/private/tmp/gne-255-catcare-owner-smoke.png`.
+- Boundary self-check: newly added analytics properties are normalized keys or
+  counts/status fields only; raw ids, notes, titles, emails, tokens, private
+  care-submission content, and payment identifiers are not sent by the new
+  CatCare analytics paths.
+- Linked test cleanup verification passed after deleting the temporary Auth
+  user: `auth.users` and `public.user_profiles` both returned zero
+  `gne255-%@example.test` / GNE-255 profile rows.
 
 2026-07-06 GNE-254 setup:
 

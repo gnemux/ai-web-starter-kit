@@ -2481,7 +2481,12 @@ export async function trackCatCareProductEvent(
     | "catcare_cat_deleted"
     | "catcare_routine_started"
     | "catcare_routine_copied"
-    | "catcare_routine_saved",
+    | "catcare_routine_saved"
+    | "catcare_plan_created"
+    | "catcare_plan_tasks_updated"
+    | "catcare_plan_published"
+    | "catcare_plan_closed"
+    | "catcare_plan_deleted",
   properties: Record<string, unknown>
 ) {
   const posthogKey =
@@ -2557,6 +2562,24 @@ export function sanitizeCatCareAnalyticsProperties(
       : {}),
     ...(typeof properties.source === "string"
       ? { source: properties.source }
+      : {}),
+    ...(typeof properties.plan_status === "string"
+      ? { plan_status: properties.plan_status }
+      : {}),
+    ...(typeof properties.scenario === "string"
+      ? { scenario: properties.scenario }
+      : {}),
+    ...(typeof properties.task_count === "number"
+      ? { task_count: properties.task_count }
+      : {}),
+    ...(typeof properties.enabled_task_count === "number"
+      ? { enabled_task_count: properties.enabled_task_count }
+      : {}),
+    ...(typeof properties.routine_count === "number"
+      ? { routine_count: properties.routine_count }
+      : {}),
+    ...(typeof properties.care_event_count === "number"
+      ? { care_event_count: properties.care_event_count }
       : {})
   };
 }

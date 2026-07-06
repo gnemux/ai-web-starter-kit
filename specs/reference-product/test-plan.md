@@ -13,9 +13,18 @@
   - Confirms `cats`, `care_routines`, `care_routine_items`, `care_items`,
     `care_events`, `care_plans`, `care_tasks`, and `care_submissions` exist,
     have RLS enabled, and have owner policies.
+  - GNE-254 adds `supabase/tests/catcare_owner_rls.sql` as the
+    rollback-only acceptance script. It creates local-only owner A/B rows,
+    verifies owner A can read only A-owned CatCare rows, verifies cross-owner
+    inserts are rejected or update zero rows, and verifies `anon` cannot read or
+    write owner-only CatCare tables.
 - Remote linked Supabase query
   - Confirms the same 8 PRODUCT02 tables, RLS flags, owner policy counts,
     grants, and migration-history version in the shared test project.
+  - GNE-254 runs the same rollback-only SQL through
+    `supabase db query --linked --file supabase/tests/catcare_owner_rls.sql`
+    so the linked test database can prove owner A/B isolation without
+    persisting seed rows.
 
 ## Browser / E2E Checks
 
@@ -89,6 +98,50 @@
   GNE-252 APP, and vice versa.
 
 ## Latest Run
+
+2026-07-06 GNE-254 setup:
+
+- Added `supabase/tests/catcare_owner_rls.sql` for CatCare owner-only RLS
+  acceptance.
+- The script rolls back all test Auth users and CatCare rows, so it can run
+  against the linked test database without leaving seed data behind.
+- Linked test database read-only metadata check passed: all 8 CatCare tables
+  have RLS enabled, each table has 4 authenticated owner policies,
+  `authenticated` has select access, and `service_role` grants exist.
+- Linked test database migration history records `20260629075823`
+  `create_reference_product_owner_model`. Later local product-catalog
+  migrations were not recorded in the linked migration history query, but they
+  are outside the 8 owner-only tables covered by this GNE-254 RLS script.
+- Linked test database rollback-only A/B script passed with:
+  `supabase db query --linked --file supabase/tests/catcare_owner_rls.sql`.
+- `supabase db reset` passed on local Supabase after Colima was started.
+- `supabase db query --local --file supabase/tests/catcare_owner_rls.sql`
+  failed on CLI v2.107.0 with
+  `cannot insert multiple commands into a prepared statement`.
+- Passed by executing the same SQL file through the local Postgres container:
+  `docker cp supabase/tests/catcare_owner_rls.sql supabase_db_ai-web-starter-kit:/tmp/catcare_owner_rls.sql`
+  then
+  `docker exec supabase_db_ai-web-starter-kit psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/catcare_owner_rls.sql`.
+- Verified: 8 CatCare tables have RLS, 32 authenticated owner policies exist,
+  owner A can read only owner A rows, owner A cross-owner inserts are rejected,
+  owner A update of owner B cat affects zero rows, and `anon` cannot read or
+  write owner-only CatCare tables.
+- Browser A/B validation used two temporary Supabase Auth Admin-created users
+  in the linked test project, plus `GNE254`-prefixed CatCare rows, then removed
+  them immediately after validation.
+- Local web ran on `http://127.0.0.1:3003` against the linked test Supabase
+  env. Owner A login reached `/catcare`; `/catcare/cats` showed
+  `GNE254 Mochi` and did not show `GNE254 Nori`; `/catcare/results` showed
+  `GNE254 owner A plan` and did not show owner B plan. Screenshot captured for
+  owner A results.
+- Owner B login reached `/catcare`; `/catcare/cats` showed `GNE254 Nori` and
+  did not show `GNE254 Mochi`; `/catcare/results` showed
+  `GNE254 owner B plan` and did not show owner A plan. Screenshot captured for
+  owner B results.
+- Linked test cleanup verification passed after deleting the temporary Auth
+  users: `auth.users`, `cats`, `care_routines`, `care_routine_items`,
+  `care_plans`, `care_tasks`, and `care_submissions` all returned zero
+  `GNE254` / `gne254` rows.
 
 2026-06-30:
 

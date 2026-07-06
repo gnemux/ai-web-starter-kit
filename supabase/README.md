@@ -59,6 +59,45 @@ supabase db reset
 
 不要把 Billing migration 直接手工复制到 staging 或 production Dashboard。
 
+## CatCare PRODUCT RLS acceptance
+
+GNE-254 的 owner-only 验收 SQL 放在：
+
+```bash
+supabase/tests/catcare_owner_rls.sql
+```
+
+linked 测试库验证方式：
+
+```bash
+supabase db query --linked --file supabase/tests/catcare_owner_rls.sql
+```
+
+本地验证方式可选：
+
+```bash
+supabase start
+supabase db reset
+docker cp supabase/tests/catcare_owner_rls.sql supabase_db_ai-web-starter-kit:/tmp/catcare_owner_rls.sql
+docker exec supabase_db_ai-web-starter-kit psql -U postgres -d postgres -v ON_ERROR_STOP=1 -f /tmp/catcare_owner_rls.sql
+```
+
+该脚本在一个 rollback-only transaction 中创建固定 UUID 的本地测试
+owner A/B、CatCare rows，并切换 `authenticated` / `anon` role 验证：
+
+- 8 张 CatCare owner 表启用 RLS。
+- 每张表有 authenticated owner policies。
+- owner A 能读自己的 cats、routines、items、events、plans、tasks、submissions。
+- owner A 不能读或写 owner B 的 CatCare 数据。
+- anon 不能读写 owner-only CatCare 表。
+
+这些测试用户和 rows 不进入 `seed.sql`，也不能替代 ACCESS 阶段的匿名
+share-token 验收。
+
+当前 Supabase CLI v2.107.0 的 `supabase db query --local --file` 会把该
+多语句文件作为 prepared statement 执行而失败；linked 测试库支持
+`--file`，本地验收则使用数据库容器内的 `psql`。
+
 ## 连接共享远程项目
 
 默认开发不需要连接远程 Supabase；先使用本地容器完成 migration 和 RLS 验证。需要为 Auth、OAuth 回调、邮件或团队联调连接线上项目时：

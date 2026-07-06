@@ -330,6 +330,20 @@ keep CatCare business types, dictionaries, icons, and product semantics out of
 `packages/*`; keep `/demo`, `/demo/login`, `/dashboard`, and `/demo/account*`
 unaffected.
 
+GNE-288 implementation note: `apps/web/lib/catcare/product-service.ts` is now a
+compatibility barrel, with implementation split under
+`apps/web/lib/catcare/product-service/` into `workspace.ts`, `cats.ts`,
+`routines.ts`, `items.ts`, `events.ts`, and `plans.ts`. Shared service and DB
+row types live in `types.ts`; select strings, cache TTLs, and default routine
+definitions live in `constants.ts`; internal shared cache loaders, normalizers,
+mappers, analytics helpers, and cross-domain utilities remain in `core.ts`.
+Existing page/server-action imports continue through the barrel, so GNE-252
+owner-flow behavior is preserved while future PRODUCT work has clear domain
+entry points. No CatCare business object, product dictionary, icon, or product
+service implementation was moved into `packages/*`. Local verification passed
+with `pnpm typecheck`, `pnpm lint`, `pnpm test:package-boundaries`,
+`pnpm test:release-boundaries`, `pnpm build`, and `git diff --check`.
+
 GNE-280 is the active PRODUCT-01 UI/SYSTEM task. The first accepted boundary
 decision is to keep the MVP1/MVP2 foundation demo, but isolate it as a demo
 surface instead of mixing it with CatCare. Demo-owned routes are `/demo`,

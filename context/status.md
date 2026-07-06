@@ -590,6 +590,26 @@ Latest `GNE-252` product-quality and architecture update on 2026-07-06:
   routines, items, events, plans, and catalog/cache while keeping CatCare
   business types out of `packages/*`.
 
+Latest `GNE-288` product-service architecture update on 2026-07-06:
+
+- CatCare service implementation is now split under
+  `apps/web/lib/catcare/product-service/` while preserving
+  `apps/web/lib/catcare/product-service.ts` as the compatibility barrel used by
+  existing pages and server actions.
+- Domain modules now separate owner workspace reads, cats, routines, items,
+  events, and plans. Shared product service types live in `types.ts`; select
+  strings, cache TTLs, and default routine definitions live in `constants.ts`;
+  internal shared cache loaders, normalizers, mappers, analytics helpers, and
+  cross-domain utilities remain in `core.ts`.
+- Boundary remains app/product-layer only: no CatCare business object, product
+  dictionary, product icon, or CatCare service implementation moved into
+  `packages/*`.
+- The split is documentation-backed in
+  `specs/reference-product/catcare-ui-guidelines.md` and
+  `context/catcare-parallel-handoff.md`. Future CatCare service work should add
+  behavior to the relevant domain module rather than growing a monolithic
+  service file again.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, continue on the current branch unless the Repo Owner explicitly asks for a new branch; do not reuse pre-tag Auth/payment branches.

@@ -218,9 +218,10 @@ product needs the same behavior without CatCare semantics.
 
 ## Code Structure Follow-Up
 
-The current GNE-252 implementation is acceptable for owner-flow acceptance, but
-the CatCare service boundary is now large enough that MVP3 should not continue
-adding unrelated responsibilities to one file.
+GNE-252 owner-flow acceptance exposed that the CatCare service boundary was too
+large to keep expanding safely. GNE-288 is the PRODUCT architecture follow-up
+that splits the service by product domain while preserving the existing app
+import path.
 
 Recommended issue timing:
 
@@ -231,15 +232,27 @@ Recommended issue timing:
   implementation, or `GNE-233` CAPABILITY AI/Billing gates add more CatCare
   branches.
 
-Split `apps/web/lib/catcare/product-service.ts` by domain:
+Current target structure:
 
-- `cats`: profile CRUD and cat summaries.
-- `routines`: reusable feeding/care habits and routine-to-item sync.
-- `items`: owner item library, assignments, product catalog lookup.
-- `events`: care/event records and item links.
-- `plans`: care plan lifecycle, tasks, publish/close/delete, results.
-- `catalog-cache`: product dictionaries, owner-level cache helpers, cache
-  invalidation.
+- `apps/web/lib/catcare/product-service.ts`: compatibility barrel only.
+- `apps/web/lib/catcare/product-service/workspace.ts`: owner workspace reads
+  that compose summaries across domains.
+- `apps/web/lib/catcare/product-service/cats.ts`: profile CRUD and cat detail
+  reads.
+- `apps/web/lib/catcare/product-service/routines.ts`: reusable feeding/care
+  habits and routine-to-item sync.
+- `apps/web/lib/catcare/product-service/items.ts`: owner item library,
+  assignment tags, and product catalog lookup.
+- `apps/web/lib/catcare/product-service/events.ts`: care/event records and item
+  links.
+- `apps/web/lib/catcare/product-service/plans.ts`: care plan lifecycle, task
+  adjustment, publish/close/delete, and owner results reads.
+- `apps/web/lib/catcare/product-service/types.ts`: CatCare service and DB row
+  types.
+- `apps/web/lib/catcare/product-service/constants.ts`: select strings, cache
+  TTLs, and default routine definitions.
+- `apps/web/lib/catcare/product-service/core.ts`: internal shared cache
+  loaders, normalizers, mappers, analytics helpers, and cross-domain utilities.
 
 Keep this as a deliberate refactor issue, not a drive-by change inside a UI
 fix. The split should preserve the existing app/product boundary and should not

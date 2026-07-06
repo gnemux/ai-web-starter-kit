@@ -14,6 +14,7 @@ export type {
   CatCarePlanListWorkspace,
   CatCareRoutine,
   CatCareRoutineItem,
+  CatCareRoutineWorkspacePreload,
   CatCareRoutineWorkspace,
   CatCareSubmission,
   CatCareTask,
@@ -35,6 +36,7 @@ export {
 
 export {
   copyCatCareRoutineFromFormData,
+  getCatCareRoutineWorkspacePreload,
   getCatCareRoutineWorkspace,
   saveCatCareRoutineFromFormData
 } from "./product-service/routines";

@@ -117,6 +117,15 @@ and do not replace `apps/web/public/catcare/icons/icon-spec.md`.
 ## Code Structure Notes
 
 - Page components own layout and interaction state.
+- Same-page owner interactions should feel local. Tabs, filters, selected-cat
+  switches, and bounded view toggles should preload or cache the current page's
+  needed data, update local UI state, and sync the URL when useful without
+  replacing the whole workspace.
+- Same-page mutations should use local server actions, return structured data
+  when the user remains in place, update the smallest local UI state, invalidate
+  the smallest relevant CatCare cache, and show the product toast. Use
+  `redirect()` only when the mutation intentionally opens a new workflow
+  destination.
 - `apps/web/app/catcare/actions.ts` owns server actions and should distinguish
   local in-page actions from route-transition actions.
 - `apps/web/lib/catcare/product-service.ts` is a compatibility barrel, not the

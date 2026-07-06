@@ -5,15 +5,20 @@
 For every task, Codex should first read:
 
 1. `AGENTS.md`
-2. `context/status.md`
-3. `specs/collaboration/engineering-spec.md` when the task may involve code or documentation changes
-4. the relevant feature spec under `specs/`
-5. the relevant integration document under `integrations/`
-6. `specs/deploy/engineering-spec.md` plus the relevant deploy memory document when the task involves deployment status, Preview / Production verification, smoke tests, production monitoring, incidents, or environment matrices
+2. `context/project.md`
+3. `context/status.md`
+4. `specs/collaboration/engineering-spec.md` when the task may involve code or documentation changes
+5. the relevant feature spec under `specs/`
+6. the relevant integration document under `integrations/`
+7. `specs/deploy/engineering-spec.md` plus the relevant deploy memory document when the task involves deployment status, Preview / Production verification, smoke tests, production monitoring, incidents, or environment matrices
 
 When a task changes code, tests, schema, migrations, configuration,
 infrastructure, or technical documentation that affects implementation behavior,
 also read `context/engineering-decision-rules.md`.
+
+For CatCare UI or owner-flow work, also read
+`specs/reference-product/catcare-ui-guidelines.md`; for CatCare icon or
+illustration work, also read `apps/web/public/catcare/icons/icon-spec.md`.
 
 ## SDD Rule
 

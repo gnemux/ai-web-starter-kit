@@ -149,6 +149,12 @@ export type CatCareRoutineWorkspace = {
   routine: CatCareRoutine | null;
 };
 
+export type CatCareRoutineWorkspacePreload = CatCareRoutineWorkspace & {
+  itemsByCatId: Record<string, CatCareItem[]>;
+  routineByCatId: Record<string, CatCareRoutine | null>;
+  routineSourceCatsByCatId: Record<string, Array<{ id: string; name: string }>>;
+};
+
 export type CatCareItemsWorkspace = {
   cats: CatCareCatSummary[];
   selectedCat: CatCareCatSummary | null;

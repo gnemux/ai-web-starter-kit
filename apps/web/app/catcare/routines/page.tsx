@@ -18,14 +18,16 @@ import {
   CustomRoutineItemsClient,
   type CustomRoutineItemDraft
 } from "./custom-routine-items-client";
+import { RoutineCatTabsClient } from "./routine-cat-tabs-client";
 import { RoutineSaveForm } from "./routine-save-form-client";
 import { RoutineScheduleControl } from "./routine-schedule-control";
 import {
-  getCatCareRoutineWorkspace,
+  getCatCareRoutineWorkspacePreload,
   type CatCareItem,
   type CatCareLibraryItem,
   type CatCareRoutine,
-  type CatCareRoutineItem
+  type CatCareRoutineItem,
+  type CatCareRoutineWorkspacePreload
 } from "@/lib/catcare/product-service";
 
 type RoutineSearchParams = Promise<{ cat_id?: string; copied?: string; saved?: string }>;
@@ -122,7 +124,7 @@ export default async function CatCareRoutinesPage({
   const params = await searchParams;
   const [context, workspaceResult] = await Promise.all([
     getCatCareContentContext(),
-    getCatCareRoutineWorkspace(params.cat_id)
+    getCatCareRoutineWorkspacePreload(params.cat_id)
   ]);
   const locale = context.locale;
 
@@ -152,42 +154,27 @@ export default async function CatCareRoutinesPage({
           </div>
         </CatCarePanel>
       ) : (
-        <RoutineForm
-          careItems={workspaceResult.data.items}
-          cats={workspaceResult.data.cats}
+        <RoutineWorkspace
           justCopied={params.copied === "1"}
           justSaved={params.saved === "1"}
-          libraryItems={workspaceResult.data.libraryItems}
           locale={locale}
-          routine={workspaceResult.data.routine}
-          routineSourceCats={workspaceResult.data.routineSourceCats}
-          selectedCatId={workspaceResult.data.selectedCat.id}
+          workspace={workspaceResult.data}
         />
       )}
     </>
   );
 }
 
-function RoutineForm({
-  careItems,
-  cats,
+function RoutineWorkspace({
   justCopied,
   justSaved,
-  libraryItems,
   locale,
-  routine,
-  routineSourceCats,
-  selectedCatId
+  workspace
 }: {
-  careItems: CatCareItem[];
-  cats: Array<{ id: string; name: string }>;
   justCopied: boolean;
   justSaved: boolean;
-  libraryItems: CatCareLibraryItem[];
   locale: "zh" | "en";
-  routine: CatCareRoutine | null;
-  routineSourceCats: Array<{ id: string; name: string }>;
-  selectedCatId: string;
+  workspace: CatCareRoutineWorkspacePreload;
 }) {
   const copy = {
     description:
@@ -216,24 +203,11 @@ function RoutineForm({
         ? "Reusable routine settings"
         : "可复用习惯设置",
   };
-  const itemsByTitle = new Map(
-    (routine?.items ?? []).map((item) => [item.title, item])
-  );
-  const customItems: CustomRoutineItemDraft[] = (routine?.items ?? [])
-    .filter((item) => !fixedRoutineTitles.has(item.title))
-    .map((item) => ({
-      category:
-        item.category === "meal" ||
-        item.category === "treat" ||
-        item.category === "medicine"
-          ? item.category
-          : "treat",
-      enabled: item.enabled,
-      frequency: normalizeRoutineFrequency(item.frequency, "daily"),
-      instructions: item.instructions ?? "",
-      timeHint: item.timeHint ?? "",
-      title: item.title
-    }));
+  const selectedCatId = workspace.selectedCat?.id;
+
+  if (!selectedCatId) {
+    return null;
+  }
 
   return (
     <div className="mx-auto grid w-full max-w-[1196px] gap-6">
@@ -247,79 +221,99 @@ function RoutineForm({
             {copy.description}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {cats.map((cat) => {
-            const active = cat.id === selectedCatId;
-            return (
-              <Link
-                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  active
-                    ? "border-[#07847f] bg-[#07847f] text-white"
-                    : "border-[#d9e0ea] bg-white text-[#526177] hover:border-[#07847f]/50 hover:text-[#07847f]"
-                }`}
-                href={`/catcare/routines?cat_id=${cat.id}`}
-                key={cat.id}
-              >
-                {cat.name}
-              </Link>
-            );
-          })}
-        </div>
+        <RoutineCatTabsClient cats={workspace.cats} initialCatId={selectedCatId} />
       </div>
 
-      <RoutineCopyPanel
-        locale={locale}
-        routineSourceCats={routineSourceCats}
-        selectedCatId={selectedCatId}
-      />
+      {workspace.cats.map((cat) => {
+        const routine = workspace.routineByCatId[cat.id] ?? null;
+        const careItems = workspace.itemsByCatId[cat.id] ?? [];
+        const routineSourceCats = workspace.routineSourceCatsByCatId[cat.id] ?? [];
+        const itemsByTitle = new Map(
+          (routine?.items ?? []).map((item) => [item.title, item])
+        );
+        const customItems: CustomRoutineItemDraft[] = (routine?.items ?? [])
+          .filter((item) => !fixedRoutineTitles.has(item.title))
+          .map((item) => ({
+            category:
+              item.category === "meal" ||
+              item.category === "treat" ||
+              item.category === "medicine"
+                ? item.category
+                : "treat",
+            enabled: item.enabled,
+            frequency: normalizeRoutineFrequency(item.frequency, "daily"),
+            instructions: item.instructions ?? "",
+            timeHint: item.timeHint ?? "",
+            title: item.title
+          }));
 
-      <RoutineSaveForm
-        action={saveCatCareRoutineLocalAction}
-        catId={selectedCatId}
-        savedMessage={copy.saved}
-      >
-        <div className="grid gap-5 lg:grid-cols-3">
-          {routineCards.map((card) => (
-            <RoutineCard
-              card={card}
-              familyProductOptions={getFamilyProductOptions(libraryItems, card.key)}
-              item={getRoutineItemForCard(itemsByTitle, card)}
-              key={card.key}
+        return (
+          <section
+            className="grid gap-6"
+            data-routine-cat-panel={cat.id}
+            hidden={cat.id !== selectedCatId}
+            id={`routine-panel-${cat.id}`}
+            key={cat.id}
+            role="tabpanel"
+            style={cat.id !== selectedCatId ? { display: "none" } : undefined}
+          >
+            <RoutineCopyPanel
               locale={locale}
+              routineSourceCats={routineSourceCats}
+              selectedCatId={cat.id}
             />
-          ))}
-        </div>
 
-        <CustomRoutineItemsClient
-          initialItems={customItems}
-          libraryItems={libraryItems}
-          locale={locale}
-        />
+            <RoutineSaveForm
+              action={saveCatCareRoutineLocalAction}
+              catId={cat.id}
+              key={cat.id}
+              savedMessage={copy.saved}
+            >
+              <div className="grid gap-5 lg:grid-cols-3">
+                {routineCards.map((card) => (
+                  <RoutineCard
+                    card={card}
+                    familyProductOptions={getFamilyProductOptions(workspace.libraryItems, card.key)}
+                    item={getRoutineItemForCard(itemsByTitle, card)}
+                    key={card.key}
+                    locale={locale}
+                  />
+                ))}
+              </div>
 
-        <CareItemsContextPanel
-          careItems={careItems}
-          locale={locale}
-          selectedCatId={selectedCatId}
-        />
+              <CustomRoutineItemsClient
+                initialItems={customItems}
+                libraryItems={workspace.libraryItems}
+                locale={locale}
+              />
 
-        <div className="rounded-2xl border border-[#f3d5b8] bg-[#fffaf4] p-5 text-sm leading-7 text-[#7a5a3a]">
-          <span className="font-semibold text-[#d96b1f]">
-            {locale === "en" ? "Note: " : "提示："}
-          </span>
-          {copy.helper}
-        </div>
+              <CareItemsContextPanel
+                careItems={careItems}
+                locale={locale}
+                selectedCatId={cat.id}
+              />
 
-        <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
-          <CatCareButton name="intent" type="submit" value="stay" variant="secondary">
-            <CatCareSaveIcon />
-            {copy.save}
-          </CatCareButton>
-          <CatCareButton name="intent" type="submit" value="items">
-            <CatCareBowlActionIcon />
-            {copy.saveNext}
-          </CatCareButton>
-        </div>
-      </RoutineSaveForm>
+              <div className="rounded-2xl border border-[#f3d5b8] bg-[#fffaf4] p-5 text-sm leading-7 text-[#7a5a3a]">
+                <span className="font-semibold text-[#d96b1f]">
+                  {locale === "en" ? "Note: " : "提示："}
+                </span>
+                {copy.helper}
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-[1fr_1fr]">
+                <CatCareButton name="intent" type="submit" value="stay" variant="secondary">
+                  <CatCareSaveIcon />
+                  {copy.save}
+                </CatCareButton>
+                <CatCareButton name="intent" type="submit" value="items">
+                  <CatCareBowlActionIcon />
+                  {copy.saveNext}
+                </CatCareButton>
+              </div>
+            </RoutineSaveForm>
+          </section>
+        );
+      })}
     </div>
   );
 }

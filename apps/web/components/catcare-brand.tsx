@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function CatCareBrand({
   href = "/",
   size = "md",
@@ -11,7 +13,7 @@ export function CatCareBrand({
   const titleClass = size === "lg" ? "text-2xl" : "text-lg";
 
   return (
-    <a className="flex min-w-0 items-center gap-3" href={href}>
+    <Link className="flex min-w-0 items-center gap-3" href={href}>
       <span
         aria-hidden="true"
         className={`flex shrink-0 items-center justify-center overflow-hidden ${markClass}`}
@@ -34,6 +36,6 @@ export function CatCareBrand({
           </span>
         ) : null}
       </span>
-    </a>
+    </Link>
   );
 }

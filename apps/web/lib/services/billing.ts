@@ -20,6 +20,7 @@ import {
   type ServiceResult
 } from "@xwlc/core";
 import { randomUUID } from "crypto";
+import { cache } from "react";
 
 import {
   createSupabaseAdminClient,
@@ -54,6 +55,24 @@ type BillingUsageLedgerIdRow = Pick<
   "id" | "related_credit_ledger_id" | "status"
 >;
 
+const billingPlanCacheTtlMs = 5 * 60_000;
+const billingSnapshotCacheTtlMs = billingPlanCacheTtlMs;
+
+const billingSnapshotCache = new Map<
+  string,
+  {
+    expiresAt: number;
+    value: BillingEntitlementSnapshot;
+  }
+>();
+const billingPlanCache = new Map<
+  string,
+  {
+    expiresAt: number;
+    value: BillingPlanId;
+  }
+>();
+
 export type BillingPaymentRecord = {
   amountCents: number;
   currency: string;
@@ -86,9 +105,88 @@ export type BillingAiCreditUsageCommit = {
   usageStatus: BillingUsageLedgerEntry["status"];
 };
 
-export async function getCurrentBillingEntitlements(): Promise<
-  ServiceResult<BillingEntitlementSnapshot>
-> {
+export const getCurrentBillingEntitlements = cache(
+  async function getCurrentBillingEntitlements(): Promise<
+    ServiceResult<BillingEntitlementSnapshot>
+  > {
+    const clientResult = await createSupabaseServerClient();
+
+    if (!clientResult.ok) {
+      return clientResult;
+    }
+
+    const userIdResult = await getAuthenticatedUserId(clientResult.data);
+
+    if (!userIdResult.ok) {
+      return userIdResult;
+    }
+
+    const cachedSnapshot = readBillingSnapshotCache(userIdResult.data);
+
+    if (cachedSnapshot) {
+      return serviceOk(cachedSnapshot);
+    }
+
+    const snapshotResult = await getBillingEntitlementSnapshot(
+      clientResult.data,
+      userIdResult.data
+    );
+
+    if (!snapshotResult.ok) {
+      return snapshotResult;
+    }
+
+    writeBillingSnapshotCache(userIdResult.data, snapshotResult.data);
+
+    return snapshotResult;
+  }
+);
+
+export const getCurrentBillingPlanId = cache(
+  async function getCurrentBillingPlanId(): Promise<ServiceResult<BillingPlanId>> {
+    const clientResult = await createSupabaseServerClient();
+
+    if (!clientResult.ok) {
+      return clientResult;
+    }
+
+    const userIdResult = await getAuthenticatedUserId(clientResult.data);
+
+    if (!userIdResult.ok) {
+      return userIdResult;
+    }
+
+    const cachedPlanId = readBillingPlanCache(userIdResult.data);
+
+    if (cachedPlanId) {
+      return serviceOk(cachedPlanId);
+    }
+
+    const subscriptionResult = await getLatestSubscription(
+      clientResult.data,
+      userIdResult.data
+    );
+
+    if (!subscriptionResult.ok) {
+      return subscriptionResult;
+    }
+
+    const planId = subscriptionResult.data?.planId ?? "free";
+    writeBillingPlanCache(userIdResult.data, planId);
+
+    return serviceOk(planId);
+  }
+);
+
+export function clearBillingCacheForOwner(ownerId: string) {
+  billingSnapshotCache.delete(ownerId);
+  billingPlanCache.delete(ownerId);
+}
+
+export async function assertCurrentBillingEntitlement(
+  featureKey: BillingFeatureKey,
+  requiredQuantity = 1
+): Promise<ServiceResult<BillingEntitlementDecision>> {
   const clientResult = await createSupabaseServerClient();
 
   if (!clientResult.ok) {
@@ -101,47 +199,10 @@ export async function getCurrentBillingEntitlements(): Promise<
     return userIdResult;
   }
 
-  const subscriptionResult = await getLatestSubscription(
+  const snapshotResult = await getBillingEntitlementSnapshot(
     clientResult.data,
     userIdResult.data
   );
-
-  if (!subscriptionResult.ok) {
-    return subscriptionResult;
-  }
-
-  const entitlementsResult = await listActiveEntitlements(
-    clientResult.data,
-    userIdResult.data
-  );
-
-  if (!entitlementsResult.ok) {
-    return entitlementsResult;
-  }
-
-  const usageResult = await listCommittedUsage(clientResult.data, userIdResult.data);
-
-  if (!usageResult.ok) {
-    return usageResult;
-  }
-
-  const subscription = subscriptionResult.data;
-  const snapshot = createBillingSnapshot({
-    ownerId: userIdResult.data,
-    planId: subscription?.planId ?? "free",
-    subscriptionStatus: subscription?.status ?? "none",
-    currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
-    entitlements: entitlementsResult.data
-  });
-
-  return serviceOk(applyUsageToSnapshot(snapshot, usageResult.data));
-}
-
-export async function assertCurrentBillingEntitlement(
-  featureKey: BillingFeatureKey,
-  requiredQuantity = 1
-): Promise<ServiceResult<BillingEntitlementDecision>> {
-  const snapshotResult = await getCurrentBillingEntitlements();
 
   if (!snapshotResult.ok) {
     return snapshotResult;
@@ -282,6 +343,8 @@ export async function switchCurrentBillingPlanToFree(): Promise<
     return mapSupabaseError(subscriptionResult.error);
   }
 
+  clearBillingCacheForOwner(userIdResult.data);
+
   return serviceOk({ planId: "free" });
 }
 
@@ -380,6 +443,7 @@ export async function commitAiCreditUsage(input: {
   }
 
   const usageLedger = usageResult.data as BillingUsageLedgerIdRow;
+  clearBillingCacheForOwner(input.ownerId);
 
   return serviceOk({
     consumedCredits: input.credits,
@@ -456,6 +520,7 @@ async function getDuplicateAiCreditUsageCommit(
   }
 
   const usageLedger = usageResult.data as BillingUsageLedgerIdRow;
+  clearBillingCacheForOwner(input.ownerId);
 
   return serviceOk({
     consumedCredits: 0,
@@ -670,6 +735,40 @@ async function listUsageRecords(
   );
 }
 
+async function getBillingEntitlementSnapshot(
+  supabase: AppSupabaseClient,
+  ownerId: string
+): Promise<ServiceResult<BillingEntitlementSnapshot>> {
+  const subscriptionResult = await getLatestSubscription(supabase, ownerId);
+
+  if (!subscriptionResult.ok) {
+    return subscriptionResult;
+  }
+
+  const entitlementsResult = await listActiveEntitlements(supabase, ownerId);
+
+  if (!entitlementsResult.ok) {
+    return entitlementsResult;
+  }
+
+  const usageResult = await listCommittedUsage(supabase, ownerId);
+
+  if (!usageResult.ok) {
+    return usageResult;
+  }
+
+  const subscription = subscriptionResult.data;
+  const snapshot = createBillingSnapshot({
+    ownerId,
+    planId: subscription?.planId ?? "free",
+    subscriptionStatus: subscription?.status ?? "none",
+    currentPeriodEnd: subscription?.currentPeriodEnd ?? null,
+    entitlements: entitlementsResult.data
+  });
+
+  return serviceOk(applyUsageToSnapshot(snapshot, usageResult.data));
+}
+
 function applyUsageToSnapshot(
   snapshot: BillingEntitlementSnapshot,
   usageTotals: Partial<Record<BillingFeatureKey, number>>
@@ -686,6 +785,47 @@ function applyUsageToSnapshot(
       ])
     ) as BillingEntitlementSnapshot["entitlements"]
   };
+}
+
+function readBillingSnapshotCache(
+  ownerId: string
+): BillingEntitlementSnapshot | null {
+  const entry = billingSnapshotCache.get(ownerId);
+
+  if (!entry || entry.expiresAt <= Date.now()) {
+    billingSnapshotCache.delete(ownerId);
+    return null;
+  }
+
+  return entry.value;
+}
+
+function writeBillingSnapshotCache(
+  ownerId: string,
+  value: BillingEntitlementSnapshot
+) {
+  billingSnapshotCache.set(ownerId, {
+    expiresAt: Date.now() + billingSnapshotCacheTtlMs,
+    value
+  });
+}
+
+function readBillingPlanCache(ownerId: string): BillingPlanId | null {
+  const entry = billingPlanCache.get(ownerId);
+
+  if (!entry || entry.expiresAt <= Date.now()) {
+    billingPlanCache.delete(ownerId);
+    return null;
+  }
+
+  return entry.value;
+}
+
+function writeBillingPlanCache(ownerId: string, value: BillingPlanId) {
+  billingPlanCache.set(ownerId, {
+    expiresAt: Date.now() + billingPlanCacheTtlMs,
+    value
+  });
 }
 
 function applyUsageToAllowance(

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useActionState,
   useEffect,
@@ -239,7 +240,7 @@ function AccountMenuLink({
   label: string;
 }) {
   return (
-    <a
+    <Link
       className="flex min-h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500"
       href={href}
       role="menuitem"
@@ -248,7 +249,7 @@ function AccountMenuLink({
         {icon}
       </span>
       <span className="truncate">{label}</span>
-    </a>
+    </Link>
   );
 }
 

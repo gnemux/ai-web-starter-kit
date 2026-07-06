@@ -2,6 +2,32 @@
 
 Scope: CatCare product UI only.
 
+## Asset Ownership
+
+Common capability assets:
+
+- `packages/ui` components own product-agnostic surfaces such as `Button`,
+  `Badge`, `EmptyState`, `ErrorState`, shell primitives, and layout utilities.
+- Generic app icons in `apps/web/components/app-icons.tsx` are shared web-app
+  UI symbols such as home, account, billing, notification, and chevrons.
+- Common assets must not import files from `apps/web/public/catcare/**`.
+
+CatCare product assets:
+
+- Prototype-derived icons live under `apps/web/public/catcare/icons/**` and are
+  owned by the CatCare product UI.
+- Cat illustrations live under `apps/web/public/catcare/cats/**` and are
+  CatCare-specific breed/profile assets.
+- CatCare action icons live in
+  `apps/web/app/catcare/catcare-action-icons.tsx`; they are local product
+  primitives because their color, stroke, and sizing are tuned to this product.
+- CatCare owner-flow components in `apps/web/app/catcare/owner-flow-components.tsx`
+  are app/product-layer components. Move them to `packages/*` only after another
+  product reuses the same behavior and visual contract.
+
+Do not place CatCare business objects, breed dictionaries, cat illustrations,
+or CatCare-only icon assets in `packages/*`.
+
 ## Source PNG Rules
 
 - Source: crop from `specs/reference-product/prototypes/v6-regenerated-normalized/`.
@@ -60,6 +86,23 @@ baseline is the non-thinned result.
 - Active, inactive, hover, and disabled states are controlled by CSS around the
   wrapper; icon body color is fixed to CatCare teal for consistency.
 - Shared package components must not import CatCare icon files.
+- Product/navigation/flow icons use traced assets. Functional action icons
+  inside buttons, inputs, and dialogs use the local currentColor line icon set
+  in `apps/web/app/catcare/catcare-action-icons.tsx` so weight, alignment, and
+  foreground color stay consistent at small sizes.
+
+## UI Size Contract
+
+| UI surface | Control size | Icon size | Notes |
+| --- | ---: | ---: | --- |
+| Primary/secondary/ghost/danger action button | 56px height | 20px | Used by `CatCareButton` and `CatCareActionButton`. |
+| Small pill action | 40px min height | 16px | Used for compact photo/upload actions. |
+| Mobile shell nav button | 44px min height | 20px | Icon and label sit in a compact row. |
+| Sidebar icon frame | 44-56px frame | 28px | Frame controls active state; icon body stays teal. |
+| Metric/flow illustration icon | display block | 32-40px | Larger communicative icons only, not form actions. |
+
+Action icons must share the same visual weight at the rendered size. Do not mix
+traced product icons with functional button icons in the same action group.
 
 ## Design Handoff
 

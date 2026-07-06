@@ -17,6 +17,7 @@ import {
   type PlatformResult
 } from "@xwlc/platform";
 import { cookies } from "next/headers";
+import { cache } from "react";
 
 import {
   createSupabaseServerClient,
@@ -42,6 +43,15 @@ type AuthConfirmationInput = {
   nextPath: string;
 };
 
+const profileCacheTtlMs = 5 * 60_000;
+const profileCache = new Map<
+  string,
+  {
+    expiresAt: number;
+    value: UserProfile | null;
+  }
+>();
+
 const EMAIL_OTP_TYPES = new Set<AuthEmailOtpType>([
   "signup",
   "invite",
@@ -51,7 +61,7 @@ const EMAIL_OTP_TYPES = new Set<AuthEmailOtpType>([
   "email"
 ]);
 
-export async function getCurrentAccount(): Promise<
+export const getCurrentAccount = cache(async function getCurrentAccount(): Promise<
   ServiceResult<AccountPayload>
 > {
   const clientResult = await createSupabaseServerClient();
@@ -60,7 +70,7 @@ export async function getCurrentAccount(): Promise<
     return clientResult;
   }
 
-  const userResult = await getAuthenticatedUser(clientResult.data);
+  const userResult = await getAuthenticatedUser();
 
   if (!userResult.ok) {
     return userResult;
@@ -79,7 +89,29 @@ export async function getCurrentAccount(): Promise<
     user: userResult.data,
     profile: profileResult.data
   });
-}
+});
+
+export const getCurrentUserClaims = cache(async function getCurrentUserClaims(): Promise<
+  ServiceResult<{ email: string; id: string }>
+> {
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const { data, error } = await clientResult.data.auth.getClaims();
+  const claims = data?.claims as { sub?: string; email?: string } | undefined;
+
+  if (error || !claims?.sub) {
+    return serviceError("unauthorized", "Sign in to continue.");
+  }
+
+  return serviceOk({
+    email: claims.email ?? "",
+    id: claims.sub
+  });
+});
 
 export async function getCurrentAccountForPublicShell(): Promise<
   AccountPayload | null
@@ -274,7 +306,7 @@ export async function updateCurrentUserProfile(
     return clientResult;
   }
 
-  const userResult = await getAuthenticatedUser(clientResult.data);
+  const userResult = await getAuthenticatedUser();
 
   if (!userResult.ok) {
     return userResult;
@@ -293,7 +325,10 @@ export async function updateCurrentUserProfile(
     return mapSupabaseError(error);
   }
 
-  return serviceOk(mapProfile(data));
+  const profile = mapProfile(data);
+  writeProfileCache(userResult.data.id, profile);
+
+  return serviceOk(profile);
 }
 
 export async function exchangeAuthConfirmationForSession(
@@ -377,30 +412,26 @@ function normalizeAuthEmailOtpType(type: string | null): AuthEmailOtpType | null
     : null;
 }
 
-async function getAuthenticatedUser(
-  supabase: AppSupabaseClient
-): Promise<ServiceResult<AuthenticatedUser>> {
-  const { data, error } = await supabase.auth.getClaims();
-  const claims = data?.claims as { sub?: string; email?: string } | undefined;
+async function getAuthenticatedUser(): Promise<ServiceResult<AuthenticatedUser>> {
+  const claimsResult = await getCurrentUserClaims();
 
-  if (error || !claims?.sub) {
-    return serviceError("unauthorized", "Sign in to continue.");
+  if (!claimsResult.ok) {
+    return claimsResult;
   }
 
-  const { data: userData } = await supabase.auth.getUser();
-
-  return serviceOk(
-    mapAuthUser({
-      id: claims.sub,
-      email: userData.user?.email ?? claims.email ?? ""
-    })
-  );
+  return serviceOk(mapAuthUser(claimsResult.data));
 }
 
 async function getProfileForUser(
   supabase: AppSupabaseClient,
   userId: string
 ): Promise<ServiceResult<UserProfile | null>> {
+  const cachedProfile = readProfileCache(userId);
+
+  if (cachedProfile !== undefined) {
+    return serviceOk(cachedProfile);
+  }
+
   const { data, error } = await supabase
     .from("user_profiles")
     .select("id, display_name, avatar_url, created_at, updated_at")
@@ -411,7 +442,10 @@ async function getProfileForUser(
     return mapSupabaseError(error);
   }
 
-  return serviceOk(data ? mapProfile(data) : null);
+  const profile = data ? mapProfile(data) : null;
+  writeProfileCache(userId, profile);
+
+  return serviceOk(profile);
 }
 
 async function ensureProfile(
@@ -430,7 +464,28 @@ async function ensureProfile(
     return mapSupabaseError(error);
   }
 
-  return serviceOk(mapProfile(data));
+  const profile = mapProfile(data);
+  writeProfileCache(userId, profile);
+
+  return serviceOk(profile);
+}
+
+function readProfileCache(userId: string) {
+  const entry = profileCache.get(userId);
+
+  if (!entry || entry.expiresAt <= Date.now()) {
+    profileCache.delete(userId);
+    return undefined;
+  }
+
+  return entry.value;
+}
+
+function writeProfileCache(userId: string, value: UserProfile | null) {
+  profileCache.set(userId, {
+    expiresAt: Date.now() + profileCacheTtlMs,
+    value
+  });
 }
 
 function mapAuthUser(user: { id: string; email: string }): AuthenticatedUser {

@@ -5,25 +5,32 @@ import type { WorkspaceNavKey } from "@/components/workspace-nav";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
+import { getCurrentBillingEntitlements } from "@/lib/services/billing";
 
 import { CatCareAppShell } from "../catcare/catcare-shell";
 
 export async function getAccountPageContext(nextPath = "/account") {
   const locale = await getRequestLocale();
   const copy = getDictionary(locale);
-  const accountResult = await getCurrentAccount();
+  const [accountResult, billingResult] = await Promise.all([
+    getCurrentAccount(),
+    getCurrentBillingEntitlements()
+  ]);
 
   if (!accountResult.ok) {
     redirect(`/login?next=${nextPath}`);
   }
 
+  const planId = billingResult.ok ? billingResult.data.planId : "free";
   const displayName = accountResult.data.profile?.displayName ?? "";
   const userLabel =
     displayName || accountResult.data.user.email || copy.account.title;
 
   return {
     account: accountResult.data,
+    billingPlanLabel: copy.account.billing.planNames[planId],
     copy,
+    creditLabel: formatCatCareAiSummaryLabel(planId, copy.account.billing),
     displayName,
     locale,
     userLabel
@@ -48,6 +55,15 @@ export function AccountAppShell({
       {children}
     </CatCareAppShell>
   );
+}
+
+function formatCatCareAiSummaryLabel(
+  planId: string,
+  labels: ReturnType<typeof getDictionary>["account"]["billing"]
+) {
+  return planId === "pro"
+    ? labels.catcareDisplay.proCreditSummary
+    : labels.catcareDisplay.freeCreditSummary;
 }
 
 export function AccountPageHeader({

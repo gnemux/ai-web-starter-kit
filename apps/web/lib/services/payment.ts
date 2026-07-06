@@ -32,6 +32,7 @@ import type { Json } from "@/lib/supabase/database.types";
 import { getCurrentAccount } from "./auth";
 import {
   assertCurrentBillingEntitlement,
+  clearBillingCacheForOwner,
   getCurrentBillingEntitlements
 } from "./billing";
 
@@ -1125,6 +1126,8 @@ async function recordPaymentBillingFacts(input: {
       return mapSupabasePaymentError(creditLedgerResult.error);
     }
   }
+
+  clearBillingCacheForOwner(input.ownerId);
 
   return serviceOk({ orderStatus });
 }

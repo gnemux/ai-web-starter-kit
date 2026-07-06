@@ -11,5 +11,6 @@
 -- 3. 插入只属于该本地测试用户的 user_profiles / demo_items 行
 -- 4. supabase db reset 验证 migration + seed 可从空库恢复
 --
--- 等项目确定统一的本地测试用户创建方式后，再把安全的本地-only seed
--- 示例写入这里。
+-- GNE-254 CatCare owner A/B RLS 验收使用
+-- supabase/tests/catcare_owner_rls.sql。该脚本在 transaction 中创建
+-- 测试用户和数据，并在结束时 rollback，适合 linked 测试库和本地库。

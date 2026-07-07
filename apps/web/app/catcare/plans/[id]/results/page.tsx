@@ -71,7 +71,7 @@ function PlanResults({ plan }: { plan: CatCarePlan }) {
             {plan.title}
           </h1>
           <p className="mt-2 text-sm leading-6 text-[#526177]">
-            主人侧查看提交状态、异常重点和后续复盘入口；照看者分享与匿名提交属于后续 ACCESS。
+            主人侧查看照看者提交状态、异常重点和后续复盘入口。
           </p>
         </div>
         <CatCareButton href={`/catcare/plans/${plan.id}`} variant="secondary">
@@ -117,11 +117,11 @@ function PlanResults({ plan }: { plan: CatCarePlan }) {
               分享给照看者
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#526177]">
-              GNE-253 保留主人侧结果入口；分享链接、匿名访问和照看者提交页在 ACCESS 阶段接入。
+              计划详情页可以生成私密链接；照看者通过链接查看任务并提交完成、备注或异常。
             </p>
             <div className="mt-5 flex min-h-14 items-center justify-center gap-3 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] px-5 text-base font-semibold text-[#526177]">
               <CatCareCalendarIcon />
-              分享入口待接入
+              分享入口在计划详情页
             </div>
           </CatCarePanel>
 
@@ -203,7 +203,7 @@ function PlanResultEntries({ summary }: { summary: PlanResultSummary }) {
     return (
       <div className="mt-6">
         <EmptyState
-          description="照看者提交后，这里会按时间线显示完成、异常和备注。当前阶段不生成匿名提交页，所以没有真实结果时保持为空。"
+          description="分享链接发出后，照看者提交的完成、异常和备注会按真实记录显示在这里。"
           title="暂无照看结果"
         />
       </div>

@@ -12,6 +12,9 @@ import {
 } from "../../supabase/server";
 import type { Database } from "../../supabase/database.types";
 import {
+  clearCatCarePlanDetailCache,
+  clearCatCarePlanSummaryCache,
+  clearCatCareWorkspaceStatsCache,
   getAuthenticatedOwnerId,
   mapPlan,
   mapTask,
@@ -44,11 +47,20 @@ export type CarePlanShareLinkMutation = CarePlanShareLinkState & {
   token: string | null;
 };
 
+export type AnonymousCareTaskSubmissionView = {
+  abnormal: boolean;
+  note: string | null;
+  status: Database["public"]["Tables"]["care_submissions"]["Row"]["status"];
+  submittedAt: string;
+};
+
 export type AnonymousCareTaskView = {
   category: Database["public"]["Tables"]["care_tasks"]["Row"]["category"];
   frequency: string | null;
   instructions: string | null;
   required: boolean;
+  submission: AnonymousCareTaskSubmissionView | null;
+  submissionRef: string;
   sortOrder: number;
   timeHint: string | null;
   title: string;
@@ -65,6 +77,12 @@ export type AnonymousCarePlanView = {
   taskCount: number;
   tasks: AnonymousCareTaskView[];
   title: string;
+};
+
+export type AnonymousCareSubmissionMutation = AnonymousCareTaskSubmissionView & {
+  alreadySubmitted: boolean;
+  message: string;
+  submissionRef: string;
 };
 
 export const shareTokenScope: ShareTokenScope = "care_plan";
@@ -320,12 +338,141 @@ export async function getAnonymousCarePlanView(
     return clientResult;
   }
 
-  const [planResult, tasksResult] = await Promise.all([
+  const [planResult, tasksResult, submissionsResult] = await Promise.all([
     clientResult.data
       .from("care_plans")
       .select(
         "id, owner_id, cat_id, routine_id, title, status, scenario, generation_source, ai_input_summary, start_on, end_on, handoff_notes, generated_at, published_at, reviewed_at, closed_at, created_at, updated_at"
       )
+      .eq("id", tokenResult.data.resourceId)
+      .eq("owner_id", tokenResult.data.ownerId)
+      .single(),
+    clientResult.data
+      .from("care_tasks")
+      .select(
+        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
+      )
+      .eq("plan_id", tokenResult.data.resourceId)
+      .order("sort_order", { ascending: true }),
+    clientResult.data
+      .from("care_submissions")
+      .select("task_id, status, note, abnormal, idempotency_key, created_at")
+      .eq("owner_id", tokenResult.data.ownerId)
+      .eq("plan_id", tokenResult.data.resourceId)
+      .like("idempotency_key", `anonymous:${tokenResult.data.tokenId}:%`)
+  ]);
+
+  if (planResult.error) {
+    return mapSupabaseError(planResult.error);
+  }
+
+  if (tasksResult.error) {
+    return mapSupabaseError(tasksResult.error);
+  }
+
+  if (submissionsResult.error) {
+    return mapSupabaseError(submissionsResult.error);
+  }
+
+  if (planResult.data.status !== "published") {
+    return serviceError("forbidden", "Care plan is no longer available.", {
+      token: "unavailable"
+    });
+  }
+
+  const plan = mapPlan(planResult.data);
+  const submissionByTaskId = new Map(
+    (submissionsResult.data ?? [])
+      .filter((submission) => submission.task_id)
+      .map((submission) => [
+        submission.task_id ?? "",
+        {
+          abnormal: submission.abnormal,
+          note: submission.note,
+          status: submission.status,
+          submittedAt: submission.created_at
+        }
+      ])
+  );
+  const tasks = (tasksResult.data ?? [])
+    .map(mapTask)
+    .filter((task) => task.enabled && !isLegacyPrepareTask(task))
+    .map((task) => ({
+      category: task.category,
+      frequency: task.frequency,
+      instructions: task.instructions,
+      required: task.required,
+      submission: submissionByTaskId.get(task.id) ?? null,
+      submissionRef: createAnonymousTaskSubmissionRef(
+        tokenResult.data.tokenId,
+        task.id
+      ),
+      sortOrder: task.sortOrder,
+      timeHint: task.timeHint,
+      title: task.title
+    }));
+
+  return serviceOk({
+    catNames: extractPlanCatNames(plan.aiInputSummary),
+    endOn: plan.endOn,
+    expiresAt: tokenResult.data.expiresAt,
+    handoffNotes: plan.handoffNotes,
+    requiredTaskCount: tasks.filter((task) => task.required).length,
+    scenario: plan.scenario,
+    startOn: plan.startOn,
+    taskCount: tasks.length,
+    tasks,
+    title: plan.title
+  });
+}
+
+export async function submitAnonymousCareSubmissionFromFormData(
+  formData: FormData
+): Promise<ServiceResult<AnonymousCareSubmissionMutation>> {
+  const secret = String(formData.get("token") ?? "").trim();
+  const submissionRef = String(formData.get("submissionRef") ?? "").trim();
+  const statusResult = parseAnonymousSubmissionStatus(formData.get("status"));
+  const noteResult = parseAnonymousSubmissionNote(formData.get("note"));
+
+  if (!submissionRef) {
+    return serviceError("validation_error", "请选择要提交的照护任务。", {
+      submissionRef: "required"
+    });
+  }
+
+  if (!statusResult.ok) {
+    return statusResult;
+  }
+
+  if (!noteResult.ok) {
+    return noteResult;
+  }
+
+  const status = statusResult.data;
+  const note = noteResult.data;
+
+  if ((status === "note" || status === "exception") && !note) {
+    return serviceError("validation_error", "请填写备注或异常说明。", {
+      note: "required"
+    });
+  }
+
+  const tokenResult = await resolveCarePlanShareToken(secret);
+
+  if (!tokenResult.ok) {
+    return tokenResult;
+  }
+
+  const clientResult = createSupabaseAdminClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const [planResult, tasksResult] = await Promise.all([
+    clientResult.data
+      .from("care_plans")
+      .select("id, owner_id, status")
       .eq("id", tokenResult.data.resourceId)
       .eq("owner_id", tokenResult.data.ownerId)
       .single(),
@@ -347,37 +494,188 @@ export async function getAnonymousCarePlanView(
   }
 
   if (planResult.data.status !== "published") {
-    return serviceError("forbidden", "Care plan is no longer available.", {
+    return serviceError("forbidden", "这个照护计划当前不可提交。", {
       token: "unavailable"
     });
   }
 
-  const plan = mapPlan(planResult.data);
-  const tasks = (tasksResult.data ?? [])
+  const task = (tasksResult.data ?? [])
     .map(mapTask)
-    .filter((task) => task.enabled && !isLegacyPrepareTask(task))
-    .map((task) => ({
-      category: task.category,
-      frequency: task.frequency,
-      instructions: task.instructions,
-      required: task.required,
-      sortOrder: task.sortOrder,
-      timeHint: task.timeHint,
-      title: task.title
-    }));
+    .filter((item) => item.enabled && !isLegacyPrepareTask(item))
+    .find(
+      (item) =>
+        createAnonymousTaskSubmissionRef(tokenResult.data.tokenId, item.id) ===
+        submissionRef
+    );
+
+  if (!task) {
+    return serviceError("validation_error", "请选择有效的照护任务。", {
+      submissionRef: "invalid"
+    });
+  }
+
+  const idempotencyKey = createAnonymousSubmissionIdempotencyKey(
+    tokenResult.data.tokenId,
+    submissionRef
+  );
+  const existingResult = await getAnonymousSubmissionByIdempotencyKey(
+    clientResult.data,
+    tokenResult.data.ownerId,
+    tokenResult.data.resourceId,
+    idempotencyKey
+  );
+
+  if (!existingResult.ok) {
+    return existingResult;
+  }
+
+  if (existingResult.data) {
+    clearCatCarePlanCaches(
+      tokenResult.data.ownerId,
+      tokenResult.data.resourceId
+    );
+    return serviceOk({
+      ...existingResult.data,
+      alreadySubmitted: true,
+      message: "这项任务已经提交过，页面已显示之前的提交结果。",
+      submissionRef
+    });
+  }
+
+  const insertResult = await clientResult.data
+    .from("care_submissions")
+    .insert({
+      abnormal: status === "exception",
+      idempotency_key: idempotencyKey,
+      note,
+      owner_id: tokenResult.data.ownerId,
+      plan_id: tokenResult.data.resourceId,
+      status,
+      submitted_by_label: "照看者",
+      task_id: task.id
+    })
+    .select("status, note, abnormal, created_at")
+    .single();
+
+  if (insertResult.error?.code === "23505") {
+    const duplicateResult = await getAnonymousSubmissionByIdempotencyKey(
+      clientResult.data,
+      tokenResult.data.ownerId,
+      tokenResult.data.resourceId,
+      idempotencyKey
+    );
+
+    if (!duplicateResult.ok) {
+      return duplicateResult;
+    }
+
+    if (duplicateResult.data) {
+      clearCatCarePlanCaches(
+        tokenResult.data.ownerId,
+        tokenResult.data.resourceId
+      );
+      return serviceOk({
+        ...duplicateResult.data,
+        alreadySubmitted: true,
+        message: "这项任务已经提交过，页面已显示之前的提交结果。",
+        submissionRef
+      });
+    }
+  }
+
+  if (insertResult.error) {
+    return mapSupabaseError(insertResult.error);
+  }
+
+  clearCatCarePlanCaches(tokenResult.data.ownerId, tokenResult.data.resourceId);
 
   return serviceOk({
-    catNames: extractPlanCatNames(plan.aiInputSummary),
-    endOn: plan.endOn,
-    expiresAt: tokenResult.data.expiresAt,
-    handoffNotes: plan.handoffNotes,
-    requiredTaskCount: tasks.filter((task) => task.required).length,
-    scenario: plan.scenario,
-    startOn: plan.startOn,
-    taskCount: tasks.length,
-    tasks,
-    title: plan.title
+    abnormal: insertResult.data.abnormal,
+    alreadySubmitted: false,
+    message: "已提交，主人会在照护结果里看到这条反馈。",
+    note: insertResult.data.note,
+    status: insertResult.data.status,
+    submittedAt: insertResult.data.created_at,
+    submissionRef
   });
+}
+
+function clearCatCarePlanCaches(ownerId: string, planId: string) {
+  clearCatCarePlanDetailCache(ownerId, planId);
+  clearCatCarePlanSummaryCache(ownerId);
+  clearCatCareWorkspaceStatsCache(ownerId);
+}
+
+function createAnonymousTaskSubmissionRef(tokenId: string, taskId: string) {
+  return createHash("sha256")
+    .update(`${tokenId}:${taskId}`, "utf8")
+    .digest("base64url")
+    .slice(0, 32);
+}
+
+function createAnonymousSubmissionIdempotencyKey(
+  tokenId: string,
+  submissionRef: string
+) {
+  return `anonymous:${tokenId}:${submissionRef}`;
+}
+
+function parseAnonymousSubmissionStatus(
+  value: FormDataEntryValue | null
+): ServiceResult<Database["public"]["Tables"]["care_submissions"]["Row"]["status"]> {
+  const status = String(value ?? "completed").trim();
+
+  if (status === "completed" || status === "note" || status === "exception") {
+    return serviceOk(status);
+  }
+
+  return serviceError("validation_error", "请选择有效的提交状态。", {
+    status: "invalid"
+  });
+}
+
+function parseAnonymousSubmissionNote(
+  value: FormDataEntryValue | null
+): ServiceResult<string | null> {
+  const note = String(value ?? "").trim();
+
+  if (note.length > 2000) {
+    return serviceError("validation_error", "备注最多 2000 个字。", {
+      note: "too_long"
+    });
+  }
+
+  return serviceOk(note || null);
+}
+
+async function getAnonymousSubmissionByIdempotencyKey(
+  client: AppSupabaseClient,
+  ownerId: string,
+  planId: string,
+  idempotencyKey: string
+): Promise<ServiceResult<AnonymousCareTaskSubmissionView | null>> {
+  const result = await client
+    .from("care_submissions")
+    .select("status, note, abnormal, created_at")
+    .eq("owner_id", ownerId)
+    .eq("plan_id", planId)
+    .eq("idempotency_key", idempotencyKey)
+    .maybeSingle();
+
+  if (result.error) {
+    return mapSupabaseError(result.error);
+  }
+
+  return serviceOk(
+    result.data
+      ? {
+          abnormal: result.data.abnormal,
+          note: result.data.note,
+          status: result.data.status,
+          submittedAt: result.data.created_at
+        }
+      : null
+  );
 }
 
 async function getOwnerPlanShareContext(planId: string): Promise<

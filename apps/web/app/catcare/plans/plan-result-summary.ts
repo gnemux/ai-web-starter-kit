@@ -78,7 +78,7 @@ export function buildPlanResultSummary(plan: CatCarePlan): PlanResultSummary {
     entries: [],
     headline: "计划已发布，正在等待照看者提交结果。",
     pendingCount: totalCount,
-    sourceDescription: "当前没有真实提交记录。接入分享链接和照看者提交页后，这里会按时间线展示反馈。",
+    sourceDescription: "当前没有真实提交记录。分享链接发出后，照看者提交的完成、备注和异常会显示在这里。",
     sourceLabel: "暂无提交",
     statusClassName: "bg-[#eef4ff] text-[#315a9f]",
     statusLabel: "待真实提交",

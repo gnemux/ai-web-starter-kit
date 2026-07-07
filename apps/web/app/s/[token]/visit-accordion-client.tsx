@@ -2,18 +2,23 @@
 
 import { useRef, useState } from "react";
 
+import type { AnonymousCareTaskSubmissionView } from "@/lib/catcare/product-service";
+
 import {
   formatTaskAction,
   getCategoryLabel,
   getCategoryStyle,
   parseTaskTitle
 } from "../../catcare/plans/plan-task-display";
+import { submitAnonymousCareTaskAction } from "./actions";
 
 type AnonymousTask = {
   category: Parameters<typeof getCategoryLabel>[0];
   frequency: string | null;
   instructions: string | null;
   required: boolean;
+  submission: AnonymousCareTaskSubmissionView | null;
+  submissionRef: string;
   sortOrder: number;
   title: string;
 };
@@ -24,9 +29,11 @@ type AnonymousVisitSection = {
 };
 
 export function AnonymousVisitAccordion({
-  sections
+  sections,
+  token
 }: {
   sections: AnonymousVisitSection[];
+  token: string;
 }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const itemRefs = useRef<Array<HTMLElement | null>>([]);
@@ -90,6 +97,7 @@ export function AnonymousVisitAccordion({
                     key={`${section.timeLabel}-${task.sortOrder}-${task.title}`}
                     step={taskIndex + 1}
                     task={task}
+                    token={token}
                   />
                 ))}
               </ol>
@@ -101,8 +109,56 @@ export function AnonymousVisitAccordion({
   );
 }
 
-function TaskStep({ step, task }: { step: number; task: AnonymousTask }) {
+function TaskStep({
+  step,
+  task,
+  token
+}: {
+  step: number;
+  task: AnonymousTask;
+  token: string;
+}) {
   const title = parseTaskTitle(task.title);
+  const [status, setStatus] = useState<
+    "completed" | "note" | "exception"
+  >(task.submission?.status ?? "completed");
+  const [note, setNote] = useState(task.submission?.note ?? "");
+  const [submission, setSubmission] = useState(task.submission);
+  const [message, setMessage] = useState<string | null>(
+    task.submission ? "这项任务已提交。" : null
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError(null);
+    setMessage(null);
+
+    const formData = new FormData(event.currentTarget);
+    formData.set("token", token);
+    formData.set("submissionRef", task.submissionRef);
+
+    const result = await submitAnonymousCareTaskAction(formData);
+
+    setPending(false);
+
+    if (!result.ok) {
+      setError(result.error.message);
+      return;
+    }
+
+    setSubmission({
+      abnormal: result.data.abnormal,
+      note: result.data.note,
+      status: result.data.status,
+      submittedAt: result.data.submittedAt
+    });
+    setStatus(result.data.status);
+    setNote(result.data.note ?? "");
+    setMessage(result.data.message);
+  }
 
   return (
     <li className="grid grid-cols-[2rem_minmax(0,1fr)] gap-3 rounded-xl bg-white p-3 ring-1 ring-[#e2e6ee]">
@@ -136,9 +192,109 @@ function TaskStep({ step, task }: { step: number; task: AnonymousTask }) {
             {task.instructions}
           </p>
         ) : null}
+        {submission ? (
+          <div className="mt-4 rounded-xl bg-[#f2fbf8] px-3 py-3 ring-1 ring-[#d9eee7]">
+            <p className="text-sm font-semibold text-[#07847f]">
+              {formatSubmissionStatus(submission.status)}
+            </p>
+            {submission.note ? (
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[#101a32]">
+                {submission.note}
+              </p>
+            ) : null}
+            <p className="mt-2 text-xs font-semibold text-[#75839a]">
+              {message ?? "已提交给主人查看"}
+            </p>
+          </div>
+        ) : null}
+        {!submission ? (
+        <form className="mt-4 grid gap-3 border-t border-[#e2e6ee] pt-3" onSubmit={onSubmit}>
+          <input name="submissionRef" type="hidden" value={task.submissionRef} />
+          <input name="token" type="hidden" value={token} />
+          <fieldset className="grid gap-2">
+            <legend className="text-sm font-semibold text-[#526177]">
+              提交结果
+            </legend>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {[
+                { label: "已完成", value: "completed" },
+                { label: "补充备注", value: "note" },
+                { label: "有异常", value: "exception" }
+              ].map((option) => (
+                <label
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d9e0ea] bg-white px-3 text-sm font-semibold text-[#526177] transition has-[:checked]:border-[#07847f] has-[:checked]:bg-[#e6f7f2] has-[:checked]:text-[#07847f]"
+                  key={option.value}
+                >
+                  <input
+                    checked={status === option.value}
+                    className="sr-only"
+                    name="status"
+                    onChange={() =>
+                      setStatus(option.value as "completed" | "note" | "exception")
+                    }
+                    type="radio"
+                    value={option.value}
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          {status !== "completed" ? (
+            <label className="grid gap-2">
+              <span className="text-sm font-semibold text-[#526177]">
+                {status === "exception" ? "异常说明（必填）" : "备注（必填）"}
+              </span>
+              <textarea
+                className="min-h-24 w-full resize-y rounded-xl border border-[#d9e0ea] bg-white px-3 py-3 text-base font-semibold leading-7 text-[#101a32] outline-none transition placeholder:text-[#98a4b5] focus:border-[#07847f] focus:ring-4 focus:ring-[#07847f]/10"
+                maxLength={2000}
+                name="note"
+                onChange={(event) => setNote(event.currentTarget.value)}
+                placeholder={
+                  status === "note"
+                    ? "请写下需要主人知道的补充信息"
+                    : "请写清异常情况和已采取的处理"
+                }
+                value={note}
+              />
+            </label>
+          ) : null}
+          {error ? (
+            <p className="rounded-xl bg-[#fff4f2] px-3 py-2 text-sm font-semibold leading-6 text-[#b7352c]">
+              {error}
+            </p>
+          ) : null}
+          {message || submission ? (
+            <p className="rounded-xl bg-[#f2fbf8] px-3 py-2 text-sm font-semibold leading-6 text-[#07847f]">
+              {message ?? "这项任务已提交。"}
+            </p>
+          ) : null}
+          <button
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#07847f] bg-[#07847f] px-5 text-base font-semibold text-white shadow-sm shadow-teal-900/20 transition hover:bg-[#06706c] disabled:cursor-not-allowed disabled:border-[#d9e0ea] disabled:bg-[#f2f4f7] disabled:text-[#98a4b5] disabled:shadow-none"
+            disabled={pending}
+            type="submit"
+          >
+            {pending ? "提交中..." : "提交这项结果"}
+          </button>
+        </form>
+        ) : null}
       </div>
     </li>
   );
+}
+
+function formatSubmissionStatus(
+  status: AnonymousCareTaskSubmissionView["status"]
+) {
+  if (status === "exception") {
+    return "已提交异常";
+  }
+
+  if (status === "note") {
+    return "已提交备注";
+  }
+
+  return "已提交完成";
 }
 
 function formatFrequency(value: string | null) {

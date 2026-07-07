@@ -73,6 +73,8 @@ export {
 } from "./product-service/plans";
 
 export type {
+  CarePlanShareLinkMutation,
+  CarePlanShareLinkState,
   ShareTokenActorContext,
   ShareTokenResourceType,
   ShareTokenRow,
@@ -80,11 +82,14 @@ export type {
 } from "./product-service/share-tokens";
 
 export {
+  createCarePlanShareLink,
   createShareTokenExpiry,
   createShareTokenSecret,
+  getCarePlanShareLinkState,
   hashShareTokenSecret,
   isShareTokenHashMatch,
   resolveCarePlanShareToken,
+  revokeCarePlanShareLink,
   shareTokenResourceType,
   shareTokenScope,
   shareTokenTtlDays

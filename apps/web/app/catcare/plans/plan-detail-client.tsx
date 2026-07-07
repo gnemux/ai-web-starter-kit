@@ -14,10 +14,17 @@ import {
 } from "../owner-flow-components";
 import {
   closeCatCarePlanLocalAction,
+  createCarePlanShareLinkLocalAction,
   publishCatCarePlanLocalAction,
+  revokeCarePlanShareLinkLocalAction,
   updateCatCarePlanTasksLocalAction
 } from "../actions";
-import type { CatCarePlan, CatCareTask } from "@/lib/catcare/product-service";
+import type {
+  CarePlanShareLinkMutation,
+  CarePlanShareLinkState,
+  CatCarePlan,
+  CatCareTask
+} from "@/lib/catcare/product-service";
 import { PlanScheduleView } from "./plan-schedule-view";
 import { PlanConfirmationSummary } from "./plan-confirmation-summary";
 import { PlanTaskSaveForm } from "./plan-task-save-form-client";
@@ -26,22 +33,32 @@ type PlanMutationResult =
   | { data: CatCarePlan; ok: true }
   | { error: { message: string }; ok: false };
 
+type ShareLinkMutationResult =
+  | { data: CarePlanShareLinkMutation; ok: true }
+  | { error: { message: string }; ok: false };
+
 export function PlanDetailClient({
   itemOptions = [],
   justClosed,
   justPublished,
   justSaved,
-  plan
+  plan,
+  shareLinkState
 }: {
   itemOptions?: string[];
   justClosed: boolean;
   justPublished: boolean;
   justSaved: boolean;
   plan: CatCarePlan;
+  shareLinkState: CarePlanShareLinkState;
 }) {
   const [currentPlan, setCurrentPlan] = useState(plan);
+  const [currentShareLink, setCurrentShareLink] = useState(shareLinkState);
+  const [copyableShareUrl, setCopyableShareUrl] = useState<string | null>(null);
   const toast = useCatCareToast();
-  const [pendingAction, setPendingAction] = useState<"close" | "publish" | null>(null);
+  const [pendingAction, setPendingAction] = useState<
+    "close" | "publish" | "share" | "revoke-share" | null
+  >(null);
   const status = getPlanStatusMeta(currentPlan.status);
   const canClose = currentPlan.status !== "closed";
   const displayTitle = formatPlanDisplayTitle(currentPlan);
@@ -79,6 +96,60 @@ export function PlanDetailClient({
         ? "计划已发布。每日任务已按到访时间排好；照看者分享链接将在后续阶段接入。"
         : "计划已关闭，历史清单和照护结果已保留。"
     );
+  }
+
+  async function runShareAction(
+    formData: FormData,
+    action: (formData: FormData) => Promise<ShareLinkMutationResult>,
+    actionName: "share" | "revoke-share"
+  ) {
+    setPendingAction(actionName);
+
+    const result = await action(formData);
+
+    setPendingAction(null);
+
+    if (!result.ok) {
+      toast.showError(result.error.message);
+      return;
+    }
+
+    setCurrentShareLink({
+      expiresAt: result.data.expiresAt,
+      generatedAt: result.data.generatedAt,
+      revokedAt: result.data.revokedAt,
+      status: result.data.status
+    });
+
+    if (result.data.token) {
+      const nextUrl = `${window.location.origin}/s/${result.data.token}`;
+      setCopyableShareUrl(nextUrl);
+      const copied = await copyShareUrl(nextUrl);
+
+      if (!copied) {
+        toast.showSuccess("分享链接已生成，请手动复制输入框中的链接。");
+      }
+
+      return;
+    }
+
+    setCopyableShareUrl(null);
+    toast.showSuccess("分享链接已撤销，照看者将无法继续访问。");
+  }
+
+  async function copyShareUrl(url = copyableShareUrl) {
+    if (!url) {
+      return false;
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.showSuccess("分享链接已复制。");
+      return true;
+    } catch {
+      toast.showError("浏览器未允许自动复制，请手动复制输入框中的链接。");
+      return false;
+    }
   }
 
   return (
@@ -214,11 +285,107 @@ export function PlanDetailClient({
             <h2 className="text-xl font-semibold text-[#101a32]">
               分享入口
             </h2>
-            <p className="mt-3 text-sm leading-6 text-[#526177]">
-              真实照看者分享页和匿名提交将在 ACCESS 阶段接入；本阶段只保留主人侧确认与结果查看。
-            </p>
+            <ShareLinkPanel
+              copyableShareUrl={copyableShareUrl}
+              isPending={pendingAction === "share" || pendingAction === "revoke-share"}
+              onCopy={() => copyShareUrl()}
+              onRunShareAction={runShareAction}
+              plan={currentPlan}
+              shareLink={currentShareLink}
+            />
           </CatCarePanel>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+function ShareLinkPanel({
+  copyableShareUrl,
+  isPending,
+  onCopy,
+  onRunShareAction,
+  plan,
+  shareLink
+}: {
+  copyableShareUrl: string | null;
+  isPending: boolean;
+  onCopy: () => void;
+  onRunShareAction: (
+    formData: FormData,
+    action: (formData: FormData) => Promise<ShareLinkMutationResult>,
+    actionName: "share" | "revoke-share"
+  ) => Promise<void>;
+  plan: CatCarePlan;
+  shareLink: CarePlanShareLinkState;
+}) {
+  const status = getShareLinkStatusMeta(shareLink.status);
+  const canGenerate = plan.status === "published";
+  const canRevoke = shareLink.status === "active";
+
+  return (
+    <div className="mt-4 grid gap-4">
+      <div className="rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}>
+            {status.label}
+          </span>
+          {shareLink.expiresAt ? (
+            <span className="text-xs font-semibold text-[#526177]">
+              过期：{formatShareDate(shareLink.expiresAt)}
+            </span>
+          ) : null}
+        </div>
+        <p className="mt-3 text-sm leading-6 text-[#526177]">
+          {getShareLinkDescription(plan.status, shareLink.status)}
+        </p>
+      </div>
+
+      {copyableShareUrl ? (
+        <div className="grid gap-2">
+          <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[#526177]">
+            本次生成的链接
+          </label>
+          <input
+            className="w-full rounded-xl border border-[#d9e0ea] bg-white px-3 py-3 text-sm font-semibold text-[#101a32]"
+            readOnly
+            value={copyableShareUrl}
+          />
+          <CatCareButton onClick={onCopy} type="button" variant="ghost">
+            复制链接
+          </CatCareButton>
+        </div>
+      ) : null}
+
+      <div className="grid gap-3">
+        {canGenerate ? (
+          <form
+            action={(formData) =>
+              onRunShareAction(formData, createCarePlanShareLinkLocalAction, "share")
+            }
+            className={isPending ? "pointer-events-none opacity-70" : ""}
+          >
+            <input name="planId" type="hidden" value={plan.id} />
+            <CatCareButton type="submit">
+              <CatCareSaveIcon />
+              {shareLink.status === "active" ? "重新生成链接" : "生成分享链接"}
+            </CatCareButton>
+          </form>
+        ) : null}
+        {canRevoke ? (
+          <form
+            action={(formData) =>
+              onRunShareAction(formData, revokeCarePlanShareLinkLocalAction, "revoke-share")
+            }
+            className={isPending ? "pointer-events-none opacity-70" : ""}
+          >
+            <input name="planId" type="hidden" value={plan.id} />
+            <CatCareButton type="submit" variant="ghost">
+              <CatCareXIcon />
+              撤销链接
+            </CatCareButton>
+          </form>
+        ) : null}
       </div>
     </div>
   );
@@ -267,6 +434,56 @@ function getPlanStatusMeta(status: CatCarePlan["status"]) {
   }
 
   return { className: "bg-[#fff8e6] text-[#8a5a00]", label: "待确认" };
+}
+
+function getShareLinkStatusMeta(status: CarePlanShareLinkState["status"]) {
+  if (status === "active") {
+    return { className: "bg-[#e6f7f2] text-[#07847f]", label: "已生成" };
+  }
+
+  if (status === "expired") {
+    return { className: "bg-[#fff8e6] text-[#8a5a00]", label: "已过期" };
+  }
+
+  if (status === "revoked") {
+    return { className: "bg-[#f2f4f7] text-[#526177]", label: "已撤销" };
+  }
+
+  return { className: "bg-[#eef4ff] text-[#315a9f]", label: "未生成" };
+}
+
+function getShareLinkDescription(
+  planStatus: CatCarePlan["status"],
+  shareStatus: CarePlanShareLinkState["status"]
+) {
+  if (planStatus === "draft") {
+    return "计划发布后才能生成私密分享链接。";
+  }
+
+  if (planStatus === "closed") {
+    return "计划已关闭，不能生成新的分享链接；已撤销链接不会再允许照看者访问。";
+  }
+
+  if (shareStatus === "active") {
+    return "链接已可分享。重新生成会撤销旧链接，并只显示一次新的可复制链接。";
+  }
+
+  if (shareStatus === "revoked") {
+    return "链接已撤销，照看者无法继续访问。可以重新生成一个新链接。";
+  }
+
+  if (shareStatus === "expired") {
+    return "链接已过期，照看者无法继续访问。可以重新生成一个新链接。";
+  }
+
+  return "生成后会得到一次性可复制链接，系统只保存 token hash。";
+}
+
+function formatShareDate(value: string) {
+  return new Intl.DateTimeFormat("zh-CN", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(new Date(value));
 }
 
 function TaskCard({

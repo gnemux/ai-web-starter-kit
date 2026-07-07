@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { closeCatCarePlan } from "@/lib/catcare/product-service";
 import { copyCatCareRoutineFromFormData } from "@/lib/catcare/product-service";
+import { createCarePlanShareLink } from "@/lib/catcare/product-service";
 import { createCatCareCatFromFormData } from "@/lib/catcare/product-service";
 import { createCatCareEventFromFormData } from "@/lib/catcare/product-service";
 import { createCatCareItemFromFormData } from "@/lib/catcare/product-service";
@@ -13,6 +14,7 @@ import { deleteCatCareCatFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCareLibraryItemFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCarePlan } from "@/lib/catcare/product-service";
 import { publishCatCarePlan } from "@/lib/catcare/product-service";
+import { revokeCarePlanShareLink } from "@/lib/catcare/product-service";
 import { saveCatCareRoutineFromFormData } from "@/lib/catcare/product-service";
 import { unassignCatCareItemFromFormData } from "@/lib/catcare/product-service";
 import { updateCatCareCatFromFormData } from "@/lib/catcare/product-service";
@@ -287,4 +289,22 @@ export async function deleteCatCarePlanLocalAction(formData: FormData) {
   const planId = String(formData.get("planId") ?? "").trim();
 
   return deleteCatCarePlan(planId);
+}
+
+export async function createCarePlanShareLinkLocalAction(formData: FormData) {
+  const planId = String(formData.get("planId") ?? "").trim();
+  const result = await createCarePlanShareLink(planId);
+
+  revalidatePath(`/catcare/plans/${planId}`);
+
+  return result;
+}
+
+export async function revokeCarePlanShareLinkLocalAction(formData: FormData) {
+  const planId = String(formData.get("planId") ?? "").trim();
+  const result = await revokeCarePlanShareLink(planId);
+
+  revalidatePath(`/catcare/plans/${planId}`);
+
+  return result;
 }

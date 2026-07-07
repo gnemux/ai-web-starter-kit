@@ -325,9 +325,7 @@ function ShareLinkPanel({
   const canGenerate = plan.status === "published";
   const canRevoke = shareLink.status === "active";
   const hasCopyableShareUrl = Boolean(copyableShareUrl);
-  const hasManagementPair = canGenerate && canRevoke;
-  const shareActionVariant =
-    shareLink.status === "active" && hasCopyableShareUrl ? "secondary" : "primary";
+  const isActiveShareLink = shareLink.status === "active";
 
   return (
     <div className="mt-4 grid gap-4">
@@ -356,14 +354,36 @@ function ShareLinkPanel({
           <div className="rounded-xl border border-[#d9e0ea] bg-white px-3 py-3 text-sm font-semibold text-[#101a32]">
             <span className="block truncate">{formatShareUrlPreview(copyableShareUrl)}</span>
           </div>
-          <CatCareButton fullWidth onClick={onCopy} type="button">
-            <CatCareCopyIcon />
-            复制链接
-          </CatCareButton>
         </div>
       ) : null}
 
-      <div className={`grid gap-3 [&_button]:w-full ${hasManagementPair ? "sm:grid-cols-2" : ""}`}>
+      <div className="grid w-full gap-3 [&_form]:w-full [&_button]:w-full">
+        {isActiveShareLink ? (
+          hasCopyableShareUrl ? (
+            <CatCareButton fullWidth onClick={onCopy} type="button">
+              <CatCareCopyIcon />
+              分享链接
+            </CatCareButton>
+          ) : (
+            <div className="grid gap-2">
+              <span
+                aria-disabled="true"
+                className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl border border-[#d9e0ea] bg-[#f7f9fb] px-5 text-base font-semibold leading-none text-[#98a4b5] [&>[data-catcare-action-icon]]:h-5 [&>[data-catcare-action-icon]]:w-5"
+              >
+                <CatCareLinkIcon />
+                分享链接
+              </span>
+              <span className="text-xs font-semibold leading-5 text-[#66758c]">
+                完整链接只在生成后显示一次；需要再次分享时请重新生成。
+              </span>
+            </div>
+          )
+        ) : null}
+        <div
+          className={`grid gap-3 ${
+            isActiveShareLink && canGenerate && canRevoke ? "grid-cols-2" : "sm:max-w-[18rem]"
+          }`}
+        >
         {canGenerate ? (
           <form
             action={(formData) =>
@@ -372,13 +392,13 @@ function ShareLinkPanel({
             className={isPending ? "pointer-events-none opacity-70" : ""}
           >
             <input name="planId" type="hidden" value={plan.id} />
-            <CatCareButton fullWidth type="submit" variant={shareActionVariant}>
+            <CatCareButton
+              fullWidth
+              type="submit"
+              variant={isActiveShareLink && hasCopyableShareUrl ? "secondary" : "primary"}
+            >
               <CatCareLinkIcon />
-              {shareLink.status === "active" && hasCopyableShareUrl
-                ? "重新生成"
-                : shareLink.status === "active"
-                  ? "重新生成链接"
-                  : "生成分享链接"}
+              {isActiveShareLink ? "重新生成" : "生成分享链接"}
             </CatCareButton>
           </form>
         ) : null}
@@ -390,12 +410,13 @@ function ShareLinkPanel({
             className={isPending ? "pointer-events-none opacity-70" : ""}
           >
             <input name="planId" type="hidden" value={plan.id} />
-            <CatCareButton fullWidth type="submit" variant="danger">
+            <CatCareButton fullWidth type="submit" variant="ghost">
               <CatCareXIcon />
               撤销链接
             </CatCareButton>
           </form>
         ) : null}
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { CatCareXIcon } from "../catcare-action-icons";
+import { getCatCareItemTypeLabel } from "../catcare-item-types";
 import { unassignCatCareItemLocalAction } from "../actions";
 import type {
   CatCareCatSummary,
@@ -10,17 +11,6 @@ import type {
   CatCareItemTag,
   CatCareLibraryItem
 } from "@/lib/catcare/product-service";
-
-const itemTypes = [
-  ["dry_food", "主粮"],
-  ["wet_food", "罐头/湿粮"],
-  ["treat", "零食/零食罐"],
-  ["supplement", "营养补充品"],
-  ["medicine", "药品"],
-  ["litter", "猫砂"],
-  ["supply", "器具/设备"],
-  ["other", "其它"]
-] as const;
 
 export function ItemUsageTabsClient({
   cats,
@@ -144,8 +134,7 @@ function ItemCard({
   onUnassigned: (id: string) => void;
 }) {
   const [pending, setPending] = useState(false);
-  const typeLabel =
-    itemTypes.find(([value]) => value === item.itemType)?.[1] ?? "用品";
+  const typeLabel = getCatCareItemTypeLabel(item.itemType);
 
   return (
     <article className="rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">

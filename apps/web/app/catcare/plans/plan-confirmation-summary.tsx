@@ -1,5 +1,6 @@
 import type { CatCarePlan } from "@/lib/catcare/product-service";
 
+import { formatPlanCatNames } from "./plan-cat-names";
 import { buildPlanSchedule, type PlanScheduleEntry } from "./plan-schedule";
 import { formatTaskAction, isAttentionEntry } from "./plan-task-display";
 
@@ -35,7 +36,7 @@ export function PlanConfirmationSummary({
           </p>
         </div>
         <span className="shrink-0 rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
-          {dayCount ? `${dayCount} 天` : "未设日期"} / {plan.tasks.length} 项
+          {dayCount ? `${dayCount} 天` : "未设日期"}，{plan.tasks.length} 项
         </span>
       </div>
 
@@ -51,7 +52,7 @@ export function PlanConfirmationSummary({
         />
         <PlanMetric
           label="任务构成"
-          value={`${requiredCount} 必做 / ${optionalCount} 可选`}
+          value={`${requiredCount} 项必做，${optionalCount} 项可选`}
         />
       </div>
 
@@ -151,19 +152,4 @@ function getPlanDayCount(plan: CatCarePlan) {
   }
 
   return Math.floor((end - start) / 86_400_000) + 1;
-}
-
-function formatPlanCatNames(plan: CatCarePlan) {
-  const summary = plan.aiInputSummary;
-
-  if (
-    summary &&
-    typeof summary === "object" &&
-    !Array.isArray(summary) &&
-    Array.isArray(summary.cat_names)
-  ) {
-    return summary.cat_names.filter((name) => typeof name === "string").join("、");
-  }
-
-  return "当前猫咪";
 }

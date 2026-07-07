@@ -274,7 +274,8 @@ GNE-231 PRODUCT
 ├── GNE-288 PRODUCT-04 [ARCH] CatCare 服务层拆分与局部更新边界收敛
 ├── GNE-253 PRODUCT-05 [APP/UX] 主人侧计划确认、结果查看和状态变化
 ├── GNE-254 PRODUCT-06 Supabase RLS 验收 SQL 与 seed 数据
-└── GNE-255 PRODUCT-07 基础事件和页面级验收
+├── GNE-255 PRODUCT-07 基础事件和页面级验收
+└── GNE-290 PRODUCT Polish: 按 V6 原型 06-11 顺序恢复 CatCare 产品链路质感
 
 GNE-278 implementation note: PRODUCT execution now runs through PRODUCT-00 as
 the page-map and prototype gate before more GNE-251/GNE-252 implementation is
@@ -474,6 +475,53 @@ were deleted after checking valid/expired/revoked/invalid states, plus mobile
 browser QA at 390px valid and 375px invalid states. GNE-258 owns anonymous
 submit; GNE-259 owns owner/anonymous RLS acceptance; GNE-260 owns security
 negative and audit checks.
+
+GNE-258 boundary correction: this ACCESS child should be accepted only as the
+anonymous submit technical foundation when verified: share-token based submit,
+real `care_submissions`, field whitelist, date/visit validation,
+duplicate/update handling, and owner result visibility. It must not claim final
+PRODUCT-quality completion of the `/s/[token]` sitter experience. The
+prototype-chain polish for screens 06 through 11 has been reopened as
+`GNE-290` under `GNE-231`, and must run from `06-food-care-items.png` through
+`11-sitter-checklist.png` in order. GNE-258 non-goals remain: no live
+AI/payment/entitlement, no anonymous photo upload or Storage/RLS image flow, no
+anonymous paid-state display, and no CatCare business objects in `packages/*`.
+
+GNE-290 planning note: this PRODUCT polish issue is the corrective pass for
+the accumulated drift from the V6 prototype chain across Food & Care Items,
+Events, Scenario & AI Inputs, AI Generate & Review, Private Share, and Sitter
+Checklist. It must preserve the real ACCESS/backend details already added for
+share tokens and submissions, while restoring page structure, visual hierarchy,
+icon/button quality, mobile operation flow, and three-party review evidence
+(architecture boundary, UI/icon quality, and product interaction).
+
+GNE-290 progress note 2026-07-07: current local work has restored the visible
+direction for 06-11 without claiming Done before the PR/merge gate. 06/07/08/
+09/10/11 now have prototype markers or framing in the app, anonymous task flow
+has better family-vs-cat scope clarity and mobile step behavior, and
+verification passed typecheck, lint, test, build, package-boundary,
+release-boundary, and diff checks. Final visual QA captured authenticated owner
+screenshots for 06-10 and active-token mobile screenshots for 11 at
+`/private/tmp/gne290-final-*`; all captured pages stayed within viewport width.
+
+GNE-290 product-quality rework note 2026-07-07: later PM/UI feedback supersedes
+the earlier above-threshold review score. Raw prototype PNGs and bare
+engineering-like line icons are no longer acceptable as product-object Done
+evidence. The current local pass uses product-local colored semantic glyph
+badges for item categories, routine/task cards, event timeline rows, plan task
+lines, and anonymous sitter task cards. It also moves plan history out of the AI
+input summary column, makes the published plan page a care-plan overview, and
+improves anonymous task cards around category visuals and family/cat scope
+chips. Post-rework local QA has authenticated owner screenshots for prototype
+screens 06-10 and valid active-token mobile screenshots for 11, with no
+horizontal overflow at `1440px` desktop and `390px` mobile. A 3003
+style-looking failure was traced to stale/corrupted Next dev `.next` output, not
+a deliberate UI regression; after clearing `.next`, sandbox-external curl
+verified `/login 200 OK` and CSS `200 OK`. Final cleanup deleted the isolated
+online QA owner/token rows (`share_tokens 1`, `care_tasks 7`, `care_plans 1`,
+`care_events 3`, `cat_item_assignments 12`, `owner_item_library 6`, `cats 2`,
+`user_profiles 1`, `auth_user 1`) and verified inspected owner-scoped table
+counts as `0` before PR/merge closure.
 
 GNE-233 CAPABILITY
 ├── GNE-261 CAP-01 业务动作到能力映射表

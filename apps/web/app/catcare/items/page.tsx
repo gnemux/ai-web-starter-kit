@@ -3,6 +3,7 @@ import { ErrorState } from "@xwlc/ui";
 import {
   CatCarePlusCircleIcon
 } from "../catcare-action-icons";
+import { normalizeCatCareItemType } from "../catcare-item-types";
 import {
   CatCareButton,
   CatCarePanel
@@ -17,17 +18,6 @@ type ItemsSearchParams = Promise<{
   saved?: string;
 }>;
 
-const itemTypes = [
-  ["dry_food", "主粮", "Dry food"],
-  ["wet_food", "罐头/湿粮", "Wet food"],
-  ["treat", "零食/零食罐", "Treat"],
-  ["supplement", "营养补充品", "Supplement"],
-  ["medicine", "药品", "Medicine"],
-  ["litter", "猫砂", "Litter"],
-  ["supply", "器具/设备", "Supply"],
-  ["other", "其它", "Other"]
-] as const;
-
 export default async function CatCareItemsPage({
   searchParams
 }: {
@@ -35,7 +25,7 @@ export default async function CatCareItemsPage({
 }) {
   const params = await searchParams;
   const result = await getCatCareItemsWorkspace(params.cat_id);
-  const initialItemType = normalizeItemType(params.item_type);
+  const initialItemType = normalizeCatCareItemType(params.item_type);
 
   return (
     <>
@@ -78,10 +68,4 @@ export default async function CatCareItemsPage({
       )}
     </>
   );
-}
-
-function normalizeItemType(value: string | undefined) {
-  return itemTypes.some(([itemType]) => itemType === value)
-    ? (value as (typeof itemTypes)[number][0])
-    : "dry_food";
 }

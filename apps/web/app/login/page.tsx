@@ -41,9 +41,9 @@ export default async function LoginPage({
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#fbf8f3] px-3 py-3 text-slate-950 sm:px-5 sm:py-5">
-      <CatCareProductFrame className="grid min-h-[calc(100vh-1.5rem)] sm:min-h-[calc(100vh-2.5rem)] lg:grid-cols-[minmax(24rem,0.94fr)_minmax(0,1.06fr)]">
-        <section className="flex flex-col bg-white px-6 py-8 sm:px-10 lg:px-14">
-          <div className="flex items-center justify-between gap-4">
+      <CatCareProductFrame className="grid min-w-0 min-h-[calc(100vh-1.5rem)] sm:min-h-[calc(100vh-2.5rem)] lg:grid-cols-[minmax(24rem,0.94fr)_minmax(0,1.06fr)]">
+        <section className="min-w-0 flex flex-col bg-white px-6 py-8 sm:px-10 lg:px-14">
+          <div className="flex min-w-0 items-center justify-between gap-3 sm:gap-4">
             <CatCareBrand />
             <Button href="/" variant="secondary">
               {copy.common.backHome}

@@ -49,7 +49,7 @@ export default async function CatCareEventsPage({
           <CatCareToast
             message={
               params.saved === "1"
-                ? "事件已保存。需关注事件会进入照护计划的 mock 生成参考。"
+                ? "事件已保存。需关注事件会进入照护计划的生成参考。"
                 : null
             }
           />

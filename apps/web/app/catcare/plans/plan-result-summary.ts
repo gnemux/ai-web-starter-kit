@@ -8,6 +8,7 @@ import {
   getCategoryLabel,
   parseTaskTitle
 } from "./plan-task-display";
+import { getAnonymousCarePlanServiceDates } from "@/lib/catcare/product-service/anonymous-submission-policy";
 
 export type PlanResultEntry = {
   id: string;
@@ -15,6 +16,7 @@ export type PlanResultEntry = {
   createdAt: string | null;
   note: string | null;
   ownerLabel: string | null;
+  serviceDate: string | null;
   status: "attention" | "completed" | "pending";
   statusLabel: string;
   submittedByLabel: string;
@@ -36,7 +38,9 @@ export type PlanResultSummary = {
 
 export function buildPlanResultSummary(plan: CatCarePlan): PlanResultSummary {
   const tasks = plan.tasks.filter((task) => task.enabled);
-  const totalCount = tasks.length;
+  const totalCount =
+    tasks.length *
+    getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn).length;
 
   if (plan.submissions.length > 0) {
     return buildRealSubmissionSummary(plan, tasks, totalCount);
@@ -92,8 +96,8 @@ function buildRealSubmissionSummary(
   totalCount: number
 ): PlanResultSummary {
   const taskById = new Map(tasks.map((task) => [task.id, task]));
-  const latestByTaskId = new Map<string, CatCareSubmission>();
   const planLevelSubmissions: CatCareSubmission[] = [];
+  const taskSubmissions: CatCareSubmission[] = [];
 
   for (const submission of plan.submissions) {
     if (!submission.taskId) {
@@ -101,20 +105,18 @@ function buildRealSubmissionSummary(
       continue;
     }
 
-    if (!latestByTaskId.has(submission.taskId)) {
-      latestByTaskId.set(submission.taskId, submission);
-    }
+    taskSubmissions.push(submission);
   }
 
   const entries = [
-    ...Array.from(latestByTaskId.values()).map((submission) =>
+    ...taskSubmissions.map((submission) =>
       submissionToEntry(submission, taskById.get(submission.taskId ?? ""))
     ),
     ...planLevelSubmissions.map((submission) => submissionToEntry(submission, null))
   ];
   const attentionCount = entries.filter((entry) => entry.status === "attention").length;
   const completedCount = entries.filter((entry) => entry.status === "completed").length;
-  const pendingCount = Math.max(totalCount - latestByTaskId.size, 0);
+  const pendingCount = Math.max(totalCount - taskSubmissions.length, 0);
   const status =
     attentionCount > 0
       ? {
@@ -152,8 +154,7 @@ function submissionToEntry(
   const parsedTitle = task ? parseTaskTitle(task.title) : null;
   const isAttention =
     submission.abnormal ||
-    submission.status === "exception" ||
-    submission.status === "note";
+    submission.status === "exception";
 
   return {
     id: submission.id,
@@ -161,11 +162,24 @@ function submissionToEntry(
     createdAt: submission.createdAt,
     note: submission.note,
     ownerLabel: parsedTitle?.owner ?? null,
+    serviceDate: getServiceDateFromSubmission(submission),
     status: isAttention ? "attention" : "completed",
-    statusLabel: isAttention ? "需关注" : "已完成",
+    statusLabel: isAttention
+      ? "需关注"
+      : submission.note
+        ? "已完成 · 有备注"
+        : "已完成",
     submittedByLabel: submission.submittedByLabel,
     title: parsedTitle?.action ?? "整体反馈"
   };
+}
+
+function getServiceDateFromSubmission(submission: CatCareSubmission) {
+  const match = /^anonymous:[^:]+:(\d{4}-\d{2}-\d{2}):/.exec(
+    submission.idempotencyKey ?? ""
+  );
+
+  return match?.[1] ?? null;
 }
 
 function formatRealHeadline(

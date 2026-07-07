@@ -8,6 +8,7 @@ import {
   CatCareButton,
   CatCareField,
   CatCarePanel,
+  CatCareStepBar,
   catCareInputClass
 } from "../owner-flow-components";
 import { createCatCarePlanAction } from "../actions";
@@ -53,14 +54,22 @@ export default async function CatCarePlansPage({
         <div className="mx-auto grid w-full max-w-[1196px] gap-6">
           <div>
             <h1 className="text-3xl font-semibold text-[#101a32]">
-              创建出门照护计划
+              场景与智能输入
             </h1>
             <p className="mt-2 text-sm leading-6 text-[#526177]">
-              选择猫咪、出门场景和日期，系统会基于档案、习惯、用品和事件生成 mock 清单。
+              选择猫咪、出门场景和日期，系统会基于档案、习惯、用品和事件生成照护清单。
             </p>
           </div>
+          <CatCareStepBar
+            steps={[
+              { active: true, label: "选择场景" },
+              { label: "时间与频率" },
+              { label: "智能输入总结" },
+              { label: "生成清单" }
+            ]}
+          />
 
-          <div className="grid gap-5 lg:grid-cols-[25rem_minmax(0,1fr)]">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_25rem]">
             <CatCarePanel>
               <h2 className="text-2xl font-semibold text-[#101a32]">
                 生成清单
@@ -166,13 +175,50 @@ export default async function CatCarePlansPage({
               )}
             </CatCarePanel>
 
-            <CatCarePanel>
-              <PlansListClient
-                activePlans={activePlans}
-                historyPlans={historyPlans}
-              />
-            </CatCarePanel>
+            <aside className="grid content-start gap-5">
+              <CatCarePanel>
+                <h2 className="text-2xl font-semibold text-[#101a32]">
+                  智能输入总结
+                </h2>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
+                  生成会引用猫咪档案、喂养习惯、家庭用品、近 30 天事件和主人备注。
+                </p>
+                <img
+                  alt=""
+                  aria-hidden="true"
+                  className="mt-4 h-40 w-full rounded-2xl object-contain"
+                  src="/catcare/card-cat-free.png"
+                />
+                <div className="mt-4 grid gap-3">
+                  <AiInputRow label="猫咪档案" value={`${result.data.cats.length} 只猫咪`} />
+                  <AiInputRow label="喂养习惯" value="已设置日常习惯" />
+                  <AiInputRow label="食物用品" value="家庭用品库" />
+                  <AiInputRow label="近 30 天事件" value="事件记录会参与建议" />
+                  <AiInputRow label="主人备注" value="随本次计划提交" />
+                </div>
+              </CatCarePanel>
+            </aside>
           </div>
+
+          <CatCarePanel>
+            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold text-[#101a32]">
+                  已有计划
+                </h2>
+                <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
+                  生成新计划是主流程；进行中和历史计划放在这里统一查看。
+                </p>
+              </div>
+              <span className="w-fit rounded-full bg-[#f2fbf8] px-3 py-1 text-sm font-semibold text-[#07847f] ring-1 ring-[#d9eee7]">
+                {activePlans.length} 个进行中
+              </span>
+            </div>
+            <PlansListClient
+              activePlans={activePlans}
+              historyPlans={historyPlans}
+            />
+          </CatCarePanel>
         </div>
       )}
     </>
@@ -181,4 +227,13 @@ export default async function CatCarePlansPage({
 
 function isHistoryPlan(plan: CatCarePlan) {
   return plan.status === "closed" || plan.status === "reviewed";
+}
+
+function AiInputRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-[#e2e6ee] bg-[#fbfdfc] px-4 py-3">
+      <span className="text-sm font-semibold text-[#526177]">{label}</span>
+      <span className="text-sm font-semibold text-[#07847f]">{value}</span>
+    </div>
+  );
 }

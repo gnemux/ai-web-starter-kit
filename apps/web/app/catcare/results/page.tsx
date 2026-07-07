@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { CatCareCalendarIcon } from "../catcare-action-icons";
 import { CatCarePanel } from "../owner-flow-components";
+import { formatPlanCatNames } from "../plans/plan-cat-names";
 import {
   getCatCarePlanResultsWorkspace,
   type CatCarePlan
@@ -26,7 +27,7 @@ export default async function CatCareResultsPage() {
               结果查看
             </h1>
             <p className="mt-2 text-sm leading-6 text-[#526177]">
-              查看主人侧计划状态、照看者提交结果和后续 AI 复盘入口。live AI 不在本阶段范围。
+              查看主人侧计划状态、照看者提交结果和后续智能复盘入口。实时智能能力不在本阶段范围。
             </p>
           </div>
           <CatCarePanel>
@@ -77,7 +78,7 @@ function ResultPlanCard({ plan }: { plan: CatCarePlan }) {
       </div>
       <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#526177]">
         <CatCareCalendarIcon className="h-4 w-4 text-[#07847f]" />
-        查看结果与 AI 复盘入口
+        查看结果与智能复盘入口
       </span>
     </Link>
   );
@@ -135,19 +136,4 @@ function formatPlanDisplayTitle(plan: CatCarePlan) {
   return range && plan.title.endsWith(range)
     ? plan.title.slice(0, -range.length)
     : plan.title;
-}
-
-function formatPlanCatNames(plan: CatCarePlan) {
-  const summary = plan.aiInputSummary;
-
-  if (
-    summary &&
-    typeof summary === "object" &&
-    !Array.isArray(summary) &&
-    Array.isArray(summary.cat_names)
-  ) {
-    return summary.cat_names.filter((name) => typeof name === "string").join("、");
-  }
-
-  return "当前猫咪";
 }

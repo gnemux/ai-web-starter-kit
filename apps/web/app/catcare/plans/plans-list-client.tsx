@@ -12,6 +12,7 @@ import { CatCareToast, useCatCareToast } from "../catcare-toast";
 import { CatCareButton } from "../owner-flow-components";
 import type { CatCarePlan } from "@/lib/catcare/product-service";
 import { DeletePlanButton } from "./delete-plan-button";
+import { formatPlanCatNames } from "./plan-cat-names";
 
 export function PlansListClient({
   activePlans,
@@ -39,7 +40,7 @@ export function PlansListClient({
   return (
     <>
       <CatCareToast message={null} toast={toast.toast} />
-      <h2 className="text-2xl font-semibold text-[#101a32]">进行中计划</h2>
+      <h3 className="text-lg font-semibold text-[#101a32]">进行中计划</h3>
       {visibleActivePlans.length > 0 ? (
         <div className="mt-5 grid gap-3">
           {visibleActivePlans.map((plan) => (
@@ -57,9 +58,9 @@ export function PlansListClient({
       {visibleHistoryPlans.length > 0 ? (
         <div className="mt-8 border-t border-[#e2e6ee] pt-6">
           <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-semibold text-[#101a32]">
+            <h3 className="text-lg font-semibold text-[#101a32]">
               历史计划
-            </h2>
+            </h3>
             <p className="text-sm font-semibold leading-6 text-[#526177]">
               已执行过的计划保留结果；未执行的草稿或已关闭计划可删除，避免测试计划堆积。
             </p>
@@ -197,19 +198,4 @@ function formatPlanDisplayTitle(plan: CatCarePlan) {
   return range && plan.title.endsWith(range)
     ? plan.title.slice(0, -range.length)
     : plan.title;
-}
-
-function formatPlanCatNames(plan: CatCarePlan) {
-  const summary = plan.aiInputSummary;
-
-  if (
-    summary &&
-    typeof summary === "object" &&
-    !Array.isArray(summary) &&
-    Array.isArray(summary.cat_names)
-  ) {
-    return summary.cat_names.filter((name) => typeof name === "string").join("、");
-  }
-
-  return "当前猫咪";
 }

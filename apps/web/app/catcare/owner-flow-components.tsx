@@ -7,10 +7,10 @@ export function CatCareStepBar({
   steps: Array<{ label: string; active?: boolean }>;
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-3xl items-center justify-center gap-6 py-3">
+    <div className="mx-auto flex w-full max-w-full items-center justify-start gap-3 overflow-x-auto py-3 sm:gap-6 xl:justify-center">
       {steps.map((step, index) => (
         <div className="flex items-center gap-6" key={step.label}>
-          {index > 0 ? <span className="h-px w-28 bg-[#b8c1cf]" /> : null}
+          {index > 0 ? <span className="h-px w-10 bg-[#b8c1cf] sm:w-28" /> : null}
           <div className="flex items-center gap-4">
             <span
               className={`flex h-10 w-10 items-center justify-center rounded-full text-base font-semibold ${
@@ -22,7 +22,7 @@ export function CatCareStepBar({
               {index + 1}
             </span>
             <span
-              className={`text-base font-semibold ${
+              className={`whitespace-nowrap text-base font-semibold ${
                 step.active ? "text-[#07847f]" : "text-[#263a59]"
               }`}
             >

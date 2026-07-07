@@ -12,6 +12,15 @@ import {
 } from "../../supabase/server";
 import type { Database } from "../../supabase/database.types";
 import {
+  getAnonymousCarePlanServiceDates,
+  getAnonymousCareTodayIsoDate,
+  isAnonymousCareServiceDate,
+  isAnonymousCareServiceDateInPlan,
+  normalizeAnonymousCareSubmissionNote,
+  parseAnonymousCareSubmissionStatus,
+  requiresAnonymousCareSubmissionNote
+} from "./anonymous-submission-policy";
+import {
   clearCatCarePlanDetailCache,
   clearCatCarePlanSummaryCache,
   clearCatCareWorkspaceStatsCache,
@@ -50,6 +59,7 @@ export type CarePlanShareLinkMutation = CarePlanShareLinkState & {
 export type AnonymousCareTaskSubmissionView = {
   abnormal: boolean;
   note: string | null;
+  serviceDate: string | null;
   status: Database["public"]["Tables"]["care_submissions"]["Row"]["status"];
   submittedAt: string;
 };
@@ -59,7 +69,7 @@ export type AnonymousCareTaskView = {
   frequency: string | null;
   instructions: string | null;
   required: boolean;
-  submission: AnonymousCareTaskSubmissionView | null;
+  submissionsBySlot: Record<string, AnonymousCareTaskSubmissionView>;
   submissionRef: string;
   sortOrder: number;
   timeHint: string | null;
@@ -381,18 +391,28 @@ export async function getAnonymousCarePlanView(
   }
 
   const plan = mapPlan(planResult.data);
-  const submissionByTaskId = new Map(
+  const submissionBySlotAndTaskId = new Map(
     (submissionsResult.data ?? [])
-      .filter((submission) => submission.task_id)
-      .map((submission) => [
-        submission.task_id ?? "",
-        {
-          abnormal: submission.abnormal,
-          note: submission.note,
-          status: submission.status,
-          submittedAt: submission.created_at
-        }
-      ])
+      .map((submission) => {
+        const slot = parseAnonymousSubmissionSlotFromKey(
+          tokenResult.data.tokenId,
+          submission.idempotency_key
+        );
+
+        return submission.task_id && slot
+          ? [
+              `${slot.key}:${submission.task_id}`,
+              {
+                abnormal: submission.abnormal,
+                note: submission.note,
+                serviceDate: slot.serviceDate,
+                status: submission.status,
+                submittedAt: submission.created_at
+              }
+            ] as const
+          : null;
+      })
+      .filter((submission) => submission !== null)
   );
   const tasks = (tasksResult.data ?? [])
     .map(mapTask)
@@ -402,7 +422,22 @@ export async function getAnonymousCarePlanView(
       frequency: task.frequency,
       instructions: task.instructions,
       required: task.required,
-      submission: submissionByTaskId.get(task.id) ?? null,
+      submissionsBySlot: Object.fromEntries(
+        getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn).flatMap(
+          (serviceDate) =>
+            getAnonymousTaskVisitTimes(task).flatMap((visitTime) => {
+              const slotKey = createAnonymousSubmissionSlotKey(
+                serviceDate,
+                visitTime
+              );
+              const submission = submissionBySlotAndTaskId.get(
+                `${slotKey}:${task.id}`
+              );
+
+              return submission ? [[slotKey, submission]] : [];
+            })
+        )
+      ),
       submissionRef: createAnonymousTaskSubmissionRef(
         tokenResult.data.tokenId,
         task.id
@@ -430,13 +465,27 @@ export async function submitAnonymousCareSubmissionFromFormData(
   formData: FormData
 ): Promise<ServiceResult<AnonymousCareSubmissionMutation>> {
   const secret = String(formData.get("token") ?? "").trim();
+  const serviceDate = String(formData.get("serviceDate") ?? "").trim();
   const submissionRef = String(formData.get("submissionRef") ?? "").trim();
+  const visitTime = String(formData.get("visitTime") ?? "").trim();
   const statusResult = parseAnonymousSubmissionStatus(formData.get("status"));
   const noteResult = parseAnonymousSubmissionNote(formData.get("note"));
+
+  if (!isAnonymousCareServiceDate(serviceDate)) {
+    return serviceError("validation_error", "请选择要提交的照护日期。", {
+      serviceDate: "required"
+    });
+  }
 
   if (!submissionRef) {
     return serviceError("validation_error", "请选择要提交的照护任务。", {
       submissionRef: "required"
+    });
+  }
+
+  if (!isAnonymousVisitTime(visitTime)) {
+    return serviceError("validation_error", "请选择要提交的到访时间。", {
+      visitTime: "required"
     });
   }
 
@@ -451,7 +500,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
   const status = statusResult.data;
   const note = noteResult.data;
 
-  if ((status === "note" || status === "exception") && !note) {
+  if (requiresAnonymousCareSubmissionNote(status) && !note) {
     return serviceError("validation_error", "请填写备注或异常说明。", {
       note: "required"
     });
@@ -472,7 +521,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
   const [planResult, tasksResult] = await Promise.all([
     clientResult.data
       .from("care_plans")
-      .select("id, owner_id, status")
+      .select("id, owner_id, status, start_on, end_on")
       .eq("id", tokenResult.data.resourceId)
       .eq("owner_id", tokenResult.data.ownerId)
       .single(),
@@ -499,6 +548,24 @@ export async function submitAnonymousCareSubmissionFromFormData(
     });
   }
 
+  if (
+    !isAnonymousCareServiceDateInPlan(
+      serviceDate,
+      planResult.data.start_on,
+      planResult.data.end_on
+    )
+  ) {
+    return serviceError("validation_error", "请选择计划日期内的照护任务。", {
+      serviceDate: "invalid"
+    });
+  }
+
+  if (serviceDate > getAnonymousCareTodayIsoDate()) {
+    return serviceError("validation_error", "这一天还没到，暂不能提交照护结果。", {
+      serviceDate: "future"
+    });
+  }
+
   const task = (tasksResult.data ?? [])
     .map(mapTask)
     .filter((item) => item.enabled && !isLegacyPrepareTask(item))
@@ -514,14 +581,23 @@ export async function submitAnonymousCareSubmissionFromFormData(
     });
   }
 
+  if (!getAnonymousTaskVisitTimes(task).includes(visitTime)) {
+    return serviceError("validation_error", "请选择计划内的到访任务。", {
+      visitTime: "invalid"
+    });
+  }
+
   const idempotencyKey = createAnonymousSubmissionIdempotencyKey(
     tokenResult.data.tokenId,
+    serviceDate,
+    visitTime,
     submissionRef
   );
   const existingResult = await getAnonymousSubmissionByIdempotencyKey(
     clientResult.data,
     tokenResult.data.ownerId,
     tokenResult.data.resourceId,
+    serviceDate,
     idempotencyKey
   );
 
@@ -530,6 +606,44 @@ export async function submitAnonymousCareSubmissionFromFormData(
   }
 
   if (existingResult.data) {
+    if (
+      existingResult.data.status !== status ||
+      note !== existingResult.data.note
+    ) {
+      const updateResult = await clientResult.data
+        .from("care_submissions")
+        .update({
+          abnormal: status === "exception",
+          note,
+          status
+        })
+        .eq("owner_id", tokenResult.data.ownerId)
+        .eq("plan_id", tokenResult.data.resourceId)
+        .eq("idempotency_key", idempotencyKey)
+        .select("status, note, abnormal, created_at")
+        .single();
+
+      if (updateResult.error) {
+        return mapSupabaseError(updateResult.error);
+      }
+
+      clearCatCarePlanCaches(
+        tokenResult.data.ownerId,
+        tokenResult.data.resourceId
+      );
+
+      return serviceOk({
+        abnormal: updateResult.data.abnormal,
+        alreadySubmitted: true,
+        message: "已更新，主人会看到这项任务的最新反馈。",
+        note: updateResult.data.note,
+        serviceDate,
+        status: updateResult.data.status,
+        submittedAt: updateResult.data.created_at,
+        submissionRef
+      });
+    }
+
     clearCatCarePlanCaches(
       tokenResult.data.ownerId,
       tokenResult.data.resourceId
@@ -562,6 +676,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
       clientResult.data,
       tokenResult.data.ownerId,
       tokenResult.data.resourceId,
+      serviceDate,
       idempotencyKey
     );
 
@@ -594,6 +709,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
     alreadySubmitted: false,
     message: "已提交，主人会在照护结果里看到这条反馈。",
     note: insertResult.data.note,
+    serviceDate,
     status: insertResult.data.status,
     submittedAt: insertResult.data.created_at,
     submissionRef
@@ -615,17 +731,104 @@ function createAnonymousTaskSubmissionRef(tokenId: string, taskId: string) {
 
 function createAnonymousSubmissionIdempotencyKey(
   tokenId: string,
+  serviceDate: string,
+  visitTime: string,
   submissionRef: string
 ) {
-  return `anonymous:${tokenId}:${submissionRef}`;
+  return `anonymous:${tokenId}:${serviceDate}:${encodeAnonymousVisitTime(visitTime)}:${submissionRef}`;
+}
+
+function createAnonymousSubmissionSlotKey(serviceDate: string, visitTime: string) {
+  return `${serviceDate}:${visitTime}`;
+}
+
+function isAnonymousVisitTime(value: string) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+function encodeAnonymousVisitTime(value: string) {
+  return value.replace(":", "");
+}
+
+function decodeAnonymousVisitTime(value: string | undefined) {
+  return value && /^([01]\d|2[0-3])[0-5]\d$/.test(value)
+    ? `${value.slice(0, 2)}:${value.slice(2)}`
+    : "00:00";
+}
+
+function getAnonymousTaskVisitTimes(task: {
+  category: Database["public"]["Tables"]["care_tasks"]["Row"]["category"];
+  frequency: string | null;
+  timeHint: string | null;
+}) {
+  const times = (task.timeHint ?? "")
+    .split(/[，,]/)
+    .map((time) => time.trim())
+    .filter(isAnonymousVisitTime);
+
+  return times.length > 0 ? times : getAnonymousFallbackTaskTimes(task);
+}
+
+function getAnonymousFallbackTaskTimes(task: {
+  category: Database["public"]["Tables"]["care_tasks"]["Row"]["category"];
+  frequency: string | null;
+}) {
+  const category = task.category ?? "other";
+  const count =
+    category === "meal" || category === "treat" || category === "medicine"
+      ? getAnonymousDailyFrequencyCount(task.frequency)
+      : 1;
+  const slots: Record<string, string[]> = {
+    environment: ["18:30"],
+    litter: ["18:30"],
+    meal: ["08:30", "18:30", "14:00"],
+    medicine: ["08:30", "18:30"],
+    observe: ["18:30"],
+    other: ["18:30"],
+    play: ["18:30"],
+    treat: ["18:30", "14:00"],
+    water: ["08:30"]
+  };
+
+  return (slots[category] ?? slots.other).slice(0, count);
+}
+
+function getAnonymousDailyFrequencyCount(frequency: string | null) {
+  const match = /^daily(?:_(\d+))?$/.exec(frequency ?? "");
+
+  return Math.max(1, Math.min(4, Number(match?.[1] ?? "1") || 1));
+}
+
+function parseAnonymousSubmissionSlotFromKey(
+  tokenId: string,
+  idempotencyKey: string | null
+) {
+  const prefix = `anonymous:${tokenId}:`;
+  const rest = idempotencyKey?.startsWith(prefix)
+    ? idempotencyKey.slice(prefix.length)
+    : "";
+  const [serviceDate, encodedVisitTime] = rest.split(":");
+
+  if (!isAnonymousCareServiceDate(serviceDate)) {
+    return null;
+  }
+
+  const visitTime = decodeAnonymousVisitTime(encodedVisitTime);
+  const key = createAnonymousSubmissionSlotKey(serviceDate, visitTime);
+
+  return {
+    key,
+    serviceDate,
+    visitTime
+  };
 }
 
 function parseAnonymousSubmissionStatus(
   value: FormDataEntryValue | null
 ): ServiceResult<Database["public"]["Tables"]["care_submissions"]["Row"]["status"]> {
-  const status = String(value ?? "completed").trim();
+  const status = parseAnonymousCareSubmissionStatus(value);
 
-  if (status === "completed" || status === "note" || status === "exception") {
+  if (status) {
     return serviceOk(status);
   }
 
@@ -637,21 +840,22 @@ function parseAnonymousSubmissionStatus(
 function parseAnonymousSubmissionNote(
   value: FormDataEntryValue | null
 ): ServiceResult<string | null> {
-  const note = String(value ?? "").trim();
+  const note = normalizeAnonymousCareSubmissionNote(value);
 
-  if (note.length > 2000) {
+  if (note === undefined) {
     return serviceError("validation_error", "备注最多 2000 个字。", {
       note: "too_long"
     });
   }
 
-  return serviceOk(note || null);
+  return serviceOk(note);
 }
 
 async function getAnonymousSubmissionByIdempotencyKey(
   client: AppSupabaseClient,
   ownerId: string,
   planId: string,
+  serviceDate: string,
   idempotencyKey: string
 ): Promise<ServiceResult<AnonymousCareTaskSubmissionView | null>> {
   const result = await client
@@ -671,6 +875,7 @@ async function getAnonymousSubmissionByIdempotencyKey(
       ? {
           abnormal: result.data.abnormal,
           note: result.data.note,
+          serviceDate,
           status: result.data.status,
           submittedAt: result.data.created_at
         }
@@ -763,10 +968,14 @@ function extractPlanCatNames(
   if (
     summary &&
     typeof summary === "object" &&
-    !Array.isArray(summary) &&
-    Array.isArray(summary.cat_names)
+    !Array.isArray(summary)
   ) {
-    return summary.cat_names.filter((name): name is string => typeof name === "string");
+    const names = summary as { catNames?: unknown; cat_names?: unknown };
+    const catNames = names.catNames ?? names.cat_names;
+
+    if (Array.isArray(catNames)) {
+      return catNames.filter((name): name is string => typeof name === "string");
+    }
   }
 
   return ["猫咪"];

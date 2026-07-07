@@ -12,7 +12,8 @@ import {
 import { CatCareToast, useCatCareToast } from "../catcare-toast";
 import {
   CatCareButton,
-  CatCarePanel
+  CatCarePanel,
+  CatCareStepBar
 } from "../owner-flow-components";
 import {
   closeCatCarePlanLocalAction,
@@ -30,6 +31,7 @@ import type {
 import { PlanScheduleView } from "./plan-schedule-view";
 import { PlanConfirmationSummary } from "./plan-confirmation-summary";
 import { PlanTaskSaveForm } from "./plan-task-save-form-client";
+import { formatPlanCatNames } from "./plan-cat-names";
 
 type PlanMutationResult =
   | { data: CatCarePlan; ok: true }
@@ -169,6 +171,27 @@ export function PlanDetailClient({
         toast={toast.toast}
       />
 
+      <div>
+        <h1 className="mt-1 text-3xl font-semibold text-[#101a32]">
+          {canPublish ? "智能生成与清单确认" : "照护计划总览"}
+        </h1>
+        <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
+          {canPublish
+            ? "先检查生成清单，必要时微调任务，再发布给照看者。"
+            : "先确认执行日历和交接说明，再生成私密链接给照看者。"}
+        </p>
+      </div>
+      {canPublish ? (
+        <CatCareStepBar
+          steps={[
+            { label: "选择场景" },
+            { label: "时间与频率" },
+            { label: "智能输入总结" },
+            { active: true, label: "生成清单" }
+          ]}
+        />
+      ) : null}
+
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <CatCarePanel>
           <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_17rem] xl:items-start">
@@ -176,9 +199,9 @@ export function PlanDetailClient({
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}>
                 {status.label}
               </span>
-              <h1 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-[#101a32]">
+              <h2 className="mt-4 max-w-3xl text-3xl font-semibold leading-tight text-[#101a32]">
                 {displayTitle}
-              </h1>
+              </h2>
               <p className="mt-2 text-sm font-semibold text-[#526177]">
                 {currentPlan.startOn ?? "未设日期"}
                 {currentPlan.endOn ? ` 至 ${currentPlan.endOn}` : ""}
@@ -204,7 +227,7 @@ export function PlanDetailClient({
               ) : (
                 <CatCareButton href={`/catcare/plans/${currentPlan.id}/results`}>
                   <CatCareCalendarIcon />
-                  查看结果
+                  查看照护反馈
                 </CatCareButton>
               )}
               {canClose ? (
@@ -225,6 +248,23 @@ export function PlanDetailClient({
           </div>
 
           <PlanConfirmationSummary canEdit={canPublish} plan={visiblePlan} />
+
+          {!canPublish ? (
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <PlanMetricCard
+                label="执行日期"
+                value={formatPlanDateRange(currentPlan)}
+              />
+              <PlanMetricCard
+                label="任务数量"
+                value={`${visiblePlan.tasks.length} 项`}
+              />
+              <PlanMetricCard
+                label="照护对象"
+                value={formatPlanCatNames(currentPlan)}
+              />
+            </div>
+          ) : null}
 
           {canPublish ? (
             <PlanTaskSaveForm
@@ -266,7 +306,9 @@ export function PlanDetailClient({
 
         <aside className="grid content-start gap-5">
           <CatCarePanel>
-            <h2 className="text-xl font-semibold text-[#101a32]">生成摘要</h2>
+            <h2 className="text-xl font-semibold text-[#101a32]">
+              {canPublish ? "生成摘要" : "计划状态"}
+            </h2>
             <dl className="mt-4 grid gap-3 text-sm font-semibold text-[#526177]">
               <div className="flex justify-between gap-4">
                 <dt>计划来源</dt>
@@ -280,6 +322,14 @@ export function PlanDetailClient({
                 <dt>场景</dt>
                 <dd className="text-[#101a32]">{formatScenario(currentPlan.scenario)}</dd>
               </div>
+              {!canPublish ? (
+                <div className="flex justify-between gap-4">
+                  <dt>分享状态</dt>
+                  <dd className="text-[#101a32]">
+                    {getShareLinkStatusMeta(currentShareLink.status).label}
+                  </dd>
+                </div>
+              ) : null}
             </dl>
           </CatCarePanel>
 
@@ -298,6 +348,17 @@ export function PlanDetailClient({
           </CatCarePanel>
         </aside>
       </div>
+    </div>
+  );
+}
+
+function PlanMetricCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-[#d9eee7] bg-[#f2fbf8] px-4 py-3">
+      <p className="text-xs font-semibold text-[#526177]">{label}</p>
+      <p className="mt-1 truncate text-base font-semibold text-[#101a32]">
+        {value}
+      </p>
     </div>
   );
 }
@@ -418,6 +479,9 @@ function ShareLinkPanel({
         ) : null}
         </div>
       </div>
+      <p className="rounded-xl bg-[#fff4e8] px-4 py-3 text-sm font-semibold leading-6 text-[#b85d00] ring-1 ring-[#efd1ad]">
+        安全提醒：完整链接只展示一次，不要写入日志、评论或截图证据。
+      </p>
     </div>
   );
 }
@@ -436,19 +500,14 @@ function formatPlanDisplayTitle(plan: CatCarePlan) {
     : plan.title;
 }
 
-function formatPlanCatNames(plan: CatCarePlan) {
-  const summary = plan.aiInputSummary;
-
-  if (
-    summary &&
-    typeof summary === "object" &&
-    !Array.isArray(summary) &&
-    Array.isArray(summary.cat_names)
-  ) {
-    return summary.cat_names.filter((name) => typeof name === "string").join("、");
+function formatPlanDateRange(plan: CatCarePlan) {
+  if (!plan.startOn) {
+    return "未设日期";
   }
 
-  return "当前猫咪";
+  return plan.endOn && plan.endOn !== plan.startOn
+    ? `${plan.startOn} 至 ${plan.endOn}`
+    : plan.startOn;
 }
 
 function getPlanStatusMeta(status: CatCarePlan["status"]) {

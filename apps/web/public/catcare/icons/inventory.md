@@ -6,12 +6,14 @@ Current frontend source: `apps/web/public/catcare/icons/traced/`.
 Prototype crops are retained in `apps/web/public/catcare/icons/prototype/` as
 trace sources.
 
-Routine task icons currently use normalized PNG crops directly:
-`prototype/routine-dry-food.png`, `prototype/routine-canned.png`,
-`prototype/routine-treat.png`, `prototype/routine-water.png`,
-`prototype/routine-litter.png`, and `prototype/routine-play.png`. They are
-product-layer task illustrations cropped from `05-recurring-routine.png`, not
-shared action icons.
+2026-07-07 GNE-290 correction: food/care item category icons, sitter task
+category icons, and event timeline icons must not render raw prototype PNG
+crops directly. The PNG crops remain in `prototype/` as visual reference/source
+material only; several crops carried baked-in white backing shapes and failed
+product-quality QA. Current runtime category/event glyphs are product-local
+semantic SVGs in `apps/web/app/catcare/catcare-item-type-icon.tsx`, with one
+shared stroke weight and one shared color system so selected tabs, timeline
+markers, task cards, and form buttons stay visually consistent.
 
 | Traced SVG | Semantic wrappers | Primary usage | Prototype reference |
 | --- | --- | --- | --- |

@@ -134,7 +134,7 @@ export function AuthForm({
 
   return (
     <form
-      className="space-y-5"
+      className="min-w-0 space-y-5"
       onSubmit={async (event) => {
         event.preventDefault();
 
@@ -178,9 +178,9 @@ export function AuthForm({
       <input name="mode" type="hidden" value={mode} />
       <input name="next" type="hidden" value={nextPath} />
 
-      <div className="grid grid-cols-2 border-b border-slate-200">
+      <div className="grid min-w-0 grid-cols-2 border-b border-slate-200">
         <button
-          className={`min-h-14 border-b-2 text-lg font-semibold transition ${
+          className={`min-w-0 border-b-2 px-2 py-4 text-base font-semibold leading-6 transition sm:text-lg ${
             !isSignUp
               ? "border-teal-700 text-teal-700"
               : "text-slate-500 hover:text-slate-950"
@@ -191,7 +191,7 @@ export function AuthForm({
           {labels.signIn}
         </button>
         <button
-          className={`min-h-14 border-b-2 text-lg font-semibold transition ${
+          className={`min-w-0 border-b-2 px-2 py-4 text-base font-semibold leading-6 transition sm:text-lg ${
             isSignUp
               ? "border-teal-700 text-teal-700"
               : "text-slate-500 hover:text-slate-950"
@@ -310,7 +310,7 @@ function OAuthOptions({ labels }: { labels: OAuthLabels }) {
       <div className="grid gap-3">
         {[labels.google, labels.apple].map((label) => (
           <button
-            className="flex min-h-16 cursor-not-allowed items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-400"
+            className="flex min-h-16 min-w-0 cursor-not-allowed items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-400 sm:gap-4"
             disabled
             key={label}
             type="button"
@@ -318,7 +318,7 @@ function OAuthOptions({ labels }: { labels: OAuthLabels }) {
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm text-slate-500">
               {label.includes("Google") ? "G" : ""}
             </span>
-            <span>{label}</span>
+            <span className="min-w-0 text-center leading-6">{label}</span>
           </button>
         ))}
       </div>

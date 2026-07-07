@@ -61,14 +61,14 @@ export const dictionaries = {
           catcare: "照护产品",
           account: "个人资料",
           billing: "套餐",
-          usage: "AI"
+          usage: "智能额度"
         },
         capabilitiesTitle: "核心能力",
         capabilities: [
           "猫咪档案与日常习惯",
-          "AI 生成临时照护清单",
+          "智能生成临时照护清单",
           "私密分享与结果回收",
-          "AI 摘要、套餐与额度"
+          "智能摘要、套餐与额度"
         ],
         resourcesTitle: "使用场景",
         resources: [
@@ -84,7 +84,7 @@ export const dictionaries = {
       brandSubtitle: "猫咪照护清单",
       badge: "猫咪临时照护",
       title: "记录猫咪日常，",
-      titleAccent: "出门前 AI 生成照护清单",
+      titleAccent: "出门前智能生成照护清单",
       description: "",
       headerAction: "立即开始",
       headerActionSignedIn: "进入工作台",
@@ -118,7 +118,7 @@ export const dictionaries = {
       preview: {
         account: "主人账户",
         activePlan: "当前交接",
-        aiCredit: "AI Credit",
+        aiCredit: "智能额度",
         billing: "照护套餐",
         cat: "Mochi",
         handoff: "等待提交",
@@ -131,16 +131,16 @@ export const dictionaries = {
         title: "猫咪照护计划"
       },
       pricing: {
-        title: "套餐与 AI Credit",
+        title: "套餐与智能额度",
         paidStepTitle: "摘要 / 付费",
-        paidStepDescription: "结果页触发 AI 摘要、Pro 或一次性额度包。",
+        paidStepDescription: "结果页触发智能摘要、Pro 或一次性额度包。",
         freeTitle: "免费版",
         freePrice: "$0 / 永久",
-        freeDescription: "3 次 AI 照护生成 / 月，适合首次体验。",
+        freeDescription: "3 次智能照护生成 / 月，适合首次体验。",
         proTitle: "专业版",
         proPrice: "$9 / 月",
-        proDescription: "无限 AI 照护生成，多条照看记录与报告。",
-        creditTitle: "AI 额度包",
+        proDescription: "无限智能照护生成，多条照看记录与报告。",
+        creditTitle: "智能额度包",
         creditPrice: "$5 / 10 次",
         creditDescription: "按需购买，永不过期。"
       },
@@ -158,7 +158,7 @@ export const dictionaries = {
           description: ""
         },
         {
-          title: "AI 生成清单",
+          title: "智能生成清单",
           description: ""
         },
         {
@@ -184,7 +184,7 @@ export const dictionaries = {
       badge: "Foundation Demo",
       title: "底座能力 Demo",
       description:
-        "这里保留 starter kit 原有验证入口，用于检查登录、工作台、demo 数据、AI 草稿、套餐、支付和 AI Credit 等底座能力。CatCare 产品从首页和照护工作台进入。",
+        "这里保留 starter kit 原有验证入口，用于检查登录、工作台、demo 数据、智能草稿、套餐、支付和智能额度等底座能力。CatCare 产品从首页和照护工作台进入。",
       signIn: "登录查看 Demo",
       openDashboard: "打开工作台",
       productLink: "返回 CatCare",
@@ -200,7 +200,7 @@ export const dictionaries = {
         },
         {
           title: "商业化能力",
-          description: "复用套餐、支付、AI Credit 和 AI 草稿验证面，不把它们复制进产品页面。"
+          description: "复用套餐、支付、智能额度和智能草稿验证面，不把它们复制进产品页面。"
         }
       ],
       login: {
@@ -250,10 +250,10 @@ export const dictionaries = {
           onboarding: "新手进度",
           drafts: "草稿计划",
           published: "已发布",
-          aiCredit: "AI Credit"
+          aiCredit: "智能额度"
         },
         hero: {
-          primary: "用 AI 生成照护清单",
+          primary: "智能生成照护清单",
           secondary: "查看产品账户",
           currentHandoff: "当前交接",
           noPlan: "还没有计划",
@@ -266,19 +266,19 @@ export const dictionaries = {
           dataNeedsReview: "服务需检查",
           title: "欢迎回来，先生成第一份可交接照护清单",
           description:
-            "先沉淀猫咪档案和重复习惯，出门前用 AI 生成临时照护清单。照看者按步骤完成，主人回到这里查看结果和付费摘要入口。",
-          creditPrefix: "当前 AI Credit：",
+            "先沉淀猫咪档案和重复习惯，出门前智能生成临时照护清单。照看者按步骤完成，主人回到这里查看结果和付费摘要入口。",
+          creditPrefix: "当前智能额度：",
           creditUnavailable: "暂不可用",
           progressTitle: "新手进度",
           progressDescription:
             "先完成猫咪档案和重复习惯，再生成第一份临时照护清单。用品和事件是增强项，不阻塞第一次体验。",
           guideTitle: "使用引导",
           workflowStepCount: "4 步",
-          paywallTitle: "AI 摘要 / 高级功能",
+          paywallTitle: "智能摘要 / 高级功能",
           paywallDescription:
-            "免费版适合完成第一次临时照护。额度用完后，结果页会触发 Pro 或一次性 AI Credit 包。",
+            "免费版适合完成第一次临时照护。额度用完后，结果页会触发 Pro 或一次性智能额度包。",
           currentPlanLabel: "当前方案",
-          aiCreditLabel: "AI 额度",
+          aiCreditLabel: "智能额度",
           catsSublabel: "猫咪数量",
           plansSublabel: "照护计划",
           pendingSublabel: "待处理",
@@ -289,8 +289,8 @@ export const dictionaries = {
             "每份计划都是一张可交接的照护卡。发布后，照看结果会回收到同一张卡片。",
           itemsAndEvents: "用品与事件",
           itemsAndEventsDescription:
-            "可选补充食物用品和事件，提高后续 AI 生成质量。",
-          aiChecklist: "AI 生成清单",
+            "可选补充食物用品和事件，提高后续智能生成质量。",
+          aiChecklist: "智能生成清单",
           publishShare: "发布分享",
           publishShareDescription:
             "发布后生成私密分享入口，照看者只看到本次需要执行的清单。",
@@ -303,7 +303,7 @@ export const dictionaries = {
             description: "先沉淀猫咪档案、重复喂养习惯和常用用品。"
           },
           {
-            title: "AI 生成临时清单",
+            title: "智能生成临时清单",
             description: "出门前选择日期和场景，生成可检查的照护任务。"
           },
           {
@@ -312,7 +312,7 @@ export const dictionaries = {
           },
           {
             title: "查看结果并复盘",
-            description: "主人查看提交结果，AI 摘要和内容生成作为付费点。"
+            description: "主人查看提交结果，智能摘要和内容生成作为付费点。"
           }
         ],
         sections: {
@@ -328,7 +328,7 @@ export const dictionaries = {
             previewItems: [
               {
                 title: "照护建议",
-                description: "年龄、性格、禁忌会影响 AI 生成的任务提示。"
+                description: "年龄、性格、禁忌会影响智能生成的任务提示。"
               },
               {
                 title: "匿名可见范围",
@@ -363,7 +363,7 @@ export const dictionaries = {
             primary: "添加用品",
             emptyTitle: "还没有用品资料",
             emptyDescription:
-              "用品资料提高 AI 生成质量，但不阻塞第一次照护计划生成。",
+              "用品资料提高智能生成质量，但不阻塞第一次照护计划生成。",
             previewTitle: "为什么单独管理",
             previewItems: [
               {
@@ -371,8 +371,8 @@ export const dictionaries = {
                 description: "常用猫粮、罐头、零食和药品可复用到不同计划。"
               },
               {
-                title: "后续识别增强",
-                description: "扫码或包装识别属于后续增强，不阻塞第一次使用。"
+                title: "后续资料增强",
+                description: "品牌、规格、用量和保质期可以逐步补全，不阻塞第一次使用。"
               }
             ]
           },
@@ -392,7 +392,7 @@ export const dictionaries = {
               },
               {
                 title: "未来付费内容",
-                description: "一段时间的事件可生成图文或视频 recap。"
+                description: "一段时间的事件可生成图文或视频复盘。"
               }
             ]
           },
@@ -403,7 +403,7 @@ export const dictionaries = {
             primary: "新建照护计划",
             emptyTitle: "还没有照护计划",
             emptyDescription:
-              "这里会承接 AI 生成、主人确认、发布和私密分享入口。",
+              "这里会承接智能生成、主人确认、发布和私密分享入口。",
             previewTitle: "计划生成逻辑",
             previewItems: [
               {
@@ -418,20 +418,20 @@ export const dictionaries = {
           },
           results: {
             title: "结果查看",
-            description: "主人查看照看者提交、异常、照片占位和后续 AI 摘要入口。",
+            description: "主人查看照看者提交、异常、照片占位和后续智能摘要入口。",
             status: "等待提交",
             primary: "查看最近结果",
             emptyTitle: "还没有提交结果",
             emptyDescription:
-              "照看者提交后，主人会在这里查看结果，并触发 AI 摘要或付费额度。",
+              "照看者提交后，主人会在这里查看结果，并触发智能摘要或付费额度。",
             previewTitle: "付费触发点",
             previewItems: [
               {
-                title: "AI 摘要",
+                title: "智能摘要",
                 description: "免费额度用完后触发套餐或一次性额度包。"
               },
               {
-                title: "内容 recap",
+                title: "内容复盘",
                 description: "事件和照片可在后续生成可分享内容。"
               }
             ]
@@ -489,10 +489,10 @@ export const dictionaries = {
         capabilities: {
           title: "产品账户",
           description:
-            "管理主人资料、照护套餐、支付入口和 AI 辅助额度。",
+            "管理主人资料、照护套餐、支付入口和智能辅助额度。",
           account: "主人账户",
           billing: "照护套餐 / 账单",
-          usage: "AI Credit / 用量",
+          usage: "智能额度 / 用量",
           connected: "已接入",
           planned: "待开放",
           accountAction: "查看账户",
@@ -503,7 +503,7 @@ export const dictionaries = {
           billingPublishedDescription:
             "已有发布计划，后续可按套餐开放分享次数和支付动作。",
           usageDescription:
-            "照护摘要、提醒文案和异常整理会使用这里的 AI Credit。"
+            "照护摘要、提醒文案和异常整理会使用这里的智能额度。"
         },
         status: {
           draft: "草稿",
@@ -538,7 +538,7 @@ export const dictionaries = {
       sideTitle: "科学照护，让每一只猫咪更安心",
       sideDescription:
         "主人先建立猫咪档案和日常习惯，再生成临时照护计划。照看者按步骤完成，结果回到主人工作台。",
-      securityLine: "账户、套餐、支付和 AI Credit 将服务于同一个 CatCare 主人账户。",
+      securityLine: "账户、套餐、支付和智能额度将服务于同一个 CatCare 主人账户。",
       createAccount: "创建账户",
       welcomeBack: "欢迎回来",
       startWithEmail: "创建主人账户",
@@ -689,32 +689,32 @@ export const dictionaries = {
       },
       billing: {
         eyebrow: "账单与权益",
-        title: "套餐与 AI Credit",
-        description: "管理 CatCare 当前套餐、sandbox/test 支付入口和 AI 额度。",
+        title: "套餐与智能额度",
+        description: "管理 CatCare 当前套餐、sandbox/test 支付入口和智能额度。",
         catcareHeroTitle: "账单与权益",
         catcareHeroDescription:
-          "查看 CatCare 当前套餐、AI 摘要额度、sandbox/test 订单记录，并在触发付费点后回到原照护计划继续操作。",
+          "查看 CatCare 当前套餐、智能摘要额度、sandbox/test 订单记录，并在触发付费点后回到原照护计划继续操作。",
         catcareSandboxNotice:
           "当前为 sandbox/test 环境，所有订单与支付均为测试数据，不会产生真实扣费。",
         catcareCurrentPlanTitle: "当前方案",
-        catcareCreditTitle: "AI 摘要额度",
+        catcareCreditTitle: "智能摘要额度",
         catcarePaywallTitle: "解锁更多照护能力",
         catcarePaywallDescription:
-          "免费版适合完成第一次临时照护。AI 摘要、报告导出和更多额度会在结果页触发权益检查。",
+          "免费版适合完成第一次临时照护。智能摘要、报告导出和更多额度会在结果页触发权益检查。",
         catcareReturnToPlan: "返回最近计划",
         catcareFlowTitle: "支付成功后会发生什么？",
         catcareFlowSteps: [
           "记录 sandbox 订单",
-          "更新套餐或 AI 摘要额度",
-          "返回原计划继续生成 AI 摘要"
+          "更新套餐或智能摘要额度",
+          "返回原计划继续生成智能摘要"
         ],
-        catcareCreditPacksTitle: "一次性 AI 摘要额度包",
+        catcareCreditPacksTitle: "一次性智能摘要额度包",
         catcareCreditPacksDescription:
-          "不切换套餐，只购买额外 AI 摘要额度。适合偶发出行或临时照护场景。",
+          "不切换套餐，只购买额外智能摘要额度。适合偶发出行或临时照护场景。",
         catcareDisplay: {
-          freeAiAllowance: "3 次 AI 摘要 / 月",
-          proAiAllowance: "30 次 AI 摘要 / 月",
-          creditPackAllowance: "10 次 AI 摘要额度",
+          freeAiAllowance: "3 次智能摘要 / 月",
+          proAiAllowance: "30 次智能摘要 / 月",
+          creditPackAllowance: "10 次智能摘要额度",
           freeCreditSummary: "3 / 3",
           proCreditSummary: "15 / 30",
           creditPackEmpty: "0 / 10",
@@ -723,10 +723,10 @@ export const dictionaries = {
           proPrice: "$9 / 月",
           creditPackPrice: "$5",
           creditPackOptions: [
-            { price: "$5 / 10 次", description: "AI 照护生成" },
-            { price: "$12 / 30 次", description: "AI 照护生成" },
-            { price: "$29 / 100 次", description: "AI 照护生成" },
-            { price: "$59 / 250 次", description: "AI 照护生成" }
+            { price: "$5 / 10 次", description: "智能照护生成" },
+            { price: "$12 / 30 次", description: "智能照护生成" },
+            { price: "$29 / 100 次", description: "智能照护生成" },
+            { price: "$59 / 250 次", description: "智能照护生成" }
           ],
           orderColumns: {
             order: "订单号",
@@ -779,9 +779,9 @@ export const dictionaries = {
         includedInCurrentPlan: "权益已覆盖",
         switchToFree: "切换到 Free",
         buyCreditPack: "充值额度包",
-        usageDemoTitle: "模拟 AI 使用",
+        usageDemoTitle: "模拟智能使用",
         usageDemoDescription:
-          "先使用一次模拟 AI 生成功能，系统会检查 Credit 权益并记录本次消耗。额度不足时才提示升级套餐或充值额度包。",
+          "先使用一次模拟智能生成功能，系统会检查额度权益并记录本次消耗。额度不足时才提示升级套餐或充值额度包。",
         usageDemoRun: "模拟生成一次",
         usageDemoReady: "可使用",
         usageDemoBlocked: "需升级",
@@ -800,9 +800,9 @@ export const dictionaries = {
           pro: "Pro"
         },
         planDescriptions: {
-          free: "适合首次临时照护体验，包含基础清单和每月 AI 额度。",
+          free: "适合首次临时照护体验，包含基础清单和每月智能额度。",
           plus: "预留中间套餐，当前 CatCare 不在主流程展示。",
-          pro: "适合持续使用，解锁更多 AI 照护生成、摘要和报告能力。"
+          pro: "适合持续使用，解锁更多智能照护生成、摘要和报告能力。"
         },
         planInheritance: {
           free: "基础能力",
@@ -822,7 +822,7 @@ export const dictionaries = {
           projects: "猫咪档案",
           pages: "照护清单",
           leads: "照看记录",
-          ai_tokens: "AI Credit",
+          ai_tokens: "智能额度",
           custom_domain: "报告与导出"
         },
         units: {
@@ -837,7 +837,7 @@ export const dictionaries = {
         aiRecordsDescription: "最近的充值和 Credit 消耗记录。",
         creditRecordsTitle: "充值记录",
         usageRecordsTitle: "Credit 消耗记录",
-        creditConsumptionRecordTitle: "AI Credit 消耗",
+        creditConsumptionRecordTitle: "智能额度消耗",
         emptyCreditRecords: "暂无充值记录",
         emptyUsageRecords: "暂无 Credit 消耗记录",
         recordsErrorTitle: "记录暂不可用",
@@ -856,17 +856,17 @@ export const dictionaries = {
         }
       },
       usage: {
-        eyebrow: "AI Credit",
-        title: "AI 用量",
+        eyebrow: "智能额度",
+        title: "智能用量",
         description:
-          "查看 CatCare 可用 AI Credit、额度包充值和消耗记录。",
-        productTitle: "CatCare AI 能力用量",
+          "查看 CatCare 可用智能额度、额度包充值和消耗记录。",
+        productTitle: "CatCare 智能能力用量",
         productDescription:
-          "AI Credit 会用于照护清单生成、照看结果摘要和未来图文/视频 recap。当前保持 sandbox/test 语义，不产生真实扣款。",
+          "智能额度会用于照护清单生成、照看结果摘要和未来图文/视频复盘。当前保持 sandbox/test 语义，不产生真实扣款。",
         productFacts: [
           "生成照护清单前先检查可用额度",
           "结果摘要和异常复盘按次消耗",
-          "事件 recap 属于后续付费增强"
+          "事件复盘属于后续付费增强"
         ]
       },
       payment: {
@@ -905,11 +905,11 @@ export const dictionaries = {
         quotaRemaining: "剩余额度",
         subscription: "订阅",
         creditPack: "额度包",
-        creditPackName: "AI Credit 额度包",
+        creditPackName: "智能额度包",
         subscriptionDescription:
-          "解锁更高层级的模板权益和 AI Credit。",
+          "解锁更高层级的模板权益和智能额度。",
         creditPackDescription:
-          "一次性增加 AI Credit。",
+          "一次性增加智能额度。",
         priceId: "Price ID",
         price: "价格",
         providerMapping: "Provider 映射",
@@ -919,7 +919,7 @@ export const dictionaries = {
         includedInCurrentPlan: "权益已覆盖",
         sandboxEyebrow: "支付确认",
         planCheckoutTitle: "确认套餐变更",
-        creditCheckoutTitle: "充值 AI Credit",
+        creditCheckoutTitle: "充值智能额度",
         sandboxTitle: "确认支付",
         sandboxDescription:
           "请确认本次支付信息。当前为本地模拟支付，不会产生真实扣款。",
@@ -982,7 +982,7 @@ export const dictionaries = {
       },
       ai: {
         prompt: "请输入至少 3 个字符。",
-        general: "AI 草稿暂时无法生成，请稍后重试。"
+        general: "智能草稿暂时无法生成，请稍后重试。"
       }
     }
   },

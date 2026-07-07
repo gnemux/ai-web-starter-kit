@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 import { getRequestLocale } from "@/lib/i18n-server";
@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: "CatCare"
   }
+};
+
+export const viewport: Viewport = {
+  initialScale: 1,
+  width: "device-width"
 };
 
 export default async function RootLayout({

@@ -73,6 +73,8 @@ export {
 } from "./product-service/plans";
 
 export type {
+  AnonymousCarePlanView,
+  AnonymousCareTaskView,
   CarePlanShareLinkMutation,
   CarePlanShareLinkState,
   ShareTokenActorContext,
@@ -85,6 +87,7 @@ export {
   createCarePlanShareLink,
   createShareTokenExpiry,
   createShareTokenSecret,
+  getAnonymousCarePlanView,
   getCarePlanShareLinkState,
   hashShareTokenSecret,
   isShareTokenHashMatch,

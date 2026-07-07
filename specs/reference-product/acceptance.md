@@ -14,6 +14,13 @@
 - [x] Draft care plans can be published.
 - [x] The owner can see plan state, tasks, and the future submission area.
 - [x] The page exposes account, billing/payment, and AI Credit entry slots without claiming GNE-233 capability wiring is complete.
+- [x] A valid private share token opens `/s/[token]` for an unauthenticated
+  sitter and shows only the minimum read-only handoff fields and task list.
+- [x] Expired, revoked, invalid, and unavailable share links show explicit
+  empty/error states and do not show care tasks.
+- [x] Anonymous share pages do not render owner navigation, billing/payment/AI
+  controls, owner email, internal ids, raw token, token hash, debug data, or
+  anonymous submission UI.
 
 ## Technical Checks
 
@@ -25,6 +32,8 @@
 - [x] `pnpm lint` passes.
 - [x] `pnpm build` passes.
 - [x] No secrets, raw share tokens, private prompts, or customer data are committed.
+- [x] Production-built `/s/[token]` HTML includes mobile viewport metadata and
+  passes 375px/390px mobile QA with no horizontal overflow.
 
 ## Product Checks
 
@@ -62,6 +71,24 @@
   Audit, Outbox, or PostHog correlation.
 
 ## Verification Snapshot
+
+2026-07-07 GNE-257 ACCESS anonymous view verification:
+
+- `pnpm typecheck`, `pnpm lint`, and `pnpm build` passed after implementing the
+  anonymous view and global mobile viewport metadata.
+- Production-built local server on `http://127.0.0.1:3003` rendered dynamic
+  route `ƒ /s/[token]`.
+- Linked Supabase test env verification used temporary active/expired/revoked
+  share-token rows, then deleted them. Valid, expired, revoked, and invalid
+  page checks all returned `200`, showed the expected state, and passed the
+  forbidden owner/billing/token text scan.
+- Mobile browser QA passed at `390px` valid and `375px` invalid states:
+  viewport/body/main widths matched, no horizontal overflow, owner nav absent,
+  forbidden owner/billing/token text absent, and screenshots were captured for
+  local review.
+- Boundary preserved: anonymous submit remains GNE-258; owner/anonymous RLS
+  acceptance remains GNE-259; security negative/audit verification remains
+  GNE-260.
 
 2026-06-30 GNE-280 UI/SYSTEM verification:
 

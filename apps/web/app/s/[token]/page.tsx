@@ -33,7 +33,7 @@ export default async function AnonymousCarePlanPage({ params }: SharePageProps) 
       <div className="mx-auto grid w-full max-w-5xl gap-5">
         <AnonymousHeader />
         {result.ok ? (
-          <AnonymousCarePlan plan={result.data} />
+          <AnonymousCarePlan plan={result.data} token={token} />
         ) : (
           <ShareErrorState
             kind={result.error.fields?.token}
@@ -71,7 +71,13 @@ function AnonymousHeader() {
   );
 }
 
-function AnonymousCarePlan({ plan }: { plan: AnonymousCarePlanView }) {
+function AnonymousCarePlan({
+  plan,
+  token
+}: {
+  plan: AnonymousCarePlanView;
+  token: string;
+}) {
   const optionalCount = plan.taskCount - plan.requiredTaskCount;
   const taskFlow = buildAnonymousTaskFlow(plan.tasks);
   const attentionTasks = getAnonymousAttentionTasks(plan.tasks);
@@ -176,12 +182,12 @@ function AnonymousCarePlan({ plan }: { plan: AnonymousCarePlanView }) {
             </section>
           ) : null}
 
-          <AnonymousVisitAccordion sections={taskFlow} />
+          <AnonymousVisitAccordion sections={taskFlow} token={token} />
         </section>
       </div>
 
       <p className="pb-6 text-center text-xs font-semibold leading-5 text-[#75839a]">
-        这个页面只显示主人授权的照护信息。提交反馈将在下一步开放。
+        这个页面只显示主人授权的照护信息。提交后，主人会在结果页看到完成、备注和异常反馈。
       </p>
     </>
   );

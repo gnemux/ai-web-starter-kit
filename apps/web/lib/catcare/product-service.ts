@@ -74,7 +74,9 @@ export {
 
 export type {
   AnonymousCarePlanView,
+  AnonymousCareSubmissionMutation,
   AnonymousCareTaskView,
+  AnonymousCareTaskSubmissionView,
   CarePlanShareLinkMutation,
   CarePlanShareLinkState,
   ShareTokenActorContext,
@@ -95,5 +97,6 @@ export {
   revokeCarePlanShareLink,
   shareTokenResourceType,
   shareTokenScope,
-  shareTokenTtlDays
+  shareTokenTtlDays,
+  submitAnonymousCareSubmissionFromFormData
 } from "./product-service/share-tokens";

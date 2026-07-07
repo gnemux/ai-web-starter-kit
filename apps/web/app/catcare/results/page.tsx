@@ -26,7 +26,7 @@ export default async function CatCareResultsPage() {
               结果查看
             </h1>
             <p className="mt-2 text-sm leading-6 text-[#526177]">
-              查看主人侧计划状态、提交入口预览和后续 AI 复盘入口。匿名提交、分享链接和 live AI 不在本阶段范围。
+              查看主人侧计划状态、照看者提交结果和后续 AI 复盘入口。live AI 不在本阶段范围。
             </p>
           </div>
           <CatCarePanel>

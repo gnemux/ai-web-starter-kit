@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import type { CatCarePlan } from "@/lib/catcare/product-service";
 
 import { CatCareXIcon } from "../catcare-action-icons";
+import { CatCareTaskCategoryIcon } from "../catcare-item-type-icon";
 import { buildPlanSchedule, type PlanScheduleEntry } from "./plan-schedule";
 import {
   getCategoryLabel,
@@ -44,7 +45,7 @@ export function PlanScheduleView({
           </p>
         </div>
         <span className="shrink-0 rounded-full bg-[#e6f7f2] px-4 py-2 text-sm font-semibold text-[#07847f]">
-          {schedule.length} 天 / {taskCount} 项
+          {schedule.length} 天，{taskCount} 项
         </span>
       </div>
 
@@ -289,35 +290,40 @@ function TaskLine({ entry }: { entry: PlanScheduleEntry }) {
 
   return (
     <div
-      className={`min-w-0 rounded-xl border-l-4 px-3 py-2 ring-1 ring-[#edf1f5] ${
+      className={`grid min-w-0 grid-cols-[2.75rem_minmax(0,1fr)] gap-3 rounded-xl border-l-4 px-3 py-3 ring-1 ring-[#edf1f5] ${
         entry.task.required
           ? "border-l-[#07847f] bg-[#fbfdfc]"
           : "border-l-[#d9e0ea] bg-white text-[#526177]"
       }`}
       title={entry.task.required ? "必做任务" : "可选任务"}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        {title.owner ? (
-          <span className="rounded-full bg-[#e6f7f2] px-2.5 py-1 text-xs font-semibold text-[#07847f]">
-            {title.owner}
+      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-white ring-1 ring-[#edf1f5]">
+        <CatCareTaskCategoryIcon className="h-10 w-10" category={entry.task.category} />
+      </span>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          {title.owner ? (
+            <span className="rounded-full bg-[#e6f7f2] px-2.5 py-1 text-xs font-semibold text-[#07847f]">
+              {title.owner}
+            </span>
+          ) : null}
+          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getCategoryStyle(entry.task.category)}`}>
+            {getCategoryLabel(entry.task.category)}
           </span>
+          <p
+            className={`min-w-0 text-sm font-semibold leading-6 ${
+              entry.task.required ? "text-[#101a32]" : "text-[#526177]"
+            }`}
+          >
+            {title.action}
+          </p>
+        </div>
+        {entry.task.instructions ? (
+          <p className="mt-1 whitespace-pre-wrap text-xs font-semibold leading-5 text-[#75839a]">
+            {entry.task.instructions}
+          </p>
         ) : null}
-        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getCategoryStyle(entry.task.category)}`}>
-          {getCategoryLabel(entry.task.category)}
-        </span>
-        <p
-          className={`min-w-0 text-sm font-semibold leading-6 ${
-            entry.task.required ? "text-[#101a32]" : "text-[#526177]"
-          }`}
-        >
-          {title.action}
-        </p>
       </div>
-      {entry.task.instructions ? (
-        <p className="mt-1 whitespace-pre-wrap text-xs font-semibold leading-5 text-[#75839a]">
-          {entry.task.instructions}
-        </p>
-      ) : null}
     </div>
   );
 }

@@ -9,6 +9,7 @@ import {
   CatCareSaveIcon,
   CatCareSearchIcon
 } from "../catcare-action-icons";
+import { CatCareEventTypeIcon } from "../catcare-item-type-icon";
 import { CatCareToast, useCatCareToast } from "../catcare-toast";
 import {
   CatCareButton,
@@ -61,6 +62,7 @@ export function EventsWorkspaceClient({
   const [eventList, setEventList] = useState(events);
   const [formKey, setFormKey] = useState(0);
   const [pending, setPending] = useState(false);
+  const [rangeMode, setRangeMode] = useState<"30d" | "month" | "custom">("30d");
   const toast = useCatCareToast();
   const [eventType, setEventType] = useState<(typeof eventTypes)[number][0]>(
     "feeding"
@@ -68,8 +70,14 @@ export function EventsWorkspaceClient({
   const [severity, setSeverity] =
     useState<(typeof severityOptions)[number][0]>("normal");
   const selectedEvents = useMemo(
-    () => eventList.filter((event) => event.catId === selectedCatId),
-    [eventList, selectedCatId]
+    () =>
+      filterEventsByRange(
+        eventList
+          .filter((event) => event.catId === selectedCatId)
+          .sort(compareEventsByDateDesc),
+        rangeMode
+      ),
+    [eventList, rangeMode, selectedCatId]
   );
   const relatedItemOptions = useMemo(
     () => Array.from(new Set(libraryItems.map((item) => item.name))),
@@ -81,10 +89,9 @@ export function EventsWorkspaceClient({
       <CatCareToast message={null} toast={toast.toast} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-[#101a32]">近期事件</h1>
-          <p className="mt-2 text-sm leading-6 text-[#526177]">
-            记录换粮、呕吐、用药、就医、行为异常等会影响照护计划的事件。
-          </p>
+          <h1 className="mt-1 text-3xl font-semibold text-[#101a32]">
+            事件与健康时间线
+          </h1>
         </div>
         <div className="flex flex-wrap gap-2">
           {cats.map((cat) => (
@@ -104,13 +111,32 @@ export function EventsWorkspaceClient({
         </div>
       </div>
 
+      <EventRangeBar
+        rangeMode={rangeMode}
+        selectedEvents={selectedEvents}
+        onChange={setRangeMode}
+      />
+
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_25rem]">
         <CatCarePanel>
-          <h2 className="text-2xl font-semibold text-[#101a32]">时间线</h2>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-[#101a32]">时间线</h2>
+              <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
+                近期健康、行为和环境变化会进入照护计划生成参考。
+              </p>
+            </div>
+            <SeverityLegend />
+          </div>
           {selectedEvents.length > 0 ? (
-            <div className="mt-5 grid gap-3">
-              {selectedEvents.map((event) => (
-                <EventCard event={event} key={event.id} />
+            <div className="relative mt-6 grid gap-0">
+              {selectedEvents.map((event, index) => (
+                <TimelineEventRow
+                  event={event}
+                  isFirst={index === 0}
+                  isLast={index === selectedEvents.length - 1}
+                  key={event.id}
+                />
               ))}
             </div>
           ) : (
@@ -155,7 +181,7 @@ export function EventsWorkspaceClient({
               <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2">
                 {eventTypes.map(([value, label]) => (
                   <button
-                    className={`min-h-10 rounded-lg px-3 text-sm font-semibold transition ${
+                    className={`inline-flex min-h-12 items-center justify-start gap-2 rounded-lg px-3 text-sm font-semibold transition ${
                       eventType === value
                         ? "bg-[#07847f] text-white shadow-sm shadow-teal-900/15"
                         : "bg-white text-[#526177] ring-1 ring-[#e2e6ee] hover:text-[#07847f]"
@@ -164,6 +190,7 @@ export function EventsWorkspaceClient({
                     onClick={() => setEventType(value)}
                     type="button"
                   >
+                    <CatCareEventTypeIcon className="h-8 w-8" eventType={value} />
                     {label}
                   </button>
                 ))}
@@ -230,6 +257,68 @@ export function EventsWorkspaceClient({
           创建照护计划
         </CatCareButton>
       </div>
+    </div>
+  );
+}
+
+function EventRangeBar({
+  rangeMode,
+  selectedEvents,
+  onChange
+}: {
+  rangeMode: "30d" | "month" | "custom";
+  selectedEvents: CatCareEvent[];
+  onChange: (mode: "30d" | "month" | "custom") => void;
+}) {
+  const rangeLabel = getEventRangeLabel(selectedEvents);
+
+  return (
+    <div className="grid gap-3 rounded-2xl border border-[#e2e6ee] bg-white p-3 shadow-sm shadow-slate-900/[0.04] lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center">
+      <div className="grid gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2 sm:grid-cols-3">
+        {[
+          ["30d", "近 30 天"],
+          ["month", "本月"],
+          ["custom", "自定义"]
+        ].map(([value, label]) => (
+          <button
+            className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-4 text-base font-semibold transition ${
+              rangeMode === value
+                ? "bg-[#07847f] text-white shadow-sm shadow-teal-900/15"
+                : "bg-white text-[#526177] ring-1 ring-[#e2e6ee] hover:text-[#07847f]"
+            }`}
+            key={value}
+            onClick={() => onChange(value as "30d" | "month" | "custom")}
+            type="button"
+          >
+            <CatCareCalendarIcon />
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl border border-[#d9e0ea] bg-white px-4 text-base font-semibold text-[#243653]">
+        <CatCareCalendarIcon className="h-5 w-5 text-[#07847f]" />
+        {rangeLabel}
+      </div>
+    </div>
+  );
+}
+
+function SeverityLegend() {
+  return (
+    <div className="flex flex-wrap gap-3 text-sm font-semibold text-[#526177]">
+      {[
+        ["#07847f", "正常"],
+        ["#f08a00", "关注"],
+        ["#d94235", "紧急"]
+      ].map(([color, label]) => (
+        <span className="inline-flex items-center gap-2" key={label}>
+          <span
+            className="h-2.5 w-2.5 rounded-full"
+            style={{ backgroundColor: color }}
+          />
+          {label}
+        </span>
+      ))}
     </div>
   );
 }
@@ -419,46 +508,131 @@ function RelatedItemInput({
   );
 }
 
-function EventCard({ event }: { event: CatCareEvent }) {
+function TimelineEventRow({
+  event,
+  isFirst,
+  isLast
+}: {
+  event: CatCareEvent;
+  isFirst: boolean;
+  isLast: boolean;
+}) {
   const typeLabel =
     eventTypes.find(([value]) => value === event.eventType)?.[1] ?? "事件";
+  const severity = getSeverityTone(event.severity);
 
   return (
-    <article className="rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-semibold text-[#101a32]">
-            {event.title}
-          </h3>
-          <p className="mt-1 text-sm font-semibold text-[#526177]">
-            {typeLabel}
-            {event.occurredOn ? ` · ${event.occurredOn}` : ""}
-          </p>
-        </div>
+    <article className="relative grid gap-3 border-b border-[#e2e6ee] py-5 last:border-b-0 sm:grid-cols-[5rem_4rem_minmax(0,1fr)_8rem] sm:items-center">
+      <div className="text-base font-semibold text-[#101a32] sm:text-center">
+        {formatEventDate(event.occurredOn)}
+      </div>
+      <div className="relative hidden h-full min-h-28 items-center justify-center sm:flex">
         <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            event.severity === "urgent"
-              ? "bg-[#fff4f2] text-[#b33a2f]"
-              : event.severity === "watch"
-                ? "bg-[#fff8e6] text-[#a35a00]"
-                : "bg-[#e6f7f2] text-[#07847f]"
-          }`}
-        >
-          {severityLabels[event.severity]}
+          className={`absolute left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-gradient-to-b from-[#d9e6e3] via-[#82b8b1] to-[#d9e6e3] ${
+            isFirst ? "top-1/2" : "top-0"
+          } ${isLast ? "bottom-1/2" : "bottom-0"}`}
+        />
+        <span className="absolute left-1/2 top-1/2 h-16 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
+        <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm shadow-slate-900/[0.05] ring-1 ring-[#c8d8e5]">
+          <CatCareEventTypeIcon className="h-10 w-10" eventType={event.eventType} />
         </span>
       </div>
-      {event.relatedItemName ? (
-        <p className="mt-3 text-sm font-semibold text-[#526177]">
-          关联：{event.relatedItemName}
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm shadow-slate-900/[0.04] ring-1 ring-[#e2e6ee] sm:hidden">
+        <CatCareEventTypeIcon className="h-8 w-8" eventType={event.eventType} />
+      </span>
+      <div className="min-w-0">
+        <h3 className="break-words text-lg font-semibold text-[#101a32]">
+          {event.title}
+        </h3>
+        <p className="mt-1 text-sm font-semibold text-[#526177]">
+          {typeLabel}
+          {event.relatedItemName ? ` · ${event.relatedItemName}` : ""}
         </p>
-      ) : null}
-      {event.note ? (
-        <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#526177]">
-          {event.note}
-        </p>
-      ) : null}
+        {event.note ? (
+          <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#526177]">
+            {event.note}
+          </p>
+        ) : null}
+      </div>
+      <span
+        className={`inline-flex w-fit items-center justify-center rounded-full px-3 py-1 text-sm font-semibold ${severity.badgeClass}`}
+      >
+        {severityLabels[event.severity]}
+      </span>
     </article>
   );
+}
+
+function filterEventsByRange(
+  events: CatCareEvent[],
+  rangeMode: "30d" | "month" | "custom"
+) {
+  const today = new Date();
+
+  if (rangeMode === "custom") {
+    return events;
+  }
+
+  return events.filter((event) => {
+    const occurredOn = event.occurredOn ? parseDateInput(event.occurredOn) : null;
+
+    if (!occurredOn) {
+      return false;
+    }
+
+    if (rangeMode === "month") {
+      return (
+        occurredOn.getFullYear() === today.getFullYear() &&
+        occurredOn.getMonth() === today.getMonth()
+      );
+    }
+
+    const start = new Date(today);
+    start.setDate(today.getDate() - 29);
+
+    return occurredOn >= start && occurredOn <= today;
+  });
+}
+
+function compareEventsByDateDesc(left: CatCareEvent, right: CatCareEvent) {
+  return (right.occurredOn ?? "").localeCompare(left.occurredOn ?? "");
+}
+
+function getEventRangeLabel(events: CatCareEvent[]) {
+  const dates = events
+    .map((event) => event.occurredOn)
+    .filter((date): date is string => Boolean(date))
+    .sort();
+
+  if (dates.length === 0) {
+    return "暂无事件";
+  }
+
+  return `${formatDateDisplay(dates[0])} - ${formatDateDisplay(dates[dates.length - 1])}`;
+}
+
+function getSeverityTone(severity: CatCareEvent["severity"]) {
+  return {
+    normal: {
+      badgeClass: "bg-[#e6f7f2] text-[#07847f]"
+    },
+    urgent: {
+      badgeClass: "bg-[#fff4f2] text-[#b33a2f]"
+    },
+    watch: {
+      badgeClass: "bg-[#fff8e6] text-[#a35a00]"
+    }
+  }[severity];
+}
+
+function formatEventDate(value: string | null) {
+  if (!value) {
+    return "未记录";
+  }
+
+  const [, month, day] = value.split("-");
+
+  return `${month}/${day}`;
 }
 
 function formatDateInput(date: Date) {

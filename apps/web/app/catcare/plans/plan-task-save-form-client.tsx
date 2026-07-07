@@ -8,6 +8,7 @@ import { CatCareSaveIcon } from "../catcare-action-icons";
 import { CatCareToast, useCatCareToast } from "../catcare-toast";
 import { CatCareButton } from "../owner-flow-components";
 import { CatCareTimeInput } from "../routines/routine-schedule-control";
+import { getPlanCatNames } from "./plan-cat-names";
 import { PlanTaskEditor } from "./plan-task-editor-client";
 import { PlanScheduleView } from "./plan-schedule-view";
 
@@ -235,23 +236,6 @@ function getPlanVisitCount(plan: CatCarePlan) {
       : 2;
 
   return value === 1 || value === 3 ? value : 2;
-}
-
-function getPlanCatNames(plan: CatCarePlan) {
-  const summary = plan.aiInputSummary;
-
-  return summary && typeof summary === "object" && !Array.isArray(summary)
-    ? Array.from(
-        new Set(
-          Array.isArray(summary.cat_names)
-            ? summary.cat_names.filter(
-                (name): name is string =>
-                  typeof name === "string" && name.trim().length > 0
-              )
-            : []
-        )
-      )
-    : [];
 }
 
 function inferVisitTimes(tasks: CatCareTask[], visitCount: number) {

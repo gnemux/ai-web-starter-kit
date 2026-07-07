@@ -31,7 +31,7 @@ export type CustomRoutineItemDraft = {
 const customCategoryOptions = [
   { id: "meal", label: "食物", labelEn: "Food" },
   { id: "treat", label: "零食", labelEn: "Treat" },
-  { id: "supplement", label: "营养补充品", labelEn: "Supplement" },
+  { id: "supplement", label: "营养补充", labelEn: "Supplement" },
   { id: "medicine", label: "用药", labelEn: "Medicine" }
 ] as const satisfies ReadonlyArray<{
   id: CustomRoutineCategory;

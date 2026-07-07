@@ -2631,6 +2631,7 @@ export function mapSubmission(row: CareSubmissionRow): CatCareSubmission {
     status: row.status,
     abnormal: row.abnormal,
     note: row.note,
+    idempotencyKey: row.idempotency_key,
     createdAt: row.created_at
   };
 }

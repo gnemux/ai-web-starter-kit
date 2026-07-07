@@ -148,9 +148,25 @@ function sortScheduleEntries(entries: PlanScheduleEntry[]) {
 
     return (
       leftTime - rightTime ||
+      getCategoryFlowOrder(left.task.category) -
+        getCategoryFlowOrder(right.task.category) ||
       left.task.title.localeCompare(right.task.title, "zh-Hans-CN")
     );
   });
+}
+
+function getCategoryFlowOrder(category: CatCareTask["category"]) {
+  return {
+    meal: 10,
+    medicine: 20,
+    water: 30,
+    treat: 40,
+    play: 50,
+    litter: 60,
+    observe: 70,
+    environment: 80,
+    other: 90
+  }[category ?? "other"];
 }
 
 function getTimeSortValue(time: string | null) {

@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
 import {
+  catCareItemTypes,
+  type CatCareItemType
+} from "../catcare-item-types";
+import {
   CatCareField,
   catCareInputClass
 } from "../owner-flow-components";
@@ -11,21 +15,8 @@ import { CatCareSaveIcon } from "../catcare-action-icons";
 import { BrandAutocompleteInput } from "../routines/brand-autocomplete-input";
 import type { CatFoodProductType } from "@/lib/catcare/cat-food-options";
 
-const itemTypes = [
-  ["dry_food", "主粮"],
-  ["wet_food", "罐头/湿粮"],
-  ["treat", "零食/零食罐"],
-  ["supplement", "营养补充品"],
-  ["medicine", "药品"],
-  ["litter", "猫砂"],
-  ["supply", "器具/设备"],
-  ["other", "其它"]
-] as const;
-
-type ItemType = (typeof itemTypes)[number][0];
-
 const productTypeByItemType: Partial<
-  Record<(typeof itemTypes)[number][0], CatFoodProductType>
+  Record<CatCareItemType, CatFoodProductType>
 > = {
   dry_food: "dry_food",
   supplement: "supplement",
@@ -43,10 +34,10 @@ export function ItemCreateForm({
   action: (formData: FormData) => void | Promise<void>;
   catalogProducts: Array<{ itemType: string; displayName: string }>;
   currentCatId: string;
-  initialItemType?: ItemType;
+  initialItemType?: CatCareItemType;
   libraryItems: Array<{ itemType: string; name: string }>;
 }) {
-  const [itemType, setItemType] = useState<ItemType>(initialItemType);
+  const [itemType, setItemType] = useState<CatCareItemType>(initialItemType);
   const libraryOptions = libraryItems
     .filter((item) => item.itemType === itemType)
     .map((item) => item.name);
@@ -63,7 +54,7 @@ export function ItemCreateForm({
       <CatCareField label="类型">
         <input name="itemType" type="hidden" value={itemType} />
         <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2 sm:grid-cols-3">
-          {itemTypes.map(([value, label]) => (
+          {catCareItemTypes.map(([value, label]) => (
             <button
               className={`min-h-11 rounded-lg px-3 text-sm font-semibold transition ${
                 itemType === value
@@ -98,8 +89,8 @@ export function ItemCreateForm({
           />
         )}
         <p className="text-xs font-semibold leading-5 text-[#75839a]">
-          主食罐归入「罐头/湿粮」；零食罐、猫条、冻干归入「零食/零食罐」。
-          鱼油、益生菌、化毛膏归入「营养补充品」；兽医处方或临时用药归入「药品」。
+          主食罐归入「罐头/湿粮」；猫条、冻干归入「零食」。
+          鱼油、益生菌、化毛膏归入「营养补充」；兽医处方或临时用药归入「药品」。
         </p>
       </CatCareField>
       <CatCareField label="存放/备注">

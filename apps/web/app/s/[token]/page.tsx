@@ -5,6 +5,10 @@ import {
   type AnonymousCarePlanView,
   type AnonymousCareTaskView
 } from "@/lib/catcare/product-service";
+import {
+  getAnonymousCarePlanServiceDates,
+  getAnonymousCareTodayIsoDate
+} from "@/lib/catcare/product-service/anonymous-submission-policy";
 
 import {
   formatTaskAction,
@@ -29,25 +33,27 @@ export default async function AnonymousCarePlanPage({ params }: SharePageProps) 
   const result = await getAnonymousCarePlanView(token);
 
   return (
-    <main className="min-h-screen bg-[#f7f3ee] px-4 py-5 text-[#101a32] sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full max-w-5xl gap-5">
-        <AnonymousHeader />
+    <main className="min-h-screen overflow-x-hidden bg-[#f7f3ee] px-4 py-5 text-[#101a32] sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-full min-w-0 max-w-[1196px] gap-5">
         {result.ok ? (
           <AnonymousCarePlan plan={result.data} token={token} />
         ) : (
-          <ShareErrorState
-            kind={result.error.fields?.token}
-            message={result.error.message}
-          />
+          <>
+            <AnonymousHeader expiresAt={null} />
+            <ShareErrorState
+              kind={result.error.fields?.token}
+              message={result.error.message}
+            />
+          </>
         )}
       </div>
     </main>
   );
 }
 
-function AnonymousHeader() {
+function AnonymousHeader({ expiresAt }: { expiresAt: string | null }) {
   return (
-    <header className="flex items-center justify-between gap-4 rounded-[22px] border border-[#e2e6ee] bg-white px-4 py-3 shadow-sm shadow-slate-900/[0.04]">
+    <header className="flex min-w-0 flex-col gap-3 rounded-[22px] border border-[#e2e6ee] bg-white px-4 py-3 shadow-sm shadow-slate-900/[0.04] sm:flex-row sm:items-center sm:justify-between">
       <div className="flex min-w-0 items-center gap-3">
         <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden">
           <img
@@ -59,14 +65,24 @@ function AnonymousHeader() {
         </span>
         <div className="min-w-0">
           <p className="truncate text-lg font-bold text-[#101a32]">CatCare</p>
-          <p className="truncate text-xs font-semibold text-[#526177]">
-            私密照护交接
-          </p>
+          <h1 className="truncate text-2xl font-semibold text-[#101a32]">
+            照护任务
+          </h1>
         </div>
       </div>
-      <span className="shrink-0 rounded-full bg-[#e6f7f2] px-3 py-1 text-xs font-semibold text-[#07847f]">
-        照看者只读
-      </span>
+      <div className="flex w-full min-w-0 flex-wrap items-center gap-2 text-sm font-semibold sm:w-auto sm:justify-end">
+        <span className="max-w-full rounded-full bg-[#e6f7f2] px-3 py-1 leading-5 text-[#07847f]">
+          匿名访问
+        </span>
+        <span className="max-w-full whitespace-normal break-words rounded-full bg-[#fffaf0] px-3 py-1 leading-5 text-[#8a5a00]">
+          私密分享，仅供照看者查看和提交
+        </span>
+        {expiresAt ? (
+          <span className="max-w-full whitespace-normal break-words rounded-full bg-white px-3 py-1 leading-5 text-[#526177] ring-1 ring-[#d9e0ea]">
+            有效期至 {formatDateTime(expiresAt)}
+          </span>
+        ) : null}
+      </div>
     </header>
   );
 }
@@ -79,32 +95,38 @@ function AnonymousCarePlan({
   token: string;
 }) {
   const optionalCount = plan.taskCount - plan.requiredTaskCount;
-  const taskFlow = buildAnonymousTaskFlow(plan.tasks);
+  const serviceDays = buildAnonymousServiceDays(plan);
   const attentionTasks = getAnonymousAttentionTasks(plan.tasks);
 
   return (
     <>
+      <AnonymousHeader expiresAt={plan.expiresAt} />
       <section className="rounded-[24px] border border-[#d9eee7] bg-[#f2fbf8] p-5 shadow-sm shadow-slate-900/[0.04] sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
-            可查看
+            可查看和提交
           </span>
           <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
             有效期至 {formatDateTime(plan.expiresAt)}
           </span>
         </div>
-        <h1 className="mt-4 text-3xl font-semibold leading-tight text-[#101a32]">
+        <h2 className="mt-4 text-3xl font-semibold leading-tight text-[#101a32]">
           {plan.title}
-        </h1>
+        </h2>
         <p className="mt-3 text-base font-semibold leading-7 text-[#526177]">
-          这是 {formatList(plan.catNames)} 的临时照护交接。先阅读主人交代，再按到访步骤执行。
+          这是主人分享给家人、朋友或照看者的临时照护交接。先认清猫咪，再按每天的到访步骤执行。
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {plan.catNames.map((name, index) => (
+            <CatNameChip index={index} key={name} name={name} />
+          ))}
+        </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
           <SummaryCard label="照护猫咪" value={formatList(plan.catNames)} />
           <SummaryCard label="照护日期" value={formatDateRange(plan)} />
           <SummaryCard
             label="到访安排"
-            value={`${taskFlow.length} 次 / ${plan.taskCount} 项`}
+            value={`${serviceDays.length} 天 · ${getDailyVisitCount(serviceDays)} 次/天`}
           />
         </div>
         <nav
@@ -145,7 +167,7 @@ function AnonymousCarePlan({
           <section className="rounded-[22px] border border-[#e2e6ee] bg-white p-5 shadow-sm shadow-slate-900/[0.04]">
             <p className="text-sm font-semibold text-[#07847f]">查看方式</p>
             <p className="mt-3 text-sm font-semibold leading-6 text-[#526177]">
-              这个页面只显示主人授权的信息。先核对日期和猫咪，再按到访时间逐项执行；反馈提交会在下一步开放。
+              这个页面只显示主人授权的信息。先核对日期和猫咪，再按每天的到访步骤执行；当天和已到日期可以提交，未来日期暂不开放提交。
             </p>
           </section>
         </div>
@@ -158,11 +180,11 @@ function AnonymousCarePlan({
             <div>
               <p className="text-sm font-semibold text-[#07847f]">照护任务</p>
               <h2 className="mt-1 text-2xl font-semibold text-[#101a32]">
-                按到访时间逐步执行
+                按日期和到访时间逐步执行
               </h2>
             </div>
             <span className="text-sm font-semibold text-[#526177]">
-              {plan.requiredTaskCount} 必做 / {optionalCount} 可选
+              {plan.requiredTaskCount} 项必做，{optionalCount} 项可选
             </span>
           </div>
 
@@ -182,7 +204,7 @@ function AnonymousCarePlan({
             </section>
           ) : null}
 
-          <AnonymousVisitAccordion sections={taskFlow} token={token} />
+          <AnonymousVisitAccordion days={serviceDays} token={token} />
         </section>
       </div>
 
@@ -201,6 +223,25 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
         {value}
       </p>
     </div>
+  );
+}
+
+function CatNameChip({ index, name }: { index: number; name: string }) {
+  const styles = [
+    "bg-[#e6f7f2] text-[#07847f] ring-[#bfe5d7]",
+    "bg-[#fff4e8] text-[#9a5b16] ring-[#efd1ad]",
+    "bg-[#eef4ff] text-[#315a9f] ring-[#cddbf6]"
+  ];
+
+  return (
+    <span
+      className={`inline-flex min-h-9 items-center gap-2 rounded-full px-3 text-sm font-semibold ring-1 ${styles[index % styles.length]}`}
+    >
+      <span className="grid h-6 w-6 place-items-center rounded-full bg-white/80 text-xs">
+        {name.slice(0, 1)}
+      </span>
+      {name}
+    </span>
   );
 }
 
@@ -232,11 +273,9 @@ function TaskStep({
         <h4 className="mt-2 break-words text-base font-semibold leading-7 text-[#101a32]">
           {formatTaskAction(task.title)}
         </h4>
-        {title.owner ? (
-          <p className="mt-1 text-sm font-semibold text-[#526177]">
-            适用猫咪：{title.owner}
-          </p>
-        ) : null}
+        <p className="mt-1 text-sm font-semibold text-[#526177]">
+          适用范围：{title.owner ?? "家庭共用"}
+        </p>
         <p className="mt-1 text-sm font-semibold leading-6 text-[#526177]">
           {formatFrequency(task.frequency)}
         </p>
@@ -250,15 +289,53 @@ function TaskStep({
   );
 }
 
+type ScheduledAnonymousTask = Omit<
+  AnonymousCareTaskView,
+  "submissionsBySlot"
+> & {
+  locked: boolean;
+  serviceDate: string;
+  submission: AnonymousCareTaskView["submissionsBySlot"][string] | null;
+  visitTime: string;
+};
+
 type AnonymousVisitSection = {
-  tasks: AnonymousCareTaskView[];
+  tasks: ScheduledAnonymousTask[];
   timeLabel: string;
 };
 
+type AnonymousServiceDay = {
+  date: string;
+  dateLabel: string;
+  locked: boolean;
+  statusLabel: string;
+  visits: AnonymousVisitSection[];
+};
+
+function buildAnonymousServiceDays(
+  plan: AnonymousCarePlanView
+): AnonymousServiceDay[] {
+  const today = getAnonymousCareTodayIsoDate();
+
+  return getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn).map((date) => {
+    const locked = date > today;
+
+    return {
+      date,
+      dateLabel: formatServiceDate(date),
+      locked,
+      statusLabel: locked ? "未到日期" : date === today ? "今天可提交" : "可补提交",
+      visits: buildAnonymousTaskFlow(plan.tasks, date, locked)
+    };
+  });
+}
+
 function buildAnonymousTaskFlow(
-  tasks: AnonymousCareTaskView[]
+  tasks: AnonymousCareTaskView[],
+  serviceDate: string,
+  locked: boolean
 ): AnonymousVisitSection[] {
-  const sections = new Map<string, AnonymousCareTaskView[]>();
+  const sections = new Map<string, ScheduledAnonymousTask[]>();
 
   for (const task of tasks) {
     if (isAnonymousAttentionTask(task)) {
@@ -266,7 +343,20 @@ function buildAnonymousTaskFlow(
     }
 
     for (const timeLabel of getTaskVisitTimes(task)) {
-      sections.set(timeLabel, [...(sections.get(timeLabel) ?? []), task]);
+      sections.set(timeLabel, [
+        ...(sections.get(timeLabel) ?? []),
+        {
+          ...task,
+          locked,
+          serviceDate,
+          submission:
+            task.submissionsBySlot[createAnonymousSubmissionSlotKey(
+              serviceDate,
+              timeLabel
+            )] ?? null,
+          visitTime: timeLabel
+        }
+      ]);
     }
   }
 
@@ -278,6 +368,14 @@ function buildAnonymousTaskFlow(
     }));
 }
 
+function createAnonymousSubmissionSlotKey(serviceDate: string, visitTime: string) {
+  return `${serviceDate}:${visitTime}`;
+}
+
+function getDailyVisitCount(days: AnonymousServiceDay[]) {
+  return Math.max(0, ...days.map((day) => day.visits.length));
+}
+
 function getAnonymousAttentionTasks(tasks: AnonymousCareTaskView[]) {
   return tasks.filter(isAnonymousAttentionTask).sort(compareAnonymousTasks);
 }
@@ -287,8 +385,8 @@ function isAnonymousAttentionTask(task: AnonymousCareTaskView) {
 }
 
 function compareAnonymousTasks(
-  left: AnonymousCareTaskView,
-  right: AnonymousCareTaskView
+  left: Pick<AnonymousCareTaskView, "category" | "sortOrder" | "title">,
+  right: Pick<AnonymousCareTaskView, "category" | "sortOrder" | "title">
 ) {
   return (
     getCategoryFlowOrder(left.category) - getCategoryFlowOrder(right.category) ||
@@ -299,15 +397,15 @@ function compareAnonymousTasks(
 
 function getCategoryFlowOrder(category: AnonymousCareTaskView["category"]) {
   return {
-    medicine: 0,
     meal: 10,
-    water: 20,
-    treat: 30,
-    play: 40,
-    litter: 50,
-    environment: 60,
+    medicine: 20,
+    water: 30,
+    treat: 40,
+    play: 50,
+    litter: 60,
     observe: 70,
-    other: 80
+    environment: 80,
+    other: 90
   }[category ?? "other"];
 }
 
@@ -357,6 +455,15 @@ function getTimeSortValue(time: string) {
   return Number(match[1]) * 60 + Number(match[2]);
 }
 
+function formatServiceDate(date: string) {
+  const weekday = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    weekday: "short"
+  }).format(new Date(`${date}T00:00:00+08:00`));
+
+  return `${date} ${weekday}`;
+}
+
 function ShareErrorState({
   kind,
   message
@@ -373,7 +480,7 @@ function ShareErrorState({
     invalid: {
       label: "不可用",
       title: "分享链接不可用",
-      description: "链接可能复制不完整，或并不是有效的 CatCare 私密链接。"
+      description: "链接无效或复制不完整。请让主人重新发送。"
     },
     revoked: {
       label: "已撤销",
@@ -392,19 +499,19 @@ function ShareErrorState({
   };
 
   return (
-    <section className="rounded-[24px] border border-[#e2e6ee] bg-white p-6 shadow-sm shadow-slate-900/[0.04]">
+    <section className="min-w-0 rounded-[24px] border border-[#e2e6ee] bg-white p-6 shadow-sm shadow-slate-900/[0.04]">
       <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-xs font-semibold text-[#526177]">
         {meta.label}
       </span>
-      <h1 className="mt-5 text-3xl font-semibold leading-tight text-[#101a32]">
+      <h2 className="mt-5 break-words text-3xl font-semibold leading-tight text-[#101a32]">
         {meta.title}
-      </h1>
-      <p className="mt-3 text-base font-semibold leading-7 text-[#526177]">
+      </h2>
+      <p className="mt-3 break-all text-base font-semibold leading-7 text-[#526177]">
         {meta.description}
       </p>
       <div className="mt-6 rounded-2xl bg-[#fbfdfc] px-4 py-4 ring-1 ring-[#e2e6ee]">
-        <p className="text-sm font-semibold leading-6 text-[#526177]">
-          为保护主人和猫咪信息，CatCare 不会在无效链接中展示任何照护内容。
+        <p className="break-all text-sm font-semibold leading-6 text-[#526177]">
+          为保护主人和猫咪信息，无效链接不会展示照护内容。
         </p>
       </div>
     </section>

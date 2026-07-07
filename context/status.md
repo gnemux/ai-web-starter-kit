@@ -706,9 +706,233 @@ Latest `GNE-257` ACCESS anonymous view update on 2026-07-07:
   whitelist. GNE-259 remains the RLS acceptance issue; GNE-260 remains security
   negative/audit verification.
 
+Latest `GNE-258` / `GNE-290` boundary correction on 2026-07-07:
+
+- GNE-258 is no longer treated as PRODUCT-quality completion for the anonymous
+  sitter experience. Its acceptable scope is ACCESS technical foundation only:
+  anonymous submit through share token, real `care_submissions`, field
+  whitelist, service-date/visit validation, duplicate/update handling, and
+  owner result visibility.
+- The V6 prototype drift across screens 06-11 is now tracked by `GNE-290`
+  under `GNE-231`. That issue must restore the PRODUCT flow from
+  `06-food-care-items.png` through `11-sitter-checklist.png` in order.
+- GNE-290 acceptance must include desktop/mobile visual QA, icon/button
+  baseline review, no horizontal overflow, and three-party review evidence:
+  architecture boundary, UI/icon quality, and product interaction.
+- Non-goals remain explicit: no live AI/payment/entitlement, no anonymous photo
+  upload or Storage/RLS image flow, no anonymous paid-state display, and no
+  CatCare business objects in `packages/*`.
+
+GNE-290 progress on 2026-07-07:
+
+- Current local branch has started the V6 06-11 restoration without changing
+  database schema or moving CatCare business objects into `packages/*`.
+- Frontend polish now covers 06 item-library table direction, 07 event timeline
+  direction, 08 scenario/AI input step chain, 09 draft AI-review framing, 10
+  private-share framing, and 11 anonymous mobile header/task flow improvements.
+- Anonymous sitter flow now shows cat-specific vs `家庭共用` scope, uses a more
+  human task category order after time ordering, opens the first incomplete
+  available day, and collapses a visit/day after submission completion.
+- Verification passed: `pnpm --filter @xwlc/web typecheck`, `lint`, `test`,
+  `build`, `pnpm test:package-boundaries`, `pnpm test:release-boundaries`, and
+  `git diff --check`.
+- Browser QA evidence currently covers 390px anonymous invalid-link state:
+  no horizontal overflow and no plan-data leakage. Owner-side 06-10 visual QA
+  still needs an authenticated reviewer session; valid `/s/[token]` QA still
+  needs an active real share token.
+
+GNE-290 product-feedback correction on 2026-07-07:
+
+- Project rules and product usability now explicitly override prototype copy:
+  V6 prototypes are reference material for flow and information architecture,
+  not a mandate to keep mixed Chinese/English labels or unfinished controls.
+- 06 Food & Care Items was corrected after product review: category tabs now
+  filter the list, visible UI no longer keeps English category labels, fake scan
+  and package upload UI was removed from the shipped surface. The interim
+  in-app SVG category-icon direction was later rejected by product review and
+  superseded by the product glyph badge rework below.
+- 07-11 visible page headings and status copy were cleaned to avoid exposed
+  prototype labels, English suffixes, and `mock` wording in Chinese product UI.
+- Updated browser evidence: 390px anonymous invalid-link page is Chinese-only
+  for the page title area, has one H1, and keeps `scrollWidth=390` with
+  `clientWidth=390`.
+
+GNE-290 06-11 product-quality correction on 2026-07-07:
+
+- Product rules were applied above literal prototype copying: Chinese-mode UI
+  must not keep prototype English suffixes, unfinished scan/OCR controls, or
+  mismatched product imagery as acceptance evidence.
+- 06 Food & Care Items now uses one product-local item type source for labels,
+  form choices, usage tags, and filters. Category tabs were browser-verified at
+  390px to change the visible list (`猫砂（1）` after tapping `猫砂 1`) with
+  `scrollWidth=390` and `clientWidth=390`.
+- 06/07 food and routine surfaces temporarily used consistent in-app SVG
+  pictograms, but this direction was later rejected because it lost product
+  illustration quality. The current accepted direction is the product glyph
+  badge rework below.
+- Chinese-mode product copy now uses `智能摘要` / `智能额度` wording instead of
+  exposed `AI/live AI/AI Credit` mixed copy across the owner flow, shell, plan,
+  result, billing, and usage surfaces.
+- Browser smoke on 390px covered `/catcare/items`, `/catcare/routines`,
+  `/catcare/events`, `/catcare/plans`, and invalid `/s/[token]`; all checked
+  pages kept `scrollWidth=390` with `clientWidth=390` and no prototype images
+  in the inspected product pages. Valid active share-token QA is still pending.
+
+GNE-290 active share-link mobile QA on 2026-07-07:
+
+- Browser QA covered a valid temporary `/s/[token]` at 390px without recording
+  the raw token in docs or final evidence.
+- Evidence: anonymous page rendered `照护任务`, did not show owner navigation,
+  showed cat-specific scope for `汤圆` / `饺子`, showed `家庭共用`, exposed submit
+  controls only for the current/available day, and marked future days as
+  `未到日期`.
+- Interaction QA: opening the second visit collapsed the first visit (`第 1 次到访`
+  changed to `展开`) and rendered the second visit's 11 task forms, avoiding a
+  full-page task dump. The page kept `scrollWidth=390` and `clientWidth=390`.
+- Cleanup was later completed through sandbox-external Supabase REST: the
+  temporary online `share_tokens` row and the isolated QA owner data were
+  deleted before PR/merge closure.
+
+GNE-290 three-party product review on 2026-07-07:
+
+- Architect score: 92/100. The shared additions stay inside the CatCare product
+  boundary (`catcare-item-types`, `catcare-item-type-icon`) and do not move
+  cat-specific business objects into common packages. ACCESS token hashing and
+  anonymous submission logic remain in product service code.
+- UI designer score: 91/100. 06/07 now use consistent pictograms instead of
+  prototype image assets; Chinese-mode product copy no longer mixes exposed
+  `AI Credit` wording; 390px owner and anonymous checks show no horizontal
+  overflow.
+- Product manager score: 91/100. The anonymous sitter flow now clarifies cats,
+  `家庭共用`, current-day availability, future-day lockout, and visit-by-visit
+  progression. Opening another visit collapses the previous one instead of
+  showing an overwhelming task dump.
+- This review was superseded by later UI feedback and is retained only as
+  historical context.
+
+This review result is superseded by the product-quality rework checkpoint below
+because later PM/UI feedback rejected the inline-SVG product-object direction.
+
+GNE-290 product-quality rework checkpoint on 2026-07-07:
+
+- The previous three-party score is superseded by later product feedback. The
+  hand-drawn inline SVG direction for item/task/event visuals was rejected and
+  must not be used as Done evidence.
+- Current rework restores the CatCare product icon production rule without
+  rendering raw prototype PNG crops directly. Item categories, event rows, plan
+  task lines, and anonymous sitter task cards now use product-local semantic
+  glyphs through `catcare-item-type-icon.tsx`; PNG crops are reference material
+  only.
+- The events timeline now uses event-type icons plus severity badges instead of
+  a dot-only timeline. The plan generation page no longer places history plans
+  inside the AI input summary column; existing plans are a secondary management
+  section below the generation flow. Published plan detail now reads as a care
+  plan overview rather than only a private-share panel. Anonymous task cards now
+  show category assets, family/cat scope chips, and a clearer mobile check-in
+  hierarchy.
+- Verification passed: `pnpm --filter @xwlc/web typecheck`,
+  `pnpm --filter @xwlc/web lint`, `pnpm --filter @xwlc/web test`,
+  `pnpm --filter @xwlc/web build`, `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and `git diff --check`.
+- Local dev server is listening on `http://127.0.0.1:3003`. Sandboxed
+  localhost access is blocked by `Operation not permitted`, but sandbox-external
+  curl verified `/catcare/items`, `/catcare/events`, and `/catcare/plans`
+  redirect to `/login?next=%2Fcatcare` when signed out, and
+  `/s/invalid-token-smoke` returns `200 OK`.
+- Mobile screenshot evidence: system Chrome captured
+  `/private/tmp/gne290-invalid-390-r3.png` at 390px for invalid
+  `/s/invalid-token-smoke`; the earlier horizontal text clipping was fixed by
+  tightening the invalid-link copy and mobile wrapping.
+- Cleanup evidence: sandbox-external Supabase REST cleanup deleted the earlier
+  temporary online `share_tokens` row (`deleted_rows 1`).
+- Latest local QA seed evidence uses an isolated online test owner and plan for
+  GNE-290 visual QA only. Authenticated owner screenshots now cover 06-10, and
+  active-token mobile screenshots cover 11:
+  `/private/tmp/gne290-06-items-desktop.png`,
+  `/private/tmp/gne290-07-events-desktop.png`,
+  `/private/tmp/gne290-08-plans-desktop.png`,
+  `/private/tmp/gne290-09-plan-detail-desktop.png`,
+  `/private/tmp/gne290-10-private-share-mobile.png`,
+  `/private/tmp/gne290-11-sitter-mobile.png`,
+  `/private/tmp/gne290-11-sitter-mobile-tasks.png`, and
+  `/private/tmp/gne290-11-sitter-mobile-accordion.png`.
+- Screenshot metrics show no horizontal overflow for the captured viewports:
+  owner desktop pages rendered at `scrollWidth=1440 / viewport=1440`; private
+  mobile pages rendered at `scrollWidth=390 / viewport=390`.
+- Local 3003 recovery evidence: a stale/corrupted Next dev `.next` cache caused
+  CSS/runtime chunk failures (`Cannot find module './5846.js'`) and made the
+  page look globally unstyled. After stopping 3003, deleting
+  `apps/web/.next`, and restarting, sandbox-external curl verified
+  `/login 200 OK` and `/_next/static/css/app/layout.css 200 OK` with
+  `Content-Length: 73987`.
+- Later cleanup evidence deleted the current isolated online QA owner/token rows
+  before PR/merge closure.
+
+GNE-290 test-readiness three-party review on 2026-07-07:
+
+- Architect score: 92/100. The latest corrections remain inside CatCare product
+  boundaries: product-specific assets/mappings stay under `apps/web/app/catcare`
+  and `apps/web/public/catcare`, anonymous access logic remains under the
+  product service, and no cat-care object was moved into common packages.
+- UI designer score: 90/100. Screens 06-11 now use consistent product-local
+  glyphs, readable status chips, stable desktop grids, and mobile private pages
+  without horizontal overflow. Minor debt remains in disabled-share explanatory
+  density on the owner detail page, but it is not a test blocker.
+- Product manager score: 91/100. The sitter flow now explains authorization,
+  family/cat scope, current-day availability, future-day lockout, and
+  visit-by-visit execution before the long task list.
+
+GNE-290 icon-quality correction on 2026-07-07:
+
+- User visual QA rejected the previous product PNG icon pass because some icons
+  carried baked-in white backing shapes, several event/category meanings were
+  too generic, and the event timeline line visually ran through the marker
+  container.
+- Runtime category/event/task icons now use one product-local semantic SVG
+  glyph system in `apps/web/app/catcare/catcare-item-type-icon.tsx` instead of
+  rendering raw prototype PNG crops. The PNG crops remain only as reference
+  material in the icon inventory.
+- Event timeline markers now draw per-row connector segments behind each
+  marker instead of one continuous line through the icon box.
+- Follow-up UI review found the first semantic glyph pass too bare and
+  engineering-like. The icons now render as colored product badges with
+  category-specific tones, and the event timeline spine is stronger while still
+  masked by each marker.
+- Fresh final screenshots after the correction:
+  `/private/tmp/gne290-final-06-items-desktop.png`,
+  `/private/tmp/gne290-final-07-events-desktop.png`,
+  `/private/tmp/gne290-final-08-plans-desktop.png`,
+  `/private/tmp/gne290-final-09-plan-detail-desktop.png`,
+  `/private/tmp/gne290-final-10-share-desktop.png`,
+  `/private/tmp/gne290-final-11-sitter-mobile.png`, and
+  `/private/tmp/gne290-final-11-sitter-mobile-tasks.png`.
+- Captured pages stayed within viewport width: desktop pages
+  `scrollWidth=1440 / viewport=1440`, mobile pages
+  `scrollWidth=390 / viewport=390`.
+- Verification passed after the correction:
+  `pnpm --filter @xwlc/web typecheck` and
+  `pnpm --filter @xwlc/web lint`,
+  `pnpm --filter @xwlc/web test`,
+  `pnpm --filter @xwlc/web build`,
+  `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and `git diff --check`.
+- After the production build check, local dev was restarted cleanly on
+  `http://127.0.0.1:3003`; sandbox-external curl verified `/login 200 OK` and
+  `/_next/static/css/app/layout.css 200 OK` with `Content-Length: 73987`.
+- Final cleanup evidence: sandbox-external Supabase REST cleanup deleted the
+  isolated GNE-290 visual QA owner data before closure (`share_tokens 1`,
+  `care_tasks 7`, `care_plans 1`, `care_events 3`,
+  `cat_item_assignments 12`, `owner_item_library 6`, `cats 2`,
+  `user_profiles 1`, `auth_user 1`) and verified remaining counts were `0` for
+  the inspected owner-scoped tables. The local raw token/password state file
+  and temporary QA scripts were removed after evidence capture.
+
 ## Next Steps
 
-1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, continue on the current branch unless the Repo Owner explicitly asks for a new branch; do not reuse pre-tag Auth/payment branches.
+1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish
+   GNE-258 only as ACCESS technical foundation, then run GNE-290 from prototype
+   screen 06 through 11 before claiming final product quality for the share and
+   sitter flow.
 2. Before changing GitHub repository visibility to Public, merge the current
    open-source preparation branch through the normal PR path. Historical
    Supabase staging identifiers, Creem test object IDs, and operator-email

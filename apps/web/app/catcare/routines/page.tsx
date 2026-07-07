@@ -6,6 +6,7 @@ import {
   CatCarePlusCircleIcon,
   CatCareSaveIcon
 } from "../catcare-action-icons";
+import { CatCareItemTypeIcon } from "../catcare-item-type-icon";
 import { CatCareToast } from "../catcare-toast";
 import { getCatCareContentContext } from "../catcare-shell";
 import {
@@ -37,7 +38,7 @@ const routineCards = [
     accent: "teal",
     aliases: [],
     category: "meal",
-    iconSrc: "/catcare/icons/prototype/routine-dry-food.png",
+    iconType: "dry_food",
     key: "dry_food",
     subtitle: "每日主食",
     subtitleEn: "Daily staple",
@@ -48,7 +49,7 @@ const routineCards = [
     accent: "rose",
     aliases: [],
     category: "meal",
-    iconSrc: "/catcare/icons/prototype/routine-canned.png",
+    iconType: "wet_food",
     key: "canned",
     subtitle: "湿粮加餐",
     subtitleEn: "Wet food",
@@ -59,7 +60,7 @@ const routineCards = [
     accent: "amber",
     aliases: [],
     category: "treat",
-    iconSrc: "/catcare/icons/prototype/routine-treat.png",
+    iconType: "treat",
     key: "treats",
     subtitle: "奖励与训练",
     subtitleEn: "Rewards",
@@ -69,7 +70,7 @@ const routineCards = [
   {
     accent: "sky",
     category: "water",
-    iconSrc: "/catcare/icons/prototype/routine-water.png",
+    iconType: "water",
     key: "water",
     aliases: ["饮水"],
     subtitle: "换水清洁",
@@ -80,7 +81,7 @@ const routineCards = [
   {
     accent: "violet",
     category: "litter",
-    iconSrc: "/catcare/icons/prototype/routine-litter.png",
+    iconType: "litter",
     key: "litter",
     aliases: ["猫砂"],
     subtitle: "猫砂盆维护",
@@ -92,7 +93,7 @@ const routineCards = [
     accent: "coral",
     aliases: [],
     category: "play",
-    iconSrc: "/catcare/icons/prototype/routine-play.png",
+    iconType: "play",
     key: "play",
     subtitle: "互动陪伴",
     subtitleEn: "Interaction",
@@ -398,10 +399,10 @@ function RoutineCard({
         name={`${card.key}.enabled`}
         type="checkbox"
       />
-      <div className="flex items-start justify-between gap-4 opacity-55 transition peer-checked:opacity-100 peer-checked:[&_.routine-off-badge]:hidden peer-checked:[&_.routine-switch-knob]:translate-x-6 peer-checked:[&_.routine-switch-track]:bg-[#07847f] [&_img]:grayscale peer-checked:[&_img]:grayscale-0">
+      <div className="flex items-start justify-between gap-4 opacity-55 transition peer-checked:opacity-100 peer-checked:[&_.routine-off-badge]:hidden peer-checked:[&_.routine-switch-knob]:translate-x-6 peer-checked:[&_.routine-switch-track]:bg-[#07847f]">
         <div className="flex items-center gap-4">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full">
-            <img alt="" className="h-14 w-14" src={card.iconSrc} />
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#f2fbf8] text-[#07847f] ring-1 ring-[#d9eee7]">
+            <RoutineCardIcon iconType={card.iconType} />
           </span>
           <div>
             <div className="flex items-center gap-2">
@@ -485,6 +486,10 @@ function RoutineCard({
       </div>
     </section>
   );
+}
+
+function RoutineCardIcon({ iconType }: { iconType: string }) {
+  return <CatCareItemTypeIcon className="h-8 w-8" itemType={iconType} />;
 }
 
 function CareItemsContextPanel({

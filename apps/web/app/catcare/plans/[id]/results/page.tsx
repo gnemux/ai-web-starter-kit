@@ -127,10 +127,10 @@ function PlanResults({ plan }: { plan: CatCarePlan }) {
 
           <CatCarePanel>
             <h2 className="text-xl font-semibold text-[#101a32]">
-              AI 复盘
+              智能复盘
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#526177]">
-              后续会基于真实提交、异常反馈和照片生成复盘重点；当前不接 live AI 或真实扣费。
+              后续会基于真实提交、异常反馈和照片生成复盘重点；当前不接实时智能能力或真实扣费。
             </p>
             <div className="mt-5 flex min-h-14 items-center justify-center gap-3 rounded-xl border border-[#07847f] bg-white px-5 text-base font-semibold text-[#07847f]">
               <CatCareSearchIcon />
@@ -278,7 +278,9 @@ function ResultEntryCard({ entry }: { entry: PlanResultEntry }) {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <p className="text-sm font-semibold text-[#07847f]">
-                {entry.createdAt ?? "提交时间待记录"}
+                {entry.serviceDate
+                  ? `${entry.serviceDate} · ${entry.createdAt ?? "提交时间待记录"}`
+                  : entry.createdAt ?? "提交时间待记录"}
               </p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {entry.ownerLabel ? (

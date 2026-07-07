@@ -72,6 +72,120 @@
 
 ## Verification Snapshot
 
+2026-07-07 GNE-258 / GNE-290 boundary correction:
+
+- GNE-258 can be accepted only as ACCESS technical foundation after fresh
+  evidence for anonymous submit, field whitelist, real `care_submissions`,
+  service-date/visit validation, duplicate/update behavior, and owner result
+  visibility.
+- GNE-258 must not claim final PRODUCT-quality completion of the anonymous
+  sitter UI.
+- GNE-290 is the reopened PRODUCT polish issue for V6 prototype screens 06-11,
+  executed in order and verified against the binding prototype folder plus
+  `catcare-ui-guidelines.md`.
+- GNE-290 must include three-party review evidence before Done: architecture
+  boundary, UI/icon quality, and product interaction including mobile.
+
+2026-07-07 GNE-290 progress checkpoint:
+
+- Current local branch has a partial PRODUCT polish pass for V6 screens 06-11,
+  but the issue is not accepted as Done.
+- Passed evidence: `pnpm --filter @xwlc/web typecheck`, `lint`, `test`,
+  `build`, `pnpm test:package-boundaries`, `pnpm test:release-boundaries`, and
+  `git diff --check`.
+- Browser evidence: 390px anonymous invalid-link state has no horizontal
+  overflow and no plan-data leakage.
+- Missing acceptance evidence before Done: authenticated owner visual QA for
+  06-10, valid active-token sitter visual QA for 11, checklist completion in
+  Linear, and final architecture/UI/product review notes.
+
+2026-07-07 GNE-290 product-feedback checkpoint:
+
+- Project rules and product usability take priority over literal prototype
+  copy. Prototype screens 06-11 are used for flow and hierarchy, not for keeping
+  mixed Chinese/English UI, unfinished features, or placeholder assets.
+- 06 Food & Care Items must pass these corrected acceptance points:
+  category tabs change the visible list, unimplemented scan/OCR is not shown as
+  a product control, category visuals use consistent iconography, and item rows
+  do not depend on broken or mismatched product images.
+- Visible CatCare product UI should stay Chinese in Chinese mode; English
+  suffixes from the prototype are not acceptance evidence.
+
+2026-07-07 GNE-290 06-11 corrected acceptance checkpoint:
+
+- 06 item-library acceptance now requires category tabs to perform real list
+  filtering, item/category labels to come from one product-local source, and
+  category visuals to use consistent in-app icons. Product photos or package
+  recognition controls are not acceptable unless the underlying feature is in
+  scope and designed end-to-end.
+- 07 routine acceptance requires routine cards and item categories to share one
+  product icon system. Runtime food/care/task meanings use product-local
+  semantic glyph badges; raw prototype PNG crops are reference material only.
+  Functional buttons still use the local currentColor action icon set.
+- Chinese-mode acceptance rejects exposed `AI/live AI/AI Credit` wording in
+  page titles, shell metrics, billing/usage copy, or explanatory copy; use
+  `智能摘要` / `智能额度` product language unless a separate English locale is
+  being reviewed.
+- Current evidence covers authenticated owner mobile smoke for `/catcare/items`,
+  `/catcare/routines`, `/catcare/events`, and `/catcare/plans` on
+  `http://localhost:3003`, plus invalid anonymous `/s/[token]`. Final GNE-290
+  Done still requires active-token sitter flow QA and final three-party review.
+
+2026-07-07 GNE-290 product-quality correction:
+
+- Raw prototype PNG crops and bare engineering-like line icons are rejected for
+  the 06-11 polish pass. Product object/category/event/task visuals must use the
+  product-local semantic glyph badge system, with provenance and runtime-source
+  notes recorded in `apps/web/public/catcare/icons/inventory.md`.
+- Prototype 06-11 remains a hierarchy and interaction reference, not a literal
+  copy target: Chinese mode must not keep mixed Chinese/English labels, and
+  unimplemented controls such as scan/OCR must not be shown as active features.
+- Prototype 08 generation flow keeps history/plan management secondary to the
+  generation task; history must not be forced into the AI input summary column.
+- Prototype 11 private execution must be evaluated as mobile-first interaction:
+  cat/family scope, current-day submit gating, visit/task progression, and
+  task-card visual quality are part of Done evidence, not optional polish.
+
+2026-07-07 GNE-290 active-token checkpoint:
+
+- Valid anonymous `/s/[token]` mobile QA now covers page rendering, no owner nav,
+  cat-specific vs `家庭共用` scope, current-day submit controls, future-day
+  disabled state, and visit accordion behavior at 390px.
+- The temporary online share-token row used for QA was later deleted before
+  closure, and final three-party review evidence was recorded.
+- The previous three-party product scores are no longer closure evidence
+  because later PM/UI review rejected the interim product-object direction.
+  Closure uses the later semantic glyph badge review and screenshots.
+
+2026-07-07 GNE-290 cleanup and invalid-link QA checkpoint:
+
+- The earlier temporary online `share_tokens` QA row was deleted from the linked
+  Supabase test environment through sandbox-external REST cleanup
+  (`deleted_rows 1`).
+- System Chrome captured invalid-link mobile QA at
+  `/private/tmp/gne290-invalid-390-r3.png` for 390px width after fixing a
+  horizontal text clipping issue in `/s/[token]` invalid states.
+- Latest local QA seed evidence covers authenticated owner visual QA for 06-10
+  and valid active-token mobile QA for 11 after the semantic glyph badge rework:
+  `/private/tmp/gne290-final-06-items-desktop.png`,
+  `/private/tmp/gne290-final-07-events-desktop.png`,
+  `/private/tmp/gne290-final-08-plans-desktop.png`,
+  `/private/tmp/gne290-final-09-plan-detail-desktop.png`,
+  `/private/tmp/gne290-final-10-share-desktop.png`,
+  `/private/tmp/gne290-final-11-sitter-mobile.png`, and
+  `/private/tmp/gne290-final-11-sitter-mobile-tasks.png`.
+- Captured pages have no horizontal overflow at the tested viewports
+  (`1440px` owner desktop and `390px` private mobile).
+- A local 3003 style failure was traced to corrupted/stale Next dev `.next`
+  output, not to an intended UI regression. After deleting `apps/web/.next` and
+  restarting, sandbox-external curl verified `/login 200 OK` and
+  `/_next/static/css/app/layout.css 200 OK` with `Content-Length: 73987`.
+- Final cleanup later deleted the current isolated online QA owner/token rows:
+  `share_tokens 1`, `care_tasks 7`, `care_plans 1`, `care_events 3`,
+  `cat_item_assignments 12`, `owner_item_library 6`, `cats 2`,
+  `user_profiles 1`, and `auth_user 1`; remaining inspected owner-scoped table
+  counts were verified as `0`.
+
 2026-07-07 GNE-257 ACCESS anonymous view verification:
 
 - `pnpm typecheck`, `pnpm lint`, and `pnpm build` passed after implementing the

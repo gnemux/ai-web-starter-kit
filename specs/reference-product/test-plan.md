@@ -28,6 +28,111 @@
 
 ## Browser / E2E Checks
 
+2026-07-07 GNE-290 checkpoint:
+
+- Current local pass covers V6 06-11 PRODUCT polish direction but does not mark
+  GNE-290 Done.
+- Passed commands: `pnpm --filter @xwlc/web typecheck`,
+  `pnpm --filter @xwlc/web lint`, `pnpm --filter @xwlc/web test`,
+  `pnpm --filter @xwlc/web build`, `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and `git diff --check`.
+- Local dev server restarted on `http://127.0.0.1:3003`.
+- Browser mobile check at 390px for `/s/invalid-token-for-visual-check`
+  confirmed `scrollWidth=390`, `clientWidth=390`, one page H1, and no plan
+  content leakage.
+- Pending before Done: signed-in owner screenshots for `/catcare/items`,
+  `/catcare/events`, `/catcare/plans`, and `/catcare/plans/[id]`; valid
+  active-token `/s/[token]` mobile screenshot and submission interaction; final
+  three-party review.
+
+2026-07-07 GNE-290 product-feedback checks:
+
+- 06 Food & Care Items: click each category tab and verify the visible rows are
+  filtered to that category.
+- 06 Food & Care Items: verify no unfinished scan/OCR/upload affordance appears
+  as a usable product control.
+- 06-11 visible product UI: verify Chinese mode does not show prototype English
+  suffixes or exposed prototype labels.
+- 06 Food & Care Items: verify row visuals use consistent category icons rather
+  than mismatched package/product images.
+
+2026-07-07 GNE-290 product-quality rework checks:
+
+- Supersedes the earlier inline-SVG icon pass. Product object visuals must come
+  from `apps/web/public/catcare/icons/prototype/` image assets and be listed in
+  `apps/web/public/catcare/icons/inventory.md`.
+- 06/07/11 visual QA must verify item, event, routine/task, and sitter task
+  icons share the same product illustration language. Functional action buttons
+  may continue to use currentColor line icons.
+- 08 generation QA must verify the AI input summary column is not used as the
+  history-plan container; existing plans are secondary to generating a new care
+  plan.
+- 09/10 owner plan QA must verify published plans read as a care-plan overview
+  with execution date, task count, cats, schedule, share state, and result
+  entry.
+- 11 private execution QA must verify mobile task cards clarify category,
+  required/optional status, family-vs-cat scope, current-day submit gating, and
+  post-submit note/exception follow-up.
+- Automated evidence already passed after this rework:
+  `pnpm --filter @xwlc/web typecheck`,
+  `pnpm --filter @xwlc/web lint`,
+  `pnpm --filter @xwlc/web test`,
+  `pnpm --filter @xwlc/web build`,
+  `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and `git diff --check`.
+- HTTP smoke on `http://127.0.0.1:3003` was run through sandbox-external curl:
+  `/catcare/items`, `/catcare/events`, and `/catcare/plans` return protected
+  owner redirects when signed out; `/s/invalid-token-smoke` returns `200 OK`.
+- Screenshot evidence now includes invalid-link mobile QA:
+  `/private/tmp/gne290-invalid-390-r3.png` at 390px. This caught and fixed a
+  horizontal text clipping issue in the invalid-link state.
+- Latest screenshot evidence now includes authenticated owner 06-10 and valid
+  active-token 11 local QA:
+  `/private/tmp/gne290-06-items-desktop.png`,
+  `/private/tmp/gne290-07-events-desktop.png`,
+  `/private/tmp/gne290-08-plans-desktop.png`,
+  `/private/tmp/gne290-09-plan-detail-desktop.png`,
+  `/private/tmp/gne290-10-private-share-mobile.png`,
+  `/private/tmp/gne290-11-sitter-mobile.png`,
+  `/private/tmp/gne290-11-sitter-mobile-tasks.png`, and
+  `/private/tmp/gne290-11-sitter-mobile-accordion.png`.
+- Captured viewport metrics: owner desktop pages stayed at
+  `scrollWidth=1440 / viewport=1440`; private mobile pages stayed at
+  `scrollWidth=390 / viewport=390`.
+- 3003 style recovery check: corrupted/stale `.next` dev cache caused global
+  CSS/runtime chunk failures. After deleting `apps/web/.next` and restarting,
+  sandbox-external curl verified `/login 200 OK` and
+  `/_next/static/css/app/layout.css 200 OK` with `Content-Length: 73987`.
+- Final closeout must include cleanup evidence for the isolated online QA
+  owner/token rows, Linear sync, and final three-party review.
+
+2026-07-07 GNE-290 icon-quality regression check:
+
+- Visual QA rejected raw product PNG icon crops where white backing shapes were
+  visible or event/category semantics were unclear.
+- Current check must verify 06 item category tabs, add-item type buttons, 07
+  event type buttons, 07 timeline markers, plan task rows, and sitter task cards
+  use the shared product-local semantic SVG glyph system instead of raw PNG
+  crops with baked-in frames.
+- Event timeline QA must verify connector lines stop before/after the icon
+  marker and do not run through the icon box.
+- Fresh final screenshot evidence after this correction:
+  `/private/tmp/gne290-final-06-items-desktop.png` and
+  `/private/tmp/gne290-final-07-events-desktop.png`, both with
+  `scrollWidth=1440 / viewport=1440`.
+- Follow-up icon QA requires the runtime glyphs to render as product badges
+  with category-specific tones, not bare engineering line icons. The event
+  timeline spine should be visible as a timeline structure while each marker
+  masks the line through the icon itself.
+- Full refreshed screenshot set after this pass:
+  `/private/tmp/gne290-final-06-items-desktop.png`,
+  `/private/tmp/gne290-final-07-events-desktop.png`,
+  `/private/tmp/gne290-final-08-plans-desktop.png`,
+  `/private/tmp/gne290-final-09-plan-detail-desktop.png`,
+  `/private/tmp/gne290-final-10-share-desktop.png`,
+  `/private/tmp/gne290-final-11-sitter-mobile.png`, and
+  `/private/tmp/gne290-final-11-sitter-mobile-tasks.png`.
+
 - Path: `/catcare` while signed out.
   - Expected result: redirects to `/login?next=/catcare`.
 - Path: `/reference-product` and `/reference-product/plans/demo/results`.
@@ -127,6 +232,21 @@
   GNE-252 APP, and vice versa.
 
 ## Latest Run
+
+2026-07-07 GNE-258 / GNE-290 boundary correction:
+
+- GNE-258 acceptance is restricted to ACCESS technical evidence: anonymous
+  share-token submit, real `care_submissions`, field whitelist,
+  service-date/visit validation, duplicate/update behavior, and owner result
+  visibility.
+- GNE-258 must not be used as evidence that `/s/[token]` has reached final V6
+  prototype/product quality.
+- PRODUCT polish for prototype screens 06-11 is tracked by GNE-290 and must be
+  verified in order: food/care items, event timeline, scenario inputs,
+  generate/review, private share, and sitter checklist.
+- GNE-290 browser evidence must include desktop and mobile visual QA, icon and
+  button baseline review, no horizontal overflow, and three-party review:
+  architecture boundary, UI/icon quality, and product interaction.
 
 2026-07-07 GNE-257 anonymous view QA:
 
@@ -292,6 +412,22 @@
   `/catcare/events` -> 307 to `/login?next=%2Fcatcare%2Fevents`,
   `/account/usage` -> 307 to `/login?next=/account/usage`,
   `/account/billing` -> 307 to `/login?next=/account/billing`.
+
+2026-07-07 GNE-290 latest local test notes:
+
+- Use `http://localhost:3003` for authenticated owner browser QA on this
+  machine. `http://127.0.0.1:3003` can redirect to login because browser
+  cookies are host-scoped.
+- 390px browser QA checks now include:
+  `/catcare/items` category filter click (`猫砂 1` -> `猫砂（1）`),
+  `/catcare/routines` prototype-image absence, `/catcare/events`,
+  `/catcare/plans`, and invalid `/s/[token]` no-overflow smoke.
+- Required before GNE-290 Done: valid active `/s/[token]` mobile QA, owner-side
+  page screenshots after final review, and Linear checklist/status sync.
+- Valid active `/s/[token]` mobile QA was run on 2026-07-07 with a temporary
+  token at 390px. The raw token was not recorded in docs/evidence. Final
+  cleanup later deleted the temporary online `share_tokens` row, isolated QA
+  owner data, temporary Auth user, and local raw token/cookie temp files.
 
 2026-06-29:
 

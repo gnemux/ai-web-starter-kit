@@ -235,7 +235,7 @@ function ActivationPanel({
       title: labels.sections.events.title
     },
     {
-      action: labels.hero.primary.replace("用 AI ", "").replace(" with AI", ""),
+      action: labels.hero.primary.replace("智能", "").replace(" with AI", ""),
       href: `/catcare/plans${catQuery}`,
       icon: <CatCareAiChecklistIcon />,
       title: labels.dashboard.aiChecklist

@@ -183,6 +183,7 @@ export type CatCareSubmission = {
   status: CareSubmissionStatus;
   abnormal: boolean;
   note: string | null;
+  idempotencyKey: string | null;
   createdAt: string;
 };
 

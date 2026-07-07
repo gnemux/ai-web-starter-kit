@@ -673,6 +673,39 @@ Latest `GNE-253` owner UX/results scope update on 2026-07-06:
   `/catcare/results`, a published owner result detail page, and a closed owner
   result detail page passed with no horizontal overflow.
 
+Latest `GNE-257` ACCESS anonymous view update on 2026-07-07:
+
+- Scope: implement unauthenticated `/s/[token]` read-only sitter view backed by
+  real `share_tokens`, `care_plans`, and `care_tasks` from the linked Supabase
+  test environment.
+- Non-goals: no anonymous submit, no owner navigation, no RLS rewrite, no live
+  AI/payment/entitlement behavior, and no raw share token in repository docs,
+  Linear, screenshots, logs readback, analytics, or committed code.
+- Implementation adds a minimal anonymous DTO in the CatCare product service,
+  exposes `getAnonymousCarePlanView()`, and renders `/s/[token]` with valid,
+  expired, revoked, invalid, and unavailable states. The valid state only shows
+  cat names, care dates, handoff notes, task categories, required/optional
+  status, time hints, frequency, task titles, and instructions. It does not
+  include owner email, owner/internal ids, billing facts, raw tokens, token
+  hashes, or submission UI.
+- Global mobile viewport metadata was added through Next's `viewport` export
+  because browser QA showed the anonymous page was otherwise rendered as a
+  scaled desktop layout on mobile.
+- Online test Supabase verification inserted temporary share-token rows for
+  active, expired, and revoked states, fetched production-built local pages for
+  valid/expired/revoked/invalid states, confirmed status copy and no forbidden
+  owner/billing/token text, then deleted all temporary rows.
+- Mobile browser QA passed on production-built local server at 390px valid and
+  375px invalid states: body/main widths matched viewport, no horizontal
+  overflow, no owner navigation, no forbidden owner/billing/token text, and
+  screenshots were captured under the local temp directory for reviewer
+  evidence.
+- Local checks after the viewport fix passed with `pnpm typecheck`,
+  `pnpm lint`, and `pnpm build`; `pnpm build` reported `ƒ /s/[token]`.
+- GNE-258 remains the next ACCESS issue for anonymous submit and field
+  whitelist. GNE-259 remains the RLS acceptance issue; GNE-260 remains security
+  negative/audit verification.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, continue on the current branch unless the Repo Owner explicitly asks for a new branch; do not reuse pre-tag Auth/payment branches.

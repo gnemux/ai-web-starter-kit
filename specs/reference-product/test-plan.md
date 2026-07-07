@@ -54,6 +54,16 @@
   - Expected result: profile, billing/order records, and usage stay under `/demo/account*`; the Demo menu does not link to `/catcare`.
 - Path: `/catcare` while signed in.
   - Expected result: page renders owner product UI, empty state, cat form, plan form, plan list, and account/billing/usage entries.
+- Path: `/s/[token]` while signed out.
+  - Expected result: valid share token renders the anonymous sitter read-only
+    page with minimum care-plan fields and task list only.
+  - Expired, revoked, invalid, and unavailable links render explicit empty/error
+    states and do not show care tasks.
+  - The page must not render owner navigation, billing/payment/AI controls,
+    owner email, owner/internal ids, raw share token, token hash, debug
+    information, or submission UI.
+  - Mobile QA must cover 375px and 390px viewports with no horizontal overflow
+    and product-grade spacing, typography, status chips, and CTA hierarchy.
 - Path: `/catcare/cats`, `/catcare/routines`,
   `/catcare/items`, `/catcare/events`,
   `/catcare/plans`, and `/catcare/plans/[id]/results`
@@ -117,6 +127,35 @@
   GNE-252 APP, and vice versa.
 
 ## Latest Run
+
+2026-07-07 GNE-257 anonymous view QA:
+
+- Scope verified: anonymous `/s/[token]` read-only sitter view for valid
+  share tokens, plus expired/revoked/invalid empty states.
+- Non-goals preserved: no anonymous submit, no RLS rewrite, no live
+  AI/payment/entitlement behavior, no owner navigation, and no raw token in
+  evidence or committed files.
+- Passed `pnpm typecheck`, `pnpm lint`, and `pnpm build`; build output included
+  dynamic route `ƒ /s/[token]`.
+- Production-built local server ran on `http://127.0.0.1:3003` against the
+  linked Supabase test env.
+- Online test Supabase verification inserted temporary active/expired/revoked
+  `share_tokens`, fetched valid/expired/revoked/invalid pages, confirmed status
+  copy and no forbidden owner/billing/token text, then deleted the temporary
+  rows.
+- Valid state returned `200`, showed the private handoff shell and task list,
+  included mobile viewport metadata, and did not show submit UI.
+- Expired, revoked, and invalid states returned `200`, showed their explicit
+  status copy, and did not show the task list.
+- Mobile browser QA passed:
+  `390px` valid state body/main width matched viewport, task list was present,
+  no owner nav or forbidden text, and no horizontal overflow; screenshot
+  captured at `/var/folders/rs/vhf5x8dj5xgf9w3qh983f7lc0000gn/T/gne257-mobile-valid-390-viewport-v2.png`.
+  `375px` invalid state body/header/section widths matched viewport, invalid
+  status was present, task list was absent, no owner nav or forbidden text, and
+  no horizontal overflow; screenshot captured at
+  `/var/folders/rs/vhf5x8dj5xgf9w3qh983f7lc0000gn/T/gne257-mobile-invalid-375-viewport-v2.png`.
+- Temporary browser handoff files and Supabase rows were deleted after QA.
 
 2026-07-06 GNE-255 analytics QA:
 

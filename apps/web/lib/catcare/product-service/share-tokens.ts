@@ -13,6 +13,8 @@ import {
 import type { Database } from "../../supabase/database.types";
 import {
   getAuthenticatedOwnerId,
+  mapPlan,
+  mapTask,
   mapDbBoundaryError,
   mapSupabaseError
 } from "./core";
@@ -23,6 +25,7 @@ export type ShareTokenResourceType = "care_plan";
 
 export type ShareTokenActorContext = {
   actorType: "anonymous_token";
+  expiresAt: string;
   ownerId: string;
   resourceId: string;
   resourceType: ShareTokenResourceType;
@@ -39,6 +42,29 @@ export type CarePlanShareLinkState = {
 
 export type CarePlanShareLinkMutation = CarePlanShareLinkState & {
   token: string | null;
+};
+
+export type AnonymousCareTaskView = {
+  category: Database["public"]["Tables"]["care_tasks"]["Row"]["category"];
+  frequency: string | null;
+  instructions: string | null;
+  required: boolean;
+  sortOrder: number;
+  timeHint: string | null;
+  title: string;
+};
+
+export type AnonymousCarePlanView = {
+  catNames: string[];
+  endOn: string | null;
+  expiresAt: string;
+  handoffNotes: string | null;
+  requiredTaskCount: number;
+  scenario: Database["public"]["Tables"]["care_plans"]["Row"]["scenario"];
+  startOn: string | null;
+  taskCount: number;
+  tasks: AnonymousCareTaskView[];
+  title: string;
 };
 
 export const shareTokenScope: ShareTokenScope = "care_plan";
@@ -270,11 +296,87 @@ export async function resolveCarePlanShareToken(
 
   return serviceOk({
     actorType: "anonymous_token",
+    expiresAt: token.expires_at,
     ownerId: token.owner_id,
     resourceId: token.resource_id,
     resourceType: token.resource_type,
     scope: token.scope,
     tokenId: token.id
+  });
+}
+
+export async function getAnonymousCarePlanView(
+  secret: string
+): Promise<ServiceResult<AnonymousCarePlanView>> {
+  const tokenResult = await resolveCarePlanShareToken(secret);
+
+  if (!tokenResult.ok) {
+    return tokenResult;
+  }
+
+  const clientResult = createSupabaseAdminClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const [planResult, tasksResult] = await Promise.all([
+    clientResult.data
+      .from("care_plans")
+      .select(
+        "id, owner_id, cat_id, routine_id, title, status, scenario, generation_source, ai_input_summary, start_on, end_on, handoff_notes, generated_at, published_at, reviewed_at, closed_at, created_at, updated_at"
+      )
+      .eq("id", tokenResult.data.resourceId)
+      .eq("owner_id", tokenResult.data.ownerId)
+      .single(),
+    clientResult.data
+      .from("care_tasks")
+      .select(
+        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
+      )
+      .eq("plan_id", tokenResult.data.resourceId)
+      .order("sort_order", { ascending: true })
+  ]);
+
+  if (planResult.error) {
+    return mapSupabaseError(planResult.error);
+  }
+
+  if (tasksResult.error) {
+    return mapSupabaseError(tasksResult.error);
+  }
+
+  if (planResult.data.status !== "published") {
+    return serviceError("forbidden", "Care plan is no longer available.", {
+      token: "unavailable"
+    });
+  }
+
+  const plan = mapPlan(planResult.data);
+  const tasks = (tasksResult.data ?? [])
+    .map(mapTask)
+    .filter((task) => task.enabled && !isLegacyPrepareTask(task))
+    .map((task) => ({
+      category: task.category,
+      frequency: task.frequency,
+      instructions: task.instructions,
+      required: task.required,
+      sortOrder: task.sortOrder,
+      timeHint: task.timeHint,
+      title: task.title
+    }));
+
+  return serviceOk({
+    catNames: extractPlanCatNames(plan.aiInputSummary),
+    endOn: plan.endOn,
+    expiresAt: tokenResult.data.expiresAt,
+    handoffNotes: plan.handoffNotes,
+    requiredTaskCount: tasks.filter((task) => task.required).length,
+    scenario: plan.scenario,
+    startOn: plan.startOn,
+    taskCount: tasks.length,
+    tasks,
+    title: plan.title
   });
 }
 
@@ -355,4 +457,23 @@ function mapShareTokenState(token: ShareTokenRow | null): CarePlanShareLinkState
     revokedAt: null,
     status: "active"
   };
+}
+
+function extractPlanCatNames(
+  summary: Database["public"]["Tables"]["care_plans"]["Row"]["ai_input_summary"]
+) {
+  if (
+    summary &&
+    typeof summary === "object" &&
+    !Array.isArray(summary) &&
+    Array.isArray(summary.cat_names)
+  ) {
+    return summary.cat_names.filter((name): name is string => typeof name === "string");
+  }
+
+  return ["猫咪"];
+}
+
+function isLegacyPrepareTask(task: { source: string; title: string }) {
+  return task.source === "care_item" || task.title.includes("：准备 ");
 }

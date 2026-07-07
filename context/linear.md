@@ -455,10 +455,25 @@ and REST Data API smoke passed.
 
 GNE-232 ACCESS
 ├── GNE-256 ACCESS-01 share token scope、有效期、撤销和重放规则
-├── GNE-257 ACCESS-02 匿名查看页面和最小可见数据
-├── GNE-258 ACCESS-03 匿名提交和字段白名单
-├── GNE-259 ACCESS-04 owner-only 与匿名边界 RLS 验收
-└── GNE-260 ACCESS-05 安全负向测试和审计事件
+├── GNE-279 ACCESS-02 owner 生成、复制、撤销分享入口
+├── GNE-257 ACCESS-03 匿名查看页面和最小可见数据
+├── GNE-258 ACCESS-04 匿名提交和字段白名单
+├── GNE-259 ACCESS-05 owner-only 与匿名边界 RLS 验收
+└── GNE-260 ACCESS-06 安全负向测试和审计事件
+
+GNE-257 implementation note: anonymous `/s/[token]` now resolves real
+`share_tokens` through the CatCare product-service boundary, loads the
+published care plan and enabled tasks with the service role, and returns a
+minimum read-only sitter DTO. The page renders valid, expired, revoked,
+invalid, and unavailable states without owner navigation, billing/payment/AI
+controls, submission UI, owner email, internal ids, raw token, token hash, or
+debug data. GNE-257 also adds the global Next `viewport` export because mobile
+QA showed the anonymous page otherwise rendered as a scaled desktop page.
+Verification used the linked Supabase test env with temporary token rows that
+were deleted after checking valid/expired/revoked/invalid states, plus mobile
+browser QA at 390px valid and 375px invalid states. GNE-258 owns anonymous
+submit; GNE-259 owns owner/anonymous RLS acceptance; GNE-260 owns security
+negative and audit checks.
 
 GNE-233 CAPABILITY
 ├── GNE-261 CAP-01 业务动作到能力映射表

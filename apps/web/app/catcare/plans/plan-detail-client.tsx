@@ -4,10 +4,11 @@ import { useState } from "react";
 
 import {
   CatCareCalendarIcon,
+  CatCareCopyIcon,
+  CatCareLinkIcon,
   CatCareSaveIcon,
   CatCareXIcon
 } from "../catcare-action-icons";
-import { CatCareShareLinkIcon } from "@/components/catcare-icons";
 import { CatCareToast, useCatCareToast } from "../catcare-toast";
 import {
   CatCareButton,
@@ -323,6 +324,10 @@ function ShareLinkPanel({
   const status = getShareLinkStatusMeta(shareLink.status);
   const canGenerate = plan.status === "published";
   const canRevoke = shareLink.status === "active";
+  const hasCopyableShareUrl = Boolean(copyableShareUrl);
+  const hasManagementPair = canGenerate && canRevoke;
+  const shareActionVariant =
+    shareLink.status === "active" && hasCopyableShareUrl ? "secondary" : "primary";
 
   return (
     <div className="mt-4 grid gap-4">
@@ -331,9 +336,10 @@ function ShareLinkPanel({
           <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}>
             {status.label}
           </span>
-          {shareLink.expiresAt ? (
+          {shareLink.expiresAt && shareLink.status !== "revoked" ? (
             <span className="text-xs font-semibold text-[#526177]">
-              过期：{formatShareDate(shareLink.expiresAt)}
+              {shareLink.status === "active" ? "有效期至" : "过期"}：
+              {formatShareDate(shareLink.expiresAt)}
             </span>
           ) : null}
         </div>
@@ -343,22 +349,21 @@ function ShareLinkPanel({
       </div>
 
       {copyableShareUrl ? (
-        <div className="grid gap-2">
-          <label className="text-xs font-semibold uppercase tracking-[0.08em] text-[#526177]">
+        <div className="grid gap-3">
+          <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[#526177]">
             本次生成的链接
-          </label>
-          <input
-            className="w-full rounded-xl border border-[#d9e0ea] bg-white px-3 py-3 text-sm font-semibold text-[#101a32]"
-            readOnly
-            value={copyableShareUrl}
-          />
-          <CatCareButton onClick={onCopy} type="button" variant="ghost">
+          </span>
+          <div className="rounded-xl border border-[#d9e0ea] bg-white px-3 py-3 text-sm font-semibold text-[#101a32]">
+            <span className="block truncate">{formatShareUrlPreview(copyableShareUrl)}</span>
+          </div>
+          <CatCareButton fullWidth onClick={onCopy} type="button">
+            <CatCareCopyIcon />
             复制链接
           </CatCareButton>
         </div>
       ) : null}
 
-      <div className="grid gap-3">
+      <div className={`grid gap-3 [&_button]:w-full ${hasManagementPair ? "sm:grid-cols-2" : ""}`}>
         {canGenerate ? (
           <form
             action={(formData) =>
@@ -367,9 +372,13 @@ function ShareLinkPanel({
             className={isPending ? "pointer-events-none opacity-70" : ""}
           >
             <input name="planId" type="hidden" value={plan.id} />
-            <CatCareButton type="submit">
-              <CatCareShareLinkIcon className="h-5 w-5" />
-              {shareLink.status === "active" ? "重新生成链接" : "生成分享链接"}
+            <CatCareButton fullWidth type="submit" variant={shareActionVariant}>
+              <CatCareLinkIcon />
+              {shareLink.status === "active" && hasCopyableShareUrl
+                ? "重新生成"
+                : shareLink.status === "active"
+                  ? "重新生成链接"
+                  : "生成分享链接"}
             </CatCareButton>
           </form>
         ) : null}
@@ -381,7 +390,7 @@ function ShareLinkPanel({
             className={isPending ? "pointer-events-none opacity-70" : ""}
           >
             <input name="planId" type="hidden" value={plan.id} />
-            <CatCareButton type="submit" variant="ghost">
+            <CatCareButton fullWidth type="submit" variant="danger">
               <CatCareXIcon />
               撤销链接
             </CatCareButton>
@@ -485,6 +494,16 @@ function formatShareDate(value: string) {
     dateStyle: "medium",
     timeStyle: "short"
   }).format(new Date(value));
+}
+
+function formatShareUrlPreview(value: string) {
+  const [origin, token] = value.split("/s/");
+
+  if (!origin || !token || token.length <= 14) {
+    return value;
+  }
+
+  return `${origin}/s/${token.slice(0, 6)}...${token.slice(-6)}`;
 }
 
 function TaskCard({

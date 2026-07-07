@@ -93,6 +93,24 @@ export function CatCareSaveIcon(props: IconProps) {
   );
 }
 
+export function CatCareLinkIcon(props: IconProps) {
+  return (
+    <CatCareActionIcon {...props}>
+      <path d="M10 13a5 5 0 0 0 7.5.5l2.5-2.5a5 5 0 0 0-7-7l-1.5 1.5" />
+      <path d="M14 11a5 5 0 0 0-7.5-.5L4 13a5 5 0 0 0 7 7l1.5-1.5" />
+    </CatCareActionIcon>
+  );
+}
+
+export function CatCareCopyIcon(props: IconProps) {
+  return (
+    <CatCareActionIcon {...props}>
+      <path d="M8 8.5h9.5v9.5H8z" />
+      <path d="M5.5 15.5v-10h10" />
+    </CatCareActionIcon>
+  );
+}
+
 export function CatCareSearchIcon(props: IconProps) {
   return (
     <CatCareActionIcon {...props}>

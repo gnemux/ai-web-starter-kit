@@ -98,7 +98,7 @@ export function CatCareButton({
   value?: string;
   variant?: keyof typeof catCareButtonClasses;
 }) {
-  const className = `inline-flex min-h-14 items-center justify-center gap-3 rounded-xl px-5 text-base font-semibold leading-none transition [&>[data-catcare-action-icon]]:h-5 [&>[data-catcare-action-icon]]:w-5 [&>img]:h-5 [&>img]:w-5 [&>img]:shrink-0 ${fullWidth ? "w-full" : ""} ${catCareButtonClasses[variant]}`;
+  const className = `inline-flex min-h-14 items-center justify-center gap-3 whitespace-nowrap rounded-xl px-5 text-base font-semibold leading-none transition [&>[data-catcare-action-icon]]:h-5 [&>[data-catcare-action-icon]]:w-5 [&>img]:h-5 [&>img]:w-5 [&>img]:shrink-0 ${fullWidth ? "w-full" : ""} ${catCareButtonClasses[variant]}`;
 
   if (href) {
     return (

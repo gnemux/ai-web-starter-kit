@@ -7,6 +7,7 @@ import {
   CatCareSaveIcon,
   CatCareXIcon
 } from "../catcare-action-icons";
+import { CatCareShareLinkIcon } from "@/components/catcare-icons";
 import { CatCareToast, useCatCareToast } from "../catcare-toast";
 import {
   CatCareButton,
@@ -93,7 +94,7 @@ export function PlanDetailClient({
     }));
     toast.showSuccess(
       actionName === "publish"
-        ? "计划已发布。每日任务已按到访时间排好；照看者分享链接将在后续阶段接入。"
+        ? "计划已发布。每日任务已按到访时间排好，可在分享入口发送给照看者。"
         : "计划已关闭，历史清单和照护结果已保留。"
     );
   }
@@ -161,7 +162,7 @@ export function PlanDetailClient({
             : justSaved
               ? "清单微调已保存，确认无误后可以发布。"
               : justPublished
-                ? "计划已发布。每日任务已按到访时间排好；照看者分享链接将在后续阶段接入。"
+                ? "计划已发布。每日任务已按到访时间排好，可在分享入口发送给照看者。"
                 : null
         }
         toast={toast.toast}
@@ -267,8 +268,8 @@ export function PlanDetailClient({
             <h2 className="text-xl font-semibold text-[#101a32]">生成摘要</h2>
             <dl className="mt-4 grid gap-3 text-sm font-semibold text-[#526177]">
               <div className="flex justify-between gap-4">
-                <dt>生成来源</dt>
-                <dd className="text-[#101a32]">CatCare mock</dd>
+                <dt>计划来源</dt>
+                <dd className="text-[#101a32]">智能照护助手</dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt>{canPublish ? "待确认任务" : "生成任务"}</dt>
@@ -367,7 +368,7 @@ function ShareLinkPanel({
           >
             <input name="planId" type="hidden" value={plan.id} />
             <CatCareButton type="submit">
-              <CatCareSaveIcon />
+              <CatCareShareLinkIcon className="h-5 w-5" />
               {shareLink.status === "active" ? "重新生成链接" : "生成分享链接"}
             </CatCareButton>
           </form>
@@ -476,7 +477,7 @@ function getShareLinkDescription(
     return "链接已过期，照看者无法继续访问。可以重新生成一个新链接。";
   }
 
-  return "生成后会得到一次性可复制链接，系统只保存 token hash。";
+  return "生成后会得到一次性可复制链接；系统只保留安全校验信息，不保存完整链接。";
 }
 
 function formatShareDate(value: string) {

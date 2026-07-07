@@ -5,9 +5,17 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 import { createAnonymousTokenScope } from "@xwlc/db";
 
-import { createSupabaseAdminClient } from "../../supabase/server";
+import {
+  createSupabaseAdminClient,
+  createSupabaseServerClient,
+  type AppSupabaseClient
+} from "../../supabase/server";
 import type { Database } from "../../supabase/database.types";
-import { mapDbBoundaryError, mapSupabaseError } from "./core";
+import {
+  getAuthenticatedOwnerId,
+  mapDbBoundaryError,
+  mapSupabaseError
+} from "./core";
 
 export type ShareTokenRow = Database["public"]["Tables"]["share_tokens"]["Row"];
 export type ShareTokenScope = "care_plan";
@@ -20,6 +28,17 @@ export type ShareTokenActorContext = {
   resourceType: ShareTokenResourceType;
   scope: ShareTokenScope;
   tokenId: string;
+};
+
+export type CarePlanShareLinkState = {
+  expiresAt: string | null;
+  generatedAt: string | null;
+  revokedAt: string | null;
+  status: "not_generated" | "active" | "expired" | "revoked";
+};
+
+export type CarePlanShareLinkMutation = CarePlanShareLinkState & {
+  token: string | null;
 };
 
 export const shareTokenScope: ShareTokenScope = "care_plan";
@@ -60,6 +79,132 @@ export function isShareTokenHashMatch(secret: string, hash: string): boolean {
   const actual = Buffer.from(hashResult.data);
   const expected = Buffer.from(hash);
   return actual.length === expected.length && timingSafeEqual(actual, expected);
+}
+
+export async function getCarePlanShareLinkState(
+  planId: string
+): Promise<ServiceResult<CarePlanShareLinkState>> {
+  const contextResult = await getOwnerPlanShareContext(planId);
+
+  if (!contextResult.ok) {
+    return contextResult;
+  }
+
+  const tokenResult = await contextResult.data.client
+    .from("share_tokens")
+    .select(
+      "id, owner_id, resource_type, resource_id, token_hash, scope, expires_at, revoked_at, last_used_at, created_at, updated_at"
+    )
+    .eq("owner_id", contextResult.data.ownerId)
+    .eq("resource_type", shareTokenResourceType)
+    .eq("resource_id", planId)
+    .eq("scope", shareTokenScope)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (tokenResult.error) {
+    return mapSupabaseError(tokenResult.error);
+  }
+
+  return serviceOk(mapShareTokenState(tokenResult.data));
+}
+
+export async function createCarePlanShareLink(
+  planId: string
+): Promise<ServiceResult<CarePlanShareLinkMutation>> {
+  const contextResult = await getOwnerPlanShareContext(planId);
+
+  if (!contextResult.ok) {
+    return contextResult;
+  }
+
+  if (contextResult.data.planStatus !== "published") {
+    return serviceError(
+      "validation_error",
+      "Only published care plans can be shared."
+    );
+  }
+
+  const now = new Date().toISOString();
+  const revokeResult = await contextResult.data.client
+    .from("share_tokens")
+    .update({ revoked_at: now })
+    .eq("owner_id", contextResult.data.ownerId)
+    .eq("resource_type", shareTokenResourceType)
+    .eq("resource_id", planId)
+    .eq("scope", shareTokenScope)
+    .is("revoked_at", null);
+
+  if (revokeResult.error) {
+    return mapSupabaseError(revokeResult.error);
+  }
+
+  const token = createShareTokenSecret();
+  const hashResult = hashShareTokenSecret(token);
+
+  if (!hashResult.ok) {
+    return hashResult;
+  }
+
+  const insertResult = await contextResult.data.client
+    .from("share_tokens")
+    .insert({
+      expires_at: createShareTokenExpiry(),
+      owner_id: contextResult.data.ownerId,
+      resource_id: planId,
+      resource_type: shareTokenResourceType,
+      scope: shareTokenScope,
+      token_hash: hashResult.data
+    })
+    .select(
+      "id, owner_id, resource_type, resource_id, token_hash, scope, expires_at, revoked_at, last_used_at, created_at, updated_at"
+    )
+    .single();
+
+  if (insertResult.error) {
+    return mapSupabaseError(insertResult.error);
+  }
+
+  return serviceOk({
+    ...mapShareTokenState(insertResult.data),
+    token
+  });
+}
+
+export async function revokeCarePlanShareLink(
+  planId: string
+): Promise<ServiceResult<CarePlanShareLinkMutation>> {
+  const contextResult = await getOwnerPlanShareContext(planId);
+
+  if (!contextResult.ok) {
+    return contextResult;
+  }
+
+  const revokedAt = new Date().toISOString();
+  const revokeResult = await contextResult.data.client
+    .from("share_tokens")
+    .update({ revoked_at: revokedAt })
+    .eq("owner_id", contextResult.data.ownerId)
+    .eq("resource_type", shareTokenResourceType)
+    .eq("resource_id", planId)
+    .eq("scope", shareTokenScope)
+    .is("revoked_at", null)
+    .select(
+      "id, owner_id, resource_type, resource_id, token_hash, scope, expires_at, revoked_at, last_used_at, created_at, updated_at"
+    )
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (revokeResult.error) {
+    return mapSupabaseError(revokeResult.error);
+  }
+
+  return serviceOk({
+    ...mapShareTokenState(revokeResult.data),
+    token: null
+  });
 }
 
 export async function resolveCarePlanShareToken(
@@ -131,4 +276,83 @@ export async function resolveCarePlanShareToken(
     scope: token.scope,
     tokenId: token.id
   });
+}
+
+async function getOwnerPlanShareContext(planId: string): Promise<
+  ServiceResult<{
+    client: AppSupabaseClient;
+    ownerId: string;
+    planStatus: Database["public"]["Tables"]["care_plans"]["Row"]["status"];
+  }>
+> {
+  const normalizedPlanId = planId.trim();
+
+  if (!normalizedPlanId) {
+    return serviceError("validation_error", "Choose a care plan to share.");
+  }
+
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const ownerResult = await getAuthenticatedOwnerId(clientResult.data);
+
+  if (!ownerResult.ok) {
+    return ownerResult;
+  }
+
+  const planResult = await clientResult.data
+    .from("care_plans")
+    .select("id, owner_id, status")
+    .eq("id", normalizedPlanId)
+    .eq("owner_id", ownerResult.data)
+    .single();
+
+  if (planResult.error) {
+    return mapSupabaseError(planResult.error);
+  }
+
+  return serviceOk({
+    client: clientResult.data,
+    ownerId: ownerResult.data,
+    planStatus: planResult.data.status
+  });
+}
+
+function mapShareTokenState(token: ShareTokenRow | null): CarePlanShareLinkState {
+  if (!token) {
+    return {
+      expiresAt: null,
+      generatedAt: null,
+      revokedAt: null,
+      status: "not_generated"
+    };
+  }
+
+  if (token.revoked_at) {
+    return {
+      expiresAt: token.expires_at,
+      generatedAt: token.created_at,
+      revokedAt: token.revoked_at,
+      status: "revoked"
+    };
+  }
+
+  if (new Date(token.expires_at).getTime() <= Date.now()) {
+    return {
+      expiresAt: token.expires_at,
+      generatedAt: token.created_at,
+      revokedAt: null,
+      status: "expired"
+    };
+  }
+
+  return {
+    expiresAt: token.expires_at,
+    generatedAt: token.created_at,
+    revokedAt: null,
+    status: "active"
+  };
 }

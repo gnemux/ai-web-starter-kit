@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ErrorState } from "@xwlc/ui";
 
 import {
+  getCarePlanShareLinkState,
   getCatCarePlanDetail,
   getCatCarePlanItemOptions
 } from "@/lib/catcare/product-service";
@@ -29,6 +30,8 @@ export default async function CatCarePlanDetailPage({
     result.ok && result.data.status === "draft"
       ? await getCatCarePlanItemOptions()
       : null;
+  const shareLinkResult =
+    result.ok ? await getCarePlanShareLinkState(result.data.id) : null;
 
   return (
     <>
@@ -45,6 +48,16 @@ export default async function CatCarePlanDetailPage({
           justSaved={query.saved === "1"}
           itemOptions={itemOptionsResult?.ok ? itemOptionsResult.data : []}
           plan={result.data}
+          shareLinkState={
+            shareLinkResult?.ok
+              ? shareLinkResult.data
+              : {
+                  expiresAt: null,
+                  generatedAt: null,
+                  revokedAt: null,
+                  status: "not_generated"
+                }
+          }
         />
       )}
     </>

@@ -71,3 +71,21 @@ export {
   publishCatCarePlan,
   updateCatCarePlanTasksFromFormData
 } from "./product-service/plans";
+
+export type {
+  ShareTokenActorContext,
+  ShareTokenResourceType,
+  ShareTokenRow,
+  ShareTokenScope
+} from "./product-service/share-tokens";
+
+export {
+  createShareTokenExpiry,
+  createShareTokenSecret,
+  hashShareTokenSecret,
+  isShareTokenHashMatch,
+  resolveCarePlanShareToken,
+  shareTokenResourceType,
+  shareTokenScope,
+  shareTokenTtlDays
+} from "./product-service/share-tokens";

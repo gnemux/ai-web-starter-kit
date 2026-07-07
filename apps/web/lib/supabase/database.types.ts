@@ -987,6 +987,48 @@ export type Database = {
         };
         Relationships: [];
       };
+      share_tokens: {
+        Row: {
+          id: string;
+          owner_id: string;
+          resource_type: "care_plan";
+          resource_id: string;
+          token_hash: string;
+          scope: "care_plan";
+          expires_at: string;
+          revoked_at: string | null;
+          last_used_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          resource_type: "care_plan";
+          resource_id: string;
+          token_hash: string;
+          scope: "care_plan";
+          expires_at: string;
+          revoked_at?: string | null;
+          last_used_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          resource_type?: "care_plan";
+          resource_id?: string;
+          token_hash?: string;
+          scope?: "care_plan";
+          expires_at?: string;
+          revoked_at?: string | null;
+          last_used_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       payment_events: {
         Row: {
           id: string;

@@ -4,6 +4,7 @@ import { ErrorState } from "@xwlc/ui";
 
 import {
   getCarePlanShareLinkState,
+  getCatCareAuditActivities,
   getCatCarePlanDetail,
   getCatCarePlanItemOptions
 } from "@/lib/catcare/product-service";
@@ -32,6 +33,8 @@ export default async function CatCarePlanDetailPage({
       : null;
   const shareLinkResult =
     result.ok ? await getCarePlanShareLinkState(result.data.id) : null;
+  const auditResult =
+    result.ok ? await getCatCareAuditActivities(result.data.ownerId, result.data.id) : null;
 
   return (
     <>
@@ -48,6 +51,7 @@ export default async function CatCarePlanDetailPage({
           justSaved={query.saved === "1"}
           itemOptions={itemOptionsResult?.ok ? itemOptionsResult.data : []}
           plan={result.data}
+          auditActivities={auditResult?.ok ? auditResult.data : []}
           shareLinkState={
             shareLinkResult?.ok
               ? shareLinkResult.data

@@ -88,6 +88,9 @@ export type {
   ShareTokenScope
 } from "./product-service/share-tokens";
 
+export { getCatCareAuditActivities } from "./product-service/audit";
+export type { CatCareAuditActivity } from "./product-service/audit";
+
 export {
   createCarePlanShareLink,
   createShareTokenExpiry,

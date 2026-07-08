@@ -3,6 +3,7 @@ import "server-only";
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
 import { createSupabaseServerClient, type AppSupabaseClient } from "../../supabase/server";
+import { recordCatCareAuditEvent } from "./audit";
 
 import {
   CARE_EVENT_SELECT,
@@ -860,6 +861,16 @@ export async function publishCatCarePlan(
   void trackCatCareProductEvent(ownerResult.data, "catcare_plan_published", {
     enabled_task_count: count ?? 0,
     plan_status: data.status
+  });
+  void recordCatCareAuditEvent({
+    actorType: "user",
+    eventName: "care_plan_published",
+    ownerId: ownerResult.data,
+    properties: {
+      task_count: count ?? 0
+    },
+    resourceId: data.id,
+    resourceType: "care_plan"
   });
 
   return serviceOk({

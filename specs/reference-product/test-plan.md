@@ -34,6 +34,22 @@
 
 ## Browser / E2E Checks
 
+2026-07-08 GNE-262 CAPABILITY audit checks:
+
+- Unit evidence: `pnpm --filter @xwlc/web test` covers audit payload redaction
+  and owner-visible activity mapping.
+- Type evidence: `pnpm --filter @xwlc/web typecheck`.
+- Boundary evidence: `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and `git diff --check`.
+- DB evidence before Done must confirm the linked test database has
+  `audit_events`, RLS enabled, authenticated owner read policy, and service-role
+  insert access.
+- Browser evidence before Done must include desktop and 390px mobile plan detail
+  with "分享与安全记录" visible and no horizontal overflow.
+- Negative evidence must search for forbidden audit fields: raw token, token
+  hash, owner email, full note text, and private handoff text must not enter
+  audit payload construction.
+
 2026-07-08 GNE-261 CAPABILITY action-map checkpoint:
 
 - No browser interaction is required because GNE-261 is a mapping and

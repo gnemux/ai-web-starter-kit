@@ -582,6 +582,18 @@ around actor, owner/resource/token scope, `correlation_id`, and
 Billing/Credit, PostHog, and reliability retry semantics remain owned by
 GNE-263 through GNE-267.
 
+GNE-263 CAPABILITY outbox note, 2026-07-08:
+CAP-03 adds `outbox_events`, a product-local CatCare Outbox facade, and pending
+owner-notification records after anonymous submission create/update. It first
+splits anonymous submission handling out of `share-tokens.ts`, reducing the
+share-token service from 1120 lines to the token/view boundary while keeping a
+generic share-token package deferred until a second product validates it. The
+common-foundation improvement is the outbox envelope around aggregate,
+status/attempt, `correlation_id`, `idempotency_key`, and redacted payload. The
+idempotency key is unique and Outbox writes upsert, so a repeated anonymous
+task update refreshes one pending notification instead of queuing duplicates;
+real worker delivery and PostHog correlation remain later CAP work.
+
 GNE-234 VERIFY
 ├── GNE-268 VERIFY-01 Reviewer 账号、测试数据、URL、版本
 ├── GNE-269 VERIFY-02 30 分钟 Reviewer Runbook

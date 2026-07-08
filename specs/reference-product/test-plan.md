@@ -50,6 +50,24 @@
   hash, owner email, full note text, and private handoff text must not enter
   audit payload construction.
 
+2026-07-08 GNE-263 CAPABILITY outbox checks:
+
+- Unit evidence: `pnpm --filter @xwlc/web test` covers outbox payload redaction
+  and existing anonymous submission policy/audit tests.
+- Type evidence: `pnpm --filter @xwlc/web typecheck`.
+- Boundary evidence: `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and `git diff --check`.
+- Build evidence: `pnpm --filter @xwlc/web build`.
+- DB evidence before Done must confirm the linked test database has
+  `outbox_events`, RLS enabled, authenticated owner read policy, service-role
+  insert access, unique `idempotency_key` index, and migration versions
+  recorded.
+- Structural evidence must confirm `share-tokens.ts` has been split before
+  Outbox is wired and no Outbox logic is piled into the old share-token file.
+- Negative evidence must search for forbidden Outbox fields: raw token, token
+  hash, owner email, full note text, and private handoff text must not enter
+  outbox payload construction.
+
 2026-07-08 GNE-261 CAPABILITY action-map checkpoint:
 
 - No browser interaction is required because GNE-261 is a mapping and

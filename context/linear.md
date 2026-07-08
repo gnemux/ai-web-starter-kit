@@ -572,6 +572,16 @@ explicit use of `@xwlc/platform`, `@xwlc/db`, and `@xwlc/core` contracts.
 Share-token and anonymous-submit behavior stay `common_pattern_not_extracted`
 until a second product validates a generic capability.
 
+GNE-262 CAPABILITY audit note, 2026-07-08:
+CAP-02 adds `audit_events`, a product-local CatCare Audit facade, business
+event wiring for publish/share/revoke/anonymous-view/anonymous-reject/anonymous
+submit, and an owner-visible "分享与安全记录" panel on plan detail. The common
+foundation improvement is the reusable audit event envelope and redaction rules
+around actor, owner/resource/token scope, `correlation_id`, and
+`idempotency_key`; storage and UI remain product-local. Outbox, AI,
+Billing/Credit, PostHog, and reliability retry semantics remain owned by
+GNE-263 through GNE-267.
+
 GNE-234 VERIFY
 ├── GNE-268 VERIFY-01 Reviewer 账号、测试数据、URL、版本
 ├── GNE-269 VERIFY-02 30 分钟 Reviewer Runbook

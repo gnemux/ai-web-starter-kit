@@ -26,6 +26,7 @@ import {
 import type {
   CarePlanShareLinkMutation,
   CarePlanShareLinkState,
+  CatCareAuditActivity,
   CatCarePlan,
   CatCareTask
 } from "@/lib/catcare/product-service";
@@ -43,6 +44,7 @@ type ShareLinkMutationResult =
   | { error: { message: string }; ok: false };
 
 export function PlanDetailClient({
+  auditActivities,
   itemOptions = [],
   justClosed,
   justPublished,
@@ -50,6 +52,7 @@ export function PlanDetailClient({
   plan,
   shareLinkState
 }: {
+  auditActivities: CatCareAuditActivity[];
   itemOptions?: string[];
   justClosed: boolean;
   justPublished: boolean;
@@ -353,10 +356,71 @@ export function PlanDetailClient({
               shareLink={currentShareLink}
             />
           </CatCarePanel>
+
+          <CatCarePanel>
+            <h2 className="text-xl font-semibold text-[#101a32]">
+              分享与安全记录
+            </h2>
+            <AuditActivityList activities={auditActivities} />
+          </CatCarePanel>
         </aside>
       </div>
     </div>
   );
+}
+
+function AuditActivityList({
+  activities
+}: {
+  activities: CatCareAuditActivity[];
+}) {
+  if (activities.length === 0) {
+    return (
+      <p className="mt-3 rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] px-4 py-3 text-sm font-semibold leading-6 text-[#526177]">
+        暂无分享访问记录。生成链接、撤销链接或照看者提交后，这里会显示给主人看的安全活动。
+      </p>
+    );
+  }
+
+  return (
+    <ol className="mt-4 grid gap-3">
+      {activities.map((activity) => (
+        <li
+          className="grid grid-cols-[0.75rem_minmax(0,1fr)] gap-3 rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-3"
+          key={activity.id}
+        >
+          <span
+            className={`mt-1 h-3 w-3 rounded-full ${getAuditActivityDotClass(activity.kind)}`}
+          />
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold text-[#101a32]">
+                {activity.title}
+              </h3>
+              <time className="text-xs font-semibold text-[#75839a]">
+                {formatShareDate(activity.occurredAt)}
+              </time>
+            </div>
+            <p className="mt-1 text-sm font-semibold leading-6 text-[#526177]">
+              {activity.description}
+            </p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function getAuditActivityDotClass(kind: CatCareAuditActivity["kind"]) {
+  if (kind === "success") {
+    return "bg-[#07847f]";
+  }
+
+  if (kind === "warning") {
+    return "bg-[#d1662f]";
+  }
+
+  return "bg-[#6f7fa3]";
 }
 
 function PlanMetricCard({ label, value }: { label: string; value: string }) {
@@ -487,7 +551,7 @@ function ShareLinkPanel({
         </div>
       </div>
       <p className="rounded-xl bg-[#fff4e8] px-4 py-3 text-sm font-semibold leading-6 text-[#b85d00] ring-1 ring-[#efd1ad]">
-        安全提醒：完整链接只展示一次，不要写入日志、评论或截图证据。
+        安全提醒：这是私密链接，任何拿到有效链接的人都能查看授权照护信息并提交结果，请只发给可信照看者。重新生成会撤销旧链接，已提交结果仍保留。
       </p>
     </div>
   );

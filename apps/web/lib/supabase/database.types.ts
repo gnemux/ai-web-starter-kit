@@ -9,6 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audit_events: {
+        Row: {
+          actor_type: "user" | "anonymous_token" | "system";
+          correlation_id: string;
+          event_data: Json;
+          event_name:
+            | "care_plan_published"
+            | "share_link_created"
+            | "share_link_revoked"
+            | "share_page_viewed"
+            | "invalid_or_revoked_token_rejected"
+            | "care_submission_created"
+            | "owner_boundary_denied";
+          id: string;
+          idempotency_key: string | null;
+          occurred_at: string;
+          owner_id: string | null;
+          resource_id: string | null;
+          resource_type: "care_plan" | null;
+          task_id: string | null;
+          token_record_id: string | null;
+        };
+        Insert: {
+          actor_type: "user" | "anonymous_token" | "system";
+          correlation_id: string;
+          event_data?: Json;
+          event_name:
+            | "care_plan_published"
+            | "share_link_created"
+            | "share_link_revoked"
+            | "share_page_viewed"
+            | "invalid_or_revoked_token_rejected"
+            | "care_submission_created"
+            | "owner_boundary_denied";
+          id?: string;
+          idempotency_key?: string | null;
+          occurred_at?: string;
+          owner_id?: string | null;
+          resource_id?: string | null;
+          resource_type?: "care_plan" | null;
+          task_id?: string | null;
+          token_record_id?: string | null;
+        };
+        Update: {
+          actor_type?: "user" | "anonymous_token" | "system";
+          correlation_id?: string;
+          event_data?: Json;
+          event_name?:
+            | "care_plan_published"
+            | "share_link_created"
+            | "share_link_revoked"
+            | "share_page_viewed"
+            | "invalid_or_revoked_token_rejected"
+            | "care_submission_created"
+            | "owner_boundary_denied";
+          id?: string;
+          idempotency_key?: string | null;
+          occurred_at?: string;
+          owner_id?: string | null;
+          resource_id?: string | null;
+          resource_type?: "care_plan" | null;
+          task_id?: string | null;
+          token_record_id?: string | null;
+        };
+        Relationships: [];
+      };
       billing_credit_ledger: {
         Row: {
           id: string;

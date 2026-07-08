@@ -31,6 +31,7 @@ import {
   mapDbBoundaryError,
   mapSupabaseError
 } from "./core";
+import { recordCatCareAuditEvent } from "./audit";
 
 export type ShareTokenRow = Database["public"]["Tables"]["share_tokens"]["Row"];
 export type ShareTokenScope = "care_plan";
@@ -193,7 +194,8 @@ export async function createCarePlanShareLink(
     .eq("resource_type", shareTokenResourceType)
     .eq("resource_id", planId)
     .eq("scope", shareTokenScope)
-    .is("revoked_at", null);
+    .is("revoked_at", null)
+    .select("id, revoked_at");
 
   if (revokeResult.error) {
     return mapSupabaseError(revokeResult.error);
@@ -224,6 +226,28 @@ export async function createCarePlanShareLink(
   if (insertResult.error) {
     return mapSupabaseError(insertResult.error);
   }
+
+  for (const revokedToken of revokeResult.data ?? []) {
+    void recordCatCareAuditEvent({
+      actorType: "user",
+      eventName: "share_link_revoked",
+      ownerId: contextResult.data.ownerId,
+      properties: { revoked_at: revokedToken.revoked_at ?? now },
+      resourceId: planId,
+      resourceType: shareTokenResourceType,
+      tokenRecordId: revokedToken.id
+    });
+  }
+
+  void recordCatCareAuditEvent({
+    actorType: "user",
+    eventName: "share_link_created",
+    ownerId: contextResult.data.ownerId,
+    properties: { expires_at: insertResult.data.expires_at },
+    resourceId: planId,
+    resourceType: shareTokenResourceType,
+    tokenRecordId: insertResult.data.id
+  });
 
   return serviceOk({
     ...mapShareTokenState(insertResult.data),
@@ -260,6 +284,18 @@ export async function revokeCarePlanShareLink(
     return mapSupabaseError(revokeResult.error);
   }
 
+  if (revokeResult.data) {
+    void recordCatCareAuditEvent({
+      actorType: "user",
+      eventName: "share_link_revoked",
+      ownerId: contextResult.data.ownerId,
+      properties: { revoked_at: revokeResult.data.revoked_at ?? revokedAt },
+      resourceId: planId,
+      resourceType: shareTokenResourceType,
+      tokenRecordId: revokeResult.data.id
+    });
+  }
+
   return serviceOk({
     ...mapShareTokenState(revokeResult.data),
     token: null
@@ -273,6 +309,12 @@ export async function resolveCarePlanShareToken(
   const hashResult = hashShareTokenSecret(secret);
 
   if (!hashResult.ok) {
+    void recordCatCareAuditEvent({
+      actorType: "anonymous_token",
+      eventName: "invalid_or_revoked_token_rejected",
+      properties: { reason: "invalid" },
+      resourceType: shareTokenResourceType
+    });
     return hashResult;
   }
 
@@ -297,6 +339,12 @@ export async function resolveCarePlanShareToken(
   }
 
   if (!tokenResult.data) {
+    void recordCatCareAuditEvent({
+      actorType: "anonymous_token",
+      eventName: "invalid_or_revoked_token_rejected",
+      properties: { reason: "invalid" },
+      resourceType: shareTokenResourceType
+    });
     return serviceError("unauthorized", "Share link is invalid.", {
       token: "invalid"
     });
@@ -305,12 +353,30 @@ export async function resolveCarePlanShareToken(
   const token = tokenResult.data;
 
   if (token.revoked_at) {
+    void recordCatCareAuditEvent({
+      actorType: "anonymous_token",
+      eventName: "invalid_or_revoked_token_rejected",
+      ownerId: token.owner_id,
+      properties: { reason: "revoked" },
+      resourceId: token.resource_id,
+      resourceType: token.resource_type,
+      tokenRecordId: token.id
+    });
     return serviceError("forbidden", "Share link has been revoked.", {
       token: "revoked"
     });
   }
 
   if (new Date(token.expires_at).getTime() <= now.getTime()) {
+    void recordCatCareAuditEvent({
+      actorType: "anonymous_token",
+      eventName: "invalid_or_revoked_token_rejected",
+      ownerId: token.owner_id,
+      properties: { reason: "expired" },
+      resourceId: token.resource_id,
+      resourceType: token.resource_type,
+      tokenRecordId: token.id
+    });
     return serviceError("forbidden", "Share link has expired.", {
       token: "expired"
     });
@@ -391,6 +457,15 @@ export async function getAnonymousCarePlanView(
   }
 
   if (planResult.data.status !== "published") {
+    void recordCatCareAuditEvent({
+      actorType: "anonymous_token",
+      eventName: "invalid_or_revoked_token_rejected",
+      ownerId: tokenResult.data.ownerId,
+      properties: { reason: "unavailable" },
+      resourceId: tokenResult.data.resourceId,
+      resourceType: tokenResult.data.resourceType,
+      tokenRecordId: tokenResult.data.tokenId
+    });
     return serviceError("forbidden", "Care plan is no longer available.", {
       token: "unavailable"
     });
@@ -477,6 +552,16 @@ export async function getAnonymousCarePlanView(
       timeHint: task.timeHint,
       title: task.title
     }));
+
+  void recordCatCareAuditEvent({
+    actorType: "anonymous_token",
+    eventName: "share_page_viewed",
+    ownerId: tokenResult.data.ownerId,
+    properties: { expires_at: tokenResult.data.expiresAt },
+    resourceId: tokenResult.data.resourceId,
+    resourceType: tokenResult.data.resourceType,
+    tokenRecordId: tokenResult.data.tokenId
+  });
 
   return serviceOk({
     catNames: extractPlanCatNames(plan.aiInputSummary),
@@ -669,6 +754,22 @@ export async function submitAnonymousCareSubmissionFromFormData(
         tokenResult.data.ownerId,
         tokenResult.data.resourceId
       );
+      void recordCatCareAuditEvent({
+        actorType: "anonymous_token",
+        eventName: "care_submission_created",
+        idempotencyKey: existingResult.data.idempotencyKey,
+        ownerId: tokenResult.data.ownerId,
+        properties: {
+          abnormal: updateResult.data.abnormal,
+          service_date: serviceDate,
+          status: updateResult.data.status,
+          visit_time: visitTime
+        },
+        resourceId: tokenResult.data.resourceId,
+        resourceType: tokenResult.data.resourceType,
+        taskId: task.id,
+        tokenRecordId: tokenResult.data.tokenId
+      });
 
       return serviceOk({
         abnormal: updateResult.data.abnormal,
@@ -742,6 +843,22 @@ export async function submitAnonymousCareSubmissionFromFormData(
   }
 
   clearCatCarePlanCaches(tokenResult.data.ownerId, tokenResult.data.resourceId);
+  void recordCatCareAuditEvent({
+    actorType: "anonymous_token",
+    eventName: "care_submission_created",
+    idempotencyKey,
+    ownerId: tokenResult.data.ownerId,
+    properties: {
+      abnormal: insertResult.data.abnormal,
+      service_date: serviceDate,
+      status: insertResult.data.status,
+      visit_time: visitTime
+    },
+    resourceId: tokenResult.data.resourceId,
+    resourceType: tokenResult.data.resourceType,
+    taskId: task.id,
+    tokenRecordId: tokenResult.data.tokenId
+  });
 
   return serviceOk({
     abnormal: insertResult.data.abnormal,

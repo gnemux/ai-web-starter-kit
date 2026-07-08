@@ -169,7 +169,7 @@ function AnonymousCarePlan({
           <section className="rounded-[22px] border border-[#e2e6ee] bg-white p-5 shadow-sm shadow-slate-900/[0.04]">
             <p className="text-sm font-semibold text-[#07847f]">查看方式</p>
             <p className="mt-3 text-sm font-semibold leading-6 text-[#526177]">
-              这个页面只显示主人授权的信息。先核对日期和猫咪，再按每天的到访步骤执行；当天和已到日期可以提交，未来日期暂不开放提交。
+              这个页面只显示主人授权的信息，不代表系统确认照看者真实身份。先核对日期和猫咪，再按每天的到访步骤执行；当天和已到日期可以提交，未来日期暂不开放提交。
             </p>
           </section>
         </div>
@@ -215,7 +215,7 @@ function AnonymousCarePlan({
       </div>
 
       <p className="pb-6 text-center text-xs font-semibold leading-5 text-[#75839a]">
-        这个页面只显示主人授权的照护信息。提交后，主人会在结果页看到完成、备注和异常反馈。
+        这个页面只显示主人授权的照护信息，不绑定具体照看者身份。提交后，主人会在结果页看到完成、备注和异常反馈。
       </p>
     </>
   );

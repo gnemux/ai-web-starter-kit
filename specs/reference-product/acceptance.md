@@ -72,6 +72,26 @@
 
 ## Verification Snapshot
 
+2026-07-08 GNE-262 CAPABILITY audit implementation:
+
+- `public.audit_events` is added as the durable CAP-02 audit store with RLS and
+  owner-only read policy.
+- CatCare uses a product-local Audit facade at
+  `apps/web/lib/catcare/product-service/audit.ts`; common-foundation uplift is
+  the shared event shape around actor, owner/resource/token scope,
+  `correlation_id`, and `idempotency_key`, not a generic share-token package.
+- Covered actions: plan publish, share link create/regenerate, share revoke,
+  valid anonymous share page view, invalid/expired/revoked/unavailable token
+  rejection, and anonymous submission create/update.
+- Owner-visible activity is shown on the care-plan detail page as
+  "分享与安全记录" with product-language summaries. It does not expose raw token,
+  token hash, internal ids, owner email, full notes, or private handoff text.
+- Bearer-link copy is explicit: anyone with a valid link can view authorized
+  care info and submit results; regenerate revokes old links while preserving
+  already submitted results.
+- Non-goals preserved: no Outbox, AI, Billing/Credit, PostHog runtime, logged-in
+  sitter identity, photo proof, or multi-user ACL.
+
 2026-07-08 GNE-261 CAPABILITY action map:
 
 - `specs/reference-product/capability-action-map.md` is the CAP-01 source for

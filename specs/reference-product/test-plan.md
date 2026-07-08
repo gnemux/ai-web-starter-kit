@@ -4,6 +4,12 @@
 
 - `pnpm test:package-boundaries`
   - Confirms package public-entry usage and product-object boundary rules.
+- GNE-261 document boundary check
+  - Confirms `specs/reference-product/capability-action-map.md` records
+    business action, product fact, capability mapping, adapter boundary,
+    foundation decision, Cloudflare/Hono risk, and owning issue.
+  - Confirms CAP-01 does not add runtime code, migrations, online Supabase
+    writes, or a generic share-token package.
 
 ## Integration Tests
 
@@ -27,6 +33,18 @@
     persisting seed rows.
 
 ## Browser / E2E Checks
+
+2026-07-08 GNE-261 CAPABILITY action-map checkpoint:
+
+- No browser interaction is required because GNE-261 is a mapping and
+  architecture handoff issue.
+- Required evidence: `git diff --check`, `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and a text search proving
+  `capability-action-map.md`, `foundation_decision`, and
+  `cloudflare_hono_risk` are present in the reference-product specs/context.
+- Reviewers should use the map before starting GNE-262 through GNE-267 to
+  ensure each runtime issue keeps actor, owner scope, anonymous token scope,
+  `correlation_id`, and `idempotency_key` explicit.
 
 2026-07-07 GNE-290 checkpoint:
 

@@ -555,12 +555,22 @@ counts as `0` before PR/merge closure.
 GNE-233 CAPABILITY
 ├── GNE-261 CAP-01 业务动作到能力映射表
 ├── GNE-262 CAP-02 Audit 接入发布、分享、提交、撤销动作
-│   └── GNE-292 CAP-02A 主人可见分享活动记录与私密链接风险说明
 ├── GNE-263 CAP-03 Outbox 接入通知和异步任务
 ├── GNE-264 CAP-04 AI 生成照护摘要或提醒文案
 ├── GNE-265 CAP-05 Billing/Credit 用量权益
 ├── GNE-266 CAP-06 PostHog 行为与能力事件串联
 └── GNE-267 CAP-07 失败、重试、幂等与降级验证
+
+GNE-261 CAPABILITY action-map note, 2026-07-08:
+`specs/reference-product/capability-action-map.md` is the CAP-01 handoff for
+GNE-262 through GNE-267. It maps owner publish/share/revoke, anonymous
+view/submit, owner result review, AI recap, entitlement/checkout, Outbox,
+PostHog, and reliability actions to product facts, capability adapters,
+foundation decisions, and Cloudflare/Hono risks. The common-foundation uplift is
+the standardized actor/owner/token/resource/correlation/idempotency handoff and
+explicit use of `@xwlc/platform`, `@xwlc/db`, and `@xwlc/core` contracts.
+Share-token and anonymous-submit behavior stay `common_pattern_not_extracted`
+until a second product validates a generic capability.
 
 GNE-234 VERIFY
 ├── GNE-268 VERIFY-01 Reviewer 账号、测试数据、URL、版本
@@ -866,11 +876,11 @@ minimum path. Its internal order is Audit / Correlation ID -> Outbox -> AI draft
 with human review -> Entitlement / Usage -> Sandbox / Test Mode -> Health /
 Trace / Metrics.
 
-CAP-02 owner-visible audit addendum: `GNE-292` sits under `GNE-262` and makes
-ACCESS audit product-visible instead of backend-only. It owns the owner-facing
-share/security activity surface, private-link bearer-risk copy, and correlation
-id handoff needed for later PostHog/Audit event stitching. It must not store raw
-share tokens, token hashes, full notes, owner email, or private handoff text.
+CAP-02 owner-visible audit addendum is folded directly into `GNE-262`, not a
+third-level task. CAP-02 owns the owner-facing share/security activity surface,
+private-link bearer-risk copy, and correlation id handoff needed for later
+PostHog/Audit event stitching. It must not store raw share tokens, token hashes,
+full notes, owner email, or private handoff text.
 ```
 
 ## Usage

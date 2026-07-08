@@ -89,6 +89,30 @@
   repository filters without RLS, propagate `correlation_id`, and implement safe
   audit payload redaction in CAP-02.
 
+2026-07-08 GNE-232 parent final smoke:
+
+- Local `http://localhost:3003` was started outside the sandbox after sandbox
+  port binding blocked `next dev`.
+- Desktop `1440px` smoke passed for `/catcare`, `/catcare/plans`,
+  `/catcare/results`, and `/catcare/plans/3c3ec881-fc2d-4b32-b3f1-d15866347d78`:
+  pages rendered authenticated owner content with no horizontal overflow.
+- Mobile `390px` smoke passed for valid anonymous
+  `/s/fd75V-mHDP1uxS1XiZF2KwSCT-PpWAnYoa66M5MGF9Q` and invalid
+  `/s/invalid-token-smoke`: both rendered Chinese ACCESS copy with no horizontal
+  overflow; invalid token showed no care content.
+- Anonymous submit smoke submitted one current-day task. The visible visit
+  progress changed from `0/4` to `1/4`, the submitted task changed to
+  `已提交完成`, and the submit button disappeared for that task after reload.
+- Owner result smoke showed `/catcare/results` increasing the active plan count
+  from `16 条提交待查看` to `17 条提交待查看`; plan result detail showed completion
+  overview, pending reminder, notes summary, and `返回结果查看`.
+- Screenshot evidence:
+  `/private/tmp/gne232-final-results-desktop-1440.png` and
+  `/private/tmp/gne232-final-anon-valid-390.png`.
+- Revoke and expired-token clicks were not executed in this smoke to avoid
+  invalidating the user's active share link. Those destructive states remain
+  covered by GNE-257/GNE-259/GNE-260 token/RLS evidence.
+
 2026-07-08 GNE-259 owner/anonymous access boundary:
 
 - Owner-only boundary is covered by rollback-only SQL against `cats`,

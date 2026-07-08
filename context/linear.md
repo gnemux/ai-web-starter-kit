@@ -495,6 +495,16 @@ slots so the sitter cannot duplicate the same care result after regeneration.
 The service now accepts legacy token-scoped submission refs but writes new
 anonymous idempotency keys at plan scope.
 
+GNE-259 access-boundary note, 2026-07-08: ACCESS-05 is an evidence issue, not a
+new user-facing feature. The repository now has
+`supabase/tests/catcare_access_boundary.sql` as a linked-test rollback SQL
+matrix for Owner A/B isolation across CatCare owner rows, submissions, and
+share tokens, plus anonymous direct-role rejection for private tables and
+token/submission writes. The matching specs record the app-layer portability
+boundary: owner services carry explicit `owner_id` filters, while anonymous
+services resolve a token into `ownerId`, `resourceId`, task, service-date, and
+visit-time scope instead of treating a token as a logged-in owner.
+
 GNE-290 planning note: this PRODUCT polish issue is the corrective pass for
 the accumulated drift from the V6 prototype chain across Food & Care Items,
 Events, Scenario & AI Inputs, AI Generate & Review, Private Share, and Sitter

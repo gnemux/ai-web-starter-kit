@@ -233,6 +233,29 @@
 
 ## Latest Run
 
+2026-07-08 GNE-259 owner/anonymous access boundary:
+
+- Added `supabase/tests/catcare_access_boundary.sql` as the combined ACCESS-05
+  SQL acceptance script. It creates rollback-only Owner A/B cats, plans, tasks,
+  submissions, and share tokens, then verifies owner A cannot read or mutate
+  owner B rows across `cats`, `care_plans`, `care_tasks`, `care_submissions`,
+  and `share_tokens`.
+- The same script verifies anonymous database role cannot directly read cat
+  private rows, care plan/task/submission rows, or `share_tokens`, and cannot
+  directly write share-token or care-submission rows.
+- App-layer boundary evidence: owner share-link management first resolves the
+  authenticated owner and then queries `care_plans`/`share_tokens` with
+  explicit `owner_id`, `resource_type`, `resource_id`, and `scope` filters in
+  `apps/web/lib/catcare/product-service/share-tokens.ts`.
+- App-layer anonymous evidence: `/s/[token]` resolves a token into an
+  `anonymous_token` scope and all anonymous plan reads/submission writes use
+  the derived `ownerId`, `resourceId`, task id, service date, and visit-time
+  boundary. The anonymous token is not treated as a logged-in owner identity.
+- Portability check: the service/repository layer does not rely only on page
+  routing or database RLS; critical owner and anonymous queries carry explicit
+  owner/token scope conditions, preserving a minimal path for future no-RLS
+  storage such as Cloudflare D1.
+
 2026-07-07 GNE-258 / GNE-290 boundary correction:
 
 - GNE-258 acceptance is restricted to ACCESS technical evidence: anonymous

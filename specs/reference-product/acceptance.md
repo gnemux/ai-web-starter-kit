@@ -72,6 +72,25 @@
 
 ## Verification Snapshot
 
+2026-07-08 GNE-261 CAPABILITY action map:
+
+- `specs/reference-product/capability-action-map.md` is the CAP-01 source for
+  mapping business actions to Audit, Outbox, Billing/Credit, AI, PostHog, and
+  permission boundaries.
+- The map classifies each action with `common_contract_verified`,
+  `common_pattern_not_extracted`, `product_foundation`, `catcare_specific`, or
+  `not_run` so later CAP issues can improve the common foundation without
+  moving CatCare business objects into `packages/*`.
+- Common-foundation handoff is explicit: capability calls should carry actor,
+  owner scope, anonymous token scope, resource scope, `correlation_id`, and
+  `idempotency_key`.
+- Cloudflare/Hono portability is preserved as a requirement: app-layer
+  owner/token/resource filters must remain correct even if a future store does
+  not enforce Supabase RLS.
+- GNE-261 is documentation and architecture acceptance only. Runtime Audit,
+  Outbox, AI, Billing/Credit, PostHog, and reliability implementation remains
+  owned by GNE-262 through GNE-267.
+
 2026-07-08 GNE-260 ACCESS security negative matrix:
 
 - `specs/reference-product/access-security-negative-matrix.md` is the ACCESS-06

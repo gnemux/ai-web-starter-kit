@@ -561,6 +561,17 @@ GNE-233 CAPABILITY
 ├── GNE-266 CAP-06 PostHog 行为与能力事件串联
 └── GNE-267 CAP-07 失败、重试、幂等与降级验证
 
+GNE-261 CAPABILITY action-map note, 2026-07-08:
+`specs/reference-product/capability-action-map.md` is the CAP-01 handoff for
+GNE-262 through GNE-267. It maps owner publish/share/revoke, anonymous
+view/submit, owner result review, AI recap, entitlement/checkout, Outbox,
+PostHog, and reliability actions to product facts, capability adapters,
+foundation decisions, and Cloudflare/Hono risks. The common-foundation uplift is
+the standardized actor/owner/token/resource/correlation/idempotency handoff and
+explicit use of `@xwlc/platform`, `@xwlc/db`, and `@xwlc/core` contracts.
+Share-token and anonymous-submit behavior stay `common_pattern_not_extracted`
+until a second product validates a generic capability.
+
 GNE-234 VERIFY
 ├── GNE-268 VERIFY-01 Reviewer 账号、测试数据、URL、版本
 ├── GNE-269 VERIFY-02 30 分钟 Reviewer Runbook

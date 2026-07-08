@@ -75,6 +75,63 @@ export type Database = {
         };
         Relationships: [];
       };
+      outbox_events: {
+        Row: {
+          aggregate_id: string;
+          aggregate_type: "care_plan" | "care_submission" | "share_token";
+          attempt_count: number;
+          correlation_id: string;
+          created_at: string;
+          event_type:
+            | "owner_notification"
+            | "share_notification"
+            | "submission_notification";
+          id: string;
+          idempotency_key: string | null;
+          next_attempt_at: string | null;
+          owner_id: string | null;
+          payload: Json;
+          status: "pending" | "processing" | "sent" | "failed" | "dead_letter";
+          updated_at: string;
+        };
+        Insert: {
+          aggregate_id: string;
+          aggregate_type: "care_plan" | "care_submission" | "share_token";
+          attempt_count?: number;
+          correlation_id: string;
+          created_at?: string;
+          event_type:
+            | "owner_notification"
+            | "share_notification"
+            | "submission_notification";
+          id?: string;
+          idempotency_key?: string | null;
+          next_attempt_at?: string | null;
+          owner_id?: string | null;
+          payload?: Json;
+          status?: "pending" | "processing" | "sent" | "failed" | "dead_letter";
+          updated_at?: string;
+        };
+        Update: {
+          aggregate_id?: string;
+          aggregate_type?: "care_plan" | "care_submission" | "share_token";
+          attempt_count?: number;
+          correlation_id?: string;
+          created_at?: string;
+          event_type?:
+            | "owner_notification"
+            | "share_notification"
+            | "submission_notification";
+          id?: string;
+          idempotency_key?: string | null;
+          next_attempt_at?: string | null;
+          owner_id?: string | null;
+          payload?: Json;
+          status?: "pending" | "processing" | "sent" | "failed" | "dead_letter";
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       billing_credit_ledger: {
         Row: {
           id: string;

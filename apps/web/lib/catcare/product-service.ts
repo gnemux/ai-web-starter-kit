@@ -77,7 +77,6 @@ export {
 
 export type {
   AnonymousCarePlanView,
-  AnonymousCareSubmissionMutation,
   AnonymousCareTaskView,
   AnonymousCareTaskSubmissionView,
   CarePlanShareLinkMutation,
@@ -87,9 +86,11 @@ export type {
   ShareTokenRow,
   ShareTokenScope
 } from "./product-service/share-tokens";
+export type { AnonymousCareSubmissionMutation } from "./product-service/anonymous-submissions";
 
 export { getCatCareAuditActivities } from "./product-service/audit";
 export type { CatCareAuditActivity } from "./product-service/audit";
+export { submitAnonymousCareSubmissionFromFormData } from "./product-service/anonymous-submissions";
 
 export {
   createCarePlanShareLink,
@@ -103,6 +104,5 @@ export {
   revokeCarePlanShareLink,
   shareTokenResourceType,
   shareTokenScope,
-  shareTokenTtlDays,
-  submitAnonymousCareSubmissionFromFormData
+  shareTokenTtlDays
 } from "./product-service/share-tokens";

@@ -7,7 +7,7 @@
     "build": "next build",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test lib/catcare/product-service/anonymous-submission-policy.test.mjs lib/catcare/product-service/audit.test.mjs"
+    "test": "node --experimental-strip-types --test lib/catcare/product-service/anonymous-submission-policy.test.mjs lib/catcare/product-service/audit.test.mjs lib/catcare/product-service/outbox.test.mjs"
   },
   "dependencies": {
     "@xwlc/core": "workspace:*",

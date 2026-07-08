@@ -92,6 +92,27 @@
 - Non-goals preserved: no Outbox, AI, Billing/Credit, PostHog runtime, logged-in
   sitter identity, photo proof, or multi-user ACL.
 
+2026-07-08 GNE-263 CAPABILITY outbox implementation:
+
+- `public.outbox_events` is added as the durable CAP-03 outbox store with RLS
+  and owner-only read policy.
+- CatCare uses a product-local Outbox facade at
+  `apps/web/lib/catcare/product-service/outbox.ts`; common-foundation uplift is
+  the shared envelope around aggregate type/id, status, attempt count,
+  `correlation_id`, `idempotency_key`, and redacted payload.
+- `idempotency_key` has a unique index and Outbox writes use upsert so repeated
+  anonymous task updates refresh the pending notification instead of creating
+  duplicate queued work.
+- `apps/web/lib/catcare/product-service/share-tokens.ts` no longer owns
+  anonymous submission mutation. Submission handling is split into
+  `anonymous-submissions.ts` before adding Outbox records.
+- Covered action: anonymous submission create/update records a pending
+  `owner_notification` outbox item after the business submission succeeds.
+- Outbox payload does not expose raw token, token hash, owner email, full notes,
+  or private handoff text.
+- Non-goals preserved: no real email/message worker, no generic share-token
+  package, no PostHog runtime correlation, and no Outbox admin UI.
+
 2026-07-08 GNE-261 CAPABILITY action map:
 
 - `specs/reference-product/capability-action-map.md` is the CAP-01 source for

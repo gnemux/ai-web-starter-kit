@@ -555,6 +555,7 @@ counts as `0` before PR/merge closure.
 GNE-233 CAPABILITY
 ├── GNE-261 CAP-01 业务动作到能力映射表
 ├── GNE-262 CAP-02 Audit 接入发布、分享、提交、撤销动作
+│   └── GNE-292 CAP-02A 主人可见分享活动记录与私密链接风险说明
 ├── GNE-263 CAP-03 Outbox 接入通知和异步任务
 ├── GNE-264 CAP-04 AI 生成照护摘要或提醒文案
 ├── GNE-265 CAP-05 Billing/Credit 用量权益
@@ -864,6 +865,12 @@ MVP3 capability boundary: `GNE-233` must not block the PRODUCT or ACCESS
 minimum path. Its internal order is Audit / Correlation ID -> Outbox -> AI draft
 with human review -> Entitlement / Usage -> Sandbox / Test Mode -> Health /
 Trace / Metrics.
+
+CAP-02 owner-visible audit addendum: `GNE-292` sits under `GNE-262` and makes
+ACCESS audit product-visible instead of backend-only. It owns the owner-facing
+share/security activity surface, private-link bearer-risk copy, and correlation
+id handoff needed for later PostHog/Audit event stitching. It must not store raw
+share tokens, token hashes, full notes, owner email, or private handoff text.
 ```
 
 ## Usage

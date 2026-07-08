@@ -90,3 +90,29 @@ export function isAnonymousCareServiceDateInPlan(
 
   return serviceDate >= startOn && serviceDate <= finalDate;
 }
+
+export function parseAnonymousCareSubmissionSlotKey(
+  idempotencyKey: string | null
+) {
+  const match = /^anonymous:[^:]+:(\d{4}-\d{2}-\d{2}):([0-2]\d[0-5]\d)/.exec(
+    idempotencyKey ?? ""
+  );
+  const serviceDate = match?.[1] ?? "";
+  const encodedVisitTime = match?.[2] ?? "";
+
+  if (!isAnonymousCareServiceDate(serviceDate)) {
+    return null;
+  }
+
+  if (!/^([01]\d|2[0-3])[0-5]\d$/.test(encodedVisitTime)) {
+    return null;
+  }
+
+  const visitTime = `${encodedVisitTime.slice(0, 2)}:${encodedVisitTime.slice(2)}`;
+
+  return {
+    key: `${serviceDate}:${visitTime}`,
+    serviceDate,
+    visitTime
+  };
+}

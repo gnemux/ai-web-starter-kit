@@ -233,6 +233,27 @@
 
 ## Latest Run
 
+2026-07-08 GNE-260 ACCESS security negative matrix:
+
+- Added `specs/reference-product/access-security-negative-matrix.md` as the
+  reusable ACCESS-06 checklist for private-link and anonymous-submit negative
+  paths.
+- The matrix covers owner A/B cross-owner access, share-token create/revoke
+  boundaries, expired/revoked/tampered tokens, repeated link generation,
+  duplicate submits, forwarded-link minimum scope, direct anonymous DB read/write
+  rejection, direct submit validation, and raw-token leakage checks.
+- Audit scope is contract-only in ACCESS: required events, allowed fields, and
+  forbidden fields are defined for CAP-02 without adding an `audit_events` table
+  or runtime Audit facade here.
+- Foundation judgment is explicit: token hash/scope/expiry/revocation,
+  anonymous actor context, whitelist, idempotency, and the negative matrix are
+  `common_pattern_not_extracted` or `common_contract_verified`; CatCare table
+  fields remain `catcare_specific`; durable audit is `not_run` until CAP-02.
+- Cloudflare/Hono portability is documented: current service-level owner/token
+  filters and server-side whitelist survive a no-RLS repository adapter, while
+  service-role anonymous reads, missing full `correlation_id` propagation, and
+  not-yet-implemented audit storage are carried as migration risks.
+
 2026-07-08 GNE-259 owner/anonymous access boundary:
 
 - Added `supabase/tests/catcare_access_boundary.sql` as the combined ACCESS-05

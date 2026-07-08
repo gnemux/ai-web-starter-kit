@@ -505,6 +505,17 @@ boundary: owner services carry explicit `owner_id` filters, while anonymous
 services resolve a token into `ownerId`, `resourceId`, task, service-date, and
 visit-time scope instead of treating a token as a logged-in owner.
 
+GNE-260 security-negative note, 2026-07-08: ACCESS-06 is a negative matrix and
+audit-requirement issue, not CAP-02 audit implementation. The repository now
+uses `specs/reference-product/access-security-negative-matrix.md` as the
+Reviewer/VERIFY handoff for cross-owner abuse, expired/revoked/tampered token
+paths, repeat link generation, duplicate submit, forwarded-link scope, direct
+anonymous DB/API attempts, and raw-token leakage checks. The same document marks
+reusable ACCESS security as `common_pattern_not_extracted` or
+`common_contract_verified`, keeps CatCare business fields as `catcare_specific`,
+and records CF/Hono risks where audit persistence or full `correlation_id`
+propagation is not yet implemented.
+
 GNE-290 planning note: this PRODUCT polish issue is the corrective pass for
 the accumulated drift from the V6 prototype chain across Food & Care Items,
 Events, Scenario & AI Inputs, AI Generate & Review, Private Share, and Sitter

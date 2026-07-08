@@ -1,15 +1,22 @@
 "use client";
 
+import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 
 import {
   CatCareBowlActionIcon,
   CatCareCalendarIcon,
+  CatCareEditIcon,
   CatCarePlusCircleIcon,
   CatCareSaveIcon,
-  CatCareSearchIcon
+  CatCareSearchIcon,
+  CatCareTrashIcon,
+  CatCareXIcon
 } from "../catcare-action-icons";
-import { CatCareEventTypeIcon } from "../catcare-item-type-icon";
+import {
+  CatCareEventTypeIcon,
+  CatCareSeverityIcon
+} from "../catcare-item-type-icon";
 import { CatCareToast, useCatCareToast } from "../catcare-toast";
 import {
   CatCareButton,
@@ -17,7 +24,11 @@ import {
   CatCarePanel,
   catCareInputClass
 } from "../owner-flow-components";
-import { createCatCareEventLocalAction } from "../actions";
+import {
+  createCatCareEventLocalAction,
+  deleteCatCareEventLocalAction,
+  updateCatCareEventLocalAction
+} from "../actions";
 import type {
   CatCareCatSummary,
   CatCareEvent,
@@ -32,18 +43,17 @@ const eventTypes = [
   ["vet", "就医"],
   ["travel", "出门"],
   ["behavior", "行为"],
-  ["environment", "环境"],
   ["other", "其它"]
 ] as const;
 
 const severityLabels = {
-  normal: "普通",
+  normal: "正常",
   urgent: "紧急",
-  watch: "需关注"
+  watch: "关注"
 } as const;
 const severityOptions = [
-  ["normal", "普通"],
-  ["watch", "需关注"],
+  ["normal", "正常"],
+  ["watch", "关注"],
   ["urgent", "紧急"]
 ] as const;
 
@@ -62,7 +72,7 @@ export function EventsWorkspaceClient({
   const [eventList, setEventList] = useState(events);
   const [formKey, setFormKey] = useState(0);
   const [pending, setPending] = useState(false);
-  const [rangeMode, setRangeMode] = useState<"30d" | "month" | "custom">("30d");
+  const [rangeMode, setRangeMode] = useState<"30d" | "month">("30d");
   const toast = useCatCareToast();
   const [eventType, setEventType] = useState<(typeof eventTypes)[number][0]>(
     "feeding"
@@ -119,14 +129,13 @@ export function EventsWorkspaceClient({
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_25rem]">
         <CatCarePanel>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
             <div>
               <h2 className="text-2xl font-semibold text-[#101a32]">时间线</h2>
               <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
-                近期健康、行为和环境变化会进入照护计划生成参考。
+                状态直接跟随时间线节点：正常、关注或紧急；近期变化会进入照护计划生成参考。
               </p>
             </div>
-            <SeverityLegend />
           </div>
           {selectedEvents.length > 0 ? (
             <div className="relative mt-6 grid gap-0">
@@ -136,6 +145,22 @@ export function EventsWorkspaceClient({
                   isFirst={index === 0}
                   isLast={index === selectedEvents.length - 1}
                   key={event.id}
+                  onDeleted={(id) => {
+                    setEventList((current) =>
+                      current.filter((entry) => entry.id !== id)
+                    );
+                    toast.showSuccess("事件已删除");
+                  }}
+                  onError={toast.showError}
+                  onUpdated={(nextEvent) => {
+                    setEventList((current) =>
+                      current.map((entry) =>
+                        entry.id === nextEvent.id ? nextEvent : entry
+                      )
+                    );
+                    toast.showSuccess("事件已更新");
+                  }}
+                  relatedItemOptions={relatedItemOptions}
                 />
               ))}
             </div>
@@ -170,7 +195,7 @@ export function EventsWorkspaceClient({
               setEventType("feeding");
               setSeverity("normal");
               setFormKey((current) => current + 1);
-              toast.showSuccess("事件已保存，已加入当前猫咪时间线。");
+              toast.showSuccess("事件已保存，已加入当前猫咪时间线");
             }}
             className={`mt-5 grid gap-4 ${pending ? "pointer-events-none opacity-70" : ""}`}
             key={formKey}
@@ -178,19 +203,21 @@ export function EventsWorkspaceClient({
             <input name="catId" type="hidden" value={selectedCatId} />
             <CatCareField label="类型">
               <input name="eventType" type="hidden" value={eventType} />
-              <div className="grid grid-cols-2 gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2">
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#fbfdfc] p-1.5 ring-1 ring-[#d9e0ea]">
                 {eventTypes.map(([value, label]) => (
                   <button
-                    className={`inline-flex min-h-12 items-center justify-start gap-2 rounded-lg px-3 text-sm font-semibold transition ${
+                    className={`inline-flex min-h-11 items-center justify-start gap-2.5 rounded-lg px-3 text-sm font-semibold transition ${
                       eventType === value
                         ? "bg-[#07847f] text-white shadow-sm shadow-teal-900/15"
-                        : "bg-white text-[#526177] ring-1 ring-[#e2e6ee] hover:text-[#07847f]"
+                        : "bg-white text-[#526177] ring-1 ring-[#e2e6ee] hover:bg-[#f6faf8] hover:text-[#07847f]"
                     }`}
                     key={value}
                     onClick={() => setEventType(value)}
                     type="button"
                   >
-                    <CatCareEventTypeIcon className="h-8 w-8" eventType={value} />
+                    <span className={eventType === value ? "brightness-0 invert" : ""}>
+                      <CatCareEventTypeIcon className="h-7 w-7" eventType={value} />
+                    </span>
                     {label}
                   </button>
                 ))}
@@ -218,7 +245,7 @@ export function EventsWorkspaceClient({
               <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2">
                 {severityOptions.map(([value, label]) => (
                   <button
-                    className={`min-h-10 rounded-lg px-3 text-sm font-semibold transition ${
+                    className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
                       severity === value
                         ? "bg-[#07847f] text-white shadow-sm shadow-teal-900/15"
                         : "bg-white text-[#526177] ring-1 ring-[#e2e6ee] hover:text-[#07847f]"
@@ -227,6 +254,9 @@ export function EventsWorkspaceClient({
                     onClick={() => setSeverity(value)}
                     type="button"
                   >
+                    <span className={severity === value ? "brightness-0 invert" : ""}>
+                      <CatCareSeverityIcon className="h-5 w-5" severity={value} />
+                    </span>
                     {label}
                   </button>
                 ))}
@@ -266,19 +296,18 @@ function EventRangeBar({
   selectedEvents,
   onChange
 }: {
-  rangeMode: "30d" | "month" | "custom";
+  rangeMode: "30d" | "month";
   selectedEvents: CatCareEvent[];
-  onChange: (mode: "30d" | "month" | "custom") => void;
+  onChange: (mode: "30d" | "month") => void;
 }) {
   const rangeLabel = getEventRangeLabel(selectedEvents);
 
   return (
     <div className="grid gap-3 rounded-2xl border border-[#e2e6ee] bg-white p-3 shadow-sm shadow-slate-900/[0.04] lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-center">
-      <div className="grid gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2 sm:grid-cols-3">
+      <div className="grid gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2 sm:grid-cols-2">
         {[
           ["30d", "近 30 天"],
-          ["month", "本月"],
-          ["custom", "自定义"]
+          ["month", "本月"]
         ].map(([value, label]) => (
           <button
             className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-4 text-base font-semibold transition ${
@@ -287,7 +316,7 @@ function EventRangeBar({
                 : "bg-white text-[#526177] ring-1 ring-[#e2e6ee] hover:text-[#07847f]"
             }`}
             key={value}
-            onClick={() => onChange(value as "30d" | "month" | "custom")}
+            onClick={() => onChange(value as "30d" | "month")}
             type="button"
           >
             <CatCareCalendarIcon />
@@ -303,31 +332,18 @@ function EventRangeBar({
   );
 }
 
-function SeverityLegend() {
-  return (
-    <div className="flex flex-wrap gap-3 text-sm font-semibold text-[#526177]">
-      {[
-        ["#07847f", "正常"],
-        ["#f08a00", "关注"],
-        ["#d94235", "紧急"]
-      ].map(([color, label]) => (
-        <span className="inline-flex items-center gap-2" key={label}>
-          <span
-            className="h-2.5 w-2.5 rounded-full"
-            style={{ backgroundColor: color }}
-          />
-          {label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function EventDateInput({ name }: { name: string }) {
+function EventDateInput({
+  initialValue,
+  name
+}: {
+  initialValue?: string | null;
+  name: string;
+}) {
   const today = useMemo(() => formatDateInput(new Date()), []);
-  const [value, setValue] = useState(today);
+  const initialDate = initialValue || today;
+  const [value, setValue] = useState(initialDate);
   const [open, setOpen] = useState(false);
-  const [visibleMonth, setVisibleMonth] = useState(parseDateInput(today));
+  const [visibleMonth, setVisibleMonth] = useState(parseDateInput(initialDate));
 
   return (
     <div
@@ -454,13 +470,15 @@ function EventDatePicker({
 }
 
 function RelatedItemInput({
+  initialValue = "",
   name,
   options
 }: {
+  initialValue?: string | null;
   name: string;
   options: string[];
 }) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialValue ?? "");
   const [open, setOpen] = useState(false);
   const suggestions = useMemo(() => {
     const query = value.trim().toLowerCase();
@@ -511,12 +529,22 @@ function RelatedItemInput({
 function TimelineEventRow({
   event,
   isFirst,
-  isLast
+  isLast,
+  onDeleted,
+  onError,
+  onUpdated,
+  relatedItemOptions
 }: {
   event: CatCareEvent;
   isFirst: boolean;
   isLast: boolean;
+  onDeleted: (id: string) => void;
+  onError: (message: string) => void;
+  onUpdated: (event: CatCareEvent) => void;
+  relatedItemOptions: string[];
 }) {
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const typeLabel =
     eventTypes.find(([value]) => value === event.eventType)?.[1] ?? "事件";
   const severity = getSeverityTone(event.severity);
@@ -528,17 +556,21 @@ function TimelineEventRow({
       </div>
       <div className="relative hidden h-full min-h-28 items-center justify-center sm:flex">
         <span
-          className={`absolute left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-gradient-to-b from-[#d9e6e3] via-[#82b8b1] to-[#d9e6e3] ${
+          className={`absolute left-1/2 w-[3px] -translate-x-1/2 rounded-full ${severity.lineClass} ${
             isFirst ? "top-1/2" : "top-0"
           } ${isLast ? "bottom-1/2" : "bottom-0"}`}
         />
-        <span className="absolute left-1/2 top-1/2 h-16 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
-        <span className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm shadow-slate-900/[0.05] ring-1 ring-[#c8d8e5]">
-          <CatCareEventTypeIcon className="h-10 w-10" eventType={event.eventType} />
+        <span className="absolute left-1/2 top-1/2 h-14 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
+        <span className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full shadow-sm shadow-slate-900/[0.06] ${severity.nodeClass}`}>
+          <span className="brightness-0 invert">
+            <CatCareEventTypeIcon className="h-8 w-8" eventType={event.eventType} />
+          </span>
         </span>
       </div>
-      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-sm shadow-slate-900/[0.04] ring-1 ring-[#e2e6ee] sm:hidden">
-        <CatCareEventTypeIcon className="h-8 w-8" eventType={event.eventType} />
+      <span className={`flex h-11 w-11 items-center justify-center rounded-full shadow-sm shadow-slate-900/[0.04] ${severity.nodeClass} sm:hidden`}>
+        <span className="brightness-0 invert">
+          <CatCareEventTypeIcon className="h-7 w-7" eventType={event.eventType} />
+        </span>
       </span>
       <div className="min-w-0">
         <h3 className="break-words text-lg font-semibold text-[#101a32]">
@@ -555,23 +587,292 @@ function TimelineEventRow({
         ) : null}
       </div>
       <span
-        className={`inline-flex w-fit items-center justify-center rounded-full px-3 py-1 text-sm font-semibold ${severity.badgeClass}`}
+        className={`inline-flex w-fit items-center justify-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${severity.badgeClass}`}
       >
+        <CatCareSeverityIcon className="h-4 w-4" severity={event.severity} />
         {severityLabels[event.severity]}
       </span>
+      <div className="flex items-center gap-2 sm:col-start-3 sm:ml-0">
+        <button
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#f2fbf8] px-3 text-sm font-semibold text-[#07847f] ring-1 ring-[#bfe5d7] transition hover:bg-[#e6f7f2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#07847f] [&>[data-catcare-action-icon]]:h-4 [&>[data-catcare-action-icon]]:w-4"
+          onClick={() => setEditOpen(true)}
+          type="button"
+        >
+          <CatCareEditIcon />
+          修改
+        </button>
+        <button
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#fff4f2] px-3 text-sm font-semibold text-[#b33a2f] ring-1 ring-[#f0c9c2] transition hover:bg-[#ffe8e3] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d86255] [&>[data-catcare-action-icon]]:h-4 [&>[data-catcare-action-icon]]:w-4"
+          onClick={() => setDeleteOpen(true)}
+          type="button"
+        >
+          <CatCareTrashIcon />
+          删除
+        </button>
+      </div>
+      {editOpen ? (
+        <EditEventDialog
+          event={event}
+          onClose={() => setEditOpen(false)}
+          onError={onError}
+          onUpdated={(nextEvent) => {
+            setEditOpen(false);
+            onUpdated(nextEvent);
+          }}
+          relatedItemOptions={relatedItemOptions}
+        />
+      ) : null}
+      {deleteOpen ? (
+        <DeleteEventDialog
+          event={event}
+          onClose={() => setDeleteOpen(false)}
+          onDeleted={(id) => {
+            setDeleteOpen(false);
+            onDeleted(id);
+          }}
+          onError={onError}
+        />
+      ) : null}
     </article>
+  );
+}
+
+function EditEventDialog({
+  event,
+  onClose,
+  onError,
+  onUpdated,
+  relatedItemOptions
+}: {
+  event: CatCareEvent;
+  onClose: () => void;
+  onError: (message: string) => void;
+  onUpdated: (event: CatCareEvent) => void;
+  relatedItemOptions: string[];
+}) {
+  const [pending, setPending] = useState(false);
+  const [eventType, setEventType] = useState(
+    event.eventType === "environment" ? "other" : event.eventType
+  );
+  const [severity, setSeverity] = useState(event.severity);
+
+  async function onSubmit(submitEvent: FormEvent<HTMLFormElement>) {
+    submitEvent.preventDefault();
+    setPending(true);
+
+    const result = await updateCatCareEventLocalAction(
+      new FormData(submitEvent.currentTarget)
+    );
+
+    setPending(false);
+
+    if (!result.ok) {
+      onError(result.error.message);
+      return;
+    }
+
+    onUpdated(result.data);
+  }
+
+  return (
+    <div
+      aria-modal="true"
+      className="fixed inset-0 z-50 grid place-items-center bg-[#101a32]/40 p-4"
+      onClick={onClose}
+      role="dialog"
+    >
+      <form
+        className="grid w-full max-w-xl gap-4 rounded-2xl border border-[#d9e0ea] bg-white p-6 shadow-2xl shadow-slate-900/20"
+        onClick={(clickEvent) => clickEvent.stopPropagation()}
+        onSubmit={onSubmit}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-xl font-semibold text-[#101a32]">修改事件</h3>
+            <p className="mt-1 text-sm font-semibold text-[#526177]">
+              更新后会同步到时间线和后续照护计划参考。
+            </p>
+          </div>
+          <button
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#526177] hover:bg-[#f2f4f7]"
+            onClick={onClose}
+            type="button"
+          >
+            <CatCareXIcon />
+          </button>
+        </div>
+        <input name="id" type="hidden" value={event.id} />
+        <input name="catId" type="hidden" value={event.catId} />
+        <label className="grid gap-2">
+          <span className="text-sm font-semibold text-[#526177]">类型</span>
+          <input name="eventType" type="hidden" value={eventType} />
+          <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#fbfdfc] p-1.5 ring-1 ring-[#d9e0ea] sm:grid-cols-4">
+            {eventTypes.map(([value, label]) => (
+              <button
+                className={`inline-flex min-h-10 items-center justify-start gap-2 rounded-lg px-3 text-sm font-semibold transition ${
+                  eventType === value
+                    ? "bg-[#07847f] text-white shadow-sm shadow-teal-900/15"
+                    : "bg-white text-[#526177] ring-1 ring-[#e2e6ee] hover:bg-[#f6faf8] hover:text-[#07847f]"
+                }`}
+                key={value}
+                onClick={() => setEventType(value)}
+                type="button"
+              >
+                <span className={eventType === value ? "brightness-0 invert" : ""}>
+                  <CatCareEventTypeIcon className="h-6 w-6" eventType={value} />
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
+        </label>
+        <label className="grid gap-2">
+          <span className="text-sm font-semibold text-[#526177]">程度</span>
+          <input name="severity" type="hidden" value={severity} />
+          <div className="grid grid-cols-3 gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2">
+            {severityOptions.map(([value, label]) => (
+              <button
+                className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold transition ${
+                  severity === value
+                    ? "bg-[#07847f] text-white shadow-sm shadow-teal-900/15"
+                    : "bg-white text-[#526177] ring-1 ring-[#e2e6ee] hover:text-[#07847f]"
+                }`}
+                key={value}
+                onClick={() => setSeverity(value)}
+                type="button"
+              >
+                <span className={severity === value ? "brightness-0 invert" : ""}>
+                  <CatCareSeverityIcon className="h-5 w-5" severity={value} />
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
+        </label>
+        <label className="grid gap-2">
+          <span className="text-sm font-semibold text-[#526177]">标题</span>
+          <input
+            className={catCareInputClass}
+            defaultValue={event.title}
+            maxLength={120}
+            name="title"
+            required
+          />
+        </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="grid gap-2">
+            <span className="text-sm font-semibold text-[#526177]">发生日期</span>
+            <EventDateInput initialValue={event.occurredOn} name="occurredOn" />
+          </label>
+          <label className="grid gap-2">
+            <span className="text-sm font-semibold text-[#526177]">关联食物/用品</span>
+            <RelatedItemInput
+              initialValue={event.relatedItemName}
+              name="relatedItemName"
+              options={relatedItemOptions}
+            />
+          </label>
+        </div>
+        <label className="grid gap-2">
+          <span className="text-sm font-semibold text-[#526177]">说明</span>
+          <textarea
+            className={`${catCareInputClass} min-h-28 py-4 leading-6`}
+            defaultValue={event.note ?? ""}
+            maxLength={2000}
+            name="note"
+          />
+        </label>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <CatCareButton fullWidth onClick={onClose} type="button" variant="ghost">
+            <CatCareXIcon />
+            取消
+          </CatCareButton>
+          <button
+            className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl border border-[#07847f] bg-[#07847f] px-5 text-base font-semibold leading-none text-white shadow-sm shadow-teal-900/20 transition hover:bg-[#06706c] disabled:cursor-wait disabled:opacity-60"
+            disabled={pending}
+            type="submit"
+          >
+            <CatCareSaveIcon />
+            {pending ? "保存中…" : "保存修改"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function DeleteEventDialog({
+  event,
+  onClose,
+  onDeleted,
+  onError
+}: {
+  event: CatCareEvent;
+  onClose: () => void;
+  onDeleted: (id: string) => void;
+  onError: (message: string) => void;
+}) {
+  const [pending, setPending] = useState(false);
+
+  async function onSubmit(submitEvent: FormEvent<HTMLFormElement>) {
+    submitEvent.preventDefault();
+    setPending(true);
+
+    const result = await deleteCatCareEventLocalAction(
+      new FormData(submitEvent.currentTarget)
+    );
+
+    setPending(false);
+
+    if (!result.ok) {
+      onError(result.error.message);
+      return;
+    }
+
+    onDeleted(result.data.id);
+  }
+
+  return (
+    <div
+      aria-modal="true"
+      className="fixed inset-0 z-50 grid place-items-center bg-[#101a32]/40 p-4"
+      onClick={onClose}
+      role="dialog"
+    >
+      <form
+        className="w-full max-w-md rounded-2xl border border-[#f0c9c2] bg-white p-6 shadow-2xl shadow-slate-900/20"
+        onClick={(clickEvent) => clickEvent.stopPropagation()}
+        onSubmit={onSubmit}
+      >
+        <h3 className="text-xl font-semibold text-[#101a32]">删除事件？</h3>
+        <p className="mt-3 text-sm font-semibold leading-6 text-[#7f534e]">
+          将删除「{event.title}」，后续生成照护计划时不会再引用这条记录。
+        </p>
+        <input name="id" type="hidden" value={event.id} />
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <CatCareButton fullWidth onClick={onClose} type="button" variant="ghost">
+            <CatCareXIcon />
+            取消
+          </CatCareButton>
+          <button
+            className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl border border-[#f0c9c2] bg-white px-5 text-base font-semibold leading-none text-[#b33a2f] transition hover:border-[#d86255] hover:bg-[#fff4f2] disabled:cursor-wait disabled:opacity-60"
+            disabled={pending}
+            type="submit"
+          >
+            <CatCareTrashIcon />
+            {pending ? "删除中…" : "确认删除"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 
 function filterEventsByRange(
   events: CatCareEvent[],
-  rangeMode: "30d" | "month" | "custom"
+  rangeMode: "30d" | "month"
 ) {
   const today = new Date();
-
-  if (rangeMode === "custom") {
-    return events;
-  }
 
   return events.filter((event) => {
     const occurredOn = event.occurredOn ? parseDateInput(event.occurredOn) : null;
@@ -614,13 +915,19 @@ function getEventRangeLabel(events: CatCareEvent[]) {
 function getSeverityTone(severity: CatCareEvent["severity"]) {
   return {
     normal: {
-      badgeClass: "bg-[#e6f7f2] text-[#07847f]"
+      badgeClass: "bg-[#e6f7f2] text-[#07847f]",
+      lineClass: "bg-gradient-to-b from-[#d9eee7] via-[#07847f] to-[#d9eee7]",
+      nodeClass: "bg-[#07847f]"
     },
     urgent: {
-      badgeClass: "bg-[#fff4f2] text-[#b33a2f]"
+      badgeClass: "bg-[#fff4f2] text-[#b33a2f]",
+      lineClass: "bg-gradient-to-b from-[#f8d8d2] via-[#d86255] to-[#f8d8d2]",
+      nodeClass: "bg-[#d86255]"
     },
     watch: {
-      badgeClass: "bg-[#fff8e6] text-[#a35a00]"
+      badgeClass: "bg-[#fff8e6] text-[#a35a00]",
+      lineClass: "bg-gradient-to-b from-[#f4dfb8] via-[#ef8a00] to-[#f4dfb8]",
+      nodeClass: "bg-[#ef8a00]"
     }
   }[severity];
 }

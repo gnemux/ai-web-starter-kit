@@ -6,9 +6,11 @@ import type { AnonymousCareTaskSubmissionView } from "@/lib/catcare/product-serv
 
 import { CatCareTaskCategoryIcon } from "../../catcare/catcare-item-type-icon";
 import {
+  formatOwnerLabel,
   formatTaskAction,
   getCategoryLabel,
   getCategoryStyle,
+  getOwnerTagStyle,
   parseTaskTitle
 } from "../../catcare/plans/plan-task-display";
 import { submitAnonymousCareTaskAction } from "./actions";
@@ -42,9 +44,11 @@ type AnonymousServiceDay = {
 
 export function AnonymousVisitAccordion({
   days,
+  today,
   token
 }: {
   days: AnonymousServiceDay[];
+  today: string;
   token: string;
 }) {
   const initialSubmittedTaskKeys = new Set(
@@ -56,9 +60,13 @@ export function AnonymousVisitAccordion({
       )
     )
   );
-  const defaultDayIndex = days.findIndex(
-    (day) => !day.locked && !isDaySubmitted(day, initialSubmittedTaskKeys)
-  );
+  const todayIndex = days.findIndex((day) => day.date === today);
+  const defaultDayIndex =
+    todayIndex >= 0 &&
+    !days[todayIndex]?.locked &&
+    !isDaySubmitted(days[todayIndex], initialSubmittedTaskKeys)
+      ? todayIndex
+      : -1;
   const [openDayIndex, setOpenDayIndex] = useState<number | null>(
     defaultDayIndex >= 0 ? defaultDayIndex : null
   );
@@ -241,7 +249,7 @@ function TaskStep({
   const [note, setNote] = useState(task.submission?.note ?? "");
   const [submission, setSubmission] = useState(task.submission);
   const [message, setMessage] = useState<string | null>(
-    task.submission ? "这项任务已提交。" : null
+    task.submission ? "这项任务已提交" : null
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -283,8 +291,12 @@ function TaskStep({
   return (
     <li className="overflow-hidden rounded-2xl bg-white ring-1 ring-[#e2e6ee]">
       <div className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 bg-[#fbfdfc] px-3 py-3">
-        <div className="relative grid h-14 w-14 place-items-center rounded-2xl bg-white shadow-sm shadow-slate-900/[0.04] ring-1 ring-[#edf1f5]">
-          <CatCareTaskCategoryIcon className="h-12 w-12" category={task.category} />
+        <div className="relative grid h-14 w-14 place-items-center rounded-2xl bg-[#f2fbf8] ring-1 ring-[#d9eee7]">
+          <CatCareTaskCategoryIcon
+            category={task.category}
+            className="h-9 w-9"
+            treatment="plain"
+          />
           <span className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full bg-[#07847f] text-[11px] font-bold text-white ring-2 ring-white">
             {step}
           </span>
@@ -292,14 +304,14 @@ function TaskStep({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getCategoryStyle(task.category)}`}
+              className={`inline-flex min-h-7 items-center rounded-full px-2.5 text-xs font-semibold ${getCategoryStyle(task.category)}`}
             >
               {getCategoryLabel(task.category)}
             </span>
-            <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
+            <span className="inline-flex min-h-7 items-center rounded-full bg-white px-2.5 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
               {task.required ? "必做" : "可选"}
             </span>
-            <CatOwnerBadge name={title.owner ?? "家庭共用"} />
+            <CatOwnerBadge name={formatOwnerLabel(title.owner)} />
           </div>
           <h4 className="mt-2 break-words text-lg font-semibold leading-7 text-[#101a32]">
             {formatTaskAction(task.title)}
@@ -329,26 +341,6 @@ function TaskStep({
               {message ?? "已提交给主人查看"}
             </p>
           </div>
-        ) : null}
-        {submission && !task.locked ? (
-          <details className="mt-3 rounded-xl border border-[#d9e0ea] bg-white px-3 py-2">
-            <summary className="cursor-pointer text-sm font-semibold text-[#07847f]">
-              补充备注或改为异常
-            </summary>
-            <TaskSubmissionForm
-              error={error}
-              note={note}
-              onNoteChange={setNote}
-              onSubmit={onSubmit}
-              pending={pending}
-              serviceDate={task.serviceDate}
-              status={status}
-              submissionRef={task.submissionRef}
-              token={token}
-              visitTime={task.visitTime}
-              onStatusChange={setStatus}
-            />
-          </details>
         ) : null}
         {!submission ? (
           task.locked ? (
@@ -478,26 +470,17 @@ function TaskSubmissionForm({
         disabled={pending}
         type="submit"
       >
-        {pending ? "提交中..." : "提交这项结果"}
+        {pending ? "提交中…" : "提交这项结果"}
       </button>
     </form>
   );
 }
 
 function CatOwnerBadge({ name }: { name: string }) {
-  const family = name === "家庭共用";
-
   return (
     <span
-      className={`inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${
-        family
-          ? "bg-[#eef4ff] text-[#315a9f] ring-[#cddbf8]"
-          : "bg-[#fff4e8] text-[#9a5b16] ring-[#efd1ad]"
-      }`}
+      className={`inline-flex min-h-7 items-center rounded-full px-2.5 text-xs font-semibold ring-1 ${getOwnerTagStyle(name)}`}
     >
-      <span className="grid h-5 w-5 place-items-center rounded-full bg-white text-[10px]">
-        {name.slice(0, 1)}
-      </span>
       {name}
     </span>
   );

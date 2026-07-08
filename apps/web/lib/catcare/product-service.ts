@@ -46,11 +46,14 @@ export {
   deleteCatCareLibraryItemFromFormData,
   getCatCareItemsWorkspace,
   unassignCatCareItemFromFormData,
+  updateCatCareLibraryItemFromFormData,
   updateCatCareLibraryItemNotesFromFormData
 } from "./product-service/items";
 
 export {
   createCatCareEventFromFormData,
+  deleteCatCareEventFromFormData,
+  updateCatCareEventFromFormData,
   getCatCareEventsWorkspace
 } from "./product-service/events";
 

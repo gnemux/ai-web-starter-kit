@@ -2,11 +2,8 @@ import { notFound } from "next/navigation";
 
 import { EmptyState, ErrorState } from "@xwlc/ui";
 
-import {
-  CatCareArrowLeftIcon,
-  CatCareCalendarIcon,
-  CatCareSearchIcon
-} from "../../../catcare-action-icons";
+import { CatCareArrowLeftIcon } from "../../../catcare-action-icons";
+import { CatCareTaskCategoryIcon } from "../../../catcare-item-type-icon";
 import {
   CatCareButton,
   CatCarePanel
@@ -17,10 +14,15 @@ import {
 } from "@/lib/catcare/product-service";
 import {
   buildPlanResultSummary,
+  type PlanOverdueEntry,
   type PlanResultEntry,
   type PlanResultSummary
 } from "../../plan-result-summary";
 import { PlanScheduleView } from "../../plan-schedule-view";
+import {
+  formatOwnerLabel,
+  getOwnerTagStyle
+} from "../../plan-task-display";
 
 type CatCarePlanResultsPageProps = {
   params: Promise<{ id: string }>;
@@ -40,7 +42,7 @@ export default async function CatCarePlanResultsPage({
     <>
       {!result.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${result.error.code}: ${result.error.message}`}
           title="计划结果暂时不可用"
         />
@@ -74,15 +76,17 @@ function PlanResults({ plan }: { plan: CatCarePlan }) {
             主人侧查看照看者提交状态、异常重点和后续复盘入口。
           </p>
         </div>
-        <CatCareButton href={`/catcare/plans/${plan.id}`} variant="secondary">
+        <CatCareButton href="/catcare/results" variant="secondary">
           <CatCareArrowLeftIcon />
-          返回计划
+          返回结果查看
         </CatCareButton>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <CatCarePanel>
           <PlanResultOverview summary={resultSummary} />
+          <PlanResultFocus summary={resultSummary} />
+          <PlanOverdueList entries={resultSummary.overdueEntries} />
 
           {plan.handoffNotes ? (
             <section className="mt-5 rounded-2xl border border-[#f0d2b2] bg-[#fffaf5] p-5">
@@ -114,27 +118,26 @@ function PlanResults({ plan }: { plan: CatCarePlan }) {
         <aside className="grid content-start gap-5">
           <CatCarePanel>
             <h2 className="text-xl font-semibold text-[#101a32]">
-              分享给照看者
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[#526177]">
-              计划详情页可以生成私密链接；照看者通过链接查看任务并提交完成、备注或异常。
-            </p>
-            <div className="mt-5 flex min-h-14 items-center justify-center gap-3 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] px-5 text-base font-semibold text-[#526177]">
-              <CatCareCalendarIcon />
-              分享入口在计划详情页
-            </div>
-          </CatCarePanel>
-
-          <CatCarePanel>
-            <h2 className="text-xl font-semibold text-[#101a32]">
               智能复盘
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#526177]">
-              后续会基于真实提交、异常反馈和照片生成复盘重点；当前不接实时智能能力或真实扣费。
+              当前先根据真实提交整理重点，不生成正式智能结论。先看逾期、异常和备注，再决定是否联系照看者确认。
             </p>
-            <div className="mt-5 flex min-h-14 items-center justify-center gap-3 rounded-xl border border-[#07847f] bg-white px-5 text-base font-semibold text-[#07847f]">
-              <CatCareSearchIcon />
-              复盘入口待接入
+            <div className="mt-5 overflow-hidden rounded-2xl bg-[#fbf8f2] ring-1 ring-[#eadfce]">
+              <img
+                alt="机器猫正在整理照护结果"
+                className="aspect-[4/3] w-full object-cover"
+                src="/catcare/illustrations/ai-review-robot-cat.png"
+              />
+              <p className="px-5 py-4 text-sm font-semibold leading-6 text-[#526177]">
+                真实提交优先；插图区域后续可承载智能复盘入口、照片摘要和异常聚合。
+              </p>
+            </div>
+            <div className="mt-5 rounded-2xl border border-[#e2e6ee] bg-white p-4">
+              <p className="text-sm font-semibold text-[#101a32]">本版边界</p>
+              <p className="mt-2 text-sm leading-6 text-[#526177]">
+                只展示真实提交和逾期判断；实时智能复盘、照片识别和扣费能力放在后续能力任务。
+              </p>
             </div>
           </CatCarePanel>
         </aside>
@@ -143,13 +146,102 @@ function PlanResults({ plan }: { plan: CatCarePlan }) {
   );
 }
 
+function PlanOverdueList({ entries }: { entries: PlanOverdueEntry[] }) {
+  if (entries.length === 0) {
+    return null;
+  }
+
+  const visibleEntries = entries.slice(0, 8);
+  const remainingCount = entries.length - visibleEntries.length;
+
+  return (
+    <section className="mt-5 rounded-2xl border border-[#f3b8ad] bg-[#fff7f5] p-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-[#101a32]">
+            逾期未提交清单
+          </h2>
+          <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
+            这些日期已经过去，但没有收到对应任务的真实提交。
+          </p>
+        </div>
+        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#b7342c] ring-1 ring-[#f3b8ad]">
+          {entries.length} 项待补交
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        {visibleEntries.map((entry) => (
+          <article
+            className="flex min-w-0 gap-3 rounded-2xl bg-white p-4 ring-1 ring-[#f3d0c8]"
+            key={entry.id}
+          >
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white ring-1 ring-[#f3d0c8]">
+              <CatCareTaskCategoryIcon
+                category={entry.category}
+                className="h-8 w-8"
+                treatment="plain"
+              />
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-[#b7342c]">
+                {formatResultServiceDate(entry.serviceDate)}
+              </p>
+              <h3 className="mt-1 truncate text-base font-semibold text-[#101a32]">
+                {entry.title}
+              </h3>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                {entry.ownerLabel ? (
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${getOwnerTagStyle(entry.ownerLabel)}`}
+                  >
+                    {formatOwnerLabel(entry.ownerLabel)}
+                  </span>
+                ) : null}
+                <span className="rounded-full bg-[#f2f4f7] px-2.5 py-1 text-xs font-semibold text-[#526177]">
+                  {entry.categoryLabel}
+                </span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {remainingCount > 0 ? (
+        <p className="mt-3 text-xs font-semibold text-[#b7342c]">
+          还有 {remainingCount} 项未展示，可按原计划日历逐项核对。
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
 function PlanResultOverview({ summary }: { summary: PlanResultSummary }) {
+  const noteCount = getResultNoteCount(summary);
+  const reviewedCount = summary.completedCount + summary.attentionCount;
+  const progressLabel =
+    summary.totalCount > 0
+      ? `${reviewedCount}/${summary.totalCount}`
+      : String(reviewedCount);
+  const riskLabel =
+    summary.overdueCount > 0
+      ? `${summary.overdueCount} 项逾期`
+      : summary.pendingCount > 0
+        ? `${summary.pendingCount} 项待提交`
+        : "无未完成";
+  const attentionLabel =
+    summary.attentionCount > 0
+      ? `${summary.attentionCount} 项异常`
+      : noteCount > 0
+        ? `${noteCount} 条备注`
+        : "无异常备注";
+
   return (
     <section>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-2xl font-semibold text-[#101a32]">
-            结果摘要
+          <h2 className="text-2xl font-semibold leading-tight text-[#101a32]">
+            照护结果概览
           </h2>
           <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
             {summary.headline}
@@ -159,14 +251,36 @@ function PlanResultOverview({ summary }: { summary: PlanResultSummary }) {
           {summary.sourceLabel}
         </div>
       </div>
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <ResultMetricCard label="已完成" value={summary.completedCount} />
-        <ResultMetricCard
-          label="需关注"
-          tone={summary.attentionCount > 0 ? "attention" : "neutral"}
-          value={summary.attentionCount}
+      <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <ResultPriorityCard
+          description={`${summary.completedCount} 项完成，${summary.attentionCount} 项需关注。`}
+          label="完成概览"
+          value={progressLabel}
         />
-        <ResultMetricCard label="待提交" value={summary.pendingCount} />
+        <ResultPriorityCard
+          description={
+            summary.overdueCount > 0
+              ? "这些日期已经过去，需要优先提醒补交。"
+              : summary.pendingCount > 0
+                ? "包含未来日期或仍未收到的结果。"
+                : "当前没有待补交任务。"
+          }
+          label="未完成提醒"
+          tone={summary.overdueCount > 0 ? "attention" : "neutral"}
+          value={riskLabel}
+        />
+        <ResultPriorityCard
+          description={
+            summary.attentionCount > 0
+              ? "先看异常说明，再决定是否联系照看者。"
+              : noteCount > 0
+                ? "备注里可能有食量、精神状态或现场补充。"
+                : "没有异常或备注需要额外处理。"
+          }
+          label="异常备注"
+          tone={summary.attentionCount > 0 ? "attention" : "neutral"}
+          value={attentionLabel}
+        />
       </div>
       <p className="mt-3 text-xs font-semibold leading-5 text-[#75839a]">
         {summary.sourceDescription}
@@ -175,27 +289,123 @@ function PlanResultOverview({ summary }: { summary: PlanResultSummary }) {
   );
 }
 
-function ResultMetricCard({
+function ResultPriorityCard({
+  description,
   label,
   tone = "neutral",
   value
 }: {
+  description: string;
   label: string;
   tone?: "attention" | "neutral";
-  value: number;
+  value: string;
 }) {
-  const valueClassName = tone === "attention" && value > 0
+  const valueClassName = tone === "attention"
     ? "text-[#b7342c]"
-    : "text-[#101a32]";
+    : "text-[#07847f]";
+  const className = tone === "attention"
+    ? "border-[#f3b8ad] bg-[#fff7f5]"
+    : "border-[#d9eee7] bg-[#f2fbf8]";
 
   return (
-    <div className="rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">
-      <p className="text-sm font-semibold text-[#75839a]">{label}</p>
-      <p className={`mt-2 text-2xl font-semibold ${valueClassName}`}>
+    <div className={`rounded-2xl border p-4 ${className}`}>
+      <p className="text-sm font-semibold text-[#526177]">{label}</p>
+      <p className={`mt-2 text-2xl font-semibold leading-tight ${valueClassName}`}>
         {value}
+      </p>
+      <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
+        {description}
       </p>
     </div>
   );
+}
+
+function PlanResultFocus({ summary }: { summary: PlanResultSummary }) {
+  const noteCount = getResultNoteCount(summary);
+  const focusItems = [
+    summary.attentionCount > 0
+      ? {
+          description: "先查看异常说明和现场处理，再决定是否追问。",
+          tone: "attention",
+          title: `${summary.attentionCount} 项异常待看`
+        }
+      : null,
+    summary.pendingCount > 0
+      ? {
+          description: "包含未来日期和可补交任务，不应直接按已完成处理。",
+          tone: "pending",
+          title: `${summary.pendingCount} 项未收到提交`
+        }
+      : null,
+    summary.overdueCount > 0
+      ? {
+          description: "这些任务所属日期已经过去，应提醒照看者补提交或说明原因。",
+          tone: "attention",
+          title: `${summary.overdueCount} 项已过期未提交`
+        }
+      : null,
+    noteCount > 0
+      ? {
+          description: "备注通常包含食量、精神状态、位置或现场补充。",
+          tone: "note",
+          title: `${noteCount} 条备注需要复看`
+        }
+      : null
+  ].filter(Boolean) as Array<{
+    description: string;
+    title: string;
+    tone: "attention" | "note" | "pending";
+  }>;
+
+  if (focusItems.length === 0) {
+    focusItems.push({
+      description: "没有异常、备注或未提交项，可以直接查看提交明细归档。",
+      title: "暂无重点风险",
+      tone: "note"
+    });
+  }
+
+  return (
+    <section className="mt-5 rounded-2xl border border-[#e2e6ee] bg-white p-4 sm:p-5">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <h2 className="text-xl font-semibold text-[#101a32]">优先处理</h2>
+        <p className="text-sm font-semibold text-[#75839a]">
+          按风险和备注排序，不用从明细里找。
+        </p>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {focusItems.map((item) => (
+          <div
+            className={`rounded-2xl p-4 ring-1 ${getFocusClassName(item.tone)}`}
+            key={item.title}
+          >
+            <h3 className="text-base font-semibold text-[#101a32]">
+              {item.title}
+            </h3>
+            <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
+              {item.description}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function getResultNoteCount(summary: PlanResultSummary) {
+  return summary.entries.filter((entry) => entry.note).length;
+}
+
+function getFocusClassName(tone: "attention" | "note" | "pending") {
+  if (tone === "attention") {
+    return "bg-[#fff4f2] ring-[#f3b8ad]";
+  }
+
+  if (tone === "pending") {
+    return "bg-[#eef4ff] ring-[#cddbf8]";
+  }
+
+  return "bg-[#f2fbf8] ring-[#d9eee7]";
 }
 
 function PlanResultEntries({ summary }: { summary: PlanResultSummary }) {
@@ -210,25 +420,34 @@ function PlanResultEntries({ summary }: { summary: PlanResultSummary }) {
     );
   }
 
-  const attentionEntries = summary.entries.filter(
-    (entry) => entry.status === "attention"
+  const reviewEntries = summary.entries.filter(
+    (entry) => entry.status === "attention" || Boolean(entry.note)
   );
-  const completedEntries = summary.entries.filter(
-    (entry) => entry.status !== "attention"
+  const detailEntries = summary.entries.filter(
+    (entry) => entry.status !== "attention" && !entry.note
   );
 
   return (
     <section className="mt-6 grid gap-5">
-      {attentionEntries.length > 0 ? (
+      {reviewEntries.length > 0 ? (
         <ResultEntryGroup
-          entries={attentionEntries}
-          title="优先查看"
+          entries={reviewEntries}
+          title="异常与备注"
         />
       ) : null}
-      <ResultEntryGroup
-        entries={completedEntries}
-        title={attentionEntries.length > 0 ? "已完成记录" : "结果记录"}
-      />
+      {detailEntries.length > 0 ? (
+        <details
+          className="rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4"
+          open={reviewEntries.length === 0}
+        >
+          <summary className="cursor-pointer text-base font-semibold text-[#07847f]">
+            提交明细（{detailEntries.length} 项）
+          </summary>
+          <div className="mt-4">
+            <ResultEntryGroup entries={detailEntries} />
+          </div>
+        </details>
+      ) : null}
     </section>
   );
 }
@@ -238,7 +457,7 @@ function ResultEntryGroup({
   title
 }: {
   entries: PlanResultEntry[];
-  title: string;
+  title?: string;
 }) {
   if (entries.length === 0) {
     return null;
@@ -246,8 +465,10 @@ function ResultEntryGroup({
 
   return (
     <div>
-      <h2 className="text-xl font-semibold text-[#101a32]">{title}</h2>
-      <div className="mt-4 grid gap-0">
+      {title ? (
+        <h2 className="text-xl font-semibold text-[#101a32]">{title}</h2>
+      ) : null}
+      <div className={title ? "mt-4 grid gap-0" : "grid gap-0"}>
         {entries.map((entry) => (
           <ResultEntryCard entry={entry} key={entry.id} />
         ))}
@@ -266,40 +487,48 @@ function ResultEntryCard({ entry }: { entry: PlanResultEntry }) {
     : "border-[#bfe5d7] bg-[#e6f7f2]";
 
   return (
-    <article className="grid grid-cols-[2.75rem_minmax(0,1fr)] gap-3">
+    <article className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-2 sm:grid-cols-[2.75rem_minmax(0,1fr)] sm:gap-3">
       <div className="relative flex justify-center">
         <span className="absolute bottom-0 top-11 w-px bg-[#e2e6ee]" />
-        <span className={`relative z-10 grid h-9 w-9 place-items-center rounded-full border text-xs font-semibold text-[#07847f] ${dotClassName}`}>
+        <span className={`relative z-10 grid h-8 w-8 place-items-center rounded-full border text-xs font-semibold text-[#07847f] sm:h-9 sm:w-9 ${dotClassName}`}>
           {isAttention ? "!" : "✓"}
         </span>
       </div>
       <div className="pb-4">
-        <div className="rounded-2xl border border-[#e2e6ee] bg-white p-4">
+        <div className="rounded-2xl border border-[#e2e6ee] bg-white p-3 sm:p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-[#07847f]">
-                {entry.serviceDate
-                  ? `${entry.serviceDate} · ${entry.createdAt ?? "提交时间待记录"}`
-                  : entry.createdAt ?? "提交时间待记录"}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                {entry.ownerLabel ? (
-                  <span className="rounded-full bg-[#e6f7f2] px-3 py-1 text-xs font-semibold text-[#07847f]">
-                    {entry.ownerLabel}
-                  </span>
-                ) : null}
-                <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-xs font-semibold text-[#526177]">
-                  {entry.categoryLabel}
+            <div className="flex min-w-0 gap-3">
+              {entry.category ? (
+                <span className="mt-1 grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#f7fbf9] ring-1 ring-[#d9eee7] sm:h-11 sm:w-11">
+                  <CatCareTaskCategoryIcon
+                    category={entry.category}
+                    className="h-7 w-7 sm:h-8 sm:w-8"
+                    treatment="plain"
+                  />
                 </span>
+              ) : null}
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[#07847f]">
+                  {formatResultTime(entry)}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {entry.ownerLabel ? (
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ${getOwnerTagStyle(entry.ownerLabel)}`}
+                    >
+                      {formatOwnerLabel(entry.ownerLabel)}
+                    </span>
+                  ) : null}
+                  <span className="rounded-full bg-[#f2f4f7] px-3 py-1 text-xs font-semibold text-[#526177]">
+                    {entry.categoryLabel}
+                  </span>
+                </div>
+                <h3 className="mt-3 break-words text-base font-semibold leading-6 text-[#101a32] sm:text-lg">
+                  {entry.title}
+                </h3>
               </div>
-              <h3 className="mt-3 text-lg font-semibold text-[#101a32]">
-                {entry.title}
-              </h3>
-              <p className="mt-1 text-sm font-semibold text-[#75839a]">
-                {entry.submittedByLabel}
-              </p>
             </div>
-            <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusClassName}`}>
+            <span className={`w-fit shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${statusClassName}`}>
               {entry.statusLabel}
             </span>
           </div>
@@ -312,6 +541,32 @@ function ResultEntryCard({ entry }: { entry: PlanResultEntry }) {
       </div>
     </article>
   );
+}
+
+function formatResultTime(entry: PlanResultEntry) {
+  const serviceDate = entry.serviceDate
+    ? formatResultServiceDate(entry.serviceDate)
+    : "日期待记录";
+  const submittedAt = entry.createdAt
+    ? new Intl.DateTimeFormat("zh-CN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        month: "numeric",
+        day: "numeric",
+        timeZone: "Asia/Shanghai"
+      }).format(new Date(entry.createdAt))
+    : "提交时间待记录";
+
+  return `${serviceDate} · ${submittedAt} 提交`;
+}
+
+function formatResultServiceDate(value: string) {
+  return new Intl.DateTimeFormat("zh-CN", {
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+    timeZone: "Asia/Shanghai"
+  }).format(new Date(`${value}T00:00:00+08:00`));
 }
 
 function getPlanStatusMeta(status: CatCarePlan["status"]) {

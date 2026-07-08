@@ -391,29 +391,46 @@ export async function getAnonymousCarePlanView(
   }
 
   const plan = mapPlan(planResult.data);
-  const submissionBySlotAndTaskId = new Map(
-    (submissionsResult.data ?? [])
-      .map((submission) => {
-        const slot = parseAnonymousSubmissionSlotFromKey(
-          tokenResult.data.tokenId,
-          submission.idempotency_key
-        );
+  const submissionBySlotAndTaskId = new Map<
+    string,
+    AnonymousCareTaskSubmissionView
+  >();
+  const legacySubmissionByDateAndTaskId = new Map<
+    string,
+    AnonymousCareTaskSubmissionView
+  >();
 
-        return submission.task_id && slot
-          ? [
-              `${slot.key}:${submission.task_id}`,
-              {
-                abnormal: submission.abnormal,
-                note: submission.note,
-                serviceDate: slot.serviceDate,
-                status: submission.status,
-                submittedAt: submission.created_at
-              }
-            ] as const
-          : null;
-      })
-      .filter((submission) => submission !== null)
-  );
+  for (const submission of submissionsResult.data ?? []) {
+    if (!submission.task_id) {
+      continue;
+    }
+
+    const slot = parseAnonymousSubmissionSlotFromKey(
+      tokenResult.data.tokenId,
+      submission.idempotency_key
+    );
+
+    if (!slot) {
+      continue;
+    }
+
+    const view = {
+      abnormal: submission.abnormal,
+      note: submission.note,
+      serviceDate: slot.serviceDate,
+      status: submission.status,
+      submittedAt: submission.created_at
+    };
+
+    if (slot.visitTime) {
+      submissionBySlotAndTaskId.set(`${slot.key}:${submission.task_id}`, view);
+    } else {
+      legacySubmissionByDateAndTaskId.set(
+        `${slot.serviceDate}:${submission.task_id}`,
+        view
+      );
+    }
+  }
   const tasks = (tasksResult.data ?? [])
     .map(mapTask)
     .filter((task) => task.enabled && !isLegacyPrepareTask(task))
@@ -425,14 +442,18 @@ export async function getAnonymousCarePlanView(
       submissionsBySlot: Object.fromEntries(
         getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn).flatMap(
           (serviceDate) =>
-            getAnonymousTaskVisitTimes(task).flatMap((visitTime) => {
+            getAnonymousTaskVisitTimes(task).flatMap((visitTime, index) => {
               const slotKey = createAnonymousSubmissionSlotKey(
                 serviceDate,
                 visitTime
               );
-              const submission = submissionBySlotAndTaskId.get(
-                `${slotKey}:${task.id}`
-              );
+              const submission =
+                submissionBySlotAndTaskId.get(`${slotKey}:${task.id}`) ??
+                (index === 0
+                  ? legacySubmissionByDateAndTaskId.get(
+                      `${serviceDate}:${task.id}`
+                    )
+                  : undefined);
 
               return submission ? [[slotKey, submission]] : [];
             })
@@ -635,7 +656,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
       return serviceOk({
         abnormal: updateResult.data.abnormal,
         alreadySubmitted: true,
-        message: "已更新，主人会看到这项任务的最新反馈。",
+        message: "已更新，主人会看到这项任务的最新反馈",
         note: updateResult.data.note,
         serviceDate,
         status: updateResult.data.status,
@@ -651,7 +672,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
     return serviceOk({
       ...existingResult.data,
       alreadySubmitted: true,
-      message: "这项任务已经提交过，页面已显示之前的提交结果。",
+      message: "这项任务已经提交过，页面已显示之前的提交结果",
       submissionRef
     });
   }
@@ -692,7 +713,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
       return serviceOk({
         ...duplicateResult.data,
         alreadySubmitted: true,
-        message: "这项任务已经提交过，页面已显示之前的提交结果。",
+        message: "这项任务已经提交过，页面已显示之前的提交结果",
         submissionRef
       });
     }
@@ -707,7 +728,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
   return serviceOk({
     abnormal: insertResult.data.abnormal,
     alreadySubmitted: false,
-    message: "已提交，主人会在照护结果里看到这条反馈。",
+    message: "已提交，主人会在照护结果里看到这条反馈",
     note: insertResult.data.note,
     serviceDate,
     status: insertResult.data.status,
@@ -753,7 +774,7 @@ function encodeAnonymousVisitTime(value: string) {
 function decodeAnonymousVisitTime(value: string | undefined) {
   return value && /^([01]\d|2[0-3])[0-5]\d$/.test(value)
     ? `${value.slice(0, 2)}:${value.slice(2)}`
-    : "00:00";
+    : null;
 }
 
 function getAnonymousTaskVisitTimes(task: {
@@ -814,7 +835,9 @@ function parseAnonymousSubmissionSlotFromKey(
   }
 
   const visitTime = decodeAnonymousVisitTime(encodedVisitTime);
-  const key = createAnonymousSubmissionSlotKey(serviceDate, visitTime);
+  const key = visitTime
+    ? createAnonymousSubmissionSlotKey(serviceDate, visitTime)
+    : null;
 
   return {
     key,

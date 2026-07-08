@@ -16,6 +16,13 @@ CatCare product assets:
 
 - Prototype-derived icons live under `apps/web/public/catcare/icons/**` and are
   owned by the CatCare product UI.
+- Product-category runtime icons live under
+  `apps/web/public/catcare/icons/product/` when the prototype's colored
+  illustration treatment is the product-quality baseline.
+- Temporary-care scenario runtime icons live under
+  `apps/web/public/catcare/icons/traced/` as `line-scenario-*` SVGs; matching
+  source crops may remain in `prototype/`, but frontend code must not consume
+  `prototype/` directly.
 - Cat illustrations live under `apps/web/public/catcare/cats/**` and are
   CatCare-specific breed/profile assets.
 - CatCare action icons live in
@@ -36,6 +43,17 @@ or CatCare-only icon assets in `packages/*`.
 - Canvas: transparent `96x96` PNG, centered icon body.
 - Color: normalized to CatCare teal from the original prototype icon shape.
 - Usage: source images for traced SVG assets.
+- Exception: routine product-category icons may be converted into transparent
+  runtime PNGs when preserving the prototype's colored badge treatment is the
+  stronger visual match than a one-color trace.
+- Exception: food/item category and event-category icons that are not covered by
+  the normalized prototypes may use an imagegen line-icon source sheet first.
+  Keep the generated sheet in `prototype/`, crop each semantic PNG, then trace
+  into SVG with the same naming contract.
+- Deprecated exception: concrete item thumbnails under
+  `apps/web/public/catcare/items/` are not part of the current UI contract.
+  Food and supplies rows use the category icon family instead, because generated
+  product art made the inventory list harder to scan.
 
 ## Traced SVG Rules
 
@@ -90,6 +108,24 @@ baseline is the non-thinned result.
   inside buttons, inputs, and dialogs use the local currentColor line icon set
   in `apps/web/app/catcare/catcare-action-icons.tsx` so weight, alignment, and
   foreground color stay consistent at small sizes.
+- Routine product icons use transparent prototype-derived PNG assets through
+  `CatCareRoutineTypeIcon`. They must not be replaced by hand-drawn inline SVG
+  glyphs just to fit the generic stroke icon system.
+- Food/item category icons use `CatCareItemTypeIcon` and traced `line-item-*`
+  SVGs.
+- Event category icons use `CatCareEventTypeIcon` and traced `line-event-*`
+  SVGs. Legacy `environment` rows may render through the `other` visual asset,
+  but new event creation should not expose an environment category unless the
+  product spec reintroduces it.
+- Concrete item rows use `CatCareItemTypeIcon`. Do not add per-item generated
+  thumbnails unless the product design has a reviewed source library.
+- Severity controls use `CatCareSeverityIcon` and traced `line-severity-*`
+  SVGs.
+- Temporary care-plan scenario cards use `CatCareScenarioIcon` and traced
+  `line-scenario-*` SVGs. The page owns the circular backing and color state;
+  the icon component must not hand-draw inline SVG paths or load the product
+  PNG directly. Generate these SVGs by thresholding the prototype-derived
+  scenario PNG to remove the pale circular backing, then run `potrace`.
 
 ## UI Size Contract
 
@@ -100,9 +136,16 @@ baseline is the non-thinned result.
 | Mobile shell nav button | 44px min height | 20px | Icon and label sit in a compact row. |
 | Sidebar icon frame | 44-56px frame | 28px | Frame controls active state; icon body stays teal. |
 | Metric/flow illustration icon | display block | 32-40px | Larger communicative icons only, not form actions. |
+| Food/item category navigation | 48-56px row | 36px | Icon uses no separate circular backing; the selected item owns the frame. |
+| Concrete item row | list row | 40px | Reuse category icon; no generated product thumbnail. |
+| Event type selector | 44px row | 28px | Button owns the border; icon should not add a second card frame. |
+| Timeline event node | 48px status node | 28-32px | The node itself carries severity color; do not add a separate white icon card/frame. |
+| Care-plan scenario card | card header icon shell | 32px inside 56px shell | Icon source is traced SVG; card owns selected state and shell color. |
 
 Action icons must share the same visual weight at the rendered size. Do not mix
 traced product icons with functional button icons in the same action group.
+Do not wrap every product icon in an additional card or border. Category icons,
+item-row icons, and timeline nodes have separate display contracts.
 
 ## Design Handoff
 

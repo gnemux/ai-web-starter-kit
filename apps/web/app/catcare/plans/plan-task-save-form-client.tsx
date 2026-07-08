@@ -74,7 +74,7 @@ export function PlanTaskSaveForm({
             handoffNotes: result.data.handoffNotes,
             tasks: result.data.tasks
           });
-          toast.showSuccess("清单微调已保存。发布前可继续检查执行日历。");
+          toast.showSuccess("清单微调已保存，发布前可继续检查执行日历");
         }}
         className={`grid gap-3 ${pending ? "pointer-events-none opacity-70" : ""}`}
       >

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import {
+  CatCareArrowLeftIcon,
   CatCareCalendarIcon,
   CatCareCopyIcon,
   CatCareLinkIcon,
@@ -97,8 +98,8 @@ export function PlanDetailClient({
     }));
     toast.showSuccess(
       actionName === "publish"
-        ? "计划已发布。每日任务已按到访时间排好，可在分享入口发送给照看者。"
-        : "计划已关闭，历史清单和照护结果已保留。"
+        ? "计划已发布，每日任务已按到访时间排好，可在分享入口发送给照看者"
+        : "计划已关闭，历史清单和照护结果已保留"
     );
   }
 
@@ -131,14 +132,14 @@ export function PlanDetailClient({
       const copied = await copyShareUrl(nextUrl);
 
       if (!copied) {
-        toast.showSuccess("分享链接已生成，请手动复制输入框中的链接。");
+        toast.showSuccess("分享链接已生成，请手动复制输入框中的链接");
       }
 
       return;
     }
 
     setCopyableShareUrl(null);
-    toast.showSuccess("分享链接已撤销，照看者将无法继续访问。");
+    toast.showSuccess("分享链接已撤销，照看者将无法继续访问");
   }
 
   async function copyShareUrl(url = copyableShareUrl) {
@@ -148,10 +149,10 @@ export function PlanDetailClient({
 
     try {
       await navigator.clipboard.writeText(url);
-      toast.showSuccess("分享链接已复制。");
+      toast.showSuccess("分享链接已复制");
       return true;
     } catch {
-      toast.showError("浏览器未允许自动复制，请手动复制输入框中的链接。");
+      toast.showError("浏览器未允许自动复制，请手动复制输入框中的链接");
       return false;
     }
   }
@@ -161,25 +162,31 @@ export function PlanDetailClient({
       <CatCareToast
         message={
           justClosed
-            ? "计划已关闭，历史清单和照护结果已保留。"
+            ? "计划已关闭，历史清单和照护结果已保留"
             : justSaved
-              ? "清单微调已保存，确认无误后可以发布。"
+              ? "清单微调已保存，确认无误后可以发布"
               : justPublished
-                ? "计划已发布。每日任务已按到访时间排好，可在分享入口发送给照看者。"
+                ? "计划已发布，每日任务已按到访时间排好，可在分享入口发送给照看者"
                 : null
         }
         toast={toast.toast}
       />
 
-      <div>
-        <h1 className="mt-1 text-3xl font-semibold text-[#101a32]">
-          {canPublish ? "智能生成与清单确认" : "照护计划总览"}
-        </h1>
-        <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
-          {canPublish
-            ? "先检查生成清单，必要时微调任务，再发布给照看者。"
-            : "先确认执行日历和交接说明，再生成私密链接给照看者。"}
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="mt-1 text-3xl font-semibold text-[#101a32]">
+            {canPublish ? "智能生成与清单确认" : "照护计划总览"}
+          </h1>
+          <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
+            {canPublish
+              ? "先检查生成清单，必要时微调任务，再发布给照看者。"
+              : "先确认执行日历和交接说明，再生成私密链接给照看者。"}
+          </p>
+        </div>
+        <CatCareButton href="/catcare/plans" variant="secondary">
+          <CatCareArrowLeftIcon />
+          返回计划记录
+        </CatCareButton>
       </div>
       {canPublish ? (
         <CatCareStepBar

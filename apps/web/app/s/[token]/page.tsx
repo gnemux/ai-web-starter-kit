@@ -11,9 +11,11 @@ import {
 } from "@/lib/catcare/product-service/anonymous-submission-policy";
 
 import {
+  formatOwnerLabel,
   formatTaskAction,
   getCategoryLabel,
   getCategoryStyle,
+  getOwnerTagStyle,
   parseTaskTitle
 } from "../../catcare/plans/plan-task-display";
 import { AnonymousVisitAccordion } from "./visit-accordion-client";
@@ -33,8 +35,8 @@ export default async function AnonymousCarePlanPage({ params }: SharePageProps) 
   const result = await getAnonymousCarePlanView(token);
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[#f7f3ee] px-4 py-5 text-[#101a32] sm:px-6 lg:px-8">
-      <div className="mx-auto grid w-full min-w-0 max-w-[1196px] gap-5">
+    <main className="min-h-screen w-screen max-w-[100vw] overflow-x-hidden bg-[#f7f3ee] px-3 py-5 text-[#101a32] sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-full min-w-0 max-w-full gap-5 sm:max-w-[1196px]">
         {result.ok ? (
           <AnonymousCarePlan plan={result.data} token={token} />
         ) : (
@@ -101,7 +103,7 @@ function AnonymousCarePlan({
   return (
     <>
       <AnonymousHeader expiresAt={plan.expiresAt} />
-      <section className="rounded-[24px] border border-[#d9eee7] bg-[#f2fbf8] p-5 shadow-sm shadow-slate-900/[0.04] sm:p-6">
+      <section className="min-w-0 rounded-[24px] border border-[#d9eee7] bg-[#f2fbf8] p-5 shadow-sm shadow-slate-900/[0.04] sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
             可查看和提交
@@ -110,15 +112,15 @@ function AnonymousCarePlan({
             有效期至 {formatDateTime(plan.expiresAt)}
           </span>
         </div>
-        <h2 className="mt-4 text-3xl font-semibold leading-tight text-[#101a32]">
-          {plan.title}
+        <h2 className="mt-4 break-words text-2xl font-semibold leading-tight text-[#101a32] sm:text-3xl">
+          {formatAnonymousPlanTitle(plan)}
         </h2>
-        <p className="mt-3 text-base font-semibold leading-7 text-[#526177]">
-          这是主人分享给家人、朋友或照看者的临时照护交接。先认清猫咪，再按每天的到访步骤执行。
+        <p className="mt-3 max-w-full break-all text-base font-semibold leading-7 text-[#526177] sm:max-w-2xl sm:break-words">
+          主人分享的临时照护交接。先核对猫咪，再按每天的到访步骤执行。
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {plan.catNames.map((name, index) => (
-            <CatNameChip index={index} key={name} name={name} />
+          {plan.catNames.map((name) => (
+            <CatNameChip key={name} name={name} />
           ))}
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -204,7 +206,11 @@ function AnonymousCarePlan({
             </section>
           ) : null}
 
-          <AnonymousVisitAccordion days={serviceDays} token={token} />
+          <AnonymousVisitAccordion
+            days={serviceDays}
+            today={getAnonymousCareTodayIsoDate()}
+            token={token}
+          />
         </section>
       </div>
 
@@ -226,20 +232,17 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CatNameChip({ index, name }: { index: number; name: string }) {
-  const styles = [
-    "bg-[#e6f7f2] text-[#07847f] ring-[#bfe5d7]",
-    "bg-[#fff4e8] text-[#9a5b16] ring-[#efd1ad]",
-    "bg-[#eef4ff] text-[#315a9f] ring-[#cddbf6]"
-  ];
+function formatAnonymousPlanTitle(plan: AnonymousCarePlanView) {
+  return plan.title
+    .replace(/\s*\d{4}[-/]\d{2}[-/]\d{2}\s*至\s*\d{4}[-/]\d{2}[-/]\d{2}\s*$/, "")
+    .trim();
+}
 
+function CatNameChip({ name }: { name: string }) {
   return (
     <span
-      className={`inline-flex min-h-9 items-center gap-2 rounded-full px-3 text-sm font-semibold ring-1 ${styles[index % styles.length]}`}
+      className={`inline-flex min-h-9 items-center rounded-full px-3.5 text-sm font-semibold ring-1 ${getOwnerTagStyle(name)}`}
     >
-      <span className="grid h-6 w-6 place-items-center rounded-full bg-white/80 text-xs">
-        {name.slice(0, 1)}
-      </span>
       {name}
     </span>
   );
@@ -274,7 +277,7 @@ function TaskStep({
           {formatTaskAction(task.title)}
         </h4>
         <p className="mt-1 text-sm font-semibold text-[#526177]">
-          适用范围：{title.owner ?? "家庭共用"}
+          适用范围：{formatOwnerLabel(title.owner)}
         </p>
         <p className="mt-1 text-sm font-semibold leading-6 text-[#526177]">
           {formatFrequency(task.frequency)}
@@ -319,13 +322,21 @@ function buildAnonymousServiceDays(
 
   return getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn).map((date) => {
     const locked = date > today;
+    const visits = buildAnonymousTaskFlow(plan.tasks, date, locked);
+    const submitted = isAnonymousServiceDaySubmitted(visits);
 
     return {
       date,
       dateLabel: formatServiceDate(date),
       locked,
-      statusLabel: locked ? "未到日期" : date === today ? "今天可提交" : "可补提交",
-      visits: buildAnonymousTaskFlow(plan.tasks, date, locked)
+      statusLabel: locked
+        ? "未到日期"
+        : submitted
+          ? "已全部提交"
+          : date === today
+            ? "今天可提交"
+            : "可补提交",
+      visits
     };
   });
 }
@@ -374,6 +385,12 @@ function createAnonymousSubmissionSlotKey(serviceDate: string, visitTime: string
 
 function getDailyVisitCount(days: AnonymousServiceDay[]) {
   return Math.max(0, ...days.map((day) => day.visits.length));
+}
+
+function isAnonymousServiceDaySubmitted(visits: AnonymousVisitSection[]) {
+  const tasks = visits.flatMap((visit) => visit.tasks);
+
+  return tasks.length > 0 && tasks.every((task) => task.submission);
 }
 
 function getAnonymousAttentionTasks(tasks: AnonymousCareTaskView[]) {

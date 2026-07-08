@@ -39,7 +39,7 @@ export default async function CatCareCatDetailPage({
       <CatCareToast message={getCatDetailToastMessage(query.saved, context.locale)} />
       {!catResult.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${catResult.error.code}: ${catResult.error.message}`}
           title="猫咪档案暂时不可用"
         />
@@ -52,11 +52,11 @@ export default async function CatCareCatDetailPage({
 
 function getCatDetailToastMessage(value: string | undefined, locale: "zh" | "en") {
   if (value === "created") {
-    return locale === "en" ? "Cat profile created." : "猫咪档案已创建。";
+    return locale === "en" ? "Cat profile created" : "猫咪档案已创建";
   }
 
   if (value === "updated") {
-    return locale === "en" ? "Cat profile saved." : "猫咪档案已保存。";
+    return locale === "en" ? "Cat profile saved" : "猫咪档案已保存";
   }
 
   return null;

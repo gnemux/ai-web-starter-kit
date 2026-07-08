@@ -12,5 +12,7 @@ These assets belong to the CatCare product layer, not `@xwlc/ui`.
   pricing card cats use `320x240` canvases with a shared warm background.
 - For icons, follow `icons/icon-spec.md`: crop source, normalize, trace/repair,
   then consume through `apps/web/components/catcare-icons.tsx`.
+- `illustrations/ai-review-robot-cat.png` is a result-review raster
+  illustration, not part of the traced SVG product icon system.
 - Keep CatCare-specific cats, pricing art, and product iconography here. Move
   only product-agnostic UI primitives to shared packages.

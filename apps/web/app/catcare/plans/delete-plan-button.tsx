@@ -54,7 +54,7 @@ export function DeletePlanButton({
       if (onDeleted) {
         onDeleted(planId);
       } else {
-        toast.showDanger("计划已删除。");
+        toast.showDanger("计划已删除");
         window.setTimeout(() => {
           // ponytail: static server card; remove locally after the local toast is visible.
           document

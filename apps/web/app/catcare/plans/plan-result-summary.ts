@@ -11,6 +11,7 @@ import {
 import { getAnonymousCarePlanServiceDates } from "@/lib/catcare/product-service/anonymous-submission-policy";
 
 export type PlanResultEntry = {
+  category: CatCareTask["category"] | null;
   id: string;
   categoryLabel: string;
   createdAt: string | null;
@@ -23,11 +24,22 @@ export type PlanResultEntry = {
   title: string;
 };
 
+export type PlanOverdueEntry = {
+  category: CatCareTask["category"];
+  categoryLabel: string;
+  id: string;
+  ownerLabel: string | null;
+  serviceDate: string;
+  title: string;
+};
+
 export type PlanResultSummary = {
   attentionCount: number;
   completedCount: number;
   entries: PlanResultEntry[];
   headline: string;
+  overdueCount: number;
+  overdueEntries: PlanOverdueEntry[];
   pendingCount: number;
   sourceDescription: string;
   sourceLabel: string;
@@ -38,12 +50,13 @@ export type PlanResultSummary = {
 
 export function buildPlanResultSummary(plan: CatCarePlan): PlanResultSummary {
   const tasks = plan.tasks.filter((task) => task.enabled);
-  const totalCount =
-    tasks.length *
-    getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn).length;
+  const serviceDates = getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn);
+  const totalCount = tasks.length * serviceDates.length;
+  const overdueEntries = buildOverdueEntries(tasks, serviceDates, []);
+  const overdueCount = overdueEntries.length;
 
   if (plan.submissions.length > 0) {
-    return buildRealSubmissionSummary(plan, tasks, totalCount);
+    return buildRealSubmissionSummary(plan, tasks, serviceDates, totalCount);
   }
 
   if (plan.status === "draft") {
@@ -52,6 +65,8 @@ export function buildPlanResultSummary(plan: CatCarePlan): PlanResultSummary {
       completedCount: 0,
       entries: [],
       headline: "计划还在确认中，发布后才会等待照看者提交结果。",
+      overdueCount: 0,
+      overdueEntries: [],
       pendingCount: totalCount,
       sourceDescription: "发布前不会生成照看者提交记录。",
       sourceLabel: "待发布",
@@ -67,6 +82,8 @@ export function buildPlanResultSummary(plan: CatCarePlan): PlanResultSummary {
       completedCount: 0,
       entries: [],
       headline: "计划已关闭，且没有收到提交记录。",
+      overdueCount,
+      overdueEntries,
       pendingCount: totalCount,
       sourceDescription: "未分享或未执行的关闭计划可以保留历史，也可以在计划列表删除。",
       sourceLabel: "无提交",
@@ -80,7 +97,11 @@ export function buildPlanResultSummary(plan: CatCarePlan): PlanResultSummary {
     attentionCount: 0,
     completedCount: 0,
     entries: [],
-    headline: "计划已发布，正在等待照看者提交结果。",
+    headline: overdueCount > 0
+      ? `已过日期仍有 ${overdueCount} 项未提交，需要提醒照看者补交。`
+      : "计划已发布，正在等待照看者提交结果。",
+    overdueCount,
+    overdueEntries,
     pendingCount: totalCount,
     sourceDescription: "当前没有真实提交记录。分享链接发出后，照看者提交的完成、备注和异常会显示在这里。",
     sourceLabel: "暂无提交",
@@ -93,6 +114,7 @@ export function buildPlanResultSummary(plan: CatCarePlan): PlanResultSummary {
 function buildRealSubmissionSummary(
   plan: CatCarePlan,
   tasks: CatCareTask[],
+  serviceDates: string[],
   totalCount: number
 ): PlanResultSummary {
   const taskById = new Map(tasks.map((task) => [task.id, task]));
@@ -113,10 +135,12 @@ function buildRealSubmissionSummary(
       submissionToEntry(submission, taskById.get(submission.taskId ?? ""))
     ),
     ...planLevelSubmissions.map((submission) => submissionToEntry(submission, null))
-  ];
+  ].sort(compareResultEntries);
   const attentionCount = entries.filter((entry) => entry.status === "attention").length;
   const completedCount = entries.filter((entry) => entry.status === "completed").length;
   const pendingCount = Math.max(totalCount - taskSubmissions.length, 0);
+  const overdueEntries = buildOverdueEntries(tasks, serviceDates, taskSubmissions);
+  const overdueCount = overdueEntries.length;
   const status =
     attentionCount > 0
       ? {
@@ -137,14 +161,80 @@ function buildRealSubmissionSummary(
     attentionCount,
     completedCount,
     entries,
-    headline: formatRealHeadline(completedCount, attentionCount, pendingCount),
+    headline: formatRealHeadline(
+      completedCount,
+      attentionCount,
+      pendingCount,
+      overdueCount
+    ),
+    overdueCount,
+    overdueEntries,
     pendingCount,
-    sourceDescription: "来自当前 owner 可见的 care_submissions 记录。",
+    sourceDescription: "来自照看者通过分享链接提交的真实结果。",
     sourceLabel: "真实提交",
     statusClassName: status.className,
     statusLabel: status.label,
     totalCount
   };
+}
+
+function buildOverdueEntries(
+  tasks: CatCareTask[],
+  serviceDates: string[],
+  taskSubmissions: CatCareSubmission[]
+): PlanOverdueEntry[] {
+  const today = getTodayIsoDate();
+  const overdueDates = serviceDates.filter((date) => date < today);
+
+  if (overdueDates.length === 0) {
+    return [];
+  }
+
+  const submittedTaskDates = new Set(taskSubmissions.flatMap((submission) => {
+    const serviceDate = getServiceDateFromSubmission(submission);
+
+    if (!submission.taskId || !serviceDate) {
+      return [];
+    }
+
+    return [`${submission.taskId}:${serviceDate}`];
+  }));
+
+  return overdueDates.flatMap((serviceDate) =>
+    tasks.flatMap((task) => {
+      if (submittedTaskDates.has(`${task.id}:${serviceDate}`)) {
+        return [];
+      }
+
+      const parsedTitle = parseTaskTitle(task.title);
+
+      return [{
+        category: task.category,
+        categoryLabel: getCategoryLabel(task.category),
+        id: `${task.id}:${serviceDate}`,
+        ownerLabel: parsedTitle.owner,
+        serviceDate,
+        title: parsedTitle.action
+      }];
+    })
+  );
+}
+
+function getTodayIsoDate() {
+  return new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Shanghai",
+    year: "numeric"
+  }).format(new Date());
+}
+
+function compareResultEntries(left: PlanResultEntry, right: PlanResultEntry) {
+  return (
+    (left.serviceDate ?? "").localeCompare(right.serviceDate ?? "") ||
+    (left.createdAt ?? "").localeCompare(right.createdAt ?? "") ||
+    left.title.localeCompare(right.title, "zh-Hans-CN")
+  );
 }
 
 function submissionToEntry(
@@ -157,6 +247,7 @@ function submissionToEntry(
     submission.status === "exception";
 
   return {
+    category: task?.category ?? null,
     id: submission.id,
     categoryLabel: task ? getCategoryLabel(task.category) : "整体反馈",
     createdAt: submission.createdAt,
@@ -185,10 +276,15 @@ function getServiceDateFromSubmission(submission: CatCareSubmission) {
 function formatRealHeadline(
   completedCount: number,
   attentionCount: number,
-  pendingCount: number
+  pendingCount: number,
+  overdueCount: number
 ) {
   if (attentionCount > 0) {
     return `收到 ${attentionCount} 项需关注反馈，优先查看异常说明。`;
+  }
+
+  if (overdueCount > 0) {
+    return `已过日期仍有 ${overdueCount} 项未提交，需要提醒照看者补交。`;
   }
 
   if (pendingCount > 0) {

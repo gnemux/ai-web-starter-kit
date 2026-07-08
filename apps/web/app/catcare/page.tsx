@@ -141,14 +141,14 @@ function CatCareWorkspace({
             value={planCount}
           />
         </Link>
-        <Link className="block transition hover:-translate-y-0.5" href="/catcare/results">
+        <a className="block transition hover:-translate-y-0.5" href="/catcare/results">
           <CatCareMetricCard
             icon={<CatCarePendingIcon className="h-8 w-8" />}
             label={labels.planList.noSubmissions}
             sublabel={labels.dashboard.pendingSublabel}
             value={submissionCount}
           />
-        </Link>
+        </a>
         <CatCareMetricCard
           icon={<CatCareAiCreditIcon className="h-8 w-8" />}
           label={labels.metrics.aiCredit}

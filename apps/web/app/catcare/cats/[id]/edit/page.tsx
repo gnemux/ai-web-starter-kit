@@ -27,7 +27,7 @@ export default async function EditCatCareCatPage({
     <>
       {!catResult.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${catResult.error.code}: ${catResult.error.message}`}
           title="猫咪档案暂时不可用"
         />

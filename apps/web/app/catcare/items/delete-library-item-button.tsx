@@ -48,12 +48,13 @@ export function DeleteLibraryItemButton({
     <>
       <button
         aria-label="删除家庭用品"
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#fff4f2] text-[#b33a2f] ring-1 ring-[#f0c9c2] transition hover:bg-[#ffe8e3] hover:text-[#982f27] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d86255] [&>[data-catcare-action-icon]]:h-4 [&>[data-catcare-action-icon]]:w-4"
+        className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#fff4f2] px-3 text-sm font-semibold text-[#b33a2f] ring-1 ring-[#f0c9c2] transition hover:bg-[#ffe8e3] hover:text-[#982f27] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d86255] [&>[data-catcare-action-icon]]:h-4 [&>[data-catcare-action-icon]]:w-4"
         onClick={() => setOpen(true)}
         title="删除家庭用品"
         type="button"
       >
         <CatCareTrashIcon />
+        删除
       </button>
 
       {open ? (

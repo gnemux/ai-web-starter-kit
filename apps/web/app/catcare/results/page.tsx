@@ -1,5 +1,4 @@
 import { EmptyState, ErrorState } from "@xwlc/ui";
-import Link from "next/link";
 
 import { CatCareCalendarIcon } from "../catcare-action-icons";
 import { CatCarePanel } from "../owner-flow-components";
@@ -16,7 +15,7 @@ export default async function CatCareResultsPage() {
     <>
       {!result.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${result.error.code}: ${result.error.message}`}
           title="结果查看暂时不可用"
         />
@@ -56,7 +55,7 @@ function ResultPlanCard({ plan }: { plan: CatCarePlan }) {
   const resultLabel = getResultLabel(plan, submissionCount);
 
   return (
-    <Link
+    <a
       className="grid gap-3 rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4 transition hover:border-[#07847f]/40 hover:bg-white"
       href={`/catcare/plans/${plan.id}/results`}
     >
@@ -80,7 +79,7 @@ function ResultPlanCard({ plan }: { plan: CatCarePlan }) {
         <CatCareCalendarIcon className="h-4 w-4 text-[#07847f]" />
         查看结果与智能复盘入口
       </span>
-    </Link>
+    </a>
   );
 }
 

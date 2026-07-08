@@ -487,6 +487,14 @@ prototype-chain polish for screens 06 through 11 has been reopened as
 AI/payment/entitlement, no anonymous photo upload or Storage/RLS image flow, no
 anonymous paid-state display, and no CatCare business objects in `packages/*`.
 
+GNE-258 regeneration policy, 2026-07-08: regenerating a private share link is
+an entrance rotation, not a reset of care results. Existing anonymous
+`care_submissions` stay owner-visible, revoked old links cannot view or submit,
+and the new active link must recognize already submitted plan/date/visit/task
+slots so the sitter cannot duplicate the same care result after regeneration.
+The service now accepts legacy token-scoped submission refs but writes new
+anonymous idempotency keys at plan scope.
+
 GNE-290 planning note: this PRODUCT polish issue is the corrective pass for
 the accumulated drift from the V6 prototype chain across Food & Care Items,
 Events, Scenario & AI Inputs, AI Generate & Review, Private Share, and Sitter

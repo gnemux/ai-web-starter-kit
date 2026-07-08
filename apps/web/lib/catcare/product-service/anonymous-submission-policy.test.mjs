@@ -8,6 +8,7 @@ import {
   isAnonymousCareServiceDate,
   isAnonymousCareServiceDateInPlan,
   normalizeAnonymousCareSubmissionNote,
+  parseAnonymousCareSubmissionSlotKey,
   parseAnonymousCareSubmissionStatus,
   requiresAnonymousCareSubmissionNote
 } from "./anonymous-submission-policy.ts";
@@ -78,5 +79,26 @@ test("anonymous today uses the configured product timezone", () => {
   assert.equal(
     getAnonymousCareTodayIsoDate(new Date("2026-07-06T17:00:00.000Z")),
     "2026-07-07"
+  );
+});
+
+test("anonymous submission slot keys survive share link regeneration", () => {
+  const expected = {
+    key: "2026-07-07:09:30",
+    serviceDate: "2026-07-07",
+    visitTime: "09:30"
+  };
+
+  assert.deepEqual(
+    parseAnonymousCareSubmissionSlotKey("anonymous:old-token:2026-07-07:0930:task-ref"),
+    expected
+  );
+  assert.deepEqual(
+    parseAnonymousCareSubmissionSlotKey("anonymous:plan:2026-07-07:0930:task-ref"),
+    expected
+  );
+  assert.equal(
+    parseAnonymousCareSubmissionSlotKey("anonymous:plan:2026-07-07:2530:task-ref"),
+    null
   );
 });

@@ -86,6 +86,15 @@
 - GNE-290 must include three-party review evidence before Done: architecture
   boundary, UI/icon quality, and product interaction including mobile.
 
+2026-07-08 GNE-258 link regeneration acceptance:
+
+- Regenerating a share link revokes the old entrance but does not delete,
+  hide, or reset existing `care_submissions`.
+- New share links must show already submitted task slots for the same
+  plan/date/visit/task and must not permit duplicate writes for those slots.
+- Legacy token-scoped anonymous submissions remain readable and updatable
+  through the plan/date/visit/task duplicate boundary.
+
 2026-07-07 GNE-290 progress checkpoint:
 
 - Current local branch has a partial PRODUCT polish pass for V6 screens 06-11,

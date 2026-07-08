@@ -244,6 +244,14 @@
 - PRODUCT polish for prototype screens 06-11 is tracked by GNE-290 and must be
   verified in order: food/care items, event timeline, scenario inputs,
   generate/review, private share, and sitter checklist.
+
+2026-07-08 GNE-258 regeneration test point:
+
+- Submit at least one anonymous task, regenerate the owner share link, confirm
+  the old link is rejected, and confirm the new link still marks the same
+  plan/date/visit/task slot as submitted.
+- Re-submit the same slot from the new link and verify the service returns the
+  duplicate/update path instead of inserting a second care result.
 - GNE-290 browser evidence must include desktop and mobile visual QA, icon and
   button baseline review, no horizontal overflow, and three-party review:
   architecture boundary, UI/icon quality, and product interaction.

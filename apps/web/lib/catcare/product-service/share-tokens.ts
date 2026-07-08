@@ -17,6 +17,7 @@ import {
   isAnonymousCareServiceDate,
   isAnonymousCareServiceDateInPlan,
   normalizeAnonymousCareSubmissionNote,
+  parseAnonymousCareSubmissionSlotKey,
   parseAnonymousCareSubmissionStatus,
   requiresAnonymousCareSubmissionNote
 } from "./anonymous-submission-policy";
@@ -93,6 +94,10 @@ export type AnonymousCareSubmissionMutation = AnonymousCareTaskSubmissionView & 
   alreadySubmitted: boolean;
   message: string;
   submissionRef: string;
+};
+
+type AnonymousCareSubmissionSlotView = AnonymousCareTaskSubmissionView & {
+  idempotencyKey: string;
 };
 
 export const shareTokenScope: ShareTokenScope = "care_plan";
@@ -369,7 +374,8 @@ export async function getAnonymousCarePlanView(
       .select("task_id, status, note, abnormal, idempotency_key, created_at")
       .eq("owner_id", tokenResult.data.ownerId)
       .eq("plan_id", tokenResult.data.resourceId)
-      .like("idempotency_key", `anonymous:${tokenResult.data.tokenId}:%`)
+      .like("idempotency_key", "anonymous:%")
+      .order("created_at", { ascending: false })
   ]);
 
   if (planResult.error) {
@@ -405,8 +411,7 @@ export async function getAnonymousCarePlanView(
       continue;
     }
 
-    const slot = parseAnonymousSubmissionSlotFromKey(
-      tokenResult.data.tokenId,
+    const slot = parseAnonymousCareSubmissionSlotKey(
       submission.idempotency_key
     );
 
@@ -423,12 +428,17 @@ export async function getAnonymousCarePlanView(
     };
 
     if (slot.visitTime) {
-      submissionBySlotAndTaskId.set(`${slot.key}:${submission.task_id}`, view);
+      const key = `${slot.key}:${submission.task_id}`;
+
+      if (!submissionBySlotAndTaskId.has(key)) {
+        submissionBySlotAndTaskId.set(key, view);
+      }
     } else {
-      legacySubmissionByDateAndTaskId.set(
-        `${slot.serviceDate}:${submission.task_id}`,
-        view
-      );
+      const key = `${slot.serviceDate}:${submission.task_id}`;
+
+      if (!legacySubmissionByDateAndTaskId.has(key)) {
+        legacySubmissionByDateAndTaskId.set(key, view);
+      }
     }
   }
   const tasks = (tasksResult.data ?? [])
@@ -460,7 +470,7 @@ export async function getAnonymousCarePlanView(
         )
       ),
       submissionRef: createAnonymousTaskSubmissionRef(
-        tokenResult.data.tokenId,
+        tokenResult.data.resourceId,
         task.id
       ),
       sortOrder: task.sortOrder,
@@ -590,11 +600,18 @@ export async function submitAnonymousCareSubmissionFromFormData(
   const task = (tasksResult.data ?? [])
     .map(mapTask)
     .filter((item) => item.enabled && !isLegacyPrepareTask(item))
-    .find(
-      (item) =>
-        createAnonymousTaskSubmissionRef(tokenResult.data.tokenId, item.id) ===
-        submissionRef
-    );
+    .find((item) => {
+      const legacyRef = createAnonymousTaskSubmissionRef(
+        tokenResult.data.tokenId,
+        item.id
+      );
+      const stableRef = createAnonymousTaskSubmissionRef(
+        tokenResult.data.resourceId,
+        item.id
+      );
+
+      return submissionRef === stableRef || submissionRef === legacyRef;
+    });
 
   if (!task) {
     return serviceError("validation_error", "请选择有效的照护任务。", {
@@ -609,17 +626,17 @@ export async function submitAnonymousCareSubmissionFromFormData(
   }
 
   const idempotencyKey = createAnonymousSubmissionIdempotencyKey(
-    tokenResult.data.tokenId,
     serviceDate,
     visitTime,
     submissionRef
   );
-  const existingResult = await getAnonymousSubmissionByIdempotencyKey(
+  const existingResult = await getAnonymousSubmissionBySlot(
     clientResult.data,
     tokenResult.data.ownerId,
     tokenResult.data.resourceId,
+    task.id,
     serviceDate,
-    idempotencyKey
+    visitTime
   );
 
   if (!existingResult.ok) {
@@ -640,7 +657,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
         })
         .eq("owner_id", tokenResult.data.ownerId)
         .eq("plan_id", tokenResult.data.resourceId)
-        .eq("idempotency_key", idempotencyKey)
+        .eq("idempotency_key", existingResult.data.idempotencyKey)
         .select("status, note, abnormal, created_at")
         .single();
 
@@ -693,12 +710,13 @@ export async function submitAnonymousCareSubmissionFromFormData(
     .single();
 
   if (insertResult.error?.code === "23505") {
-    const duplicateResult = await getAnonymousSubmissionByIdempotencyKey(
+    const duplicateResult = await getAnonymousSubmissionBySlot(
       clientResult.data,
       tokenResult.data.ownerId,
       tokenResult.data.resourceId,
+      task.id,
       serviceDate,
-      idempotencyKey
+      visitTime
     );
 
     if (!duplicateResult.ok) {
@@ -743,20 +761,19 @@ function clearCatCarePlanCaches(ownerId: string, planId: string) {
   clearCatCareWorkspaceStatsCache(ownerId);
 }
 
-function createAnonymousTaskSubmissionRef(tokenId: string, taskId: string) {
+function createAnonymousTaskSubmissionRef(scopeKey: string, taskId: string) {
   return createHash("sha256")
-    .update(`${tokenId}:${taskId}`, "utf8")
+    .update(`${scopeKey}:${taskId}`, "utf8")
     .digest("base64url")
     .slice(0, 32);
 }
 
 function createAnonymousSubmissionIdempotencyKey(
-  tokenId: string,
   serviceDate: string,
   visitTime: string,
   submissionRef: string
 ) {
-  return `anonymous:${tokenId}:${serviceDate}:${encodeAnonymousVisitTime(visitTime)}:${submissionRef}`;
+  return `anonymous:plan:${serviceDate}:${encodeAnonymousVisitTime(visitTime)}:${submissionRef}`;
 }
 
 function createAnonymousSubmissionSlotKey(serviceDate: string, visitTime: string) {
@@ -769,12 +786,6 @@ function isAnonymousVisitTime(value: string) {
 
 function encodeAnonymousVisitTime(value: string) {
   return value.replace(":", "");
-}
-
-function decodeAnonymousVisitTime(value: string | undefined) {
-  return value && /^([01]\d|2[0-3])[0-5]\d$/.test(value)
-    ? `${value.slice(0, 2)}:${value.slice(2)}`
-    : null;
 }
 
 function getAnonymousTaskVisitTimes(task: {
@@ -820,32 +831,6 @@ function getAnonymousDailyFrequencyCount(frequency: string | null) {
   return Math.max(1, Math.min(4, Number(match?.[1] ?? "1") || 1));
 }
 
-function parseAnonymousSubmissionSlotFromKey(
-  tokenId: string,
-  idempotencyKey: string | null
-) {
-  const prefix = `anonymous:${tokenId}:`;
-  const rest = idempotencyKey?.startsWith(prefix)
-    ? idempotencyKey.slice(prefix.length)
-    : "";
-  const [serviceDate, encodedVisitTime] = rest.split(":");
-
-  if (!isAnonymousCareServiceDate(serviceDate)) {
-    return null;
-  }
-
-  const visitTime = decodeAnonymousVisitTime(encodedVisitTime);
-  const key = visitTime
-    ? createAnonymousSubmissionSlotKey(serviceDate, visitTime)
-    : null;
-
-  return {
-    key,
-    serviceDate,
-    visitTime
-  };
-}
-
 function parseAnonymousSubmissionStatus(
   value: FormDataEntryValue | null
 ): ServiceResult<Database["public"]["Tables"]["care_submissions"]["Row"]["status"]> {
@@ -874,33 +859,42 @@ function parseAnonymousSubmissionNote(
   return serviceOk(note);
 }
 
-async function getAnonymousSubmissionByIdempotencyKey(
+async function getAnonymousSubmissionBySlot(
   client: AppSupabaseClient,
   ownerId: string,
   planId: string,
+  taskId: string,
   serviceDate: string,
-  idempotencyKey: string
-): Promise<ServiceResult<AnonymousCareTaskSubmissionView | null>> {
+  visitTime: string
+): Promise<ServiceResult<AnonymousCareSubmissionSlotView | null>> {
   const result = await client
     .from("care_submissions")
-    .select("status, note, abnormal, created_at")
+    .select("status, note, abnormal, idempotency_key, created_at")
     .eq("owner_id", ownerId)
     .eq("plan_id", planId)
-    .eq("idempotency_key", idempotencyKey)
-    .maybeSingle();
+    .eq("task_id", taskId)
+    .like("idempotency_key", "anonymous:%")
+    .order("created_at", { ascending: false });
 
   if (result.error) {
     return mapSupabaseError(result.error);
   }
 
+  const submission = (result.data ?? []).find((row) => {
+    const slot = parseAnonymousCareSubmissionSlotKey(row.idempotency_key);
+
+    return slot?.serviceDate === serviceDate && slot.visitTime === visitTime;
+  });
+
   return serviceOk(
-    result.data
+    submission?.idempotency_key
       ? {
-          abnormal: result.data.abnormal,
-          note: result.data.note,
+          abnormal: submission.abnormal,
+          idempotencyKey: submission.idempotency_key,
+          note: submission.note,
           serviceDate,
-          status: result.data.status,
-          submittedAt: result.data.created_at
+          status: submission.status,
+          submittedAt: submission.created_at
         }
       : null
   );

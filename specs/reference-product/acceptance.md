@@ -72,6 +72,20 @@
 
 ## Verification Snapshot
 
+2026-07-08 GNE-259 owner/anonymous access boundary:
+
+- Owner-only boundary is covered by rollback-only SQL against `cats`,
+  `care_plans`, `care_tasks`, `care_submissions`, and `share_tokens`: Owner A
+  can read own rows and cannot read or mutate Owner B rows.
+- Anonymous database role cannot directly read private CatCare tables or the
+  share-token table and cannot directly write share-token or submission rows.
+- Anonymous app access remains token-scoped: valid `/s/[token]` access resolves
+  a token into an anonymous scope and then reads/writes only through derived
+  `ownerId`, `resourceId`, task, service-date, and visit-time conditions.
+- Current ACCESS security model is not purely RLS-dependent; service-layer
+  owner/token conditions are documented as the minimum portability boundary for
+  a future no-RLS store.
+
 2026-07-07 GNE-258 / GNE-290 boundary correction:
 
 - GNE-258 can be accepted only as ACCESS technical foundation after fresh

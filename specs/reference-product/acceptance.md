@@ -72,6 +72,23 @@
 
 ## Verification Snapshot
 
+2026-07-08 GNE-260 ACCESS security negative matrix:
+
+- `specs/reference-product/access-security-negative-matrix.md` is the ACCESS-06
+  source for negative scenarios and audit requirements.
+- Covered negative scenarios: cross-owner access, share-token create/revoke
+  abuse, expired/revoked/tampered tokens, repeated link generation, duplicate
+  submit, forwarded-link minimum scope, direct anonymous DB read/write, direct
+  submit validation, and raw-token leakage checks.
+- Audit is intentionally contract-only here. CAP-02 owns durable audit storage;
+  GNE-260 defines required event names, allowed fields, and forbidden fields.
+- Common-foundation judgment: token gate, anonymous actor context, field
+  whitelist, idempotency, and the matrix are reusable security patterns; CatCare
+  business table fields remain product-specific; audit persistence is `not_run`.
+- Cloudflare/Hono portability has a recorded risk list: preserve owner/token
+  repository filters without RLS, propagate `correlation_id`, and implement safe
+  audit payload redaction in CAP-02.
+
 2026-07-08 GNE-259 owner/anonymous access boundary:
 
 - Owner-only boundary is covered by rollback-only SQL against `cats`,

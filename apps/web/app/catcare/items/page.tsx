@@ -31,7 +31,7 @@ export default async function CatCareItemsPage({
     <>
       {!result.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${result.error.code}: ${result.error.message}`}
           title="食物用品暂时不可用"
         />

@@ -45,9 +45,7 @@ export function CatCareShellClient({
   const navItems = getWorkspaceNavItems(copy, currentNav, {
     includeDashboard: false
   });
-  const title =
-    navItems.find((item) => item.active)?.label ??
-    (locale === "en" ? "CatCare" : "CatCare");
+  const title = navItems.find((item) => item.active)?.label ?? "CatCare";
 
   useEffect(() => {
     const pageKey = getAnalyticsPageKey(pathname, currentNav);
@@ -88,15 +86,29 @@ export function CatCareShellClient({
                 }`}
                 href={item.href}
                 key={item.href}
-                onClick={() =>
+                onClick={(event) => {
                   trackCatCareEvent("catcare_navigation_clicked", {
                     from_page_key: getAnalyticsPageKey(pathname, currentNav),
                     surface: "owner",
                     target_page_key: getAnalyticsNavKey(item.href)
-                  })
-                }
-                onFocus={() => router.prefetch(item.href)}
-                onPointerEnter={() => router.prefetch(item.href)}
+                  });
+
+                  if (item.href === "/catcare/results") {
+                    event.preventDefault();
+                    window.location.assign(item.href);
+                  }
+                }}
+                onFocus={() => {
+                  if (item.href !== "/catcare/results") {
+                    router.prefetch(item.href);
+                  }
+                }}
+                onPointerEnter={() => {
+                  if (item.href !== "/catcare/results") {
+                    router.prefetch(item.href);
+                  }
+                }}
+                prefetch={item.href === "/catcare/results" ? false : undefined}
               >
                 {item.active ? (
                   <span
@@ -193,15 +205,29 @@ export function CatCareShellClient({
                   }`}
                   href={item.href}
                   key={item.href}
-                  onClick={() =>
+                  onClick={(event) => {
                     trackCatCareEvent("catcare_navigation_clicked", {
                       from_page_key: getAnalyticsPageKey(pathname, currentNav),
                       surface: "owner",
                       target_page_key: getAnalyticsNavKey(item.href)
-                    })
-                  }
-                  onFocus={() => router.prefetch(item.href)}
-                  onPointerEnter={() => router.prefetch(item.href)}
+                    });
+
+                    if (item.href === "/catcare/results") {
+                      event.preventDefault();
+                      window.location.assign(item.href);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (item.href !== "/catcare/results") {
+                      router.prefetch(item.href);
+                    }
+                  }}
+                  onPointerEnter={() => {
+                    if (item.href !== "/catcare/results") {
+                      router.prefetch(item.href);
+                    }
+                  }}
+                  prefetch={item.href === "/catcare/results" ? false : undefined}
                 >
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center [&_img]:h-5 [&_img]:w-5 [&_svg]:h-5 [&_svg]:w-5">
                     {item.icon}

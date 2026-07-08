@@ -6,7 +6,7 @@ import {
   CatCarePlusCircleIcon,
   CatCareSaveIcon
 } from "../catcare-action-icons";
-import { CatCareItemTypeIcon } from "../catcare-item-type-icon";
+import { CatCareRoutineTypeIcon } from "../catcare-item-type-icon";
 import { CatCareToast } from "../catcare-toast";
 import { getCatCareContentContext } from "../catcare-shell";
 import {
@@ -133,7 +133,7 @@ export default async function CatCareRoutinesPage({
     <>
       {!workspaceResult.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${workspaceResult.error.code}: ${workspaceResult.error.message}`}
           title="喂养习惯暂时不可用"
         />
@@ -189,11 +189,11 @@ function RoutineWorkspace({
     saved:
       locale === "en"
         ? "Routine saved."
-        : "习惯已保存。",
+        : "习惯已保存",
     copied:
       locale === "en"
         ? "Routine copied. Review the amount, products, and timing for this cat."
-        : "已复制习惯。请按这只猫的体重、用品和时间再检查一遍。",
+        : "已复制习惯，请按这只猫的体重、用品和时间再检查一遍",
     save: locale === "en" ? "Save routine" : "保存习惯",
     saveNext:
       locale === "en"
@@ -401,9 +401,7 @@ function RoutineCard({
       />
       <div className="flex items-start justify-between gap-4 opacity-55 transition peer-checked:opacity-100 peer-checked:[&_.routine-off-badge]:hidden peer-checked:[&_.routine-switch-knob]:translate-x-6 peer-checked:[&_.routine-switch-track]:bg-[#07847f]">
         <div className="flex items-center gap-4">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#f2fbf8] text-[#07847f] ring-1 ring-[#d9eee7]">
-            <RoutineCardIcon iconType={card.iconType} />
-          </span>
+          <RoutineCardIcon iconType={card.iconType} />
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-semibold text-[#101a32]">
@@ -489,7 +487,7 @@ function RoutineCard({
 }
 
 function RoutineCardIcon({ iconType }: { iconType: string }) {
-  return <CatCareItemTypeIcon className="h-8 w-8" itemType={iconType} />;
+  return <CatCareRoutineTypeIcon className="h-16 w-16" itemType={iconType} />;
 }
 
 function CareItemsContextPanel({

@@ -37,7 +37,7 @@ export default async function CatCarePlanDetailPage({
     <>
       {!result.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${result.error.code}: ${result.error.message}`}
           title="照护计划暂时不可用"
         />

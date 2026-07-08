@@ -11,6 +11,7 @@ import { createCatCareEventFromFormData } from "@/lib/catcare/product-service";
 import { createCatCareItemFromFormData } from "@/lib/catcare/product-service";
 import { createCatCarePlanFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCareCatFromFormData } from "@/lib/catcare/product-service";
+import { deleteCatCareEventFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCareLibraryItemFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCarePlan } from "@/lib/catcare/product-service";
 import { publishCatCarePlan } from "@/lib/catcare/product-service";
@@ -18,6 +19,8 @@ import { revokeCarePlanShareLink } from "@/lib/catcare/product-service";
 import { saveCatCareRoutineFromFormData } from "@/lib/catcare/product-service";
 import { unassignCatCareItemFromFormData } from "@/lib/catcare/product-service";
 import { updateCatCareCatFromFormData } from "@/lib/catcare/product-service";
+import { updateCatCareEventFromFormData } from "@/lib/catcare/product-service";
+import { updateCatCareLibraryItemFromFormData } from "@/lib/catcare/product-service";
 import { updateCatCarePlanTasksFromFormData } from "@/lib/catcare/product-service";
 import { updateCatCareLibraryItemNotesFromFormData } from "@/lib/catcare/product-service";
 
@@ -201,6 +204,38 @@ export async function updateCatCareLibraryItemNotesLocalAction(
   return updateCatCareLibraryItemNotesFromFormData(formData);
 }
 
+export async function updateCatCareLibraryItemAction(formData: FormData) {
+  const result = await updateCatCareLibraryItemFromFormData(formData);
+  const currentCatId = String(formData.get("currentCatId") ?? "").trim();
+
+  if (!result.ok) {
+    redirect(
+      currentCatId
+        ? `/catcare/items?cat_id=${currentCatId}&error=save_failed`
+        : "/catcare/items?error=save_failed"
+    );
+  }
+
+  revalidatePath("/catcare");
+  revalidatePath("/catcare/items");
+  redirect(
+    result.data.currentCatId
+      ? `/catcare/items?cat_id=${result.data.currentCatId}&saved=1`
+      : "/catcare/items?saved=1"
+  );
+}
+
+export async function updateCatCareLibraryItemLocalAction(formData: FormData) {
+  const result = await updateCatCareLibraryItemFromFormData(formData);
+
+  if (result.ok) {
+    revalidatePath("/catcare");
+    revalidatePath("/catcare/items");
+  }
+
+  return result;
+}
+
 export async function createCatCareEventAction(formData: FormData) {
   const result = await createCatCareEventFromFormData(formData);
 
@@ -215,6 +250,28 @@ export async function createCatCareEventAction(formData: FormData) {
 
 export async function createCatCareEventLocalAction(formData: FormData) {
   return createCatCareEventFromFormData(formData);
+}
+
+export async function updateCatCareEventLocalAction(formData: FormData) {
+  const result = await updateCatCareEventFromFormData(formData);
+
+  if (result.ok) {
+    revalidatePath("/catcare");
+    revalidatePath("/catcare/events");
+  }
+
+  return result;
+}
+
+export async function deleteCatCareEventLocalAction(formData: FormData) {
+  const result = await deleteCatCareEventFromFormData(formData);
+
+  if (result.ok) {
+    revalidatePath("/catcare");
+    revalidatePath("/catcare/events");
+  }
+
+  return result;
 }
 
 export async function createCatCarePlanAction(formData: FormData) {

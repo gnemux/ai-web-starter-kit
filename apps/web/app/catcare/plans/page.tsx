@@ -4,6 +4,7 @@ import {
   CatCarePlusCircleIcon,
   CatCareSaveIcon
 } from "../catcare-action-icons";
+import { CatCareScenarioIcon } from "../catcare-item-type-icon";
 import {
   CatCareButton,
   CatCareField,
@@ -20,10 +21,9 @@ import {
 import { PlansListClient } from "./plans-list-client";
 
 const scenarioOptions = [
-  ["weekend_away", "周末出门", "适合 1-3 天短期照护"],
-  ["business_trip", "出差", "适合工作日多天照护"],
-  ["friend_visit", "朋友上门", "适合熟人临时代看"],
-  ["other", "其它", "自定义临时场景"]
+  ["business_trip", "出差", "短期出差或工作行程，需要他人照看猫咪。"],
+  ["weekend_away", "周末外出", "周末或短时间外出游玩，需要临时照看。"],
+  ["friend_visit", "朋友上门", "朋友来家中做客，需要临时照看。"]
 ] as const;
 
 type PlansSearchParams = Promise<{ cat_id?: string }>;
@@ -46,7 +46,7 @@ export default async function CatCarePlansPage({
     <>
       {!result.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${result.error.code}: ${result.error.message}`}
           title="照护计划暂时不可用"
         />
@@ -69,10 +69,10 @@ export default async function CatCarePlansPage({
             ]}
           />
 
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_25rem]">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_27rem]">
             <CatCarePanel>
               <h2 className="text-2xl font-semibold text-[#101a32]">
-                生成清单
+                生成照护计划
               </h2>
               {result.data.cats.length > 0 ? (
                 <form
@@ -98,11 +98,11 @@ export default async function CatCarePlansPage({
                       ))}
                     </div>
                   </CatCareField>
-                  <CatCareField label="场景">
-                    <div className="grid gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2">
+                  <CatCareField label="临时照护场景">
+                    <div className="grid gap-3 sm:grid-cols-3">
                       {scenarioOptions.map(([value, label, description], index) => (
                         <label
-                          className="grid min-h-14 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-[#526177] ring-1 ring-[#e2e6ee] transition has-[:checked]:bg-[#07847f] has-[:checked]:text-white has-[:checked]:shadow-sm has-[:checked]:shadow-teal-900/15"
+                          className="group relative grid min-h-36 cursor-pointer content-start gap-5 rounded-2xl border border-[#d9e0ea] bg-white p-5 text-left transition hover:border-[#9ccfc7] hover:bg-[#fbfdfc] has-[:checked]:border-[#07847f] has-[:checked]:bg-[#f2fbf8] has-[:checked]:shadow-sm has-[:checked]:shadow-teal-900/10"
                           key={value}
                         >
                           <input
@@ -112,8 +112,20 @@ export default async function CatCarePlansPage({
                             type="radio"
                             value={value}
                           />
-                          <span>{label}</span>
-                          <span className="mt-1 text-xs opacity-80">
+                          <span className="flex items-center gap-4">
+                            <span className={`grid h-16 w-16 shrink-0 place-items-center rounded-full ${getScenarioIconTone(value)}`}>
+                              <CatCareScenarioIcon
+                                className="h-10 w-10"
+                                scenario={value}
+                              />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="block whitespace-nowrap text-xl font-semibold leading-7 text-[#101a32]">
+                                {label}
+                              </span>
+                            </span>
+                          </span>
+                          <span className="block text-sm font-semibold leading-6 text-[#526177]">
                             {description}
                           </span>
                         </label>
@@ -178,47 +190,28 @@ export default async function CatCarePlansPage({
             <aside className="grid content-start gap-5">
               <CatCarePanel>
                 <h2 className="text-2xl font-semibold text-[#101a32]">
-                  智能输入总结
+                  计划记录
                 </h2>
                 <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
-                  生成会引用猫咪档案、喂养习惯、家庭用品、近 30 天事件和主人备注。
+                  进行中和历史计划放在这里，进入页面就能继续确认、查看执行日历或回看结果。
                 </p>
-                <img
-                  alt=""
-                  aria-hidden="true"
-                  className="mt-4 h-40 w-full rounded-2xl object-contain"
-                  src="/catcare/card-cat-free.png"
-                />
-                <div className="mt-4 grid gap-3">
-                  <AiInputRow label="猫咪档案" value={`${result.data.cats.length} 只猫咪`} />
-                  <AiInputRow label="喂养习惯" value="已设置日常习惯" />
-                  <AiInputRow label="食物用品" value="家庭用品库" />
-                  <AiInputRow label="近 30 天事件" value="事件记录会参与建议" />
-                  <AiInputRow label="主人备注" value="随本次计划提交" />
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="w-fit rounded-full bg-[#f2fbf8] px-3 py-1 text-sm font-semibold text-[#07847f] ring-1 ring-[#d9eee7]">
+                    {activePlans.length} 个进行中
+                  </span>
+                  <span className="w-fit rounded-full bg-[#f7f9fb] px-3 py-1 text-sm font-semibold text-[#526177] ring-1 ring-[#e2e6ee]">
+                    {historyPlans.length} 个历史
+                  </span>
+                </div>
+                <div className="mt-5">
+                  <PlansListClient
+                    activePlans={activePlans}
+                    historyPlans={historyPlans}
+                  />
                 </div>
               </CatCarePanel>
             </aside>
           </div>
-
-          <CatCarePanel>
-            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold text-[#101a32]">
-                  已有计划
-                </h2>
-                <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
-                  生成新计划是主流程；进行中和历史计划放在这里统一查看。
-                </p>
-              </div>
-              <span className="w-fit rounded-full bg-[#f2fbf8] px-3 py-1 text-sm font-semibold text-[#07847f] ring-1 ring-[#d9eee7]">
-                {activePlans.length} 个进行中
-              </span>
-            </div>
-            <PlansListClient
-              activePlans={activePlans}
-              historyPlans={historyPlans}
-            />
-          </CatCarePanel>
         </div>
       )}
     </>
@@ -229,11 +222,14 @@ function isHistoryPlan(plan: CatCarePlan) {
   return plan.status === "closed" || plan.status === "reviewed";
 }
 
-function AiInputRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-[#e2e6ee] bg-[#fbfdfc] px-4 py-3">
-      <span className="text-sm font-semibold text-[#526177]">{label}</span>
-      <span className="text-sm font-semibold text-[#07847f]">{value}</span>
-    </div>
-  );
+function getScenarioIconTone(scenario: (typeof scenarioOptions)[number][0]) {
+  if (scenario === "business_trip") {
+    return "bg-[#e6f7f2]";
+  }
+
+  if (scenario === "friend_visit") {
+    return "bg-[#fff4df]";
+  }
+
+  return "bg-[#eeefff]";
 }

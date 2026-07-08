@@ -34,7 +34,7 @@ export function PlansListClient({
     setDeletedPlanIds((current) =>
       current.includes(planId) ? current : [...current, planId]
     );
-    toast.showDanger("计划已删除。");
+    toast.showDanger("计划已删除");
   }
 
   return (
@@ -87,6 +87,7 @@ function PlanCard({
   const status = getPlanStatusMeta(plan.status);
   const action = getPlanAction(plan);
   const canDelete = canDeletePlan(plan);
+  const timingNote = getPlanTimingNote(plan);
 
   return (
     <article
@@ -105,17 +106,22 @@ function PlanCard({
           <p className="mt-1 text-sm font-semibold text-[#526177]">
             照护猫咪：{formatPlanCatNames(plan)}
           </p>
+          {timingNote ? (
+            <p className="mt-2 text-xs font-semibold leading-5 text-[#8a5a00]">
+              {timingNote}
+            </p>
+          ) : null}
         </div>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}>
           {status.label}
         </span>
       </div>
-      <div className="flex flex-col gap-3 border-t border-[#e2e6ee] pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="flex items-center gap-2 text-sm font-semibold text-[#526177]">
+      <div className="grid gap-3 border-t border-[#e2e6ee] pt-4">
+        <p className="inline-flex w-fit items-center gap-2 rounded-full bg-[#f2fbf8] px-3 py-1.5 text-sm font-semibold text-[#526177] ring-1 ring-[#d9eee7]">
           <CatCareCalendarIcon className="h-4 w-4 text-[#07847f]" />
           {plan.taskCount ?? plan.tasks.length} 项清单任务
         </p>
-        <div className="grid gap-3 sm:grid-flow-col sm:auto-cols-max">
+        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
           <CatCareButton href={action.href} variant={action.variant}>
             {action.icon}
             {action.label}
@@ -131,6 +137,25 @@ function PlanCard({
       </div>
     </article>
   );
+}
+
+function getPlanTimingNote(plan: CatCarePlan) {
+  if (plan.status !== "published" || !plan.endOn) {
+    return null;
+  }
+
+  return plan.endOn < getTodayIsoDate()
+    ? "计划日期已过；分享链接仍有效时，照看者可以补提交，主人侧在结果页查看。"
+    : null;
+}
+
+function getTodayIsoDate() {
+  return new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Shanghai",
+    year: "numeric"
+  }).format(new Date());
 }
 
 function canDeletePlan(plan: CatCarePlan) {

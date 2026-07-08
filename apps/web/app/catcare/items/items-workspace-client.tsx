@@ -6,7 +6,9 @@ import {
   CatCareBowlActionIcon,
   CatCarePlusCircleIcon
 } from "../catcare-action-icons";
-import { CatCareItemTypeIcon } from "../catcare-item-type-icon";
+import {
+  CatCareItemTypeIcon
+} from "../catcare-item-type-icon";
 import {
   catCareItemTypes,
   getCatCareItemTypeLabel,
@@ -17,12 +19,11 @@ import { CatCareButton, CatCarePanel } from "../owner-flow-components";
 import {
   createCatCareItemLocalAction,
   deleteCatCareLibraryItemLocalAction,
-  updateCatCareLibraryItemNotesLocalAction
+  updateCatCareLibraryItemLocalAction
 } from "../actions";
 import { DeleteLibraryItemButton } from "./delete-library-item-button";
 import { EditLibraryItemNotesButton } from "./edit-library-item-notes-button";
 import { ItemCreateForm } from "./item-create-form";
-import { ItemUsageTabsClient } from "./item-usage-tabs-client";
 import type {
   CatCareCatalogProduct,
   CatCareCatSummary,
@@ -37,8 +38,6 @@ export function ItemsWorkspaceClient({
   initialItemType,
   initialItemTags,
   initialLibraryItems,
-  routineOwnerItemKeys,
-  routineOwnerItemKeysByCatId,
   saved,
   selectedCat
 }: {
@@ -88,7 +87,7 @@ export function ItemsWorkspaceClient({
       result.data.item,
       ...items.filter((item) => item.id !== result.data.item.id)
     ]);
-    toast.showSuccess("已加入家庭用品库。");
+    toast.showSuccess("已加入家庭用品库");
     setFormKey((key) => key + 1);
   }
 
@@ -100,8 +99,8 @@ export function ItemsWorkspaceClient({
             ? "用品保存失败，请检查名称后再试。"
             : saved
               ? saved === "routine"
-                ? "习惯已保存，用品库已同步。"
-                : "用品已保存。"
+                ? "习惯已保存，用品库已同步"
+                : "用品已保存"
               : null
         }
         tone={error === "save_failed" ? "error" : "success"}
@@ -128,19 +127,13 @@ export function ItemsWorkspaceClient({
                 {getCatCareItemTypeLabel(activeItemType)}（{filteredItems.length}）
               </h2>
               <p className="mt-2 text-sm font-semibold leading-6 text-[#526177]">
-                家庭用品是账号资产；猫咪标签只表示谁在用它。
+                家庭用品是账号资产；使用猫咪来自日常习惯，不在这里强制绑定。
               </p>
             </div>
-            <span className="inline-flex min-h-9 items-center rounded-full bg-[#e6f7f2] px-3 text-sm font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
-              {getCatCareItemTypeLabel(activeItemType)}
-            </span>
           </div>
 
-          <div className="mt-5 hidden grid-cols-[minmax(15rem,1.8fr)_8rem_8rem_8rem_7rem] gap-4 border-b border-[#e2e6ee] px-4 pb-3 text-xs font-semibold text-[#526177] lg:grid">
+          <div className="mt-5 hidden grid-cols-[minmax(16rem,1fr)_11rem] gap-4 border-b border-[#e2e6ee] px-4 pb-3 text-xs font-semibold text-[#526177] lg:grid">
             <span>用品信息</span>
-            <span>类型</span>
-            <span>照看者可见</span>
-            <span>使用猫咪</span>
             <span className="text-right">操作</span>
           </div>
 
@@ -158,16 +151,16 @@ export function ItemsWorkspaceClient({
                     setItemTags((tags) =>
                       tags.filter((tag) => tag.ownerItemId !== id)
                     );
-                    toast.showSuccess("家庭用品已删除。");
+                    toast.showSuccess("家庭用品已删除");
                   }}
                   onError={toast.showError}
-                  onNotesSaved={(id, notes) => {
+                  onSaved={(nextItem) => {
                     setLibraryItems((items) =>
                       items.map((entry) =>
-                        entry.id === id ? { ...entry, notes } : entry
+                        entry.id === nextItem.id ? nextItem : entry
                       )
                     );
-                    toast.showSuccess("备注已保存。");
+                    toast.showSuccess("用品已更新");
                   }}
                   tags={tagsByOwnerItemId.get(item.id) ?? []}
                 />
@@ -199,25 +192,6 @@ export function ItemsWorkspaceClient({
                 先把真实会用到的食物、药品、猫砂和器具录入家庭库。
               </p>
             </div>
-            <span className="rounded-full bg-[#e6f7f2] px-3 py-1 text-xs font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
-              {getCatCareItemTypeLabel(activeItemType)}
-            </span>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-[#d9eee7] bg-[#f2fbf8] p-4">
-            <div className="flex items-center gap-4">
-              <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-[#07847f] ring-1 ring-[#bfe5d7]">
-                <CatCareItemTypeIcon className="h-8 w-8" itemType={activeItemType} />
-              </span>
-              <div>
-                <h3 className="text-base font-semibold text-[#101a32]">
-                  当前录入：{getCatCareItemTypeLabel(activeItemType)}
-                </h3>
-                <p className="mt-1 text-sm font-semibold leading-6 text-[#526177]">
-                  填写品牌、规格或备注，照看者只会看到你设置为可见的内容。
-                </p>
-              </div>
-            </div>
           </div>
 
           <ItemCreateForm
@@ -230,22 +204,6 @@ export function ItemsWorkspaceClient({
           />
         </CatCarePanel>
       </div>
-
-      <CatCarePanel>
-        <ItemUsageTabsClient
-          cats={cats}
-          initialCatId={selectedCat.id}
-          itemTags={itemTags}
-          libraryItems={libraryItems}
-          onError={toast.showError}
-          onUnassigned={(id) => {
-            setItemTags((tags) => tags.filter((tag) => tag.id !== id));
-            toast.showSuccess("已移除当前猫标签。");
-          }}
-          routineOwnerItemKeys={routineOwnerItemKeys}
-          routineOwnerItemKeysByCatId={routineOwnerItemKeysByCatId}
-        />
-      </CatCarePanel>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <CatCareButton
@@ -274,22 +232,28 @@ function ItemTypeTabs({
   onChange: (itemType: CatCareItemType) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-[#e2e6ee] bg-white px-3 py-3 shadow-sm shadow-slate-900/[0.04]">
-      <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
+    <div className="rounded-2xl border border-[#e2e6ee] bg-white px-3 py-2 shadow-sm shadow-slate-900/[0.04]">
+      <div className="grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-4">
         {catCareItemTypes.map(([value, label]) => (
           <button
-            className={`inline-flex min-h-12 min-w-0 items-center justify-center gap-2 rounded-xl border px-3 text-sm font-semibold transition ${
+            className={`grid min-h-14 min-w-0 grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold transition ${
               activeItemType === value
-                ? "border-[#07847f] bg-[#e6f7f2] text-[#07847f]"
-                : "border-transparent bg-white text-[#526177] hover:border-[#d9e0ea]"
+                ? "bg-[#eef8f4] text-[#07847f] ring-1 ring-[#9ccfc7]"
+                : "text-[#526177] hover:bg-[#f6faf8] hover:text-[#07847f]"
             }`}
             key={value}
             onClick={() => onChange(value)}
             type="button"
           >
-            <CatCareItemTypeIcon itemType={value} />
-            <span className="min-w-0">{label}</span>
-            <span className="rounded-full bg-white/80 px-2 py-0.5 text-xs text-[#75839a]">
+            <CatCareItemTypeIcon className="h-9 w-9" itemType={value} />
+            <span className="min-w-0 truncate">{label}</span>
+            <span
+              className={`inline-flex min-w-7 justify-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+                activeItemType === value
+                  ? "bg-[#07847f] text-white shadow-sm shadow-teal-900/10"
+                  : "bg-transparent text-[#75839a]"
+              }`}
+            >
               {counts[value] ?? 0}
             </span>
           </button>
@@ -304,25 +268,23 @@ function LibraryItemRow({
   item,
   onDeleted,
   onError,
-  onNotesSaved,
+  onSaved,
   tags
 }: {
   catId: string;
   item: CatCareLibraryItem;
   onDeleted: (id: string) => void;
   onError: (message: string) => void;
-  onNotesSaved: (id: string, notes: string | null) => void;
+  onSaved: (item: CatCareLibraryItem) => void;
   tags: Array<{ name: string; visibleToSitter: boolean }>;
 }) {
   const uniqueTags = Array.from(new Set(tags.map((tag) => tag.name)));
   const visibleToSitter = tags.length === 0 || tags.some((tag) => tag.visibleToSitter);
 
   return (
-    <article className="grid gap-4 px-0 py-4 lg:grid-cols-[minmax(15rem,1.8fr)_8rem_8rem_8rem_7rem] lg:items-center lg:px-4">
-      <div className="flex min-w-0 items-start gap-4">
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#f2fbf8] text-[#07847f] ring-1 ring-[#d9eee7]">
-          <CatCareItemTypeIcon className="h-8 w-8" itemType={item.itemType} />
-        </span>
+    <article className="grid gap-4 px-0 py-4 lg:grid-cols-[minmax(16rem,1fr)_11rem] lg:items-center lg:px-4">
+      <div className="flex min-w-0 items-center gap-4">
+        <CatCareItemTypeIcon className="h-10 w-10" itemType={item.itemType} />
         <div className="min-w-0">
           <h3 className="break-words text-base font-semibold text-[#101a32]">
             {item.name}
@@ -331,48 +293,35 @@ function LibraryItemRow({
             {item.brand ? `${item.brand} · ` : ""}
             {item.notes ?? "未填写备注"}
           </p>
+          {uniqueTags.length > 0 || !visibleToSitter ? (
+            <div className="mt-2 flex min-h-7 flex-wrap items-center gap-2">
+              {uniqueTags.map((tag) => (
+                <span
+                  className="inline-flex min-h-6 items-center rounded-full bg-[#e6f7f2] px-2.5 text-xs font-semibold leading-none text-[#07847f]"
+                  key={tag}
+                >
+                  {tag}
+                </span>
+              ))}
+              {!visibleToSitter ? (
+                <span className="w-fit rounded-full bg-[#f2f4f7] px-2.5 py-1 text-xs font-semibold text-[#75839a]">
+                  仅主人
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
-      <span className="w-fit rounded-full bg-[#e6f7f2] px-3 py-1 text-sm font-semibold text-[#07847f]">
-        {getCatCareItemTypeLabel(item.itemType)}
-      </span>
-      <span
-        className={`inline-flex w-fit items-center gap-2 text-sm font-semibold ${
-          visibleToSitter ? "text-[#07847f]" : "text-[#75839a]"
-        }`}
-      >
-        <span
-          className={`h-2 w-2 rounded-full ${
-            visibleToSitter ? "bg-[#07847f]" : "bg-[#98a4b5]"
-          }`}
-        />
-        {visibleToSitter ? "可见" : "隐藏"}
-      </span>
-      <div className="flex min-h-7 flex-wrap items-center gap-2">
-        {uniqueTags.length > 0 ? (
-          uniqueTags.map((tag) => (
-            <span
-              className="inline-flex min-h-6 items-center rounded-full bg-[#07847f] px-2.5 text-xs font-semibold leading-none text-white"
-              key={tag}
-            >
-              {tag}
-            </span>
-          ))
-        ) : (
-          <span className="inline-flex min-h-6 items-center rounded-full bg-white px-2.5 text-xs font-semibold leading-none text-[#75839a] ring-1 ring-[#d9e0ea]">
-            未分配
-          </span>
-        )}
-      </div>
-      <div className="flex items-center justify-start gap-2 lg:justify-end">
+      <div className="flex min-w-0 flex-nowrap items-center justify-start gap-2 lg:justify-end">
         <EditLibraryItemNotesButton
-          action={updateCatCareLibraryItemNotesLocalAction}
+          action={updateCatCareLibraryItemLocalAction}
+          brand={item.brand}
           currentCatId={catId}
           itemId={item.id}
           itemName={item.name}
           notes={item.notes}
           onError={onError}
-          onSaved={onNotesSaved}
+          onSaved={onSaved}
         />
         <DeleteLibraryItemButton
           action={deleteCatCareLibraryItemLocalAction}

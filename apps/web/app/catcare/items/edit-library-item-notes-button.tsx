@@ -9,10 +9,12 @@ import {
   CatCareXIcon
 } from "../catcare-action-icons";
 import { CatCareButton } from "../owner-flow-components";
-import { updateCatCareLibraryItemNotesAction } from "../actions";
+import { updateCatCareLibraryItemAction } from "../actions";
+import type { CatCareLibraryItem } from "@/lib/catcare/product-service";
 
 export function EditLibraryItemNotesButton({
   action,
+  brand,
   currentCatId,
   itemId,
   itemName,
@@ -21,16 +23,17 @@ export function EditLibraryItemNotesButton({
   onSaved
 }: {
   action?: (formData: FormData) => Promise<{
-    data?: { id: string; notes: string | null };
+    data?: { currentCatId: string | null; item: CatCareLibraryItem };
     error?: { message: string };
     ok: boolean;
   }>;
+  brand: string | null;
   currentCatId: string;
   itemId: string;
   itemName: string;
   notes: string | null;
   onError?: (message: string) => void;
-  onSaved?: (id: string, notes: string | null) => void;
+  onSaved?: (item: CatCareLibraryItem) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -53,13 +56,14 @@ export function EditLibraryItemNotesButton({
   return (
     <>
       <button
-        aria-label={`编辑备注：${itemName}`}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#f2fbf8] text-[#07847f] ring-1 ring-[#bfe5d7] transition hover:bg-[#e6f7f2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#07847f] [&>[data-catcare-action-icon]]:h-4 [&>[data-catcare-action-icon]]:w-4"
+        aria-label={`修改用品：${itemName}`}
+        className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#f2fbf8] px-3 text-sm font-semibold text-[#07847f] ring-1 ring-[#bfe5d7] transition hover:bg-[#e6f7f2] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#07847f] [&>[data-catcare-action-icon]]:h-4 [&>[data-catcare-action-icon]]:w-4"
         onClick={() => setOpen(true)}
-        title="编辑备注"
+        title="修改用品"
         type="button"
       >
         <CatCareEditIcon />
+        修改
       </button>
 
       {open ? (
@@ -83,10 +87,10 @@ export function EditLibraryItemNotesButton({
                   className="text-xl font-semibold leading-tight text-[#101a32]"
                   id="catcare-edit-family-item-title"
                 >
-                  编辑备注
+                  修改用品
                 </h2>
                 <p className="mt-3 text-sm font-medium leading-6 text-[#526177]">
-                  {itemName}
+                  可以修改名称、品牌和备注；分类保持不变，避免影响已有照护习惯引用。
                 </p>
               </div>
             </div>
@@ -103,15 +107,40 @@ export function EditLibraryItemNotesButton({
                         return;
                       }
 
-                      onSaved?.(result.data?.id ?? itemId, result.data?.notes ?? null);
+                      if (result.data?.item) {
+                        onSaved?.(result.data.item);
+                      }
                       setOpen(false);
                     }
-                  : updateCatCareLibraryItemNotesAction
+                  : updateCatCareLibraryItemAction
               }
               className="mt-6"
             >
               <input name="currentCatId" type="hidden" value={currentCatId} />
               <input name="id" type="hidden" value={itemId} />
+              <label className="grid gap-2">
+                <span className="text-sm font-semibold text-[#526177]">名称</span>
+                <input
+                  className="h-12 w-full rounded-xl border border-[#d9e0ea] bg-white px-4 text-sm font-semibold text-[#16233b] outline-none transition placeholder:text-[#98a4b5] focus:border-[#07847f] focus:ring-4 focus:ring-[#07847f]/10"
+                  defaultValue={itemName}
+                  maxLength={120}
+                  name="name"
+                  placeholder="例如：皇家 室内成猫粮"
+                  required
+                />
+              </label>
+              <label className="mt-4 grid gap-2">
+                <span className="text-sm font-semibold text-[#526177]">品牌</span>
+                <input
+                  className="h-12 w-full rounded-xl border border-[#d9e0ea] bg-white px-4 text-sm font-semibold text-[#16233b] outline-none transition placeholder:text-[#98a4b5] focus:border-[#07847f] focus:ring-4 focus:ring-[#07847f]/10"
+                  defaultValue={brand ?? ""}
+                  maxLength={80}
+                  name="brand"
+                  placeholder="可选"
+                />
+              </label>
+              <label className="mt-4 grid gap-2">
+                <span className="text-sm font-semibold text-[#526177]">备注</span>
               <textarea
                 className="min-h-32 w-full rounded-xl border border-[#d9e0ea] bg-white px-4 py-3 text-sm font-semibold leading-6 text-[#16233b] outline-none transition placeholder:text-[#98a4b5] focus:border-[#07847f] focus:ring-4 focus:ring-[#07847f]/10"
                 defaultValue={notes ?? ""}
@@ -119,6 +148,7 @@ export function EditLibraryItemNotesButton({
                 name="notes"
                 placeholder="例如：放在玄关柜第二层；开封后冷藏；照看者需要先摇匀。"
               />
+              </label>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <CatCareButton
                   fullWidth
@@ -149,7 +179,7 @@ function SaveNotesButton() {
       type="submit"
     >
       <CatCareSaveIcon />
-      {pending ? "保存中…" : "保存备注"}
+      {pending ? "保存中…" : "保存修改"}
     </button>
   );
 }

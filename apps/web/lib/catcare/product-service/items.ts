@@ -25,6 +25,7 @@ import {
   makeOwnerItemKey,
   mapAssignedItemToLibraryItem,
   mapCatItemTag,
+  mapLibraryItem,
   mapSupabaseError,
   normalizeCareItemInput,
   normalizeOptionalText
@@ -370,3 +371,63 @@ export async function updateCatCareLibraryItemNotesFromFormData(
   return serviceOk({ currentCatId, id: result.data.id, notes: result.data.notes });
 }
 
+export async function updateCatCareLibraryItemFromFormData(
+  formData: FormData
+): Promise<
+  ServiceResult<{ currentCatId: string | null; item: CatCareLibraryItem }>
+> {
+  const id = String(formData.get("id") ?? "").trim();
+  const currentCatId = String(formData.get("currentCatId") ?? "").trim() || null;
+  const name = String(formData.get("name") ?? "").trim();
+  const brand = normalizeOptionalText(formData.get("brand"));
+  const notes = normalizeOptionalText(formData.get("notes"));
+
+  if (!id || name.length < 1 || name.length > 120 || (notes && notes.length > 2000)) {
+    const fields: Record<string, string> = {};
+
+    if (!id) {
+      fields.id = "required";
+    }
+
+    if (name.length < 1) {
+      fields.name = "required";
+    } else if (name.length > 120) {
+      fields.name = "invalid";
+    }
+
+    if (notes && notes.length > 2000) {
+      fields.notes = "invalid";
+    }
+
+    return serviceError("validation_error", "Check the family item details.", fields);
+  }
+
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const ownerResult = await getAuthenticatedOwnerId(clientResult.data);
+
+  if (!ownerResult.ok) {
+    return ownerResult;
+  }
+
+  const result = await clientResult.data
+    .from("owner_item_library")
+    .update({ brand, display_name: name, notes })
+    .eq("owner_id", ownerResult.data)
+    .eq("id", id)
+    .select(OWNER_ITEM_SELECT)
+    .single();
+
+  if (result.error) {
+    return mapSupabaseError(result.error);
+  }
+
+  clearOwnerLibraryItemCache(ownerResult.data);
+  clearCatCareWorkspaceStatsCache(ownerResult.data);
+
+  return serviceOk({ currentCatId, item: mapLibraryItem(result.data) });
+}

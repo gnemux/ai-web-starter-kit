@@ -1,6 +1,6 @@
 import "server-only";
 
-import { serviceOk, type ServiceResult } from "@xwlc/core";
+import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
 import { createSupabaseServerClient } from "../../supabase/server";
 
@@ -110,3 +110,89 @@ export async function createCatCareEventFromFormData(
   return serviceOk(mapCareEvent(result.data));
 }
 
+export async function updateCatCareEventFromFormData(
+  formData: FormData
+): Promise<ServiceResult<CatCareEvent>> {
+  const id = String(formData.get("id") ?? "").trim();
+  const input = normalizeCareEventInput(formData);
+
+  if (!id) {
+    return serviceError("validation_error", "Choose a valid care event.", {
+      id: "required"
+    });
+  }
+
+  if (!input.ok) {
+    return input;
+  }
+
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const ownerResult = await getAuthenticatedOwnerId(clientResult.data);
+
+  if (!ownerResult.ok) {
+    return ownerResult;
+  }
+
+  const result = await clientResult.data
+    .from("care_events")
+    .update(input.data)
+    .eq("owner_id", ownerResult.data)
+    .eq("id", id)
+    .select(CARE_EVENT_SELECT)
+    .single();
+
+  if (result.error) {
+    return mapSupabaseError(result.error);
+  }
+
+  clearCatCareEventListCache(ownerResult.data);
+  clearCatCareWorkspaceStatsCache(ownerResult.data);
+
+  return serviceOk(mapCareEvent(result.data));
+}
+
+export async function deleteCatCareEventFromFormData(
+  formData: FormData
+): Promise<ServiceResult<{ id: string }>> {
+  const id = String(formData.get("id") ?? "").trim();
+
+  if (!id) {
+    return serviceError("validation_error", "Choose a valid care event.", {
+      id: "required"
+    });
+  }
+
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const ownerResult = await getAuthenticatedOwnerId(clientResult.data);
+
+  if (!ownerResult.ok) {
+    return ownerResult;
+  }
+
+  const result = await clientResult.data
+    .from("care_events")
+    .delete()
+    .eq("owner_id", ownerResult.data)
+    .eq("id", id)
+    .select("id")
+    .single();
+
+  if (result.error) {
+    return mapSupabaseError(result.error);
+  }
+
+  clearCatCareEventListCache(ownerResult.data);
+  clearCatCareWorkspaceStatsCache(ownerResult.data);
+
+  return serviceOk({ id: result.data.id });
+}

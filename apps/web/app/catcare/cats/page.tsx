@@ -71,7 +71,7 @@ export default async function CatCareCatsPage({
 
         {!workspaceResult.ok ? (
           <ErrorState
-            badgeLabel="Needs review"
+            badgeLabel="需检查"
             description={`${workspaceResult.error.code}: ${workspaceResult.error.message}`}
             title="CatCare 暂时不可用"
           />
@@ -137,5 +137,5 @@ function getCatsToastMessage(value: string | undefined, locale: "zh" | "en") {
     return null;
   }
 
-  return locale === "en" ? "Cat profile deleted." : "猫咪档案已删除。";
+  return locale === "en" ? "Cat profile deleted" : "猫咪档案已删除";
 }

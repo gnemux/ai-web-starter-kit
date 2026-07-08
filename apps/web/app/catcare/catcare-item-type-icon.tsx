@@ -4,6 +4,7 @@ import type { CatCareItemType } from "./catcare-item-types";
 type IconProps = {
   className?: string;
   itemType: CatCareItemType | string;
+  treatment?: "plain" | "soft";
 };
 
 type IconTone = {
@@ -22,6 +23,58 @@ const itemTypeLabels: Record<string, string> = {
   treat: "零食",
   water: "饮水",
   wet_food: "罐头"
+};
+
+const routineIconSources: Record<string, string> = {
+  dry_food: "/catcare/icons/product/routine-dry-food.png",
+  litter: "/catcare/icons/product/routine-litter.png",
+  play: "/catcare/icons/product/routine-play.png",
+  treat: "/catcare/icons/product/routine-treat.png",
+  water: "/catcare/icons/product/routine-water.png",
+  wet_food: "/catcare/icons/product/routine-canned.png"
+};
+
+const itemLineIconAssets: Record<string, LineIconAsset> = {
+  dry_food: {
+    src: "/catcare/icons/traced/line-item-dry-food.svg",
+    tint: "#e6f7f2"
+  },
+  litter: {
+    src: "/catcare/icons/traced/line-item-litter.svg",
+    tint: "#eeefff"
+  },
+  medicine: {
+    src: "/catcare/icons/traced/line-item-medicine.svg",
+    tint: "#e6f7f2"
+  },
+  other: {
+    src: "/catcare/icons/traced/line-item-other.svg",
+    tint: "#f1f4f8"
+  },
+  play: {
+    src: "/catcare/icons/traced/line-item-play.svg",
+    tint: "#fff0ed"
+  },
+  supplement: {
+    src: "/catcare/icons/traced/line-item-supplement.svg",
+    tint: "#fff4df"
+  },
+  supply: {
+    src: "/catcare/icons/traced/line-item-supply.svg",
+    tint: "#edf3ff"
+  },
+  treat: {
+    src: "/catcare/icons/traced/line-item-treat.svg",
+    tint: "#fff4df"
+  },
+  water: {
+    src: "/catcare/icons/traced/line-item-water.svg",
+    tint: "#e8f5ff"
+  },
+  wet_food: {
+    src: "/catcare/icons/traced/line-item-wet-food.svg",
+    tint: "#fff0ed"
+  }
 };
 
 const taskCategoryToItemType: Record<
@@ -51,6 +104,66 @@ const eventTypeLabels: Record<string, string> = {
   vet: "就医"
 };
 
+const eventLineIconAssets: Record<string, LineIconAsset> = {
+  behavior: {
+    src: "/catcare/icons/traced/line-event-behavior.svg",
+    tint: "#fff0ed"
+  },
+  environment: {
+    src: "/catcare/icons/traced/line-event-other.svg",
+    tint: "#f1f4f8"
+  },
+  feeding: {
+    src: "/catcare/icons/traced/line-event-feeding.svg",
+    tint: "#e6f7f2"
+  },
+  health: {
+    src: "/catcare/icons/traced/line-event-health.svg",
+    tint: "#fff4df"
+  },
+  medicine: {
+    src: "/catcare/icons/traced/line-event-medicine.svg",
+    tint: "#e6f7f2"
+  },
+  other: {
+    src: "/catcare/icons/traced/line-event-other.svg",
+    tint: "#f1f4f8"
+  },
+  travel: {
+    src: "/catcare/icons/traced/line-event-travel.svg",
+    tint: "#edf3ff"
+  },
+  treat: {
+    src: "/catcare/icons/traced/line-event-treat.svg",
+    tint: "#fff4df"
+  },
+  vet: {
+    src: "/catcare/icons/traced/line-event-vet.svg",
+    tint: "#edf3ff"
+  }
+};
+
+const severityIconSources: Record<string, string> = {
+  normal: "/catcare/icons/traced/line-severity-normal.svg",
+  urgent: "/catcare/icons/traced/line-severity-urgent.svg",
+  watch: "/catcare/icons/traced/line-severity-watch.svg"
+};
+
+const scenarioLineIconAssets: Record<string, LineIconAsset> = {
+  business_trip: {
+    src: "/catcare/icons/traced/line-scenario-business-trip.svg",
+    tint: "#e6f7f2"
+  },
+  friend_visit: {
+    src: "/catcare/icons/traced/line-scenario-friend-visit.svg",
+    tint: "#fff4df"
+  },
+  weekend_away: {
+    src: "/catcare/icons/traced/line-scenario-weekend-away.svg",
+    tint: "#eeefff"
+  }
+};
+
 const iconTones: Record<string, IconTone> = {
   behavior: { color: "#d85c48", tint: "#fff0ed" },
   dry_food: { color: "#07847f", tint: "#e6f7f2" },
@@ -70,10 +183,29 @@ const iconTones: Record<string, IconTone> = {
   wet_food: { color: "#e05a45", tint: "#fff0ed" }
 };
 
+type LineIconAsset = {
+  src: string;
+  tint: string;
+};
+
 export function CatCareItemTypeIcon({
   className = "h-9 w-9",
-  itemType
+  itemType,
+  treatment = "plain"
 }: IconProps) {
+  const asset = itemLineIconAssets[itemType ?? "other"];
+
+  if (asset) {
+    return (
+      <CatCareExternalIcon
+        asset={asset}
+        className={className}
+        label={getItemTypeLabel(itemType)}
+        treatment={treatment}
+      />
+    );
+  }
+
   return (
     <CatCareProductGlyph
       className={className}
@@ -83,14 +215,46 @@ export function CatCareItemTypeIcon({
   );
 }
 
+export function CatCareRoutineTypeIcon({
+  className = "h-16 w-16",
+  itemType
+}: IconProps) {
+  const src = routineIconSources[itemType] ?? routineIconSources.dry_food;
+
+  return (
+    <img
+      alt=""
+      aria-hidden="true"
+      className={`shrink-0 object-contain ${className}`}
+      decoding="async"
+      src={src}
+      title={getItemTypeLabel(itemType)}
+    />
+  );
+}
+
 export function CatCareTaskCategoryIcon({
   category,
-  className = "h-9 w-9"
+  className = "h-9 w-9",
+  treatment = "plain"
 }: {
   category: PlanScheduleEntry["task"]["category"];
   className?: string;
+  treatment?: "plain" | "soft";
 }) {
   const itemType = taskCategoryToItemType[category ?? "other"] ?? "other";
+  const asset = itemLineIconAssets[itemType];
+
+  if (asset) {
+    return (
+      <CatCareExternalIcon
+        asset={asset}
+        className={className}
+        label={getItemTypeLabel(itemType)}
+        treatment={treatment}
+      />
+    );
+  }
 
   return (
     <CatCareProductGlyph
@@ -103,11 +267,26 @@ export function CatCareTaskCategoryIcon({
 
 export function CatCareEventTypeIcon({
   className = "h-9 w-9",
-  eventType
+  eventType,
+  treatment = "plain"
 }: {
   className?: string;
   eventType: string | null;
+  treatment?: "plain" | "soft";
 }) {
+  const asset = eventLineIconAssets[eventType ?? "other"];
+
+  if (asset) {
+    return (
+      <CatCareExternalIcon
+        asset={asset}
+        className={className}
+        label={eventTypeLabels[eventType ?? "other"] ?? eventTypeLabels.other}
+        treatment={treatment}
+      />
+    );
+  }
+
   return (
     <CatCareProductGlyph
       className={className}
@@ -117,8 +296,82 @@ export function CatCareEventTypeIcon({
   );
 }
 
+export function CatCareSeverityIcon({
+  className = "h-5 w-5",
+  severity
+}: {
+  className?: string;
+  severity: string;
+}) {
+  const src = severityIconSources[severity] ?? severityIconSources.normal;
+
+  return (
+    <img
+      alt=""
+      aria-hidden="true"
+      className={`shrink-0 object-contain ${className}`}
+      decoding="async"
+      src={src}
+    />
+  );
+}
+
+export function CatCareScenarioIcon({
+  className = "h-8 w-8",
+  scenario,
+  treatment = "plain"
+}: {
+  className?: string;
+  scenario: string;
+  treatment?: "plain" | "soft";
+}) {
+  const asset =
+    scenarioLineIconAssets[scenario] ?? scenarioLineIconAssets.weekend_away;
+
+  return (
+    <CatCareExternalIcon
+      asset={asset}
+      className={className}
+      label="照护场景"
+      treatment={treatment}
+    />
+  );
+}
+
 function getItemTypeLabel(itemType: string | null | undefined) {
   return itemTypeLabels[itemType ?? "other"] ?? itemTypeLabels.other;
+}
+
+function CatCareExternalIcon({
+  asset,
+  className,
+  label,
+  treatment = "soft"
+}: {
+  asset: LineIconAsset;
+  className: string;
+  label: string;
+  treatment?: "plain" | "soft";
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`inline-flex shrink-0 items-center justify-center ${treatment === "soft" ? "rounded-full" : ""} ${className}`}
+      data-catcare-product-icon=""
+      style={{ backgroundColor: treatment === "soft" ? asset.tint : "transparent" }}
+    >
+      <img
+        alt=""
+        className={`${treatment === "soft" ? "h-[80%] w-[80%]" : "h-[95%] w-[95%]"} object-contain`}
+        decoding="async"
+        src={asset.src}
+        style={{
+          filter: treatment === "plain" ? "drop-shadow(0.45px 0 0 #05807b)" : undefined
+        }}
+        title={label}
+      />
+    </span>
+  );
 }
 
 function CatCareProductGlyph({

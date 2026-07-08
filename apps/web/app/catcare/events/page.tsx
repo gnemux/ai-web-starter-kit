@@ -23,7 +23,7 @@ export default async function CatCareEventsPage({
     <>
       {!result.ok ? (
         <ErrorState
-          badgeLabel="Needs review"
+          badgeLabel="需检查"
           description={`${result.error.code}: ${result.error.message}`}
           title="事件记录暂时不可用"
         />
@@ -49,7 +49,7 @@ export default async function CatCareEventsPage({
           <CatCareToast
             message={
               params.saved === "1"
-                ? "事件已保存。需关注事件会进入照护计划的生成参考。"
+                ? "事件已保存，需关注事件会进入照护计划的生成参考"
                 : null
             }
           />

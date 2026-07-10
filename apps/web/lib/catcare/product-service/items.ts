@@ -3,6 +3,8 @@ import "server-only";
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
 import { createSupabaseServerClient } from "../../supabase/server";
+import { assertCatCarePlanItemCreation, getCatCarePlanLimits } from "../plan-limits";
+import { getCurrentBillingPlanId } from "../../services/billing";
 
 import {
   CAT_ITEM_ASSIGNMENT_SELECT,
@@ -166,10 +168,26 @@ export async function createCatCareItemFromFormData(
     return ownerResult;
   }
 
+  const planResult = await getCurrentBillingPlanId();
+
+  if (!planResult.ok) {
+    return planResult;
+  }
+
+  const maxItems = getCatCarePlanLimits(planResult.data).maxItems;
   const libraryResult = await findOrCreateOwnerItem(
     clientResult.data,
     ownerResult.data,
-    input.data
+    input.data,
+    maxItems === null
+      ? undefined
+      : {
+          beforeInsert: (currentItemCount) =>
+            assertCatCarePlanItemCreation({
+              currentItemCount,
+              planId: planResult.data
+            })
+        }
   );
 
   if (!libraryResult.ok) {

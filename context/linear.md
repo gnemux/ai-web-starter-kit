@@ -594,6 +594,81 @@ idempotency key is unique and Outbox writes upsert, so a repeated anonymous
 task update refreshes one pending notification instead of queuing duplicates;
 real worker delivery and PostHog correlation remain later CAP work.
 
+GNE-264 CAPABILITY AI recap note, 2026-07-08:
+CAP-04 adds an owner-side "生成复盘草稿" entry on the CatCare plan result page.
+The action reads owner-scoped plan results through the existing product service,
+builds a redacted structured prompt from `PlanResultSummary`, and calls the
+core AI facade so provider mode, entitlement/credit gate, usage recording, and
+PostHog-safe metadata stay behind the shared capability contract. The prompt
+uses counts, overdue task labels, and attention task labels only; raw
+submission notes, private handoff text, raw share tokens, token hashes, owner
+email, and internal debug fields are not included. The UI shows mock/no-op/
+sandbox mode, generated draft text, failed/degraded states, and a usable path
+to usage/subscription pages when entitlement or quota blocks generation. Usage
+metadata is allowlisted to `correlation_id`, `plan_id`, `resource_type`, and
+`request_source` so ledger evidence can trace owner/plan/action without storing
+private prompt content. Live AI provider quality, real payment, and generic
+share-token extraction remain owned by later CAP work.
+
+GNE-264/GNE-265 in-progress note, 2026-07-10:
+Current active CAP work remains `GNE-264` and `GNE-265`; do not start
+`GNE-266` until AI generation/recap and Billing/paywall return have authenticated
+smoke evidence. AI plan generation and AI recap now revalidate CatCare plus
+`/account`, `/account/billing`, and `/account/usage` after successful usage
+commit so the product shell and Billing review pages can refresh allowance
+state without relying on a manual full-page navigation.
+
+GNE-264/GNE-265 implementation verification note, 2026-07-10:
+GNE-264 now gives plan generation and result recap the same server-side AI
+entitlement/credit gate. The result page reads the entitlement snapshot before
+rendering: zero remaining uses disables generation/regeneration and exposes the
+CatCare paywall while existing recap content remains viewable. GNE-265 now keeps
+safe internal returns in one helper and splits CatCare Billing presentation into
+the overview composer, plan-comparison section, and records section; the main
+view decreased from 681 to 343 lines without creating a generic Billing UI
+package. Fresh evidence passed 20 web tests, web typecheck, package/release
+boundary checks, diff check, and production build. The linked online test
+Supabase returned readable Billing tables; sampled AI entitlement/usage values
+were `credit` and 10000-block aligned. Authenticated desktop 1440x800 and mobile
+390x844 browser smoke now covers the owner result/recap route and Billing page
+without horizontal overflow. This closes GNE-264 page evidence. Creem Test Mode
+payment then completed and returned to the originating CatCare result route.
+The new paid test order has one active 100000-credit entitlement and one matching
+grant ledger; replaying the successful return kept both counts at one. This
+closes the GNE-265 payment-return and idempotency evidence without treating test
+payment as live charging.
+
+GNE-265 CAPABILITY billing return-flow note, 2026-07-08:
+CAP-04 connects the CatCare AI recap blocked state to the existing Billing/
+Payment sandbox path. When the server-side AI/Billing gate blocks generation,
+the result page can send the owner to `/account/usage` with a CatCare
+`return_to` context or directly into the sandbox credit-pack checkout. The
+usage page shows a CatCare-specific Paywall panel only for safe `/catcare`
+return paths, and the payment service now allowlists `/account` and `/catcare`
+return URLs with exact path-prefix checks so success/cancel/failure can return
+to the original plan result page without allowing external redirects. This
+strengthens the common payment return capability while keeping order,
+entitlement, credit, and usage facts inside the existing server-side Billing/
+Payment services. Live payment, invoices, refunds, proration, and
+client-derived entitlement remain non-goals.
+
+GNE-265 structure guardrail, 2026-07-09:
+CAP-04 must not keep growing `apps/web/app/account/catcare-billing-overview.tsx`
+as a single large product page file. If the page still owns current entitlement,
+AI usage, credit-pack purchase, plan comparison, order records, and usage
+records together, split the CatCare billing page into minimal local sections
+before closing the issue. This is a CatCare product-view boundary, not a shared
+Billing UI package.
+
+GNE-267 structure guardrail, 2026-07-09:
+CAP-07 must use its failure/retry/idempotency pass to keep `apps/web/lib/services/billing.ts`
+from becoming the sink for every Billing/Credit concern. If ledger write,
+usage commit, duplicate commit lookup, entitlement snapshot, plan cache, and
+activity query still live together, first extract the smallest Billing ledger /
+usage commit helper or same-folder module needed to test duplicate charge and
+failed ledger paths. Do not push AI, Audit, Outbox, or analytics correlation
+logic back into `billing.ts`.
+
 GNE-234 VERIFY
 ├── GNE-268 VERIFY-01 Reviewer 账号、测试数据、URL、版本
 ├── GNE-269 VERIFY-02 30 分钟 Reviewer Runbook

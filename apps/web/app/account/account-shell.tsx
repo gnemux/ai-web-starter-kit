@@ -5,7 +5,10 @@ import type { WorkspaceNavKey } from "@/components/workspace-nav";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
-import { getCurrentBillingEntitlements } from "@/lib/services/billing";
+import {
+  formatAiCreditAllowanceLabel,
+  getCurrentBillingEntitlements
+} from "@/lib/services/billing";
 
 import { CatCareAppShell } from "../catcare/catcare-shell";
 
@@ -30,7 +33,9 @@ export async function getAccountPageContext(nextPath = "/account") {
     account: accountResult.data,
     billingPlanLabel: copy.account.billing.planNames[planId],
     copy,
-    creditLabel: formatCatCareAiSummaryLabel(planId, copy.account.billing),
+    creditLabel: billingResult.ok
+      ? formatAiCreditAllowanceLabel(billingResult.data.entitlements.ai_tokens)
+      : copy.catcare.owner.dashboard.creditUnavailable,
     displayName,
     locale,
     userLabel
@@ -55,15 +60,6 @@ export function AccountAppShell({
       {children}
     </CatCareAppShell>
   );
-}
-
-function formatCatCareAiSummaryLabel(
-  planId: string,
-  labels: ReturnType<typeof getDictionary>["account"]["billing"]
-) {
-  return planId === "pro"
-    ? labels.catcareDisplay.proCreditSummary
-    : labels.catcareDisplay.freeCreditSummary;
 }
 
 export function AccountPageHeader({

@@ -3,6 +3,7 @@ import "server-only";
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
 import { createSupabaseServerClient, type AppSupabaseClient } from "../../supabase/server";
+import type { Json } from "../../supabase/database.types";
 import { recordCatCareAuditEvent } from "./audit";
 
 import {
@@ -44,7 +45,10 @@ import {
 } from "./core";
 
 export async function createCatCarePlanFromFormData(
-  formData: FormData
+  formData: FormData,
+  options: {
+    beforeCreate?: (context: CreateCatCarePlanContext) => Promise<ServiceResult<unknown>>;
+  } = {}
 ): Promise<ServiceResult<CatCarePlan>> {
   const inputResult = normalizePlanInput({
     catIds: formData.getAll("catIds"),
@@ -72,6 +76,33 @@ export async function createCatCarePlanFromFormData(
 
   if (!ownerResult.ok) {
     return ownerResult;
+  }
+
+  const generationRequestId = normalizeOptionalText(
+    formData.get("generationRequestId")
+  );
+
+  if (generationRequestId) {
+    const existingPlanResult = await clientResult.data
+      .from("care_plans")
+      .select(
+        "id, owner_id, cat_id, routine_id, title, status, scenario, generation_source, ai_input_summary, start_on, end_on, handoff_notes, generated_at, published_at, reviewed_at, closed_at, created_at, updated_at"
+      )
+      .eq("owner_id", ownerResult.data)
+      .filter("ai_input_summary->>generation_request_id", "eq", generationRequestId)
+      .maybeSingle();
+
+    if (existingPlanResult.error) {
+      return mapSupabaseError(existingPlanResult.error);
+    }
+
+    if (existingPlanResult.data) {
+      return serviceOk({
+        ...mapPlan(existingPlanResult.data),
+        submissions: [],
+        tasks: []
+      });
+    }
   }
 
   const catsResult = await clientResult.data
@@ -117,6 +148,23 @@ export async function createCatCarePlanFromFormData(
     );
   }
 
+  const beforeCreateResult = await options.beforeCreate?.({
+    cats: selectedCats.map((cat) => ({
+      id: cat.id,
+      name: cat.name
+    })),
+    eventCount: planTasksResult.data.eventCount,
+    input: inputResult.data,
+    itemCount: planTasksResult.data.itemCount,
+    ownerId: ownerResult.data,
+    routineCount: planTasksResult.data.routineCount,
+    taskCount: tasks.length
+  });
+
+  if (beforeCreateResult && !beforeCreateResult.ok) {
+    return beforeCreateResult;
+  }
+
   const { data: plan, error: planError } = await clientResult.data
     .from("care_plans")
     .insert({
@@ -129,6 +177,7 @@ export async function createCatCarePlanFromFormData(
         cat_ids: selectedCats.map((cat) => cat.id),
         cat_names: selectedCats.map((cat) => cat.name),
         generated_from: planTasksResult.data.routineCount > 0 ? "routine" : "manual_fallback",
+        generation_request_id: generationRequestId,
         routine_count: planTasksResult.data.routineCount,
         task_count: tasks.length,
         visit_count: inputResult.data.visitCount
@@ -193,6 +242,91 @@ export async function createCatCarePlanFromFormData(
     ...mapPlan(plan),
     tasks: (taskRows ?? []).map(mapTask),
     submissions: []
+  });
+}
+
+export type CreateCatCarePlanContext = {
+  cats: Array<{ id: string; name: string }>;
+  eventCount: number;
+  input: CreatePlanInput;
+  itemCount: number;
+  ownerId: string;
+  routineCount: number;
+  taskCount: number;
+};
+
+export async function saveCatCarePlanAiRecap(input: {
+  consumedCredits: number;
+  mode: string;
+  planId: string;
+  text: string;
+  usageRecordStatus: string;
+}): Promise<ServiceResult<CatCarePlan>> {
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const ownerResult = await getAuthenticatedOwnerId(clientResult.data);
+
+  if (!ownerResult.ok) {
+    return ownerResult;
+  }
+
+  const planResult = await clientResult.data
+    .from("care_plans")
+    .select(
+      "id, owner_id, cat_id, routine_id, title, status, scenario, generation_source, ai_input_summary, start_on, end_on, handoff_notes, generated_at, published_at, reviewed_at, closed_at, created_at, updated_at"
+    )
+    .eq("owner_id", ownerResult.data)
+    .eq("id", input.planId)
+    .single();
+
+  if (planResult.error) {
+    return mapSupabaseError(planResult.error);
+  }
+
+  if (planResult.data.status !== "published" && planResult.data.status !== "reviewed") {
+    return serviceError(
+      "validation_error",
+      "只有已发布的照护计划可以生成复盘。"
+    );
+  }
+
+  const reviewedAt = new Date().toISOString();
+  const { data, error } = await clientResult.data
+    .from("care_plans")
+    .update({
+      ai_input_summary: withResultRecap(planResult.data.ai_input_summary, {
+        consumed_credits: input.consumedCredits,
+        generated_at: reviewedAt,
+        mode: input.mode,
+        text: input.text,
+        usage_record_status: input.usageRecordStatus
+      }),
+      reviewed_at: reviewedAt,
+      status: "reviewed"
+    })
+    .eq("owner_id", ownerResult.data)
+    .eq("id", input.planId)
+    .select(
+      "id, owner_id, cat_id, routine_id, title, status, scenario, generation_source, ai_input_summary, start_on, end_on, handoff_notes, generated_at, published_at, reviewed_at, closed_at, created_at, updated_at"
+    )
+    .single();
+
+  if (error) {
+    return mapSupabaseError(error);
+  }
+
+  clearCatCarePlanSummaryCache(ownerResult.data);
+  clearCatCarePlanDetailCache(ownerResult.data, input.planId);
+  clearCatCareWorkspaceStatsCache(ownerResult.data);
+
+  return serviceOk({
+    ...mapPlan(data),
+    submissions: [],
+    tasks: []
   });
 }
 
@@ -1117,4 +1251,16 @@ export async function getCatCarePlanItemOptions(): Promise<ServiceResult<string[
   }
 
   return serviceOk(Array.from(new Set(itemsResult.data.map((item) => item.name))));
+}
+
+function withResultRecap(summary: Json, recap: Record<string, Json>): Json {
+  const base =
+    summary && typeof summary === "object" && !Array.isArray(summary)
+      ? summary
+      : {};
+
+  return {
+    ...base,
+    result_recap: recap
+  };
 }

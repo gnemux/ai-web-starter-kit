@@ -23,7 +23,10 @@ import {
   CatCareMetricCard
 } from "@/components/catcare-ui";
 import { getDictionary } from "@/lib/i18n";
-import { getCurrentBillingEntitlements } from "@/lib/services/billing";
+import {
+  formatAiCreditAllowanceLabel,
+  getCurrentBillingEntitlements
+} from "@/lib/services/billing";
 import {
   getCatCareWorkspace,
   type CatCareCatSummary
@@ -93,7 +96,7 @@ function CatCareWorkspace({
 }) {
   const currentPlan = billingResult.ok ? billingResult.data.planId : "free";
   const creditLabel = billingResult.ok
-    ? formatCatCareAiSummaryLabel(currentPlan, billingLabels)
+    ? formatAiCreditAllowanceLabel(billingResult.data.entitlements.ai_tokens)
     : labels.dashboard.creditUnavailable;
   const onboarding = getOnboardingProgress({
     cats,
@@ -333,13 +336,4 @@ function getOnboardingProgress({
     label: `${percent}%`,
     percent
   };
-}
-
-function formatCatCareAiSummaryLabel(
-  planId: string,
-  labels: ReturnType<typeof getDictionary>["account"]["billing"]
-) {
-  return planId === "pro"
-    ? labels.catcareDisplay.proCreditSummary
-    : labels.catcareDisplay.freeCreditSummary;
 }

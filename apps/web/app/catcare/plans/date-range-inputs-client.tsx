@@ -1,32 +1,103 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { CatCareCalendarIcon } from "../catcare-action-icons";
 import { catCareInputClass } from "../owner-flow-components";
+import { validateCatCarePlanDateRange } from "@/lib/catcare/plan-date-range";
 
 export function DateRangeInputsClient() {
+  const today = useMemo(() => formatDateInput(new Date()), []);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [startOn, setStartOn] = useState("");
+  const [endOn, setEndOn] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const form = containerRef.current?.closest("form");
+
+    if (!form) {
+      return;
+    }
+
+    function handleSubmit(event: SubmitEvent) {
+      const nextErrors = validateCatCarePlanDateRange({
+        endOn,
+        startOn,
+        today
+      });
+
+      setErrors(nextErrors);
+
+      if (Object.keys(nextErrors).length > 0) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+
+    form.addEventListener("submit", handleSubmit);
+
+    return () => form.removeEventListener("submit", handleSubmit);
+  }, [endOn, startOn, today]);
+
+  function updateStartOn(value: string) {
+    setStartOn(value);
+    setErrors((current) => ({ ...current, startOn: "" }));
+
+    if (endOn && value && endOn < value) {
+      setEndOn(value);
+      setErrors((current) => ({ ...current, endOn: "" }));
+    }
+  }
+
+  function updateEndOn(value: string) {
+    setEndOn(value);
+    setErrors((current) => ({ ...current, endOn: "" }));
+  }
+
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      <CatCarePlanDateInput label="开始日期" name="startOn" required />
-      <CatCarePlanDateInput label="结束日期" name="endOn" />
+    <div className="grid gap-4 sm:grid-cols-2" ref={containerRef}>
+      <CatCarePlanDateInput
+        error={formatDateError("startOn", errors.startOn)}
+        label="开始日期"
+        minDate={today}
+        name="startOn"
+        onChange={updateStartOn}
+        required
+        value={startOn}
+      />
+      <CatCarePlanDateInput
+        error={formatDateError("endOn", errors.endOn)}
+        label="结束日期"
+        minDate={startOn || today}
+        name="endOn"
+        onChange={updateEndOn}
+        required
+        value={endOn}
+      />
     </div>
   );
 }
 
 function CatCarePlanDateInput({
+  error,
   label,
+  minDate,
   name,
-  required = false
+  onChange,
+  required = false,
+  value
 }: {
+  error?: string;
   label: string;
+  minDate: string;
   name: string;
+  onChange: (value: string) => void;
   required?: boolean;
+  value: string;
 }) {
-  const today = useMemo(() => formatDateInput(new Date()), []);
-  const [value, setValue] = useState("");
   const [open, setOpen] = useState(false);
-  const [visibleMonth, setVisibleMonth] = useState(parseDateInput(today));
+  const [visibleMonth, setVisibleMonth] = useState(parseDateInput(minDate));
 
   return (
     <div className="grid content-start gap-3 text-[#243653]">
@@ -42,7 +113,14 @@ function CatCarePlanDateInput({
         <input name={name} type="hidden" value={value} />
         <button
           aria-expanded={open}
-          className={`${catCareInputClass} flex items-center justify-between gap-3 text-left ${!value ? "text-[#98a4b5]" : ""}`}
+          aria-invalid={Boolean(error)}
+          className={`${catCareInputClass} flex items-center justify-between gap-3 text-left ${
+            !value ? "text-[#98a4b5]" : ""
+          } ${
+            error
+              ? "border-[#d86255] bg-[#fffafa] ring-4 ring-[#d86255]/10 focus:border-[#d86255] focus:ring-[#d86255]/10"
+              : ""
+          }`}
           onClick={() => setOpen((current) => !current)}
           type="button"
         >
@@ -51,32 +129,38 @@ function CatCarePlanDateInput({
         </button>
         {open ? (
           <DatePicker
-            maxDate={null}
+            minDate={minDate}
             onClear={
               required
                 ? undefined
                 : () => {
-                    setValue("");
+                    onChange("");
                     setOpen(false);
                   }
             }
             onMonthChange={setVisibleMonth}
             onSelect={(nextValue) => {
-              setValue(nextValue);
+              onChange(nextValue);
               setVisibleMonth(parseDateInput(nextValue));
               setOpen(false);
             }}
             selectedDate={value}
-            today={today}
+            today={minDate}
             visibleMonth={visibleMonth}
           />
         ) : null}
       </div>
+      {error ? (
+        <p className="text-xs font-semibold leading-5 text-[#b33a2f]">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
 
 function DatePicker({
+  minDate,
   onClear,
   onMonthChange,
   onSelect,
@@ -84,7 +168,7 @@ function DatePicker({
   today,
   visibleMonth
 }: {
-  maxDate: string | null;
+  minDate: string;
   onClear?: () => void;
   onMonthChange: (date: Date) => void;
   onSelect: (date: string) => void;
@@ -137,14 +221,18 @@ function DatePicker({
           }
 
           const dateValue = formatDateInput(date);
+          const disabled = dateValue < minDate;
 
           return (
             <button
               className={`flex h-9 items-center justify-center rounded-lg text-sm font-semibold transition ${
                 dateValue === selectedDate
                   ? "bg-[#07847f] text-white shadow-sm shadow-teal-900/20"
-                  : "text-[#16233b] hover:bg-[#eef8f4]"
+                  : disabled
+                    ? "cursor-not-allowed text-[#b8c1cf]"
+                    : "text-[#16233b] hover:bg-[#eef8f4]"
               }`}
+              disabled={disabled}
               key={dateValue}
               onClick={() => onSelect(dateValue)}
               type="button"
@@ -169,7 +257,7 @@ function DatePicker({
           onClick={() => onSelect(today)}
           type="button"
         >
-          今天
+          最早可选
         </button>
       </div>
     </div>
@@ -210,4 +298,24 @@ function getMonthDays(monthDate: Date) {
   }
 
   return days;
+}
+
+function formatDateError(field: "startOn" | "endOn", code?: string) {
+  if (!code) {
+    return "";
+  }
+
+  if (code === "required") {
+    return field === "startOn" ? "请选择开始日期。" : "请选择结束日期。";
+  }
+
+  if (code === "past") {
+    return "开始日期不能早于今天。";
+  }
+
+  if (code === "invalid") {
+    return "结束日期不能早于开始日期。";
+  }
+
+  return "请检查日期。";
 }

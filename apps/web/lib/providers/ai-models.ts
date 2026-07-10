@@ -22,8 +22,8 @@ export const aiModelCatalog = [
     },
     costProfile: {
       unit: "credit",
-      requestCredits: 1000,
-      minimumCredits: 1000,
+      requestCredits: 10000,
+      minimumCredits: 10000,
       inputTokenCreditsPer1K: 0,
       outputTokenCreditsPer1K: 0
     },
@@ -45,8 +45,8 @@ export const aiModelCatalog = [
     },
     costProfile: {
       unit: "credit",
-      requestCredits: 10000,
-      minimumCredits: 10000,
+      requestCredits: 30000,
+      minimumCredits: 30000,
       inputTokenCreditsPer1K: 0,
       outputTokenCreditsPer1K: 0
     },
@@ -67,8 +67,8 @@ export const aiModelCatalog = [
     },
     costProfile: {
       unit: "credit",
-      requestCredits: 1000,
-      minimumCredits: 1000,
+      requestCredits: 10000,
+      minimumCredits: 10000,
       inputTokenCreditsPer1K: 0,
       outputTokenCreditsPer1K: 0
     },

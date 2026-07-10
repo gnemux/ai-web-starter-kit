@@ -72,6 +72,7 @@ export {
   getCatCarePlanDetail,
   getCatCarePlanItemOptions,
   publishCatCarePlan,
+  saveCatCarePlanAiRecap,
   updateCatCarePlanTasksFromFormData
 } from "./product-service/plans";
 

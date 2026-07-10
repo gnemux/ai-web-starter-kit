@@ -8,10 +8,17 @@ import {
   CatCareButton,
   CatCarePanel
 } from "../../../owner-flow-components";
+import { getAiTextReviewState } from "@/lib/services/ai";
+import {
+  getAiCreditAllowanceUsage,
+  getCurrentBillingEntitlements
+} from "@/lib/services/billing";
+import { PaymentReturnNotice } from "@/app/account/payment/payment-return-notice";
 import {
   getCatCarePlanDetail,
   type CatCarePlan
 } from "@/lib/catcare/product-service";
+import { CatCareAiRecapPanel } from "../../plan-ai-recap-client";
 import {
   buildPlanResultSummary,
   type PlanOverdueEntry,
@@ -26,13 +33,24 @@ import {
 
 type CatCarePlanResultsPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{
+    checkout_result?: string;
+    payment_result?: string;
+  }>;
 };
 
 export default async function CatCarePlanResultsPage({
-  params
+  params,
+  searchParams
 }: CatCarePlanResultsPageProps) {
-  const { id } = await params;
-  const result = await getCatCarePlanDetail(id);
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const [result, billingResult] = await Promise.all([
+    getCatCarePlanDetail(id),
+    getCurrentBillingEntitlements()
+  ]);
+  const aiUsage = billingResult.ok
+    ? getAiCreditAllowanceUsage(billingResult.data.entitlements.ai_tokens)
+    : null;
 
   if (!result.ok && result.error.code === "not_found") {
     notFound();
@@ -47,18 +65,32 @@ export default async function CatCarePlanResultsPage({
           title="计划结果暂时不可用"
         />
       ) : (
-        <PlanResults plan={result.data} />
+        <PlanResults
+          hasAiQuota={aiUsage ? aiUsage.remaining > 0 : true}
+          paymentResult={query.payment_result ?? query.checkout_result}
+          plan={result.data}
+        />
       )}
     </>
   );
 }
 
-function PlanResults({ plan }: { plan: CatCarePlan }) {
+function PlanResults({
+  hasAiQuota,
+  paymentResult,
+  plan
+}: {
+  hasAiQuota: boolean;
+  paymentResult?: string;
+  plan: CatCarePlan;
+}) {
   const status = getPlanStatusMeta(plan.status);
   const resultSummary = buildPlanResultSummary(plan);
+  const aiReviewState = getAiTextReviewState();
 
   return (
     <div className="mx-auto grid w-full max-w-[1196px] gap-6">
+      <PaymentReturnNotice context="catcare" status={paymentResult} />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex flex-wrap gap-2">
@@ -82,10 +114,30 @@ function PlanResults({ plan }: { plan: CatCarePlan }) {
         </CatCareButton>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-5">
         <CatCarePanel>
           <PlanResultOverview summary={resultSummary} />
           <PlanResultFocus summary={resultSummary} />
+          {aiReviewState.ok ? (
+            <CatCareAiRecapPanel
+              hasAiQuota={hasAiQuota}
+              initialRecapText={getStoredRecapText(plan)}
+              isPlanClosed={plan.status === "closed"}
+              isPlanDraft={plan.status === "draft"}
+              mode={aiReviewState.data.mode}
+              planId={plan.id}
+              requestedCredits={aiReviewState.data.requestedCredits}
+            />
+          ) : (
+            <div className="mt-6 rounded-2xl border border-[#e2e6ee] bg-white p-4">
+              <p className="text-sm font-semibold text-[#101a32]">
+                智能复盘暂不可用
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[#526177]">
+                {aiReviewState.error.message}
+              </p>
+            </div>
+          )}
           <PlanOverdueList entries={resultSummary.overdueEntries} />
 
           {plan.handoffNotes ? (
@@ -114,33 +166,6 @@ function PlanResults({ plan }: { plan: CatCarePlan }) {
             </div>
           </details>
         </CatCarePanel>
-
-        <aside className="grid content-start gap-5">
-          <CatCarePanel>
-            <h2 className="text-xl font-semibold text-[#101a32]">
-              智能复盘
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[#526177]">
-              当前先根据真实提交整理重点，不生成正式智能结论。先看逾期、异常和备注，再决定是否联系照看者确认。
-            </p>
-            <div className="mt-5 overflow-hidden rounded-2xl bg-[#fbf8f2] ring-1 ring-[#eadfce]">
-              <img
-                alt="机器猫正在整理照护结果"
-                className="aspect-[4/3] w-full object-cover"
-                src="/catcare/illustrations/ai-review-robot-cat.png"
-              />
-              <p className="px-5 py-4 text-sm font-semibold leading-6 text-[#526177]">
-                真实提交优先；插图区域后续可承载智能复盘入口、照片摘要和异常聚合。
-              </p>
-            </div>
-            <div className="mt-5 rounded-2xl border border-[#e2e6ee] bg-white p-4">
-              <p className="text-sm font-semibold text-[#101a32]">本版边界</p>
-              <p className="mt-2 text-sm leading-6 text-[#526177]">
-                只展示真实提交和逾期判断；实时智能复盘、照片识别和扣费能力放在后续能力任务。
-              </p>
-            </div>
-          </CatCarePanel>
-        </aside>
       </div>
     </div>
   );
@@ -583,4 +608,20 @@ function getPlanStatusMeta(status: CatCarePlan["status"]) {
   }
 
   return { className: "bg-[#fff8e6] text-[#8a5a00]", label: "草稿" };
+}
+
+function getStoredRecapText(plan: CatCarePlan) {
+  const summary = plan.aiInputSummary;
+
+  if (!summary || typeof summary !== "object" || Array.isArray(summary)) {
+    return null;
+  }
+
+  const recap = summary.result_recap;
+
+  if (!recap || typeof recap !== "object" || Array.isArray(recap)) {
+    return null;
+  }
+
+  return typeof recap.text === "string" ? recap.text : null;
 }

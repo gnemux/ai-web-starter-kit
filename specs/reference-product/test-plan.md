@@ -68,6 +68,83 @@
   hash, owner email, full note text, and private handoff text must not enter
   outbox payload construction.
 
+2026-07-08 GNE-264 CAPABILITY AI recap checks:
+
+- Unit evidence: `pnpm --filter @xwlc/web test` covers CatCare AI recap prompt
+  construction from structured result summary and verifies private note text is
+  excluded.
+- Type/build evidence: `pnpm --filter @xwlc/web typecheck` and
+  `pnpm --filter @xwlc/web build`.
+- Boundary evidence: `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and `git diff --check`.
+- Browser/route evidence before Done must confirm `/catcare/results` and a
+  plan result route can compile in the local app without breaking the owner
+  result page. Signed-in visual QA should verify the intelligent recap panel
+  shows generated, blocked, and failed states without replacing real
+  `care_submissions`.
+- Ledger evidence should show only allowlisted request metadata:
+  `correlation_id`, `plan_id`, `resource_type`, and `request_source`.
+- Negative evidence must search the prompt/action code for forbidden fields:
+  raw share token, token hash, owner email, full sitter notes, and private
+  handoff text must not enter AI prompt construction or capability metadata.
+
+2026-07-10 GNE-264 verification snapshot:
+
+- `pnpm --filter @xwlc/web test`: 20 passed, including the new zero-quota
+  availability regression and structured prompt privacy checks.
+- `pnpm --filter @xwlc/web typecheck`, `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, `git diff --check`, and
+  `pnpm --filter @xwlc/web build`: passed.
+- Local route smoke after a clean dev-server start: `/login` returned 200;
+  `/account/billing` and `/catcare/plans` returned protected 307 redirects.
+- Authenticated interaction smoke passed for the owner plan list and an
+  existing result/recap route. Desktop 1440x800 and mobile 390x844 showed no
+  horizontal overflow. Evidence: `/private/tmp/gne264-results-desktop-1440.png`
+  and `/private/tmp/gne264-results-mobile-390.png`.
+
+2026-07-08 GNE-265 CAPABILITY Billing/Credit return-flow checks:
+
+- Type/build evidence: `pnpm --filter @xwlc/web typecheck` and
+  `pnpm --filter @xwlc/web build`.
+- Boundary evidence: `pnpm test:package-boundaries`,
+  `pnpm test:release-boundaries`, and `git diff --check`.
+- Browser/route evidence before Done must confirm:
+  `/account/usage?return_to=/catcare/plans/<id>/results` renders the CatCare
+  Paywall context, `/account/payment/checkout?price_id=ai_credit_pack_100k&return_to=/catcare/plans/<id>/results`
+  reaches the sandbox checkout, and sandbox success/cancel/failure returns to
+  the original CatCare route with payment result markers.
+- Security evidence must confirm return URL allowlisting rejects external URLs,
+  protocol URLs, double-slash URLs, and prefix-confusion paths such as
+  `/catcareevil`.
+- Billing evidence must inspect server-side order/entitlement/credit/usage
+  records for the test owner after sandbox success; route query params alone
+  are not entitlement proof.
+
+2026-07-10 GNE-265 verification snapshot:
+
+- The same test/type/build/boundary commands above passed after Billing section
+  extraction; `catcare-billing-overview.tsx` decreased from 681 to 343 lines.
+- Internal return tests cover external URL, protocol URL, double-slash, exact
+  root, and sibling-prefix rejection.
+- Online test Supabase REST checks returned 200 for `billing_entitlements`,
+  `billing_usage_ledger`, and `billing_credit_ledger`. Nineteen sampled AI
+  entitlement rows and twenty sampled usage rows used `credit`; no sampled
+  quantity, quantity-used, or usage value violated the 10000-credit block rule.
+- `supabase migration list` was `not_run` as evidence after the remote CLI
+  connection returned a TLS EOF; runtime table data was checked directly
+  instead and no local Supabase instance was used.
+- Authenticated Billing visual smoke passed at desktop 1440x800 and mobile
+  390x844 without horizontal overflow. Evidence:
+  `/private/tmp/gne265-billing-desktop-1440.png` and
+  `/private/tmp/gne265-billing-mobile-390.png`.
+- Creem Test Mode payment completed and returned to the originating CatCare
+  result route with `payment_result=success`. Evidence:
+  `/private/tmp/gne265-catcare-return-desktop-1440.png`.
+- Server-side evidence for order `2c64812f-b5ab-490c-8eae-f439f688f341`
+  confirmed `paid`, 900 cents, one active 100000-credit entitlement, and one
+  100000-credit grant ledger. Replaying the successful return kept those counts
+  at one each, so the callback/return path did not duplicate the grant.
+
 2026-07-08 GNE-261 CAPABILITY action-map checkpoint:
 
 - No browser interaction is required because GNE-261 is a mapping and

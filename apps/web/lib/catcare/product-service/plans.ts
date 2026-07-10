@@ -1,5 +1,7 @@
 import "server-only";
 
+import { randomUUID } from "node:crypto";
+
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
 import { createSupabaseServerClient, type AppSupabaseClient } from "../../supabase/server";
@@ -941,6 +943,7 @@ function parseCatScopedTaskTitle(title: string) {
 export async function publishCatCarePlan(
   planId: string
 ): Promise<ServiceResult<CatCarePlan>> {
+  const correlationId = randomUUID();
   const clientResult = await createSupabaseServerClient();
 
   if (!clientResult.ok) {
@@ -994,10 +997,17 @@ export async function publishCatCarePlan(
   clearCatCareWorkspaceStatsCache(ownerResult.data);
   void trackCatCareProductEvent(ownerResult.data, "catcare_plan_published", {
     enabled_task_count: count ?? 0,
-    plan_status: data.status
+    plan_status: data.status,
+    result: "success"
+  }, {
+    correlation_id: correlationId,
+    request_source: "catcare_plan_publish",
+    resource_id: data.id,
+    resource_type: "care_plan"
   });
   void recordCatCareAuditEvent({
     actorType: "user",
+    correlationId,
     eventName: "care_plan_published",
     ownerId: ownerResult.data,
     properties: {

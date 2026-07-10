@@ -3,13 +3,26 @@ import "server-only";
 import type {
   AiAnalyticsEvent,
   AiAnalyticsProperties,
-  AnalyticsBaseProperties,
   PaymentAnalyticsEvent,
   PaymentAnalyticsProperties
 } from "@xwlc/core";
 import { headers } from "next/headers";
 
-import { getAnalyticsBaseProperties, readOptionalPublicEnv } from "./config";
+import {
+  getAnalyticsBaseProperties,
+  readOptionalPublicEnv,
+  type AnalyticsModule
+} from "./config";
+import {
+  normalizeSafeCapabilityMetadata,
+  type SafeCapabilityMetadata
+} from "./safe-capability-metadata";
+import { resolveSafeAnalyticsCurrentUrl } from "./request-context";
+import {
+  sanitizeServerProperties,
+  type ProductAnalyticsEvent,
+  type ProductAnalyticsProperties
+} from "./server-properties";
 
 const posthogKey =
   readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_KEY) ??
@@ -21,17 +34,29 @@ const posthogHost =
 
 type ServerAnalyticsEvent = {
   distinctId: string;
-  event: PaymentAnalyticsEvent | AiAnalyticsEvent;
-  module: AnalyticsBaseProperties["module"];
-  properties: PaymentAnalyticsProperties | AiAnalyticsProperties;
+  event: PaymentAnalyticsEvent | AiAnalyticsEvent | ProductAnalyticsEvent;
+  metadata?: SafeCapabilityMetadata;
+  module: AnalyticsModule;
+  properties:
+    | PaymentAnalyticsProperties
+    | AiAnalyticsProperties
+    | ProductAnalyticsProperties;
 };
 
 export async function trackServerEvent({
   distinctId,
   event,
+  metadata,
   module,
   properties
 }: ServerAnalyticsEvent): Promise<void> {
+  const metadataResult = normalizeSafeCapabilityMetadata(metadata);
+
+  if (!metadataResult.ok) {
+    console.warn("Analytics metadata rejected", { event });
+    return;
+  }
+
   if (!posthogKey) {
     return;
   }
@@ -47,6 +72,7 @@ export async function trackServerEvent({
         properties: {
           ...getAnalyticsBaseProperties(module),
           ...requestContextProperties,
+          ...(metadataResult.data ?? {}),
           ...sanitizeServerProperties(properties)
         }
       }),
@@ -80,9 +106,17 @@ async function getServerRequestContextProperties(): Promise<
 
   try {
     const requestHeaders = await headers();
-    const currentUrl = resolveCurrentUrl(requestHeaders);
     const host =
       requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+    const currentUrl = resolveSafeAnalyticsCurrentUrl({
+      host,
+      path:
+        requestHeaders.get("next-url") ??
+        requestHeaders.get("x-next-url") ??
+        requestHeaders.get("x-invoke-path"),
+      protocol: requestHeaders.get("x-forwarded-proto"),
+      referer: requestHeaders.get("referer")
+    });
 
     return {
       ...baseProperties,
@@ -97,89 +131,4 @@ async function getServerRequestContextProperties(): Promise<
   } catch {
     return baseProperties;
   }
-}
-
-function resolveCurrentUrl(requestHeaders: Headers): string | null {
-  const referer = requestHeaders.get("referer");
-
-  if (referer) {
-    return referer;
-  }
-
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const path =
-    requestHeaders.get("next-url") ??
-    requestHeaders.get("x-next-url") ??
-    requestHeaders.get("x-invoke-path");
-
-  if (!host || !path) {
-    return null;
-  }
-
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ??
-    (host.includes("localhost") || host.startsWith("127.0.0.1")
-      ? "http"
-      : "https");
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-
-  return `${protocol}://${host}${normalizedPath}`;
-}
-
-function sanitizeServerProperties(
-  properties: PaymentAnalyticsProperties | AiAnalyticsProperties
-): Record<string, unknown> {
-  const values = properties as Record<string, unknown>;
-
-  return {
-    ...(typeof values.amount_cents === "number"
-      ? { amount_cents: values.amount_cents }
-      : {}),
-    ...(values.billing_period
-      ? { billing_period: values.billing_period }
-      : {}),
-    ...(values.checkout_kind ? { checkout_kind: values.checkout_kind } : {}),
-    ...(values.checkout_session_id
-      ? { checkout_session_id: values.checkout_session_id }
-      : {}),
-    ...(values.currency ? { currency: values.currency } : {}),
-    ...(values.entitlement_type
-      ? { entitlement_type: values.entitlement_type }
-      : {}),
-    ...(values.feature_key ? { feature_key: values.feature_key } : {}),
-    ...(values.quota_reason ? { quota_reason: values.quota_reason } : {}),
-    ...(typeof values.requested_units === "number"
-      ? { requested_units: values.requested_units }
-      : {}),
-    ...(values.order_status ? { order_status: values.order_status } : {}),
-    ...(values.payment_mode ? { payment_mode: values.payment_mode } : {}),
-    ...(values.plan ? { plan: values.plan } : {}),
-    ...(values.price_id ? { price_id: values.price_id } : {}),
-    provider: values.provider,
-    ...(typeof values.remaining_units === "number"
-      ? { remaining_units: values.remaining_units }
-      : {}),
-    ...(values.capability ? { capability: values.capability } : {}),
-    ...(typeof values.consumed_credits === "number"
-      ? { consumed_credits: values.consumed_credits }
-      : {}),
-    ...(values.mode ? { mode: values.mode } : {}),
-    ...(values.model ? { model: values.model } : {}),
-    ...(values.provider_model_id
-      ? { provider_model_id: values.provider_model_id }
-      : {}),
-    ...(values.reason ? { reason: values.reason } : {}),
-    ...(typeof values.remaining_credits === "number"
-      ? { remaining_credits: values.remaining_credits }
-      : {}),
-    ...(typeof values.requested_credits === "number"
-      ? { requested_credits: values.requested_credits }
-      : {}),
-    ...(values.result ? { result: values.result } : {}),
-    ...(values.source ? { source: values.source } : {}),
-    ...(values.usage_record_status
-      ? { usage_record_status: values.usage_record_status }
-      : {})
-  };
 }

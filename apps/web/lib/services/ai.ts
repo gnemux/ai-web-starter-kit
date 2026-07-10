@@ -21,6 +21,10 @@ import {
 
 import { trackServerEvent } from "@/lib/analytics/server";
 import {
+  normalizeSafeCapabilityMetadata,
+  type SafeCapabilityMetadata
+} from "../analytics/safe-capability-metadata";
+import {
   listAiTextModelOptions,
   resolveAiTextModelConfig,
   type AiTextModelOption
@@ -95,6 +99,13 @@ export async function generateAiTextFromJson(
 export async function generateAiText(
   input: AiGenerateTextInput
 ): Promise<ServiceResult<AiGenerateTextResponse>> {
+  const metadataResult = normalizeSafeCapabilityMetadata(input.metadata);
+
+  if (!metadataResult.ok) {
+    return metadataResult;
+  }
+
+  const safeMetadata = metadataResult.data;
   const accountResult = await getCurrentAccount();
 
   if (!accountResult.ok) {
@@ -116,6 +127,7 @@ export async function generateAiText(
       consumedCredits: 0,
       distinctId: ownerId,
       event: "ai_request_failed",
+      metadata: safeMetadata,
       mode: "mock",
       model: input.model ?? "unavailable",
       provider: "mock",
@@ -147,6 +159,7 @@ export async function generateAiText(
   await trackAiEvent({
     distinctId: ownerId,
     event: "ai_request_started",
+    metadata: safeMetadata,
     mode: modelConfig.mode,
     model: modelConfig.id,
     provider: modelConfig.provider,
@@ -171,6 +184,7 @@ export async function generateAiText(
       consumedCredits: 0,
       distinctId: ownerId,
       event: "ai_request_failed",
+      metadata: safeMetadata,
       mode: modelConfig.mode,
       model: modelConfig.id,
       provider: modelConfig.provider,
@@ -213,6 +227,7 @@ export async function generateAiText(
       consumedCredits: 0,
       distinctId: ownerId,
       event: "ai_request_failed",
+      metadata: safeMetadata,
       mode: modelConfig.mode,
       model: modelConfig.id,
       provider: modelConfig.provider,
@@ -260,6 +275,7 @@ export async function generateAiText(
         modelAccess.reason === "quota_exhausted"
           ? "quota_limit_reached"
           : "ai_request_failed",
+      metadata: safeMetadata,
       mode: modelConfig.mode,
       model: modelConfig.id,
       provider: modelConfig.provider,
@@ -294,6 +310,7 @@ export async function generateAiText(
       consumedCredits: 0,
       distinctId: ownerId,
       event: "ai_request_failed",
+      metadata: safeMetadata,
       mode: modelConfig.mode,
       model: modelConfig.id,
       provider: modelConfig.provider,
@@ -329,7 +346,7 @@ export async function generateAiText(
     prompt: input.prompt,
     model: modelConfig.providerModelId,
     metadata: {
-      ...(input.metadata ?? {}),
+      ...(safeMetadata ?? {}),
       idempotency_key: idempotencyKey
     }
   });
@@ -339,6 +356,7 @@ export async function generateAiText(
       consumedCredits: 0,
       distinctId: ownerId,
       event: "ai_request_failed",
+      metadata: safeMetadata,
       mode: provider.descriptor.mode,
       model: modelConfig.id,
       provider: provider.descriptor.provider,
@@ -368,7 +386,7 @@ export async function generateAiText(
 
   const usageMetadata = {
     capability: "generate_text",
-    ...pickAiUsageRequestMetadata(input.metadata),
+    ...pickAiUsageRequestMetadata(safeMetadata),
     finish_reason: textResult.data.finishReason,
     input_tokens: textResult.data.usage?.inputTokens ?? 0,
     model: textResult.data.model,
@@ -400,6 +418,7 @@ export async function generateAiText(
       consumedCredits: 0,
       distinctId: ownerId,
       event: "ai_request_failed",
+      metadata: safeMetadata,
       mode: textResult.data.mode,
       model: textResult.data.model,
       provider: textResult.data.provider,
@@ -434,6 +453,7 @@ export async function generateAiText(
       consumedCredits: 0,
       distinctId: ownerId,
       event: "ai_request_failed",
+      metadata: safeMetadata,
       mode: textResult.data.mode,
       model: textResult.data.model,
       provider: textResult.data.provider,
@@ -470,6 +490,7 @@ export async function generateAiText(
     consumedCredits: usageCommitResult?.data.consumedCredits ?? 0,
     distinctId: ownerId,
     event: "ai_request_completed",
+    metadata: safeMetadata,
     mode: textResult.data.mode,
     model: textResult.data.model,
     provider: textResult.data.provider,
@@ -586,6 +607,7 @@ async function trackAiEvent(input: {
   consumedCredits?: number;
   distinctId: string;
   event: AiAnalyticsEvent;
+  metadata?: SafeCapabilityMetadata;
   mode: AiGenerateTextResponse["mode"];
   model: string;
   provider: string;
@@ -600,6 +622,7 @@ async function trackAiEvent(input: {
   await trackServerEvent({
     distinctId: input.distinctId,
     event: input.event,
+    metadata: input.metadata,
     module: "ai",
     properties: {
       capability: "generate_text",
@@ -624,19 +647,8 @@ async function trackAiEvent(input: {
   });
 }
 
-function pickAiUsageRequestMetadata(metadata?: Record<string, string>) {
-  if (!metadata) {
-    return {};
-  }
+function pickAiUsageRequestMetadata(metadata?: SafeCapabilityMetadata) {
+  const result = normalizeSafeCapabilityMetadata(metadata);
 
-  return {
-    ...(metadata.correlation_id
-      ? { correlation_id: metadata.correlation_id }
-      : {}),
-    ...(metadata.plan_id ? { plan_id: metadata.plan_id } : {}),
-    ...(metadata.resource_type
-      ? { resource_type: metadata.resource_type }
-      : {}),
-    ...(metadata.source ? { request_source: metadata.source } : {})
-  };
+  return result.ok ? (result.data ?? {}) : {};
 }

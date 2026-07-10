@@ -83,7 +83,7 @@
   shows generated, blocked, and failed states without replacing real
   `care_submissions`.
 - Ledger evidence should show only allowlisted request metadata:
-  `correlation_id`, `plan_id`, `resource_type`, and `request_source`.
+  `correlation_id`, `resource_id`, `resource_type`, and `request_source`.
 - Negative evidence must search the prompt/action code for forbidden fields:
   raw share token, token hash, owner email, full sitter notes, and private
   handoff text must not enter AI prompt construction or capability metadata.

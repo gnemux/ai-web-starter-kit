@@ -1,10 +1,18 @@
 import "server-only";
 
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 import { createAnonymousTokenScope } from "@xwlc/db";
 
+import {
+  createShareTokenCredential,
+  hashShareTokenSecret,
+  resolveShareTokenGate,
+  verifyShareTokenSecret,
+  type AnonymousShareTokenActorContext,
+  type RejectedShareTokenGateOutcome
+} from "../../access/share-token-gate";
 import {
   createSupabaseAdminClient,
   createSupabaseServerClient,
@@ -12,31 +20,23 @@ import {
 } from "../../supabase/server";
 import type { Database } from "../../supabase/database.types";
 import {
-  getAnonymousCarePlanServiceDates,
-  parseAnonymousCareSubmissionSlotKey
-} from "./anonymous-submission-policy";
-import {
   getAuthenticatedOwnerId,
-  mapPlan,
-  mapTask,
   mapDbBoundaryError,
-  mapSupabaseError
+  mapSupabaseError,
+  trackCatCareProductEvent
 } from "./core";
 import { recordCatCareAuditEvent } from "./audit";
+
+export { hashShareTokenSecret };
 
 export type ShareTokenRow = Database["public"]["Tables"]["share_tokens"]["Row"];
 export type ShareTokenScope = "care_plan";
 export type ShareTokenResourceType = "care_plan";
 
-export type ShareTokenActorContext = {
-  actorType: "anonymous_token";
-  expiresAt: string;
-  ownerId: string;
-  resourceId: string;
-  resourceType: ShareTokenResourceType;
-  scope: ShareTokenScope;
-  tokenId: string;
-};
+export type ShareTokenActorContext = AnonymousShareTokenActorContext<
+  ShareTokenResourceType,
+  ShareTokenScope
+>;
 
 export type CarePlanShareLinkState = {
   expiresAt: string | null;
@@ -49,59 +49,12 @@ export type CarePlanShareLinkMutation = CarePlanShareLinkState & {
   token: string | null;
 };
 
-export type AnonymousCareTaskSubmissionView = {
-  abnormal: boolean;
-  note: string | null;
-  serviceDate: string | null;
-  status: Database["public"]["Tables"]["care_submissions"]["Row"]["status"];
-  submittedAt: string;
-};
-
-export type AnonymousCareTaskView = {
-  category: Database["public"]["Tables"]["care_tasks"]["Row"]["category"];
-  frequency: string | null;
-  instructions: string | null;
-  required: boolean;
-  submissionsBySlot: Record<string, AnonymousCareTaskSubmissionView>;
-  submissionRef: string;
-  sortOrder: number;
-  timeHint: string | null;
-  title: string;
-};
-
-export type AnonymousCarePlanView = {
-  catNames: string[];
-  endOn: string | null;
-  expiresAt: string;
-  handoffNotes: string | null;
-  requiredTaskCount: number;
-  scenario: Database["public"]["Tables"]["care_plans"]["Row"]["scenario"];
-  startOn: string | null;
-  taskCount: number;
-  tasks: AnonymousCareTaskView[];
-  title: string;
-};
-
 export const shareTokenScope: ShareTokenScope = "care_plan";
 export const shareTokenResourceType: ShareTokenResourceType = "care_plan";
 export const shareTokenTtlDays = 14;
 
 export function createShareTokenSecret(): string {
-  return randomBytes(32).toString("base64url");
-}
-
-export function hashShareTokenSecret(secret: string): ServiceResult<string> {
-  const normalized = secret.trim();
-
-  if (normalized.length < 32) {
-    return serviceError("validation_error", "Share token is invalid.", {
-      token: "invalid"
-    });
-  }
-
-  return serviceOk(
-    createHash("sha256").update(normalized, "utf8").digest("base64url")
-  );
+  return createShareTokenCredential().secret;
 }
 
 export function createShareTokenExpiry(now = new Date()): string {
@@ -111,15 +64,7 @@ export function createShareTokenExpiry(now = new Date()): string {
 }
 
 export function isShareTokenHashMatch(secret: string, hash: string): boolean {
-  const hashResult = hashShareTokenSecret(secret);
-
-  if (!hashResult.ok) {
-    return false;
-  }
-
-  const actual = Buffer.from(hashResult.data);
-  const expected = Buffer.from(hash);
-  return actual.length === expected.length && timingSafeEqual(actual, expected);
+  return verifyShareTokenSecret(secret, hash);
 }
 
 export async function getCarePlanShareLinkState(
@@ -154,6 +99,7 @@ export async function getCarePlanShareLinkState(
 export async function createCarePlanShareLink(
   planId: string
 ): Promise<ServiceResult<CarePlanShareLinkMutation>> {
+  const correlationId = randomUUID();
   const contextResult = await getOwnerPlanShareContext(planId);
 
   if (!contextResult.ok) {
@@ -182,12 +128,7 @@ export async function createCarePlanShareLink(
     return mapSupabaseError(revokeResult.error);
   }
 
-  const token = createShareTokenSecret();
-  const hashResult = hashShareTokenSecret(token);
-
-  if (!hashResult.ok) {
-    return hashResult;
-  }
+  const credential = createShareTokenCredential();
 
   const insertResult = await contextResult.data.client
     .from("share_tokens")
@@ -197,7 +138,7 @@ export async function createCarePlanShareLink(
       resource_id: planId,
       resource_type: shareTokenResourceType,
       scope: shareTokenScope,
-      token_hash: hashResult.data
+      token_hash: credential.tokenHash
     })
     .select(
       "id, owner_id, resource_type, resource_id, token_hash, scope, expires_at, revoked_at, last_used_at, created_at, updated_at"
@@ -211,6 +152,7 @@ export async function createCarePlanShareLink(
   for (const revokedToken of revokeResult.data ?? []) {
     void recordCatCareAuditEvent({
       actorType: "user",
+      correlationId,
       eventName: "share_link_revoked",
       ownerId: contextResult.data.ownerId,
       properties: { revoked_at: revokedToken.revoked_at ?? now },
@@ -222,6 +164,7 @@ export async function createCarePlanShareLink(
 
   void recordCatCareAuditEvent({
     actorType: "user",
+    correlationId,
     eventName: "share_link_created",
     ownerId: contextResult.data.ownerId,
     properties: { expires_at: insertResult.data.expires_at },
@@ -229,16 +172,30 @@ export async function createCarePlanShareLink(
     resourceType: shareTokenResourceType,
     tokenRecordId: insertResult.data.id
   });
+  void trackCatCareProductEvent(
+    contextResult.data.ownerId,
+    "catcare_share_link_created",
+    {
+      result: (revokeResult.data?.length ?? 0) > 0 ? "updated" : "created"
+    },
+    {
+      correlation_id: correlationId,
+      request_source: "catcare_share_link",
+      resource_id: planId,
+      resource_type: shareTokenResourceType
+    }
+  );
 
   return serviceOk({
     ...mapShareTokenState(insertResult.data),
-    token
+    token: credential.secret
   });
 }
 
 export async function revokeCarePlanShareLink(
   planId: string
 ): Promise<ServiceResult<CarePlanShareLinkMutation>> {
+  const correlationId = randomUUID();
   const contextResult = await getOwnerPlanShareContext(planId);
 
   if (!contextResult.ok) {
@@ -268,6 +225,7 @@ export async function revokeCarePlanShareLink(
   if (revokeResult.data) {
     void recordCatCareAuditEvent({
       actorType: "user",
+      correlationId,
       eventName: "share_link_revoked",
       ownerId: contextResult.data.ownerId,
       properties: { revoked_at: revokeResult.data.revoked_at ?? revokedAt },
@@ -275,6 +233,17 @@ export async function revokeCarePlanShareLink(
       resourceType: shareTokenResourceType,
       tokenRecordId: revokeResult.data.id
     });
+    void trackCatCareProductEvent(
+      contextResult.data.ownerId,
+      "catcare_share_link_revoked",
+      { result: "success" },
+      {
+        correlation_id: correlationId,
+        request_source: "catcare_share_link",
+        resource_id: planId,
+        resource_type: shareTokenResourceType
+      }
+    );
   }
 
   return serviceOk({
@@ -285,18 +254,20 @@ export async function revokeCarePlanShareLink(
 
 export async function resolveCarePlanShareToken(
   secret: string,
-  now = new Date()
+  now = new Date(),
+  correlationId = randomUUID()
 ): Promise<ServiceResult<ShareTokenActorContext>> {
   const hashResult = hashShareTokenSecret(secret);
 
   if (!hashResult.ok) {
-    void recordCatCareAuditEvent({
-      actorType: "anonymous_token",
-      eventName: "invalid_or_revoked_token_rejected",
-      properties: { reason: "invalid" },
-      resourceType: shareTokenResourceType
-    });
-    return hashResult;
+    const outcome = resolveShareTokenGate<
+      ShareTokenResourceType,
+      ShareTokenScope
+    >({ now, record: null, secret });
+
+    return outcome.status === "valid"
+      ? hashResult
+      : rejectShareTokenOutcome(outcome, correlationId);
   }
 
   const clientResult = createSupabaseAdminClient();
@@ -319,51 +290,29 @@ export async function resolveCarePlanShareToken(
     return mapSupabaseError(tokenResult.error);
   }
 
-  if (!tokenResult.data) {
-    void recordCatCareAuditEvent({
-      actorType: "anonymous_token",
-      eventName: "invalid_or_revoked_token_rejected",
-      properties: { reason: "invalid" },
-      resourceType: shareTokenResourceType
-    });
-    return serviceError("unauthorized", "Share link is invalid.", {
-      token: "invalid"
-    });
-  }
-
   const token = tokenResult.data;
+  const outcome = resolveShareTokenGate({
+    now,
+    record: token
+      ? {
+          expiresAt: token.expires_at,
+          ownerId: token.owner_id,
+          resourceId: token.resource_id,
+          resourceType: token.resource_type,
+          revokedAt: token.revoked_at,
+          scope: token.scope,
+          tokenHash: token.token_hash,
+          tokenId: token.id
+        }
+      : null,
+    secret
+  });
 
-  if (token.revoked_at) {
-    void recordCatCareAuditEvent({
-      actorType: "anonymous_token",
-      eventName: "invalid_or_revoked_token_rejected",
-      ownerId: token.owner_id,
-      properties: { reason: "revoked" },
-      resourceId: token.resource_id,
-      resourceType: token.resource_type,
-      tokenRecordId: token.id
-    });
-    return serviceError("forbidden", "Share link has been revoked.", {
-      token: "revoked"
-    });
+  if (outcome.status !== "valid") {
+    return rejectShareTokenOutcome(outcome, correlationId);
   }
 
-  if (new Date(token.expires_at).getTime() <= now.getTime()) {
-    void recordCatCareAuditEvent({
-      actorType: "anonymous_token",
-      eventName: "invalid_or_revoked_token_rejected",
-      ownerId: token.owner_id,
-      properties: { reason: "expired" },
-      resourceId: token.resource_id,
-      resourceType: token.resource_type,
-      tokenRecordId: token.id
-    });
-    return serviceError("forbidden", "Share link has expired.", {
-      token: "expired"
-    });
-  }
-
-  const scopeResult = createAnonymousTokenScope(token.id);
+  const scopeResult = createAnonymousTokenScope(outcome.actor.tokenId);
 
   if (!scopeResult.ok) {
     return mapDbBoundaryError(scopeResult);
@@ -372,248 +321,55 @@ export async function resolveCarePlanShareToken(
   await clientResult.data
     .from("share_tokens")
     .update({ last_used_at: now.toISOString() })
-    .eq("id", token.id);
+    .eq("id", outcome.actor.tokenId);
 
-  return serviceOk({
-    actorType: "anonymous_token",
-    expiresAt: token.expires_at,
-    ownerId: token.owner_id,
-    resourceId: token.resource_id,
-    resourceType: token.resource_type,
-    scope: token.scope,
-    tokenId: token.id
-  });
+  return serviceOk(outcome.actor);
 }
 
-export async function getAnonymousCarePlanView(
-  secret: string
-): Promise<ServiceResult<AnonymousCarePlanView>> {
-  const tokenResult = await resolveCarePlanShareToken(secret);
-
-  if (!tokenResult.ok) {
-    return tokenResult;
-  }
-
-  const clientResult = createSupabaseAdminClient();
-
-  if (!clientResult.ok) {
-    return clientResult;
-  }
-
-  const [planResult, tasksResult, submissionsResult] = await Promise.all([
-    clientResult.data
-      .from("care_plans")
-      .select(
-        "id, owner_id, cat_id, routine_id, title, status, scenario, generation_source, ai_input_summary, start_on, end_on, handoff_notes, generated_at, published_at, reviewed_at, closed_at, created_at, updated_at"
-      )
-      .eq("id", tokenResult.data.resourceId)
-      .eq("owner_id", tokenResult.data.ownerId)
-      .single(),
-    clientResult.data
-      .from("care_tasks")
-      .select(
-        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
-      )
-      .eq("plan_id", tokenResult.data.resourceId)
-      .order("sort_order", { ascending: true }),
-    clientResult.data
-      .from("care_submissions")
-      .select("task_id, status, note, abnormal, idempotency_key, created_at")
-      .eq("owner_id", tokenResult.data.ownerId)
-      .eq("plan_id", tokenResult.data.resourceId)
-      .like("idempotency_key", "anonymous:%")
-      .order("created_at", { ascending: false })
-  ]);
-
-  if (planResult.error) {
-    return mapSupabaseError(planResult.error);
-  }
-
-  if (tasksResult.error) {
-    return mapSupabaseError(tasksResult.error);
-  }
-
-  if (submissionsResult.error) {
-    return mapSupabaseError(submissionsResult.error);
-  }
-
-  if (planResult.data.status !== "published") {
-    void recordCatCareAuditEvent({
-      actorType: "anonymous_token",
-      eventName: "invalid_or_revoked_token_rejected",
-      ownerId: tokenResult.data.ownerId,
-      properties: { reason: "unavailable" },
-      resourceId: tokenResult.data.resourceId,
-      resourceType: tokenResult.data.resourceType,
-      tokenRecordId: tokenResult.data.tokenId
-    });
-    return serviceError("forbidden", "Care plan is no longer available.", {
-      token: "unavailable"
-    });
-  }
-
-  const plan = mapPlan(planResult.data);
-  const submissionBySlotAndTaskId = new Map<
-    string,
-    AnonymousCareTaskSubmissionView
-  >();
-  const legacySubmissionByDateAndTaskId = new Map<
-    string,
-    AnonymousCareTaskSubmissionView
-  >();
-
-  for (const submission of submissionsResult.data ?? []) {
-    if (!submission.task_id) {
-      continue;
-    }
-
-    const slot = parseAnonymousCareSubmissionSlotKey(
-      submission.idempotency_key
-    );
-
-    if (!slot) {
-      continue;
-    }
-
-    const view = {
-      abnormal: submission.abnormal,
-      note: submission.note,
-      serviceDate: slot.serviceDate,
-      status: submission.status,
-      submittedAt: submission.created_at
-    };
-
-    if (slot.visitTime) {
-      const key = `${slot.key}:${submission.task_id}`;
-
-      if (!submissionBySlotAndTaskId.has(key)) {
-        submissionBySlotAndTaskId.set(key, view);
-      }
-    } else {
-      const key = `${slot.serviceDate}:${submission.task_id}`;
-
-      if (!legacySubmissionByDateAndTaskId.has(key)) {
-        legacySubmissionByDateAndTaskId.set(key, view);
-      }
-    }
-  }
-  const tasks = (tasksResult.data ?? [])
-    .map(mapTask)
-    .filter((task) => task.enabled && !isLegacyPrepareTask(task))
-    .map((task) => ({
-      category: task.category,
-      frequency: task.frequency,
-      instructions: task.instructions,
-      required: task.required,
-      submissionsBySlot: Object.fromEntries(
-        getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn).flatMap(
-          (serviceDate) =>
-            getAnonymousTaskVisitTimes(task).flatMap((visitTime, index) => {
-              const slotKey = createAnonymousSubmissionSlotKey(
-                serviceDate,
-                visitTime
-              );
-              const submission =
-                submissionBySlotAndTaskId.get(`${slotKey}:${task.id}`) ??
-                (index === 0
-                  ? legacySubmissionByDateAndTaskId.get(
-                      `${serviceDate}:${task.id}`
-                    )
-                  : undefined);
-
-              return submission ? [[slotKey, submission]] : [];
-            })
-        )
-      ),
-      submissionRef: createAnonymousTaskSubmissionRef(
-        tokenResult.data.resourceId,
-        task.id
-      ),
-      sortOrder: task.sortOrder,
-      timeHint: task.timeHint,
-      title: task.title
-    }));
+function rejectShareTokenOutcome(
+  outcome: RejectedShareTokenGateOutcome<
+    ShareTokenResourceType,
+    ShareTokenScope
+  >,
+  correlationId: string
+): ServiceResult<never> {
+  const actor = outcome.actor;
+  const status = outcome.status;
 
   void recordCatCareAuditEvent({
     actorType: "anonymous_token",
-    eventName: "share_page_viewed",
-    ownerId: tokenResult.data.ownerId,
-    properties: { expires_at: tokenResult.data.expiresAt },
-    resourceId: tokenResult.data.resourceId,
-    resourceType: tokenResult.data.resourceType,
-    tokenRecordId: tokenResult.data.tokenId
+    correlationId,
+    eventName: "invalid_or_revoked_token_rejected",
+    ownerId: actor?.ownerId,
+    properties: { reason: status },
+    resourceId: actor?.resourceId,
+    resourceType: actor?.resourceType ?? shareTokenResourceType,
+    tokenRecordId: actor?.tokenId
   });
+  void trackCatCareProductEvent(
+    "anonymous_token",
+    "catcare_share_link_rejected",
+    { outcome: status, result: "rejected" },
+    {
+      correlation_id: correlationId,
+      request_source: "catcare_share_token",
+      ...(actor?.resourceId ? { resource_id: actor.resourceId } : {}),
+      resource_type: actor?.resourceType ?? shareTokenResourceType
+    }
+  );
 
-  return serviceOk({
-    catNames: extractPlanCatNames(plan.aiInputSummary),
-    endOn: plan.endOn,
-    expiresAt: tokenResult.data.expiresAt,
-    handoffNotes: plan.handoffNotes,
-    requiredTaskCount: tasks.filter((task) => task.required).length,
-    scenario: plan.scenario,
-    startOn: plan.startOn,
-    taskCount: tasks.length,
-    tasks,
-    title: plan.title
-  });
-}
+  const messages = {
+    expired: "Share link has expired.",
+    invalid: "Share link is invalid.",
+    revoked: "Share link has been revoked.",
+    unavailable: "Care plan is no longer available."
+  } as const;
 
-export function createAnonymousTaskSubmissionRef(scopeKey: string, taskId: string) {
-  return createHash("sha256")
-    .update(`${scopeKey}:${taskId}`, "utf8")
-    .digest("base64url")
-    .slice(0, 32);
-}
-
-function createAnonymousSubmissionSlotKey(serviceDate: string, visitTime: string) {
-  return `${serviceDate}:${visitTime}`;
-}
-
-function isAnonymousVisitTime(value: string) {
-  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
-}
-
-export function getAnonymousTaskVisitTimes(task: {
-  category: Database["public"]["Tables"]["care_tasks"]["Row"]["category"];
-  frequency: string | null;
-  timeHint: string | null;
-}) {
-  const times = (task.timeHint ?? "")
-    .split(/[，,]/)
-    .map((time) => time.trim())
-    .filter(isAnonymousVisitTime);
-
-  return times.length > 0 ? times : getAnonymousFallbackTaskTimes(task);
-}
-
-function getAnonymousFallbackTaskTimes(task: {
-  category: Database["public"]["Tables"]["care_tasks"]["Row"]["category"];
-  frequency: string | null;
-}) {
-  const category = task.category ?? "other";
-  const count =
-    category === "meal" || category === "treat" || category === "medicine"
-      ? getAnonymousDailyFrequencyCount(task.frequency)
-      : 1;
-  const slots: Record<string, string[]> = {
-    environment: ["18:30"],
-    litter: ["18:30"],
-    meal: ["08:30", "18:30", "14:00"],
-    medicine: ["08:30", "18:30"],
-    observe: ["18:30"],
-    other: ["18:30"],
-    play: ["18:30"],
-    treat: ["18:30", "14:00"],
-    water: ["08:30"]
-  };
-
-  return (slots[category] ?? slots.other).slice(0, count);
-}
-
-function getAnonymousDailyFrequencyCount(frequency: string | null) {
-  const match = /^daily(?:_(\d+))?$/.exec(frequency ?? "");
-
-  return Math.max(1, Math.min(4, Number(match?.[1] ?? "1") || 1));
+  return serviceError(
+    status === "invalid" ? "unauthorized" : "forbidden",
+    messages[status],
+    { token: status }
+  );
 }
 
 async function getOwnerPlanShareContext(planId: string): Promise<
@@ -693,27 +449,4 @@ function mapShareTokenState(token: ShareTokenRow | null): CarePlanShareLinkState
     revokedAt: null,
     status: "active"
   };
-}
-
-function extractPlanCatNames(
-  summary: Database["public"]["Tables"]["care_plans"]["Row"]["ai_input_summary"]
-) {
-  if (
-    summary &&
-    typeof summary === "object" &&
-    !Array.isArray(summary)
-  ) {
-    const names = summary as { catNames?: unknown; cat_names?: unknown };
-    const catNames = names.catNames ?? names.cat_names;
-
-    if (Array.isArray(catNames)) {
-      return catNames.filter((name): name is string => typeof name === "string");
-    }
-  }
-
-  return ["猫咪"];
-}
-
-export function isLegacyPrepareTask(task: { source: string; title: string }) {
-  return task.source === "care_item" || task.title.includes("：准备 ");
 }

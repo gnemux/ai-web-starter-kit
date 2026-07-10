@@ -605,7 +605,7 @@ submission notes, private handoff text, raw share tokens, token hashes, owner
 email, and internal debug fields are not included. The UI shows mock/no-op/
 sandbox mode, generated draft text, failed/degraded states, and a usable path
 to usage/subscription pages when entitlement or quota blocks generation. Usage
-metadata is allowlisted to `correlation_id`, `plan_id`, `resource_type`, and
+metadata is allowlisted to `correlation_id`, `resource_id`, `resource_type`, and
 `request_source` so ledger evidence can trace owner/plan/action without storing
 private prompt content. Live AI provider quality, real payment, and generic
 share-token extraction remain owned by later CAP work.

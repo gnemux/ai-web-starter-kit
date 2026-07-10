@@ -927,6 +927,21 @@ GNE-290 icon-quality correction on 2026-07-07:
   the inspected owner-scoped tables. The local raw token/password state file
   and temporary QA scripts were removed after evidence capture.
 
+Latest `GNE-266` CAPABILITY checkpoint on 2026-07-10:
+
+- Local implementation is complete. Anonymous capability access now shares a
+  common share-token gate, while anonymous-view assembly is split from token
+  credential and lifecycle handling.
+- PostHog receives an exact-four allowlist of resource metadata plus one
+  correlation chain across Audit, Outbox, AI, Billing, Credit, and PostHog.
+  Bearer tokens in `/s/<token>` URLs are redacted before analytics delivery.
+- Local verification and independent review passed: 41 web tests, typecheck,
+  lint, build, package/release boundaries, AI safety boundaries, and diff
+  checks.
+- Live PostHog and Production observation remain `not_run`, pending merge,
+  deploy, and the required user action. This checkpoint does not claim a
+  Linear status transition.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

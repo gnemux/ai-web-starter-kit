@@ -1,13 +1,21 @@
 import type { AnalyticsBaseProperties } from "@xwlc/core";
 
+export type AnalyticsModule = AnalyticsBaseProperties["module"] | "catcare";
+export type AppAnalyticsBaseProperties = Omit<
+  AnalyticsBaseProperties,
+  "module"
+> & {
+  module: AnalyticsModule;
+};
+
 const DEFAULT_APP_NAME = "XWLC";
 const DEFAULT_MVP_STAGE = "mvp1";
 const DEFAULT_MARKET = "overseas";
 const DEFAULT_VERSION = "v0.1";
 
 export function getAnalyticsBaseProperties(
-  module: AnalyticsBaseProperties["module"] = "auth"
-): AnalyticsBaseProperties {
+  module: AnalyticsModule = "auth"
+): AppAnalyticsBaseProperties {
   return {
     app: readOptionalPublicEnv(process.env.NEXT_PUBLIC_APP_NAME) ?? DEFAULT_APP_NAME,
     mvp_stage:

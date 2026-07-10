@@ -21,6 +21,12 @@ import {
 import { getCurrentUserClaims } from "../../services/auth";
 import { getSupabasePublicConfig } from "../../supabase/config";
 import type { Database } from "../../supabase/database.types";
+import { trackServerEvent } from "../../analytics/server";
+import type {
+  ProductAnalyticsEvent,
+  ProductAnalyticsProperties
+} from "../../analytics/server-properties";
+import type { SafeCapabilityMetadata } from "../../analytics/safe-capability-metadata";
 import {
   getLifeStageFromBirthDate,
   isCatBreedId,
@@ -28,10 +34,6 @@ import {
   type CatGender,
   type CatLifeStage
 } from "../cat-profile-options";
-import {
-  getAnalyticsBaseProperties,
-  readOptionalPublicEnv
-} from "../../analytics/config";
 import { validateCatCarePlanDateRange } from "../plan-date-range";
 
 import type {
@@ -2506,113 +2508,20 @@ export function mapCareEvent(row: CareEventRow): CatCareEvent {
 
 export async function trackCatCareProductEvent(
   ownerId: string,
-  event:
-    | "catcare_cat_created"
-    | "catcare_cat_updated"
-    | "catcare_cat_deleted"
-    | "catcare_routine_started"
-    | "catcare_routine_copied"
-    | "catcare_routine_saved"
-    | "catcare_plan_created"
-    | "catcare_plan_tasks_updated"
-    | "catcare_plan_published"
-    | "catcare_plan_closed"
-    | "catcare_plan_deleted",
-  properties: Record<string, unknown>
+  event: ProductAnalyticsEvent,
+  properties: Omit<ProductAnalyticsProperties, "provider">,
+  metadata?: SafeCapabilityMetadata
 ) {
-  const posthogKey =
-    readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_KEY) ??
-    readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN);
-
-  if (!posthogKey) {
-    return;
-  }
-
-  const posthogHost =
-    readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_HOST) ??
-    "https://us.i.posthog.com";
-
-  try {
-    const response = await fetch(`${posthogHost.replace(/\/$/, "")}/capture/`, {
-      body: JSON.stringify({
-        api_key: posthogKey,
-        distinct_id: ownerId,
-        event,
-        properties: {
-          ...getAnalyticsBaseProperties("core"),
-          module: "catcare",
-          provider: CATCARE_ANALYTICS_PROVIDER,
-          ...sanitizeCatCareAnalyticsProperties(properties)
-        }
-      }),
-      cache: "no-store",
-      headers: {
-        "content-type": "application/json"
-      },
-      method: "POST"
-    });
-
-    if (!response.ok) {
-      console.warn("CatCare PostHog capture failed", {
-        event,
-        status: response.status
-      });
+  await trackServerEvent({
+    distinctId: ownerId,
+    event,
+    metadata,
+    module: "catcare",
+    properties: {
+      provider: CATCARE_ANALYTICS_PROVIDER,
+      ...properties
     }
-  } catch (error) {
-    console.warn("CatCare PostHog capture failed", {
-      event,
-      message: error instanceof Error ? error.message : "unknown_error"
-    });
-  }
-}
-
-export function sanitizeCatCareAnalyticsProperties(
-  properties: Record<string, unknown>
-): Record<string, unknown> {
-  return {
-    ...(typeof properties.enabled_item_count === "number"
-      ? { enabled_item_count: properties.enabled_item_count }
-      : {}),
-    ...(typeof properties.item_count === "number"
-      ? { item_count: properties.item_count }
-      : {}),
-    ...(typeof properties.custom_item_count === "number"
-      ? { custom_item_count: properties.custom_item_count }
-      : {}),
-    ...(typeof properties.cat_count === "number"
-      ? { cat_count: properties.cat_count }
-      : {}),
-    ...(typeof properties.has_existing_routine === "boolean"
-      ? { has_existing_routine: properties.has_existing_routine }
-      : {}),
-    ...(typeof properties.has_photo === "boolean"
-      ? { has_photo: properties.has_photo }
-      : {}),
-    ...(typeof properties.breed === "string"
-      ? { breed: properties.breed }
-      : {}),
-    ...(typeof properties.source === "string"
-      ? { source: properties.source }
-      : {}),
-    ...(typeof properties.plan_status === "string"
-      ? { plan_status: properties.plan_status }
-      : {}),
-    ...(typeof properties.scenario === "string"
-      ? { scenario: properties.scenario }
-      : {}),
-    ...(typeof properties.task_count === "number"
-      ? { task_count: properties.task_count }
-      : {}),
-    ...(typeof properties.enabled_task_count === "number"
-      ? { enabled_task_count: properties.enabled_task_count }
-      : {}),
-    ...(typeof properties.routine_count === "number"
-      ? { routine_count: properties.routine_count }
-      : {}),
-    ...(typeof properties.care_event_count === "number"
-      ? { care_event_count: properties.care_event_count }
-      : {})
-  };
+  });
 }
 
 export function mapPlan(row: CarePlanRow): Omit<CatCarePlan, "tasks" | "submissions"> {

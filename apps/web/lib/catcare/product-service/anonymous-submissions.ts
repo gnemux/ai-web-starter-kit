@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createHash } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
@@ -21,16 +21,17 @@ import {
   clearCatCarePlanSummaryCache,
   clearCatCareWorkspaceStatsCache,
   mapSupabaseError,
-  mapTask
+  mapTask,
+  trackCatCareProductEvent
 } from "./core";
 import { recordCatCareOutboxEvent } from "./outbox";
+import type { AnonymousCareTaskSubmissionView } from "./anonymous-view";
 import {
-  type AnonymousCareTaskSubmissionView,
   createAnonymousTaskSubmissionRef,
   getAnonymousTaskVisitTimes,
-  isLegacyPrepareTask,
-  resolveCarePlanShareToken
-} from "./share-tokens";
+  isLegacyPrepareTask
+} from "./anonymous-view-policy";
+import { resolveCarePlanShareToken } from "./share-tokens";
 
 export type AnonymousCareSubmissionMutation = AnonymousCareTaskSubmissionView & {
   alreadySubmitted: boolean;
@@ -45,6 +46,7 @@ type AnonymousCareSubmissionSlotView = AnonymousCareTaskSubmissionView & {
 export async function submitAnonymousCareSubmissionFromFormData(
   formData: FormData
 ): Promise<ServiceResult<AnonymousCareSubmissionMutation>> {
+  const correlationId = randomUUID();
   const secret = String(formData.get("token") ?? "").trim();
   const serviceDate = String(formData.get("serviceDate") ?? "").trim();
   const submissionRef = String(formData.get("submissionRef") ?? "").trim();
@@ -87,7 +89,11 @@ export async function submitAnonymousCareSubmissionFromFormData(
     });
   }
 
-  const tokenResult = await resolveCarePlanShareToken(secret);
+  const tokenResult = await resolveCarePlanShareToken(
+    secret,
+    new Date(),
+    correlationId
+  );
 
   if (!tokenResult.ok) {
     return tokenResult;
@@ -124,6 +130,27 @@ export async function submitAnonymousCareSubmissionFromFormData(
   }
 
   if (planResult.data.status !== "published") {
+    void recordCatCareAuditEvent({
+      actorType: "anonymous_token",
+      correlationId,
+      eventName: "invalid_or_revoked_token_rejected",
+      ownerId: tokenResult.data.ownerId,
+      properties: { reason: "unavailable" },
+      resourceId: tokenResult.data.resourceId,
+      resourceType: tokenResult.data.resourceType,
+      tokenRecordId: tokenResult.data.tokenId
+    });
+    void trackCatCareProductEvent(
+      "anonymous_token",
+      "catcare_share_link_rejected",
+      { outcome: "unavailable", result: "rejected" },
+      {
+        correlation_id: correlationId,
+        request_source: "catcare_anonymous_submit",
+        resource_id: tokenResult.data.resourceId,
+        resource_type: tokenResult.data.resourceType
+      }
+    );
     return serviceError("forbidden", "这个照护计划当前不可提交。", {
       token: "unavailable"
     });
@@ -221,6 +248,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
       );
       void recordCatCareAuditEvent({
         actorType: "anonymous_token",
+        correlationId,
         eventName: "care_submission_created",
         idempotencyKey: existingResult.data.idempotencyKey,
         ownerId: tokenResult.data.ownerId,
@@ -237,6 +265,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
       });
       void recordSubmissionOutbox({
         abnormal: updateResult.data.abnormal,
+        correlationId,
         idempotencyKey: existingResult.data.idempotencyKey,
         ownerId: tokenResult.data.ownerId,
         serviceDate,
@@ -245,6 +274,17 @@ export async function submitAnonymousCareSubmissionFromFormData(
         taskTitle: task.title,
         visitTime
       });
+      void trackCatCareProductEvent(
+        "anonymous_token",
+        "catcare_submission_created",
+        { result: "updated" },
+        {
+          correlation_id: correlationId,
+          request_source: "catcare_anonymous_submit",
+          resource_id: tokenResult.data.resourceId,
+          resource_type: tokenResult.data.resourceType
+        }
+      );
 
       return serviceOk({
         abnormal: updateResult.data.abnormal,
@@ -320,6 +360,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
   clearCatCarePlanCaches(tokenResult.data.ownerId, tokenResult.data.resourceId);
   void recordCatCareAuditEvent({
     actorType: "anonymous_token",
+    correlationId,
     eventName: "care_submission_created",
     idempotencyKey,
     ownerId: tokenResult.data.ownerId,
@@ -336,6 +377,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
   });
   void recordSubmissionOutbox({
     abnormal: insertResult.data.abnormal,
+    correlationId,
     idempotencyKey,
     ownerId: tokenResult.data.ownerId,
     serviceDate,
@@ -344,6 +386,17 @@ export async function submitAnonymousCareSubmissionFromFormData(
     taskTitle: task.title,
     visitTime
   });
+  void trackCatCareProductEvent(
+    "anonymous_token",
+    "catcare_submission_created",
+    { result: "created" },
+    {
+      correlation_id: correlationId,
+      request_source: "catcare_anonymous_submit",
+      resource_id: tokenResult.data.resourceId,
+      resource_type: tokenResult.data.resourceType
+    }
+  );
 
   return serviceOk({
     abnormal: insertResult.data.abnormal,
@@ -359,6 +412,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
 
 function recordSubmissionOutbox({
   abnormal,
+  correlationId,
   idempotencyKey,
   ownerId,
   serviceDate,
@@ -368,6 +422,7 @@ function recordSubmissionOutbox({
   visitTime
 }: {
   abnormal: boolean;
+  correlationId: string;
   idempotencyKey: string;
   ownerId: string;
   serviceDate: string;
@@ -379,6 +434,7 @@ function recordSubmissionOutbox({
   return recordCatCareOutboxEvent({
     aggregateId: submissionId,
     aggregateType: "care_submission",
+    correlationId,
     eventType: "owner_notification",
     idempotencyKey,
     ownerId,

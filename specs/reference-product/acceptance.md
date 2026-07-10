@@ -124,7 +124,7 @@
 - The server action calls the shared AI service boundary, so provider mode,
   entitlement/credit gating, usage record status, and analytics-safe metadata
   remain behind the common capability contract.
-- Usage metadata is allowlisted to `correlation_id`, `plan_id`,
+- Usage metadata is allowlisted to `correlation_id`, `resource_id`,
   `resource_type`, and `request_source` so reviewer evidence can trace the
   owner plan action without storing raw prompt text or sitter notes.
 - The UI shows mock/no-op/sandbox mode, successful draft output, failed state,

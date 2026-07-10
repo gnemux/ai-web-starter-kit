@@ -331,8 +331,8 @@ export async function createCatCarePlanAction(formData: FormData) {
         idempotencyKey: generationRequestId || undefined,
         metadata: {
           correlation_id: `catcare_plan_generation:${generationRequestId || randomUUID()}`,
-          resource_type: "care_plan",
-          source: "catcare_plans"
+          request_source: "catcare_plans",
+          resource_type: "care_plan"
         },
         prompt: buildCatCarePlanGenerationPrompt(context),
         purpose: "catcare_plan_generation"
@@ -508,7 +508,7 @@ export async function runCatCarePlanAiRecapAction(
     };
   }
 
-  const correlationId = `catcare_result_recap:${planResult.data.id}`;
+  const correlationId = randomUUID();
   const storedRecapText = getStoredCatCarePlanRecapText(
     planResult.data.aiInputSummary
   );
@@ -518,9 +518,9 @@ export async function runCatCarePlanAiRecapAction(
       : planResult.data.id,
     metadata: {
       correlation_id: correlationId,
-      plan_id: planResult.data.id,
-      resource_type: "care_plan",
-      source: "catcare_results"
+      request_source: "catcare_results",
+      resource_id: planResult.data.id,
+      resource_type: "care_plan"
     },
     prompt: buildCatCarePlanAiRecapPrompt({
       planTitle: planResult.data.title,

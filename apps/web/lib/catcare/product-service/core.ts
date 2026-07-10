@@ -32,6 +32,7 @@ import {
   getAnalyticsBaseProperties,
   readOptionalPublicEnv
 } from "../../analytics/config";
+import { validateCatCarePlanDateRange } from "../plan-date-range";
 
 import type {
   CatRow,
@@ -1151,13 +1152,14 @@ export function normalizePlanInput(input: {
     fields.title = "invalid";
   }
 
-  if (!startOn) {
-    fields.startOn = "required";
-  }
-
-  if (startOn && endOn && endOn < startOn) {
-    fields.endOn = "invalid";
-  }
+  Object.assign(
+    fields,
+    validateCatCarePlanDateRange({
+      endOn,
+      startOn,
+      today: getTodayInShanghai()
+    })
+  );
 
   if (handoffNotes && handoffNotes.length > 2000) {
     fields.handoffNotes = "invalid";
@@ -1305,6 +1307,15 @@ export function normalizeCareTaskCategory(
 export function normalizeDate(value: FormDataEntryValue | null) {
   const text = String(value ?? "").trim();
   return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
+}
+
+function getTodayInShanghai() {
+  return new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
+    timeZone: "Asia/Shanghai",
+    year: "numeric"
+  }).format(new Date());
 }
 
 export function normalizeWeight(value: FormDataEntryValue | null) {
@@ -1593,7 +1604,10 @@ export async function getLegacyCareItemCount(
 export async function findOrCreateOwnerItem(
   client: AppSupabaseClient,
   ownerId: string,
-  input: CreateCareItemInput
+  input: CreateCareItemInput,
+  options: {
+    beforeInsert?: (currentItemCount: number) => Promise<ServiceResult<unknown>> | ServiceResult<unknown>;
+  } = {}
 ): Promise<ServiceResult<CatCareLibraryItem>> {
   const catalogResult = await client
     .from("catcare_product_catalog")
@@ -1644,6 +1658,23 @@ export async function findOrCreateOwnerItem(
     }
 
     return serviceOk(mapLibraryItem(updateResult.data));
+  }
+
+  if (options.beforeInsert) {
+    const countResult = await client
+      .from("owner_item_library")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", ownerId);
+
+    if (countResult.error) {
+      return mapSupabaseError(countResult.error);
+    }
+
+    const beforeInsertResult = await options.beforeInsert(countResult.count ?? 0);
+
+    if (!beforeInsertResult.ok) {
+      return beforeInsertResult;
+    }
   }
 
   const insertResult = await client

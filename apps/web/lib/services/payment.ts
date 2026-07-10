@@ -35,6 +35,7 @@ import {
   clearBillingCacheForOwner,
   getCurrentBillingEntitlements
 } from "./billing";
+import { normalizeInternalReturnTo } from "./internal-return";
 
 export type PaymentPageState = PaymentReviewState & {
   ownerId: string;
@@ -1356,22 +1357,7 @@ function withPaymentResult(
 }
 
 function normalizeReturnTo(value: string | undefined, fallback: string) {
-  const trimmed = String(value ?? "").trim();
-
-  if (
-    !trimmed ||
-    !trimmed.startsWith("/") ||
-    trimmed.startsWith("//") ||
-    trimmed.includes("://")
-  ) {
-    return fallback;
-  }
-
-  if (trimmed.startsWith("/account")) {
-    return trimmed;
-  }
-
-  return fallback;
+  return normalizeInternalReturnTo(value, fallback);
 }
 
 function normalizeResultStatus(

@@ -31,7 +31,7 @@ import { getCurrentAccount } from "./auth";
 import {
   commitAiCreditUsage,
   findCommittedAiCreditUsage,
-  getCurrentBillingEntitlements
+  getCurrentBillingEntitlementsForGate
 } from "./billing";
 
 const aiCreditFeatureKey = "ai_tokens" as const;
@@ -240,7 +240,7 @@ export async function generateAiText(
     );
   }
 
-  const billingResult = await getCurrentBillingEntitlements();
+  const billingResult = await getCurrentBillingEntitlementsForGate();
 
   if (!billingResult.ok) {
     return billingResult;
@@ -368,6 +368,7 @@ export async function generateAiText(
 
   const usageMetadata = {
     capability: "generate_text",
+    ...pickAiUsageRequestMetadata(input.metadata),
     finish_reason: textResult.data.finishReason,
     input_tokens: textResult.data.usage?.inputTokens ?? 0,
     model: textResult.data.model,
@@ -621,4 +622,21 @@ async function trackAiEvent(input: {
         : {})
     }
   });
+}
+
+function pickAiUsageRequestMetadata(metadata?: Record<string, string>) {
+  if (!metadata) {
+    return {};
+  }
+
+  return {
+    ...(metadata.correlation_id
+      ? { correlation_id: metadata.correlation_id }
+      : {}),
+    ...(metadata.plan_id ? { plan_id: metadata.plan_id } : {}),
+    ...(metadata.resource_type
+      ? { resource_type: metadata.resource_type }
+      : {}),
+    ...(metadata.source ? { request_source: metadata.source } : {})
+  };
 }

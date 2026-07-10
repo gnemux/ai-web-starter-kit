@@ -4,6 +4,8 @@ import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
 import { createSupabaseServerClient } from "../../supabase/server";
 import type { Database } from "../../supabase/database.types";
+import { assertCatCarePlanCatCreation } from "../plan-limits";
+import { getCurrentBillingPlanId } from "../../services/billing";
 
 import {
   CAT_SELECT,
@@ -50,6 +52,30 @@ export async function createCatCareCatFromFormData(
 
   if (!ownerResult.ok) {
     return ownerResult;
+  }
+
+  const planResult = await getCurrentBillingPlanId();
+
+  if (!planResult.ok) {
+    return planResult;
+  }
+
+  const countResult = await clientResult.data
+    .from("cats")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", ownerResult.data);
+
+  if (countResult.error) {
+    return mapSupabaseError(countResult.error);
+  }
+
+  const catLimitResult = assertCatCarePlanCatCreation({
+    currentCatCount: countResult.count ?? 0,
+    planId: planResult.data
+  });
+
+  if (!catLimitResult.ok) {
+    return catLimitResult;
   }
 
   const photoResult = await uploadCatPhotoIfPresent(
@@ -264,4 +290,3 @@ export async function deleteCatCareCatById(
 
   return serviceOk({ id: data?.id ?? id });
 }
-

@@ -36,6 +36,10 @@ export default async function PaymentResultPage({
     returnTo: getParam(params.return_to)
   });
 
+  if (stateResult.ok && shouldReturnToSource(stateResult.data.returnTo)) {
+    redirect(buildPaymentReturnUrl(stateResult.data));
+  }
+
   if (stateResult.ok && shouldCleanPaymentResultUrl(params)) {
     redirect(buildCleanPaymentResultUrl(stateResult.data));
   }
@@ -109,9 +113,7 @@ export default async function PaymentResultPage({
               </dl>
               <div className="mt-5">
                 <Button href={stateResult.data.returnTo}>
-                  {stateResult.data.returnTo.startsWith("/account/usage")
-                    ? copy.account.payment.returnToUsage
-                    : copy.account.payment.returnToBilling}
+                  {getReturnLabel(stateResult.data.returnTo, copy)}
                 </Button>
               </div>
             </Panel>
@@ -131,6 +133,21 @@ function Fact({ label, value }: { label: string; value: string }) {
       </dd>
     </div>
   );
+}
+
+function getReturnLabel(
+  returnTo: string,
+  copy: ReturnType<typeof getDictionary>
+) {
+  if (returnTo.startsWith("/catcare")) {
+    return copy.account.payment.returnToCatCare;
+  }
+
+  if (returnTo.startsWith("/account/usage")) {
+    return copy.account.payment.returnToUsage;
+  }
+
+  return copy.account.payment.returnToBilling;
 }
 
 function getParam(value: string | string[] | undefined) {
@@ -184,6 +201,27 @@ function buildCleanPaymentResultUrl(state: PaymentResultState) {
   }
 
   return `/account/payment/result?${params.toString()}`;
+}
+
+function shouldReturnToSource(returnTo: string) {
+  return !returnTo.startsWith("/account/payment");
+}
+
+function buildPaymentReturnUrl(state: PaymentResultState) {
+  const [pathname, search = ""] = state.returnTo.split("?");
+  const params = new URLSearchParams(search);
+
+  params.set("payment_result", state.status);
+
+  if (state.priceId) {
+    params.set("price_id", state.priceId);
+  }
+
+  if (state.orderId) {
+    params.set("billing_order_id", state.orderId);
+  }
+
+  return `${pathname}?${params.toString()}`;
 }
 
 function resultTone(status: "success" | "cancel" | "failure") {

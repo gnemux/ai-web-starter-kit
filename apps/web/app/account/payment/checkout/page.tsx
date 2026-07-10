@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { ServiceErrorCode } from "@xwlc/core";
 
+import { normalizeInternalReturnTo } from "@/lib/services/internal-return";
 import { createPaymentCheckout } from "@/lib/services/payment";
 
 type CheckoutPageProps = {
@@ -32,7 +33,7 @@ function buildCheckoutErrorRedirect(
   code: "configuration" | "unavailable" | "unsupported_price"
 ) {
   const fallbackPath = "/account";
-  const safeReturnTo = returnTo?.startsWith("/account") ? returnTo : fallbackPath;
+  const safeReturnTo = normalizeInternalReturnTo(returnTo, fallbackPath);
   const [pathname, search = ""] = safeReturnTo.split("?");
   const params = new URLSearchParams(search);
 

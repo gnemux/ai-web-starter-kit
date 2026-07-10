@@ -82,6 +82,7 @@ const catCareButtonClasses = {
 export function CatCareButton({
   children,
   fullWidth = false,
+  disabled = false,
   href,
   name,
   onClick,
@@ -90,6 +91,7 @@ export function CatCareButton({
   variant = "primary"
 }: {
   children: ReactNode;
+  disabled?: boolean;
   fullWidth?: boolean;
   href?: string;
   name?: string;
@@ -111,6 +113,7 @@ export function CatCareButton({
   return (
     <button
       className={className}
+      disabled={disabled}
       name={name}
       onClick={onClick}
       type={type}

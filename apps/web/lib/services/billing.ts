@@ -20,6 +20,7 @@ import {
   type ServiceResult
 } from "@xwlc/core";
 import { randomUUID } from "crypto";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { cache } from "react";
 
 import {
@@ -27,8 +28,17 @@ import {
   createSupabaseServerClient,
   type AppSupabaseClient
 } from "../supabase/server";
+import {
+  formatAiCreditsAsUsesLabel,
+  formatAiUsesFromCredits
+} from "./ai-credit-format";
 import type { Database } from "../supabase/database.types";
 import type { Json } from "../supabase/database.types";
+
+export {
+  formatAiCreditsAsUsesLabel,
+  formatAiUsesFromCredits
+} from "./ai-credit-format";
 
 type BillingEntitlementRow =
   Database["public"]["Tables"]["billing_entitlements"]["Row"];
@@ -57,14 +67,7 @@ type BillingUsageLedgerIdRow = Pick<
 
 const billingPlanCacheTtlMs = 5 * 60_000;
 const billingSnapshotCacheTtlMs = billingPlanCacheTtlMs;
-
-const billingSnapshotCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: BillingEntitlementSnapshot;
-  }
->();
+const billingEntitlementTagPrefix = "billing-entitlements";
 const billingPlanCache = new Map<
   string,
   {
@@ -105,6 +108,53 @@ export type BillingAiCreditUsageCommit = {
   usageStatus: BillingUsageLedgerEntry["status"];
 };
 
+export function getQuantityAllowanceUsage(allowance: BillingAllowance) {
+  if (allowance.kind !== "quantity") {
+    return null;
+  }
+
+  const used = allowance.used ?? 0;
+
+  return {
+    quantity: allowance.quantity,
+    remaining: Math.max(allowance.quantity - used, 0),
+    used
+  };
+}
+
+export function formatQuantityAllowanceLabel(allowance: BillingAllowance) {
+  const usage = getQuantityAllowanceUsage(allowance);
+
+  return usage
+    ? `${formatBillingNumber(usage.remaining)} / ${formatBillingNumber(usage.quantity)}`
+    : "不可用";
+}
+
+export function getAiCreditAllowanceUsage(allowance: BillingAllowance) {
+  if (allowance.kind !== "quantity") {
+    return null;
+  }
+
+  const used = allowance.used ?? 0;
+  const quantity = allowance.quantity;
+
+  return {
+    quantity: formatAiUsesFromCredits(quantity),
+    remaining: formatAiUsesFromCredits(Math.max(quantity - used, 0)),
+    used: formatAiUsesFromCredits(used)
+  };
+}
+
+export function formatAiCreditAllowanceLabel(allowance: BillingAllowance) {
+  if (allowance.kind !== "quantity") {
+    return "不可用";
+  }
+
+  const remaining = Math.max(allowance.quantity - (allowance.used ?? 0), 0);
+
+  return `${formatAiCreditsAsUsesLabel(remaining)} / ${formatAiCreditsAsUsesLabel(allowance.quantity)}`;
+}
+
 export const getCurrentBillingEntitlements = cache(
   async function getCurrentBillingEntitlements(): Promise<
     ServiceResult<BillingEntitlementSnapshot>
@@ -121,26 +171,27 @@ export const getCurrentBillingEntitlements = cache(
       return userIdResult;
     }
 
-    const cachedSnapshot = readBillingSnapshotCache(userIdResult.data);
-
-    if (cachedSnapshot) {
-      return serviceOk(cachedSnapshot);
-    }
-
-    const snapshotResult = await getBillingEntitlementSnapshot(
-      clientResult.data,
-      userIdResult.data
-    );
-
-    if (!snapshotResult.ok) {
-      return snapshotResult;
-    }
-
-    writeBillingSnapshotCache(userIdResult.data, snapshotResult.data);
-
-    return snapshotResult;
+    return getCachedBillingEntitlementSnapshot(userIdResult.data);
   }
 );
+
+export async function getCurrentBillingEntitlementsForGate(): Promise<
+  ServiceResult<BillingEntitlementSnapshot>
+> {
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const userIdResult = await getAuthenticatedUserId(clientResult.data);
+
+  if (!userIdResult.ok) {
+    return userIdResult;
+  }
+
+  return getBillingEntitlementSnapshot(clientResult.data, userIdResult.data);
+}
 
 export const getCurrentBillingPlanId = cache(
   async function getCurrentBillingPlanId(): Promise<ServiceResult<BillingPlanId>> {
@@ -179,8 +230,31 @@ export const getCurrentBillingPlanId = cache(
 );
 
 export function clearBillingCacheForOwner(ownerId: string) {
-  billingSnapshotCache.delete(ownerId);
   billingPlanCache.delete(ownerId);
+  revalidateTag(getBillingEntitlementTag(ownerId));
+}
+
+function getBillingEntitlementTag(ownerId: string) {
+  return `${billingEntitlementTagPrefix}:${ownerId}`;
+}
+
+function getCachedBillingEntitlementSnapshot(ownerId: string) {
+  return unstable_cache(
+    async () => {
+      const adminResult = createSupabaseAdminClient();
+
+      if (!adminResult.ok) {
+        return adminResult;
+      }
+
+      return getBillingEntitlementSnapshot(adminResult.data, ownerId);
+    },
+    [billingEntitlementTagPrefix, ownerId],
+    {
+      revalidate: Math.floor(billingSnapshotCacheTtlMs / 1000),
+      tags: [getBillingEntitlementTag(ownerId)]
+    }
+  )();
 }
 
 export async function assertCurrentBillingEntitlement(
@@ -646,7 +720,17 @@ async function listActiveEntitlements(
   return serviceOk(
     (data ?? [])
       .map(mapBillingEntitlement)
-      .filter((row): row is BillingEntitlement => Boolean(row))
+      .filter(isAdditionalBillingEntitlement)
+  );
+}
+
+function isAdditionalBillingEntitlement(
+  entitlement: BillingEntitlement | null
+): entitlement is BillingEntitlement {
+  return (
+    Boolean(entitlement) &&
+    entitlement?.sourceType !== "plan" &&
+    entitlement?.sourceType !== "subscription"
   );
 }
 
@@ -787,29 +871,6 @@ function applyUsageToSnapshot(
   };
 }
 
-function readBillingSnapshotCache(
-  ownerId: string
-): BillingEntitlementSnapshot | null {
-  const entry = billingSnapshotCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    billingSnapshotCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-function writeBillingSnapshotCache(
-  ownerId: string,
-  value: BillingEntitlementSnapshot
-) {
-  billingSnapshotCache.set(ownerId, {
-    expiresAt: Date.now() + billingSnapshotCacheTtlMs,
-    value
-  });
-}
-
 function readBillingPlanCache(ownerId: string): BillingPlanId | null {
   const entry = billingPlanCache.get(ownerId);
 
@@ -840,6 +901,10 @@ function applyUsageToAllowance(
     ...allowance,
     used: (allowance.used ?? 0) + used
   };
+}
+
+function formatBillingNumber(value: number) {
+  return Math.max(value, 0).toLocaleString("zh-CN");
 }
 
 function mapBillingSubscription(

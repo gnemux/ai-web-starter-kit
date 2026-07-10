@@ -33,7 +33,7 @@ export const dictionaries = {
         account: "账户",
         profile: "个人资料",
         billing: "套餐权益",
-        usage: "AI"
+        usage: "智能"
       },
       accountMenu: {
         label: "账户菜单",
@@ -42,7 +42,7 @@ export const dictionaries = {
         catcare: "照护产品",
         account: "个人资料",
         billing: "套餐权益",
-        usage: "AI",
+        usage: "智能",
         signOut: "退出登录",
         working: "退出中..."
       },
@@ -133,15 +133,15 @@ export const dictionaries = {
       pricing: {
         title: "套餐与智能额度",
         paidStepTitle: "摘要 / 付费",
-        paidStepDescription: "结果页触发智能摘要、Pro 或一次性额度包。",
+        paidStepDescription: "结果页触发智能摘要、专业版或一次性额度包。",
         freeTitle: "免费版",
         freePrice: "$0 / 永久",
-        freeDescription: "3 次智能照护生成 / 月，适合首次体验。",
+        freeDescription: "2 次智能照护生成 / 月，适合首次体验。",
         proTitle: "专业版",
-        proPrice: "$9 / 月",
+        proPrice: "$19 / 月",
         proDescription: "无限智能照护生成，多条照看记录与报告。",
         creditTitle: "智能额度包",
-        creditPrice: "$5 / 10 次",
+        creditPrice: "$9 / 10 次",
         creditDescription: "按需购买，永不过期。"
       },
       callouts: [
@@ -276,7 +276,7 @@ export const dictionaries = {
           workflowStepCount: "4 步",
           paywallTitle: "智能摘要 / 高级功能",
           paywallDescription:
-            "免费版适合完成第一次临时照护。额度用完后，结果页会触发 Pro 或一次性智能额度包。",
+            "免费版适合完成第一次临时照护。额度用完后，结果页会触发专业版或一次性智能额度包。",
           currentPlanLabel: "当前方案",
           aiCreditLabel: "智能额度",
           catsSublabel: "猫咪数量",
@@ -581,7 +581,7 @@ export const dictionaries = {
       }
     },
     dashboard: {
-      shellSubtitle: "CatCare account",
+      shellSubtitle: "猫咪照护账户",
       title: "工作台",
       eyebrow: "已登录",
       description:
@@ -676,7 +676,7 @@ export const dictionaries = {
         group: "账户",
         profile: "个人资料",
         billing: "套餐",
-        usage: "AI"
+        usage: "智能"
       },
       profile: {
         title: "个人资料",
@@ -690,48 +690,45 @@ export const dictionaries = {
       billing: {
         eyebrow: "账单与权益",
         title: "套餐与智能额度",
-        description: "管理 CatCare 当前套餐、sandbox/test 支付入口和智能额度。",
+        description: "管理当前套餐、测试支付入口和智能额度。",
         catcareHeroTitle: "账单与权益",
         catcareHeroDescription:
-          "查看 CatCare 当前套餐、智能摘要额度、sandbox/test 订单记录，并在触发付费点后回到原照护计划继续操作。",
+          "查看当前套餐、智能照护次数、测试订单记录，并在触发付费点后回到原照护计划继续操作。",
         catcareSandboxNotice:
-          "当前为 sandbox/test 环境，所有订单与支付均为测试数据，不会产生真实扣费。",
+          "当前为测试环境，所有订单与支付均为测试数据，不会产生真实扣费。",
         catcareCurrentPlanTitle: "当前方案",
-        catcareCreditTitle: "智能摘要额度",
+        catcareCreditTitle: "智能照护次数",
         catcarePaywallTitle: "解锁更多照护能力",
         catcarePaywallDescription:
-          "免费版适合完成第一次临时照护。智能摘要、报告导出和更多额度会在结果页触发权益检查。",
+          "免费版适合完成第一次临时照护。生成计划、结果复盘和更多额度会在结果页触发权益检查。",
         catcareReturnToPlan: "返回最近计划",
         catcareFlowTitle: "支付成功后会发生什么？",
         catcareFlowSteps: [
-          "记录 sandbox 订单",
-          "更新套餐或智能摘要额度",
-          "返回原计划继续生成智能摘要"
+          "记录测试订单",
+          "更新套餐或智能照护次数",
+          "返回原计划继续生成复盘"
         ],
-        catcareCreditPacksTitle: "一次性智能摘要额度包",
+        catcareCreditPacksTitle: "一次性智能照护次数包",
         catcareCreditPacksDescription:
-          "不切换套餐，只购买额外智能摘要额度。适合偶发出行或临时照护场景。",
+          "不切换套餐，只购买额外智能照护次数。适合偶发出行或临时照护场景。",
         catcareDisplay: {
-          freeAiAllowance: "3 次智能摘要 / 月",
-          proAiAllowance: "30 次智能摘要 / 月",
-          creditPackAllowance: "10 次智能摘要额度",
-          freeCreditSummary: "3 / 3",
-          proCreditSummary: "15 / 30",
+          freeAiAllowance: "2 次智能照护 / 月",
+          proAiAllowance: "25 次智能照护 / 月",
+          creditPackAllowance: "10 次智能照护次数",
+          freeCreditSummary: "2 / 2",
+          proCreditSummary: "10 / 25",
           creditPackEmpty: "0 / 10",
           creditPackOwned: "已购买",
           freePrice: "$0",
-          proPrice: "$9 / 月",
-          creditPackPrice: "$5",
+          proPrice: "$19 / 月",
+          creditPackPrice: "$9",
           creditPackOptions: [
-            { price: "$5 / 10 次", description: "智能照护生成" },
-            { price: "$12 / 30 次", description: "智能照护生成" },
-            { price: "$29 / 100 次", description: "智能照护生成" },
-            { price: "$59 / 250 次", description: "智能照护生成" }
+            { price: "$9 / 10 次", description: "适合临时多生成几次计划或复盘" }
           ],
           orderColumns: {
             order: "订单号",
             type: "类型",
-            amount: "金额 (USD)",
+            amount: "金额",
             status: "状态",
             time: "时间",
             environment: "环境",
@@ -739,7 +736,7 @@ export const dictionaries = {
             balance: "发生后余额",
             description: "说明"
           },
-          sandboxTag: "sandbox/test",
+          sandboxTag: "测试环境",
           viewAllOrders: "查看全部订单",
           viewAllLedger: "查看全部流水"
         },
@@ -751,7 +748,7 @@ export const dictionaries = {
         entitlements: "已包含权益",
         renewalDate: "续费时间",
         noRenewalDate: "暂无自动续费",
-        viewUsage: "查看 AI",
+        viewUsage: "查看智能用量",
         planOptionsTitle: "选择套餐",
         planOptionsDescription: "查看当前套餐，并选择适合当前阶段的套餐。",
         currentPlanSelected: "当前套餐",
@@ -761,31 +758,31 @@ export const dictionaries = {
         baseline: "基础",
         enabled: "已包含",
         disabled: "未包含",
-        creditOverviewTitle: "Credit 账户",
+        creditOverviewTitle: "智能额度账户",
         creditOverviewDescription:
-          "这里展示当前可用于 AI 功能的 Credit，总量由套餐和额度包共同组成。",
-        creditAvailable: "可用 Credit",
-        planCreditRemaining: "套餐剩余 Credit",
-        packCreditRemaining: "额度包 Credit",
-        creditConsumed: "已消耗 Credit",
-        creditPackTitle: "充值额度包",
+          "这里展示当前可用于智能功能的智能额度，总量由套餐和额度包共同组成。",
+        creditAvailable: "可用额度",
+        planCreditRemaining: "套餐剩余额度",
+        packCreditRemaining: "额度包",
+        creditConsumed: "已消耗额度",
+        creditPackTitle: "一次性智能补充包",
         creditPackDescription:
-          "一次性增加 100,000 Credit，不改变当前套餐。",
+          "一次性增加 10 次生成计划或复盘次数，不改变当前套餐。",
         sandboxOnly: "本地模拟",
         planSwitchNote:
           "测试模式按目标套餐全额记录，不处理差额或退款。",
         upgradePlan: "升级套餐",
         switchPlan: "切换套餐",
         includedInCurrentPlan: "权益已覆盖",
-        switchToFree: "切换到 Free",
-        buyCreditPack: "充值额度包",
+        switchToFree: "切换到免费版",
+        buyCreditPack: "购买一次性智能补充包",
         usageDemoTitle: "模拟智能使用",
         usageDemoDescription:
           "先使用一次模拟智能生成功能，系统会检查额度权益并记录本次消耗。额度不足时才提示升级套餐或充值额度包。",
         usageDemoRun: "模拟生成一次",
         usageDemoReady: "可使用",
         usageDemoBlocked: "需升级",
-        usageDemoCost: 10000,
+        usageDemoCost: 1,
         usageDemoCostLabel: "本次消耗",
         usageDemoRemaining: "当前可用",
         usageDemoLastResult: "上次结果",
@@ -795,19 +792,19 @@ export const dictionaries = {
         creditAmount: "额度",
         price: "价格",
         planNames: {
-          free: "Free",
-          plus: "Plus",
-          pro: "Pro"
+          free: "免费版",
+          plus: "进阶版",
+          pro: "专业版"
         },
         planDescriptions: {
           free: "适合首次临时照护体验，包含基础清单和每月智能额度。",
-          plus: "预留中间套餐，当前 CatCare 不在主流程展示。",
+          plus: "预留中间套餐，当前照护流程不在主流程展示。",
           pro: "适合持续使用，解锁更多智能照护生成、摘要和报告能力。"
         },
         planInheritance: {
           free: "基础能力",
-          plus: "包含 Free 全部内容",
-          pro: "包含 Plus 全部内容"
+          plus: "包含免费版全部内容",
+          pro: "包含进阶版全部内容"
         },
         subscriptionStatuses: {
           none: "无订阅",
@@ -827,19 +824,19 @@ export const dictionaries = {
         },
         units: {
           count: "次",
-          credit: "Credit",
-          token: "Credit"
+          credit: "智能额度",
+          token: "智能额度"
         },
         planRecordsTitle: "套餐记录",
         planRecordsDescription: "最近的套餐消费记录。",
         emptyPlanRecords: "暂无套餐消费记录",
-        aiRecordsTitle: "记录",
-        aiRecordsDescription: "最近的充值和 Credit 消耗记录。",
+        aiRecordsTitle: "智能额度记录",
+        aiRecordsDescription: "最近的充值和智能额度消耗记录。",
         creditRecordsTitle: "充值记录",
-        usageRecordsTitle: "Credit 消耗记录",
+        usageRecordsTitle: "智能额度消耗记录",
         creditConsumptionRecordTitle: "智能额度消耗",
         emptyCreditRecords: "暂无充值记录",
-        emptyUsageRecords: "暂无 Credit 消耗记录",
+        emptyUsageRecords: "暂无智能额度消耗记录",
         recordsErrorTitle: "记录暂不可用",
         orderStatuses: {
           pending: "处理中",
@@ -862,15 +859,22 @@ export const dictionaries = {
           "查看 CatCare 可用智能额度、额度包充值和消耗记录。",
         productTitle: "CatCare 智能能力用量",
         productDescription:
-          "智能额度会用于照护清单生成、照看结果摘要和未来图文/视频复盘。当前保持 sandbox/test 语义，不产生真实扣款。",
+          "智能额度会用于照护清单生成、照看结果摘要和未来图文/视频复盘。当前为测试支付环境，不产生真实扣款。",
         productFacts: [
           "生成照护清单前先检查可用额度",
           "结果摘要和异常复盘按次消耗",
           "事件复盘属于后续付费增强"
-        ]
+        ],
+        paywallEyebrow: "来自 CatCare",
+        paywallTitle: "智能照护次数不足",
+        paywallDescription:
+          "这次智能生成已被额度检查拦截。可购买一次性智能补充包，支付确认后回到原照护计划继续生成。",
+        returnContext: "回流页面",
+        topUpAction: "购买一次性智能补充包",
+        returnAction: "先返回原计划"
       },
       payment: {
-        eyebrow: "Payment",
+        eyebrow: "支付",
         title: "升级与支付",
         description:
           "选择套餐或额度包，确认费用后完成支付。当前本地环境使用模拟支付，不会真实扣款。",
@@ -889,13 +893,13 @@ export const dictionaries = {
         billingFacts: "以服务端记录为准",
         currentBillingTitle: "当前套餐状态",
         currentBillingDescription:
-          "当前套餐和 Credit 始终以账户状态为准。",
-        quotaGateTitle: "Quota gate 验收",
+          "当前套餐和智能额度始终以账户状态为准。",
+        quotaGateTitle: "权益检查验收",
         quotaGateDescription:
-          "通过服务端 Billing entitlement 检查占位权益是否可用。若被拦截，PostHog 会从服务端 decision 上报 quota_limit_reached。",
+          "通过服务端权益记录检查占位权益是否可用。若被拦截，会从服务端判断结果上报额度限制事件。",
         quotaGateReady: "可检查",
         quotaGateChecked: "已检查",
-        runQuotaGate: "运行 quota gate",
+        runQuotaGate: "运行权益检查",
         featureKey: "能力",
         quotaRequested: "请求数量",
         quotaDecision: "判断结果",
@@ -910,9 +914,9 @@ export const dictionaries = {
           "解锁更高层级的模板权益和智能额度。",
         creditPackDescription:
           "一次性增加智能额度。",
-        priceId: "Price ID",
+        priceId: "价格编号",
         price: "价格",
-        providerMapping: "Provider 映射",
+        providerMapping: "支付映射",
         sandboxOnly: "本地模拟",
         startCheckout: "继续",
         currentPlanSelected: "当前已是此套餐",
@@ -932,7 +936,7 @@ export const dictionaries = {
         chooseSuccess: "确认支付",
         chooseCancel: "取消支付",
         chooseFailure: "模拟失败",
-        resultEyebrow: "Payment Result",
+        resultEyebrow: "支付结果",
         resultTitles: {
           success: "支付成功",
           cancel: "支付已取消",
@@ -955,7 +959,8 @@ export const dictionaries = {
         resultNoGrant: "仅展示服务端记录",
         returnToAccount: "返回账户查看权益",
         returnToBilling: "返回套餐",
-        returnToUsage: "返回 AI",
+        returnToUsage: "返回智能用量",
+        returnToCatCare: "返回照护计划",
         billingUnavailable: "Billing 不可用"
       }
     },
@@ -1124,12 +1129,12 @@ export const dictionaries = {
         paidStepDescription: "Results trigger AI summary, Pro, or one-time credit packs.",
         freeTitle: "Free",
         freePrice: "$0",
-        freeDescription: "3 AI care generations per month for first-time care.",
+        freeDescription: "2 AI care generations per month for first-time care.",
         proTitle: "Pro",
-        proPrice: "$9 / mo",
+        proPrice: "$19 / mo",
         proDescription: "Unlimited AI care generation, more records, and reports.",
         creditTitle: "AI Credit pack",
-        creditPrice: "$5 / 10 uses",
+        creditPrice: "$9 / 10 uses",
         creditDescription: "One-time credits. Never expires."
       },
       callouts: [
@@ -1687,36 +1692,33 @@ export const dictionaries = {
         catcareSandboxNotice:
           "This is a sandbox/test environment. Orders and payments are test records and never create a real charge.",
         catcareCurrentPlanTitle: "Current plan",
-        catcareCreditTitle: "AI summary credit",
+        catcareCreditTitle: "AI care uses",
         catcarePaywallTitle: "Unlock more care capability",
         catcarePaywallDescription:
-          "Free is enough for the first temporary-care handoff. AI summaries, exports, and additional credit are gated from the results page.",
+          "Free is enough for the first temporary-care handoff. Care-plan generation, result recaps, exports, and additional uses are gated from the results page.",
         catcareReturnToPlan: "Return to recent plan",
         catcareFlowTitle: "What happens after payment?",
         catcareFlowSteps: [
           "Record sandbox order",
-          "Update plan or AI-summary credit",
-          "Return to the original plan and continue AI summary"
+          "Update plan or AI care uses",
+          "Return to the original plan and continue the recap"
         ],
-        catcareCreditPacksTitle: "One-time AI summary credit packs",
+        catcareCreditPacksTitle: "One-time AI care use packs",
         catcareCreditPacksDescription:
-          "Buy extra AI-summary credit without switching plans. Useful for occasional trips or temporary care.",
+          "Buy extra AI care uses without switching plans. Useful for occasional trips or temporary care.",
         catcareDisplay: {
-          freeAiAllowance: "3 AI summaries / month",
-          proAiAllowance: "30 AI summaries / month",
-          creditPackAllowance: "10 AI-summary credits",
-          freeCreditSummary: "3 / 3",
-          proCreditSummary: "15 / 30",
+          freeAiAllowance: "2 AI care uses / month",
+          proAiAllowance: "25 AI care uses / month",
+          creditPackAllowance: "10 AI care uses",
+          freeCreditSummary: "2 / 2",
+          proCreditSummary: "10 / 25",
           creditPackEmpty: "0 / 10",
           creditPackOwned: "Purchased",
           freePrice: "$0",
-          proPrice: "$9 / mo",
-          creditPackPrice: "$5",
+          proPrice: "$19 / mo",
+          creditPackPrice: "$9",
           creditPackOptions: [
-            { price: "$5 / 10", description: "AI care generation" },
-            { price: "$12 / 30", description: "AI care generation" },
-            { price: "$29 / 100", description: "AI care generation" },
-            { price: "$59 / 250", description: "AI care generation" }
+            { price: "$9 / 10", description: "For a few extra recaps or checklist generations" }
           ],
           orderColumns: {
             order: "Order",
@@ -1759,7 +1761,7 @@ export const dictionaries = {
         planCreditRemaining: "Remaining plan Credit",
         packCreditRemaining: "Credit-pack Credit",
         creditConsumed: "Consumed Credit",
-        creditPackTitle: "Credit pack top-up",
+        creditPackTitle: "One-time AI top-up",
         creditPackDescription:
           "Add 100,000 Credit once without changing the current plan.",
         sandboxOnly: "Local simulation",
@@ -1769,14 +1771,14 @@ export const dictionaries = {
         switchPlan: "Switch plan",
         includedInCurrentPlan: "Covered by current plan",
         switchToFree: "Switch to Free",
-        buyCreditPack: "Top up credit pack",
+        buyCreditPack: "Buy one-time AI top-up",
         usageDemoTitle: "Simulate AI usage",
         usageDemoDescription:
           "Use one simulated AI generation first. The system checks Credit access and records the usage. Upgrade the plan or top up a credit pack only when quota is blocked.",
         usageDemoRun: "Generate once",
         usageDemoReady: "Available",
         usageDemoBlocked: "Upgrade needed",
-        usageDemoCost: 10000,
+        usageDemoCost: 1,
         usageDemoCostLabel: "This use costs",
         usageDemoRemaining: "Available now",
         usageDemoLastResult: "Last result",
@@ -1859,7 +1861,14 @@ export const dictionaries = {
           "Check available credit before generating care plans",
           "Result summaries and exception reviews consume credits",
           "Event recaps remain a later paid enhancement"
-        ]
+        ],
+        paywallEyebrow: "From CatCare",
+        paywallTitle: "AI care uses are depleted",
+        paywallDescription:
+          "The Billing gate blocked this AI action. Buy a one-time AI top-up, confirm payment, and return to the care plan to continue.",
+        returnContext: "Return page",
+        topUpAction: "Buy one-time AI top-up",
+        returnAction: "Return to plan first"
       },
       payment: {
         eyebrow: "Payment",
@@ -1949,6 +1958,7 @@ export const dictionaries = {
         returnToAccount: "Return to account",
         returnToBilling: "Return to plans",
         returnToUsage: "Return to AI",
+        returnToCatCare: "Return to care plan",
         billingUnavailable: "Billing unavailable"
       }
     },

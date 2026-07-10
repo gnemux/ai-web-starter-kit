@@ -1,7 +1,13 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
+import {
+  serviceError,
+  type ServiceResult
+} from "@xwlc/core";
 
 import { closeCatCarePlan } from "@/lib/catcare/product-service";
 import { copyCatCareRoutineFromFormData } from "@/lib/catcare/product-service";
@@ -14,8 +20,10 @@ import { deleteCatCareCatFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCareEventFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCareLibraryItemFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCarePlan } from "@/lib/catcare/product-service";
+import { getCatCarePlanDetail } from "@/lib/catcare/product-service";
 import { publishCatCarePlan } from "@/lib/catcare/product-service";
 import { revokeCarePlanShareLink } from "@/lib/catcare/product-service";
+import { saveCatCarePlanAiRecap } from "@/lib/catcare/product-service";
 import { saveCatCareRoutineFromFormData } from "@/lib/catcare/product-service";
 import { unassignCatCareItemFromFormData } from "@/lib/catcare/product-service";
 import { updateCatCareCatFromFormData } from "@/lib/catcare/product-service";
@@ -23,6 +31,25 @@ import { updateCatCareEventFromFormData } from "@/lib/catcare/product-service";
 import { updateCatCareLibraryItemFromFormData } from "@/lib/catcare/product-service";
 import { updateCatCarePlanTasksFromFormData } from "@/lib/catcare/product-service";
 import { updateCatCareLibraryItemNotesFromFormData } from "@/lib/catcare/product-service";
+import { assertCatCarePlanCatSelection } from "@/lib/catcare/plan-limits";
+import { generateAiText } from "@/lib/services/ai";
+import { getCurrentBillingEntitlements } from "@/lib/services/billing";
+
+import { buildCatCarePlanGenerationPrompt } from "./plans/plan-ai-generation";
+import { buildCatCarePlanAiRecapPrompt } from "./plans/plan-ai-recap";
+import { buildPlanResultSummary } from "./plans/plan-result-summary";
+
+export type CatCareAiRecapActionState = {
+  result: ServiceResult<CatCareAiRecapActionData>;
+} | null;
+
+type CatCareAiRecapActionData = {
+  consumedCredits: number;
+  reason: string;
+  status: "blocked" | "failed" | "succeeded";
+  text: string | null;
+  usageRecordStatus: string;
+};
 
 export async function createCatCareCatAction(formData: FormData) {
   const result = await createCatCareCatFromFormData(formData);
@@ -275,14 +302,74 @@ export async function deleteCatCareEventLocalAction(formData: FormData) {
 }
 
 export async function createCatCarePlanAction(formData: FormData) {
-  const result = await createCatCarePlanFromFormData(formData);
+  const generationRequestId = String(formData.get("generationRequestId") ?? "")
+    .trim();
+  const billingResult = await getCurrentBillingEntitlements();
+
+  if (!billingResult.ok) {
+    throw new Error(billingResult.error.message);
+  }
+
+  const selectedCatCount = new Set(
+    formData
+      .getAll("catIds")
+      .map((value) => String(value).trim())
+      .filter(Boolean)
+  ).size;
+  const catSelectionResult = assertCatCarePlanCatSelection({
+    planId: billingResult.data.planId,
+    selectedCatCount
+  });
+
+  if (!catSelectionResult.ok) {
+    throw new Error(catSelectionResult.error.message);
+  }
+
+  const result = await createCatCarePlanFromFormData(formData, {
+    beforeCreate: async (context) => {
+      const aiResult = await generateAiText({
+        idempotencyKey: generationRequestId || undefined,
+        metadata: {
+          correlation_id: `catcare_plan_generation:${generationRequestId || randomUUID()}`,
+          resource_type: "care_plan",
+          source: "catcare_plans"
+        },
+        prompt: buildCatCarePlanGenerationPrompt(context),
+        purpose: "catcare_plan_generation"
+      });
+
+      if (!aiResult.ok) {
+        return aiResult;
+      }
+
+      if (aiResult.data.status === "blocked") {
+        redirect(
+          "/catcare/plans?paywall=ai_quota"
+        );
+      }
+
+      if (aiResult.data.status === "failed") {
+        return serviceError(
+          "system_error",
+          "智能生成暂时不可用，照护计划未生成。"
+        );
+      }
+
+      return aiResult;
+    }
+  });
 
   if (!result.ok) {
+    if (result.error.code === "validation_error") {
+      redirect("/catcare/plans?plan_error=validation");
+    }
+
     throw new Error(result.error.message);
   }
 
   revalidatePath("/catcare");
   revalidatePath("/catcare/plans");
+  revalidateAiUsageSurfaces();
   redirect(`/catcare/plans/${result.data.id}`);
 }
 
@@ -364,4 +451,164 @@ export async function revokeCarePlanShareLinkLocalAction(formData: FormData) {
   revalidatePath(`/catcare/plans/${planId}`);
 
   return result;
+}
+
+export async function runCatCarePlanAiRecapAction(
+  _previousState: CatCareAiRecapActionState,
+  formData: FormData
+): Promise<CatCareAiRecapActionState> {
+  const planId = String(formData.get("planId") ?? "").trim();
+  const forceRecap = formData.get("forceRecap") === "1";
+
+  if (!planId) {
+    return {
+      result: serviceError("validation_error", "请选择要复盘的照护计划。", {
+        planId: "required"
+      })
+    };
+  }
+
+  const planResult = await getCatCarePlanDetail(planId);
+
+  if (!planResult.ok) {
+    return {
+      result: serviceError(planResult.error.code, planResult.error.message)
+    };
+  }
+
+  const summary = buildPlanResultSummary(planResult.data);
+
+  if (planResult.data.status === "draft") {
+    return {
+      result: serviceError(
+        "validation_error",
+        "待发布计划还没有照看结果，不能生成复盘。"
+      )
+    };
+  }
+
+  if (planResult.data.status === "closed") {
+    return {
+      result: serviceError(
+        "validation_error",
+        "已关闭计划只能查看历史结果，不能再消耗额度生成复盘。"
+      )
+    };
+  }
+
+  if (
+    summary.completedCount + summary.attentionCount + summary.overdueCount ===
+    0
+  ) {
+    return {
+      result: serviceError(
+        "validation_error",
+        "还没有可复盘的提交或逾期项。"
+      )
+    };
+  }
+
+  const correlationId = `catcare_result_recap:${planResult.data.id}`;
+  const storedRecapText = getStoredCatCarePlanRecapText(
+    planResult.data.aiInputSummary
+  );
+  const result = await generateAiText({
+    idempotencyKey: forceRecap || !storedRecapText
+      ? `${planResult.data.id}:${randomUUID()}`
+      : planResult.data.id,
+    metadata: {
+      correlation_id: correlationId,
+      plan_id: planResult.data.id,
+      resource_type: "care_plan",
+      source: "catcare_results"
+    },
+    prompt: buildCatCarePlanAiRecapPrompt({
+      planTitle: planResult.data.title,
+      statusLabel: formatPlanStatusLabel(planResult.data.status),
+      summary
+    }),
+    purpose: "catcare_result_recap"
+  });
+
+  revalidatePath(`/catcare/plans/${planResult.data.id}/results`);
+
+  if (!result.ok) {
+    return { result };
+  }
+
+  const text = result.data.result?.text ?? null;
+
+  if (result.data.status === "succeeded" && text) {
+    const saveResult = await saveCatCarePlanAiRecap({
+      consumedCredits: result.data.credit.consumedCredits,
+      mode: result.data.mode,
+      planId: planResult.data.id,
+      text,
+      usageRecordStatus: result.data.usage.recordStatus
+    });
+
+    if (!saveResult.ok) {
+      return {
+        result: serviceError(saveResult.error.code, saveResult.error.message)
+      };
+    }
+
+    revalidatePath("/catcare");
+    revalidatePath("/catcare/plans");
+    revalidatePath("/catcare/results");
+    revalidateAiUsageSurfaces();
+  }
+
+  return {
+    result: {
+      ok: true,
+      data: {
+        consumedCredits: result.data.credit.consumedCredits,
+        reason: result.data.reason,
+        status: result.data.status,
+        text,
+        usageRecordStatus: result.data.usage.recordStatus
+      }
+    }
+  };
+}
+
+function formatPlanStatusLabel(status: string) {
+  if (status === "closed") {
+    return "已关闭";
+  }
+
+  if (status === "reviewed") {
+    return "已复盘";
+  }
+
+  if (status === "published") {
+    return "已发布";
+  }
+
+  return "草稿";
+}
+
+function getStoredCatCarePlanRecapText(summary: unknown) {
+  if (!summary || typeof summary !== "object" || Array.isArray(summary)) {
+    return null;
+  }
+
+  const recap = (summary as { result_recap?: unknown }).result_recap;
+
+  if (!recap || typeof recap !== "object" || Array.isArray(recap)) {
+    return null;
+  }
+
+  const text = (recap as { text?: unknown }).text;
+
+  return typeof text === "string" && text.trim() ? text : null;
+}
+
+function revalidateAiUsageSurfaces() {
+  revalidatePath("/account");
+  revalidatePath("/account/billing");
+  revalidatePath("/account/usage");
+  revalidatePath("/catcare");
+  revalidatePath("/catcare/plans");
 }

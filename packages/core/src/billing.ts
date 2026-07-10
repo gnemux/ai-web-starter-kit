@@ -181,7 +181,7 @@ export const defaultBillingPlans: BillingPlan[] = [
       projects: { kind: "boolean", enabled: true },
       pages: { kind: "boolean", enabled: true },
       leads: { kind: "boolean", enabled: false },
-      ai_tokens: { kind: "quantity", quantity: 10000, unit: "credit" },
+      ai_tokens: { kind: "quantity", quantity: 20000, unit: "credit" },
       custom_domain: { kind: "boolean", enabled: false }
     }
   },
@@ -194,7 +194,7 @@ export const defaultBillingPlans: BillingPlan[] = [
       projects: { kind: "boolean", enabled: true },
       pages: { kind: "boolean", enabled: true },
       leads: { kind: "boolean", enabled: true },
-      ai_tokens: { kind: "quantity", quantity: 60000, unit: "credit" },
+      ai_tokens: { kind: "quantity", quantity: 120000, unit: "credit" },
       custom_domain: { kind: "boolean", enabled: false }
     }
   },
@@ -207,7 +207,7 @@ export const defaultBillingPlans: BillingPlan[] = [
       projects: { kind: "boolean", enabled: true },
       pages: { kind: "boolean", enabled: true },
       leads: { kind: "boolean", enabled: true },
-      ai_tokens: { kind: "quantity", quantity: 200000, unit: "credit" },
+      ai_tokens: { kind: "quantity", quantity: 250000, unit: "credit" },
       custom_domain: { kind: "boolean", enabled: true }
     }
   }
@@ -236,7 +236,7 @@ export const defaultBillingPrices: BillingPrice[] = [
     id: "pro_monthly",
     planId: "pro",
     type: "recurring",
-    amountCents: 900,
+    amountCents: 1900,
     currency: "usd",
     interval: "month",
     providerPriceId: null
@@ -245,7 +245,7 @@ export const defaultBillingPrices: BillingPrice[] = [
     id: "ai_credit_pack_100k",
     planId: null,
     type: "one_time",
-    amountCents: 500,
+    amountCents: 900,
     currency: "usd",
     interval: null,
     creditFeatureKey: "ai_tokens",

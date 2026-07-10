@@ -113,6 +113,91 @@
 - Non-goals preserved: no real email/message worker, no generic share-token
   package, no PostHog runtime correlation, and no Outbox admin UI.
 
+2026-07-08 GNE-264 CAPABILITY AI recap implementation:
+
+- The owner result detail page exposes "生成复盘草稿" in the intelligent recap
+  panel and keeps real submission/result rendering as the source of truth.
+- CatCare builds the AI request from `PlanResultSummary` only: completion
+  counts, overdue entries, and attention entries. Raw sitter notes, private
+  handoff text, raw share tokens, token hashes, owner email, and debug ids are
+  excluded from prompt construction and capability metadata.
+- The server action calls the shared AI service boundary, so provider mode,
+  entitlement/credit gating, usage record status, and analytics-safe metadata
+  remain behind the common capability contract.
+- Usage metadata is allowlisted to `correlation_id`, `plan_id`,
+  `resource_type`, and `request_source` so reviewer evidence can trace the
+  owner plan action without storing raw prompt text or sitter notes.
+- The UI shows mock/no-op/sandbox mode, successful draft output, failed state,
+  and blocked state with links to the usage page and sandbox credit-pack
+  checkout.
+- Non-goals preserved: no live AI provider quality guarantee, no real payment
+  checkout work, no new anonymous share behavior, and no generic share-token
+  extraction.
+
+2026-07-10 GNE-264 completion checkpoint:
+
+- AI-assisted plan generation and owner result recap both consume the shared
+  entitlement/credit gate; successful generation records usage and invalidates
+  the owner-scoped Billing entitlement cache tag.
+- The result page now reads the same server-side entitlement snapshot as the
+  plan page. Zero remaining uses disables only generation/regeneration, shows
+  the CatCare paywall actions immediately, and keeps an existing recap readable.
+- A pure availability rule covers published, draft, closed, and quota-exhausted
+  states. Regression tests prove quota exhaustion blocks generation while a
+  published plan with remaining uses stays available.
+- Successful plan/recap actions invalidate the CatCare, Account, Billing, and
+  Usage server paths; the current result route uses `router.refresh()` only, so
+  this is targeted server-cache refresh rather than a browser-wide reload.
+- Authenticated browser acceptance opened the owner plan list, entered an
+  existing result, read its persisted recap, and returned to the result list.
+  Desktop 1440x800 and mobile 390x844 showed no horizontal overflow. Evidence:
+  `/private/tmp/gne264-results-desktop-1440.png` and
+  `/private/tmp/gne264-results-mobile-390.png`.
+
+2026-07-08 GNE-265 CAPABILITY Billing/Credit return-flow implementation:
+
+- CatCare AI recap blocked state now links to `/account/usage` with a safe
+  CatCare `return_to` context and can start the sandbox AI credit-pack checkout
+  from the original plan result page.
+- `/account/usage` renders a CatCare-specific Paywall panel only when
+  `return_to` is a safe `/catcare` path, with actions to buy the sandbox
+  credit pack or return to the original plan.
+- Payment checkout/result return URLs allow exact `/account` and `/catcare`
+  path scopes only; external URLs, protocol URLs, double-slash URLs, and
+  prefix-confusion paths stay rejected.
+- Sandbox checkout success/cancel/failure continues to write trusted Billing
+  facts through the protected server action and then returns to the original
+  CatCare context with `payment_result` and `price_id` query markers.
+- Non-goals preserved: no live payment, no invoice/refund/proration flow, no
+  client-derived entitlement, and no PostHog-as-billing-source behavior.
+
+2026-07-10 GNE-265 completion checkpoint:
+
+- Payment/checkout return validation is centralized in the internal return
+  helper and accepts only exact `/account` and `/catcare` route roots.
+- CatCare Billing presentation is split into the 343-line overview composer,
+  a local plan-comparison section, and a local records section. Shared Billing
+  facts remain in the server service; no generic cross-product Billing UI was
+  introduced.
+- The linked online test database returned readable Billing entitlement,
+  usage, and credit-ledger surfaces. Sampled AI entitlement and usage rows use
+  `credit` units and are stored in 10000-credit blocks, matching one product use.
+- The sandbox return UI continues to return to the originating CatCare route;
+  live payment, refunds, invoices, and production Creem charging remain out of
+  scope.
+- Authenticated Billing acceptance passed at 1440x800 and 390x844 without
+  horizontal overflow. Evidence:
+  `/private/tmp/gne265-billing-desktop-1440.png` and
+  `/private/tmp/gne265-billing-mobile-390.png`.
+- The AI top-up action completed in Creem Test Mode and returned to the
+  originating CatCare result route with a success notice. The resulting test
+  order `2c64812f-b5ab-490c-8eae-f439f688f341` is `paid` for 900 cents and has
+  one active 100000-credit entitlement plus one 100000-credit grant ledger.
+- Replaying the successful checkout result for the CatCare return path kept
+  exactly one entitlement and one grant ledger for that order, proving the
+  payment return is idempotent. Evidence:
+  `/private/tmp/gne265-catcare-return-desktop-1440.png`.
+
 2026-07-08 GNE-261 CAPABILITY action map:
 
 - `specs/reference-product/capability-action-map.md` is the CAP-01 source for

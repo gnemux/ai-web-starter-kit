@@ -184,7 +184,10 @@ export function createMockAiProvider(modelConfig?: AiModelConfig): AiProvider {
   return {
     descriptor,
     async generateText(input) {
-      const promptPreview = input.prompt.replace(/\s+/g, " ").trim().slice(0, 72);
+      const text =
+        input.purpose === "catcare_result_recap"
+          ? buildCatCareMockRecap(input.prompt)
+          : buildDefaultMockText(input.prompt);
 
       return serviceOk({
         id: `mock-ai-${input.purpose}`,
@@ -192,7 +195,7 @@ export function createMockAiProvider(modelConfig?: AiModelConfig): AiProvider {
         mode: descriptor.mode,
         model: modelId,
         providerModelId,
-        text: `示例草稿：围绕“${promptPreview}”生成一段可替换的产品文案。`,
+        text,
         finishReason: "stop",
         usage: {
           inputTokens: 0,
@@ -202,6 +205,50 @@ export function createMockAiProvider(modelConfig?: AiModelConfig): AiProvider {
       });
     }
   };
+}
+
+function buildDefaultMockText(prompt: string) {
+  const promptPreview = prompt.replace(/\s+/g, " ").trim().slice(0, 72);
+
+  return `示例草稿：围绕“${promptPreview}”生成一段可替换的产品文案。`;
+}
+
+function buildCatCareMockRecap(prompt: string) {
+  const planTitle = getPromptLineValue(prompt, "计划") ?? "本次照护计划";
+  const overview =
+    getPromptLineValue(prompt, "完成概览") ??
+    "已根据真实提交整理完成情况。";
+  const overdue = getPromptLineValue(prompt, "逾期重点") ?? "无";
+  const attention = getPromptLineValue(prompt, "异常重点") ?? "无";
+  const hasOverdue = overdue !== "无";
+  const hasAttention = attention !== "无";
+
+  return [
+    `完成概览\n${planTitle}已完成复盘：${overview}`,
+    `需要关注\n${
+      hasOverdue
+        ? `有逾期未提交项：${overdue}。建议先提醒照看者补交或说明原因。`
+        : "暂无逾期未提交项。"
+    }${hasAttention ? `\n异常项：${attention}。建议主人优先回看。` : ""}`,
+    `备注摘要\n${
+      hasAttention || hasOverdue
+        ? "本次复盘只引用结构化统计，不展示备注原文。"
+        : "未发现需要额外处理的异常或逾期。"
+    }`,
+    `给主人建议\n${
+      hasOverdue || hasAttention
+        ? "先处理上面的关注项，再归档本次照护结果。"
+        : "本次照护整体稳定，可以直接归档；下次继续重点确认饮水、喂食和猫砂。"
+    }`
+  ].join("\n\n");
+}
+
+function getPromptLineValue(prompt: string, label: string) {
+  const line = prompt
+    .split("\n")
+    .find((item) => item.trim().startsWith(`${label}：`));
+
+  return line?.slice(`${label}：`.length).trim();
 }
 
 export function createNoopAiProvider(modelConfig?: AiModelConfig): AiProvider {

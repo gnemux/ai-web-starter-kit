@@ -9,12 +9,21 @@ import {
   getAccountPageContext
 } from "../account-shell";
 import { CatCareBillingOverview } from "../catcare-billing-overview";
+import { PaymentReturnNotice } from "../payment/payment-return-notice";
 
-export default async function AccountBillingPage() {
-  const [context, billingResult, activityResult] = await Promise.all([
+export default async function AccountBillingPage({
+  searchParams
+}: {
+  searchParams: Promise<{
+    checkout_result?: string;
+    payment_result?: string;
+  }>;
+}) {
+  const [context, billingResult, activityResult, query] = await Promise.all([
     getAccountPageContext("/account/billing"),
     getCurrentBillingEntitlements(),
-    getCurrentBillingActivity()
+    getCurrentBillingActivity(),
+    searchParams
   ]);
   const { copy } = context;
 
@@ -25,6 +34,9 @@ export default async function AccountBillingPage() {
       topBar={<BillingTopBar labels={copy} />}
     >
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+        <PaymentReturnNotice
+          status={query.payment_result ?? query.checkout_result}
+        />
         <CatCareBillingOverview
           activityResult={activityResult}
           billingResult={billingResult}

@@ -3,8 +3,8 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
+import { normalizeShareTokenAvailability } from "@xwlc/platform";
 
-import { normalizeShareTokenAvailability } from "../../access/share-token-gate";
 import { createSupabaseAdminClient } from "../../supabase/server";
 import type { Database } from "../../supabase/database.types";
 import {

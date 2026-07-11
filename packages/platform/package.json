@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "tsc --noEmit",
-    "test": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/capability-contracts.test.mjs && tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

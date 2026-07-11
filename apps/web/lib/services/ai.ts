@@ -18,12 +18,12 @@ import {
   type AiServiceReason,
   type ServiceResult
 } from "@xwlc/core";
+import {
+  normalizeSafeCapabilityContext,
+  type SafeCapabilityContext
+} from "@xwlc/platform";
 
 import { trackServerEvent } from "@/lib/analytics/server";
-import {
-  normalizeSafeCapabilityMetadata,
-  type SafeCapabilityMetadata
-} from "../analytics/safe-capability-metadata";
 import {
   listAiTextModelOptions,
   resolveAiTextModelConfig,
@@ -99,7 +99,7 @@ export async function generateAiTextFromJson(
 export async function generateAiText(
   input: AiGenerateTextInput
 ): Promise<ServiceResult<AiGenerateTextResponse>> {
-  const metadataResult = normalizeSafeCapabilityMetadata(input.metadata);
+  const metadataResult = normalizeSafeCapabilityContext(input.metadata);
 
   if (!metadataResult.ok) {
     return metadataResult;
@@ -607,7 +607,7 @@ async function trackAiEvent(input: {
   consumedCredits?: number;
   distinctId: string;
   event: AiAnalyticsEvent;
-  metadata?: SafeCapabilityMetadata;
+  metadata?: SafeCapabilityContext;
   mode: AiGenerateTextResponse["mode"];
   model: string;
   provider: string;
@@ -647,8 +647,8 @@ async function trackAiEvent(input: {
   });
 }
 
-function pickAiUsageRequestMetadata(metadata?: SafeCapabilityMetadata) {
-  const result = normalizeSafeCapabilityMetadata(metadata);
+function pickAiUsageRequestMetadata(metadata?: SafeCapabilityContext) {
+  const result = normalizeSafeCapabilityContext(metadata);
 
   return result.ok ? (result.data ?? {}) : {};
 }

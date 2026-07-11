@@ -35,7 +35,10 @@ import { assertCatCarePlanCatSelection } from "@/lib/catcare/plan-limits";
 import { generateAiText } from "@/lib/services/ai";
 import { getCurrentBillingEntitlements } from "@/lib/services/billing";
 
-import { buildCatCarePlanGenerationPrompt } from "./plans/plan-ai-generation";
+import {
+  buildCatCarePlanGenerationPrompt,
+  normalizeGenerationRequestId
+} from "./plans/plan-ai-generation";
 import { buildCatCarePlanAiRecapPrompt } from "./plans/plan-ai-recap";
 import { buildPlanResultSummary } from "./plans/plan-result-summary";
 
@@ -302,8 +305,11 @@ export async function deleteCatCareEventLocalAction(formData: FormData) {
 }
 
 export async function createCatCarePlanAction(formData: FormData) {
-  const generationRequestId = String(formData.get("generationRequestId") ?? "")
-    .trim();
+  const generationRequestId = normalizeGenerationRequestId(
+    formData.get("generationRequestId"),
+    randomUUID()
+  );
+  formData.set("generationRequestId", generationRequestId);
   const billingResult = await getCurrentBillingEntitlements();
 
   if (!billingResult.ok) {
@@ -330,7 +336,7 @@ export async function createCatCarePlanAction(formData: FormData) {
       const aiResult = await generateAiText({
         idempotencyKey: generationRequestId || undefined,
         metadata: {
-          correlation_id: `catcare_plan_generation:${generationRequestId || randomUUID()}`,
+          correlation_id: `catcare_plan_generation:${generationRequestId}`,
           request_source: "catcare_plans",
           resource_type: "care_plan"
         },

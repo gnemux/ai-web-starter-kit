@@ -1,117 +1,78 @@
-import type {
-  AiAnalyticsProperties,
-  PaymentAnalyticsProperties
-} from "@xwlc/core";
+export type SafeAnalyticsPrimitive = string | number | boolean | null | undefined;
+export type SafeAnalyticsProperties = Record<string, SafeAnalyticsPrimitive>;
 
-export type ProductAnalyticsEvent =
-  | "catcare_cat_created"
-  | "catcare_cat_updated"
-  | "catcare_cat_deleted"
-  | "catcare_routine_started"
-  | "catcare_routine_copied"
-  | "catcare_routine_saved"
-  | "catcare_plan_created"
-  | "catcare_plan_tasks_updated"
-  | "catcare_plan_published"
-  | "catcare_plan_closed"
-  | "catcare_plan_deleted"
-  | "catcare_share_link_created"
-  | "catcare_share_link_revoked"
-  | "catcare_share_page_viewed"
-  | "catcare_share_link_rejected"
-  | "catcare_submission_created";
-
-export type ProductAnalyticsProperties = {
-  provider: string;
-  breed?: string | null;
-  care_event_count?: number;
-  cat_count?: number;
-  custom_item_count?: number;
-  enabled_item_count?: number;
-  enabled_task_count?: number;
-  has_existing_routine?: boolean;
-  has_photo?: boolean;
-  item_count?: number;
-  outcome?: "valid" | "expired" | "revoked" | "invalid" | "unavailable";
-  plan_status?: string;
-  result?: "success" | "created" | "updated" | "rejected";
-  routine_count?: number;
-  scenario?: string;
-  source?: string;
-  task_count?: number;
-};
-
-const stringProperties = [
-  "billing_period",
-  "breed",
-  "capability",
-  "checkout_kind",
-  "checkout_session_id",
-  "currency",
-  "entitlement_type",
-  "feature_key",
-  "mode",
-  "model",
-  "order_status",
-  "outcome",
-  "payment_mode",
-  "plan",
-  "plan_status",
-  "price_id",
-  "provider",
-  "provider_model_id",
-  "quota_reason",
-  "reason",
-  "result",
-  "scenario",
-  "source",
-  "usage_record_status"
-] as const;
-const numberProperties = [
-  "amount_cents",
-  "care_event_count",
-  "cat_count",
-  "consumed_credits",
-  "custom_item_count",
-  "enabled_item_count",
-  "enabled_task_count",
-  "item_count",
-  "remaining_credits",
-  "remaining_units",
-  "requested_credits",
-  "requested_units",
-  "routine_count",
-  "task_count"
-] as const;
-const booleanProperties = ["has_existing_routine", "has_photo"] as const;
+const propertyNamePattern = /^[a-z$][a-z0-9_$]{0,63}$/;
+const sensitivePropertyPattern =
+  /(authorization|cookie|credential|password|prompt|secret|token|private|handoff|note|content|body|email)/i;
+const safeAnalyticsStringPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]{0,159}$/;
+const authHeaderValuePattern = /^(?:basic|bearer)\s+/i;
+const sensitiveValueSemanticPattern =
+  /(^|[._:/-])(api[-_]?key|auth(?:orization)?|bearer|credential|password|private|secret|token)([._:/-]|$)/i;
+const knownSecretValuePrefixPattern =
+  /(?:^|[._:-])(?:github_pat_|gh[pousr]_|phx_|sk_(?:live|test)_|xox[baprs]-|AIza)/i;
+const urlValuePattern = /(?:^[a-z][a-z0-9+.-]*:\/\/|www\.)/i;
+const reservedEnvelopeProperties = new Set([
+  "$current_url",
+  "$lib",
+  "app",
+  "correlation_id",
+  "current_url",
+  "env",
+  "host",
+  "market",
+  "module",
+  "mvp_stage",
+  "request_source",
+  "resource_id",
+  "resource_type",
+  "version"
+]);
 
 export function sanitizeServerProperties(
-  properties:
-    | PaymentAnalyticsProperties
-    | AiAnalyticsProperties
-    | ProductAnalyticsProperties
-    | Record<string, unknown>
-): Record<string, unknown> {
-  const values = properties as Record<string, unknown>;
-  const safe: Record<string, unknown> = {};
+  properties: object
+): Record<string, string | number | boolean> {
+  const safe: Record<string, string | number | boolean> = {};
 
-  for (const key of stringProperties) {
-    if (typeof values[key] === "string" && values[key]) {
-      safe[key] = values[key];
+  for (const [key, value] of Object.entries(properties)) {
+    if (
+      !propertyNamePattern.test(key) ||
+      reservedEnvelopeProperties.has(key) ||
+      sensitivePropertyPattern.test(key)
+    ) {
+      continue;
     }
-  }
 
-  for (const key of numberProperties) {
-    if (typeof values[key] === "number") {
-      safe[key] = values[key];
-    }
-  }
+    if (typeof value === "string") {
+      const normalized = value.trim();
 
-  for (const key of booleanProperties) {
-    if (typeof values[key] === "boolean") {
-      safe[key] = values[key];
+      if (
+        normalized &&
+        safeAnalyticsStringPattern.test(normalized) &&
+        !authHeaderValuePattern.test(normalized) &&
+        !sensitiveValueSemanticPattern.test(normalized) &&
+        !knownSecretValuePrefixPattern.test(normalized) &&
+        !urlValuePattern.test(normalized) &&
+        !looksLikeHighEntropyToken(normalized)
+      ) {
+        safe[key] = normalized;
+      }
+    } else if (typeof value === "number" && Number.isFinite(value)) {
+      safe[key] = value;
+    } else if (typeof value === "boolean") {
+      safe[key] = value;
     }
   }
 
   return safe;
+}
+
+function looksLikeHighEntropyToken(value: string): boolean {
+  if (
+    value.length < 32 ||
+    !/^[A-Za-z0-9_-]+$/.test(value)
+  ) {
+    return false;
+  }
+
+  return true;
 }

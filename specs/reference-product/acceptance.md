@@ -460,3 +460,21 @@
   `create_reference_product_owner_model`; this was repaired through linked SQL
   because the official CLI repair command uses the same failing direct Postgres
   connection path.
+
+## GNE-266 Foundation Hardening Acceptance
+
+- Shared correlation/capability context is owned by the runtime-agnostic
+  `@xwlc/platform` public entry, exposes exactly four external metadata keys,
+  and rejects URL, whitespace/private text, oversized, and bearer-like values.
+- Shared Analytics transport accepts bounded safe primitives and contains no
+  CatCare event union or CatCare field allowlist. CatCare owns its event adapter;
+  a Travel adapter can add events without changing CatCare or the transport.
+- Analytics URLs remove all query/hash data and redact high-entropy or
+  known-secret path segments without depending on route names; `/s`, `/share`,
+  `/invite`, and `/public-link` are covered while normal UUID resources remain.
+- PostHog server capture uses the documented single-event `/i/v0/e/` endpoint
+  with `api_key`, `distinct_id`, and `event` at the request-body top level.
+- `@xwlc/platform` owns only generic anonymous share-credential actor and
+  valid/expired/revoked/invalid/unavailable state resolution. CatCare DTOs,
+  persistence rows, raw secrets, and Node crypto remain in the app layer.
+- No schema, migration, or UI behavior changes are introduced.

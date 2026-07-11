@@ -636,6 +636,24 @@
 - Reloaded PostgREST schema and passed remote REST smoke with the service key:
   all 8 PRODUCT02 tables returned `200 ok`.
 
+## GNE-266 Foundation Hardening Checks
+
+- Run `pnpm --filter @xwlc/platform test` and `pnpm --filter @xwlc/platform typecheck`.
+- Run `pnpm --filter @xwlc/web test` and `pnpm --filter @xwlc/web typecheck`.
+- Run `pnpm test:package-boundaries` and `git diff --check`.
+- Assert the capability context has exactly `correlation_id`, `resource_id`,
+  `resource_type`, and `request_source`, with value-level negative cases for
+  URLs, whitespace/private text, oversized data, and bearer-like strings.
+- Assert the PostHog adapter uses `/i/v0/e/`, preserves top-level identity/event
+  fields, drops query/hash data, and redacts high-entropy bearer segments on
+  both known and previously unknown routes without redacting normal UUID paths.
+- Assert CatCare event names/properties live only in its product adapter and the
+  shared transport accepts a future product's bounded primitive property
+  without adding that property to a central product allowlist.
+- Assert share authorization-state tests run from the package public entry while
+  app crypto tests cover generation, hashing, and constant-time verification.
+- Confirm there are no migration or visible-page changes.
+
 ## Regression Risks
 
 - Continuing implementation before GNE-278 is reflected in page routes could

@@ -127,6 +127,21 @@ New instrumentation must follow this contract before a reviewer treats it as val
 - `quota_limit_reached` must come from a server-side entitlement or quota block decision. Do not emit it from a disabled button, pricing-page click, static route load, or other client-only inference.
 - All events must include the shared factory properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
 - Server-side events should also include safe runtime context such as `$lib=server`, `current_url` / `$current_url`, and `host` when available, so PostHog Activity rows do not look like incomplete browser-only events.
+- Server-side single-event capture uses PostHog's documented `/i/v0/e/` endpoint
+  with `api_key`, `distinct_id`, and `event` at the top level. Keep this request
+  shape in a pure adapter test so a legacy endpoint cannot silently return a
+  misleading success response.
+- Server URL context is fail-closed: remove query strings and fragments, and
+  redact any high-entropy or known-secret path segment regardless of route
+  name before sending `current_url` or `$current_url`. Normal resource UUIDs
+  may remain; `/s`, `/share`, `/invite`, and `/public-link` are covered by the
+  same route-independent rule.
+- Product event unions and property allowlists belong to product adapters
+  (CatCare, Travel, and later products). The shared transport accepts bounded
+  analytics-safe primitives and rejects sensitive keys, free text, URLs,
+  authorization headers, known secret prefixes, and high-entropy token-like
+  values. Any single-segment `[A-Za-z0-9_-]` string of 32 characters or more
+  is treated as opaque and removed by default, including lowercase-only values.
 - Event-specific properties must be minimal and decision-relevant. Examples: `plan`, `price_id`, `provider`, `payment_mode`, `result`, `feature_key`, `requested_credit`, `remaining_credit`, `model`, and `provider_mode`.
 - Analytics events may observe Auth, Payment, Billing, AI, and quota behavior, but these systems must keep their own trusted facts in services and database tables.
 - Reviewers should expand a fresh PostHog event and verify both shared properties and event-specific properties. A row appearing in Activity is not enough if the properties are missing.

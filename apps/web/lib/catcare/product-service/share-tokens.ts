@@ -4,14 +4,16 @@ import { randomUUID } from "node:crypto";
 
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 import { createAnonymousTokenScope } from "@xwlc/db";
+import {
+  resolveShareTokenGate,
+  type AnonymousShareTokenActorContext,
+  type RejectedShareTokenGateOutcome
+} from "@xwlc/platform";
 
 import {
   createShareTokenCredential,
   hashShareTokenSecret,
-  resolveShareTokenGate,
-  verifyShareTokenSecret,
-  type AnonymousShareTokenActorContext,
-  type RejectedShareTokenGateOutcome
+  verifyShareTokenSecret
 } from "../../access/share-token-gate";
 import {
   createSupabaseAdminClient,
@@ -263,7 +265,7 @@ export async function resolveCarePlanShareToken(
     const outcome = resolveShareTokenGate<
       ShareTokenResourceType,
       ShareTokenScope
-    >({ now, record: null, secret });
+    >({ now, record: null, secretVerified: false });
 
     return outcome.status === "valid"
       ? hashResult
@@ -301,11 +303,12 @@ export async function resolveCarePlanShareToken(
           resourceType: token.resource_type,
           revokedAt: token.revoked_at,
           scope: token.scope,
-          tokenHash: token.token_hash,
           tokenId: token.id
         }
       : null,
-    secret
+    secretVerified: token
+      ? verifyShareTokenSecret(secret, token.token_hash)
+      : false
   });
 
   if (outcome.status !== "valid") {

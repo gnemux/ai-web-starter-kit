@@ -4,6 +4,8 @@ import { randomUUID } from "node:crypto";
 
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
+import { fanOutSafeCapabilityContext } from "../../capabilities/capability-context";
+
 import { createSupabaseServerClient, type AppSupabaseClient } from "../../supabase/server";
 import type { Json } from "../../supabase/database.types";
 import { recordCatCareAuditEvent } from "./audit";
@@ -995,27 +997,41 @@ export async function publishCatCarePlan(
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_published", {
-    enabled_task_count: count ?? 0,
-    plan_status: data.status,
-    result: "success"
-  }, {
-    correlation_id: correlationId,
-    request_source: "catcare_plan_publish",
-    resource_id: data.id,
-    resource_type: "care_plan"
-  });
-  void recordCatCareAuditEvent({
-    actorType: "user",
-    correlationId,
-    eventName: "care_plan_published",
-    ownerId: ownerResult.data,
-    properties: {
-      task_count: count ?? 0
+  fanOutSafeCapabilityContext(
+    {
+      correlation_id: correlationId,
+      request_source: "catcare_plan_publish",
+      resource_id: data.id,
+      resource_type: "care_plan"
     },
-    resourceId: data.id,
-    resourceType: "care_plan"
-  });
+    [
+      (context) => {
+        void trackCatCareProductEvent(
+          ownerResult.data,
+          "catcare_plan_published",
+          {
+            enabled_task_count: count ?? 0,
+            plan_status: data.status,
+            result: "success"
+          },
+          context
+        );
+      },
+      (context) => {
+        void recordCatCareAuditEvent({
+          actorType: "user",
+          correlationId: context.correlation_id ?? correlationId,
+          eventName: "care_plan_published",
+          ownerId: ownerResult.data,
+          properties: {
+            task_count: count ?? 0
+          },
+          resourceId: context.resource_id ?? data.id,
+          resourceType: "care_plan"
+        });
+      }
+    ]
+  );
 
   return serviceOk({
     ...mapPlan(data),

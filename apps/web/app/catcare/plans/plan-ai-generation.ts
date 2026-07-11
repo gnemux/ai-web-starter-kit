@@ -1,5 +1,17 @@
 import type { CreateCatCarePlanContext } from "@/lib/catcare/product-service/plans";
 
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export function normalizeGenerationRequestId(
+  value: unknown,
+  fallbackUuid: string
+): string {
+  const normalized = typeof value === "string" ? value.trim() : "";
+
+  return uuidPattern.test(normalized) ? normalized : fallbackUuid;
+}
+
 export function buildCatCarePlanGenerationPrompt(
   context: CreateCatCarePlanContext
 ) {

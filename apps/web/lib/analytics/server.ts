@@ -1,11 +1,9 @@
 import "server-only";
 
-import type {
-  AiAnalyticsEvent,
-  AiAnalyticsProperties,
-  PaymentAnalyticsEvent,
-  PaymentAnalyticsProperties
-} from "@xwlc/core";
+import {
+  normalizeSafeCapabilityContext,
+  type SafeCapabilityContext
+} from "@xwlc/platform";
 import { headers } from "next/headers";
 
 import {
@@ -13,16 +11,9 @@ import {
   readOptionalPublicEnv,
   type AnalyticsModule
 } from "./config";
-import {
-  normalizeSafeCapabilityMetadata,
-  type SafeCapabilityMetadata
-} from "./safe-capability-metadata";
 import { resolveSafeAnalyticsCurrentUrl } from "./request-context";
-import {
-  sanitizeServerProperties,
-  type ProductAnalyticsEvent,
-  type ProductAnalyticsProperties
-} from "./server-properties";
+import { buildPostHogCaptureRequest } from "./posthog-capture";
+import { sanitizeServerProperties } from "./server-properties";
 
 const posthogKey =
   readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_KEY) ??
@@ -34,13 +25,10 @@ const posthogHost =
 
 type ServerAnalyticsEvent = {
   distinctId: string;
-  event: PaymentAnalyticsEvent | AiAnalyticsEvent | ProductAnalyticsEvent;
-  metadata?: SafeCapabilityMetadata;
+  event: string;
+  metadata?: SafeCapabilityContext;
   module: AnalyticsModule;
-  properties:
-    | PaymentAnalyticsProperties
-    | AiAnalyticsProperties
-    | ProductAnalyticsProperties;
+  properties: object;
 };
 
 export async function trackServerEvent({
@@ -50,7 +38,7 @@ export async function trackServerEvent({
   module,
   properties
 }: ServerAnalyticsEvent): Promise<void> {
-  const metadataResult = normalizeSafeCapabilityMetadata(metadata);
+  const metadataResult = normalizeSafeCapabilityContext(metadata);
 
   if (!metadataResult.ok) {
     console.warn("Analytics metadata rejected", { event });
@@ -64,18 +52,20 @@ export async function trackServerEvent({
   try {
     const requestContextProperties = await getServerRequestContextProperties();
 
-    const response = await fetch(`${posthogHost.replace(/\/$/, "")}/capture/`, {
-      body: JSON.stringify({
-        api_key: posthogKey,
-        distinct_id: distinctId,
-        event,
-        properties: {
-          ...getAnalyticsBaseProperties(module),
-          ...requestContextProperties,
-          ...(metadataResult.data ?? {}),
-          ...sanitizeServerProperties(properties)
-        }
-      }),
+    const request = buildPostHogCaptureRequest({
+      apiKey: posthogKey,
+      distinctId,
+      event,
+      host: posthogHost,
+      properties: {
+        ...getAnalyticsBaseProperties(module),
+        ...requestContextProperties,
+        ...(metadataResult.data ?? {}),
+        ...sanitizeServerProperties(properties)
+      }
+    });
+    const response = await fetch(request.url, {
+      body: request.body,
       cache: "no-store",
       headers: {
         "content-type": "application/json"

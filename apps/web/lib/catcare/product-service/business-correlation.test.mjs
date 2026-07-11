@@ -33,8 +33,8 @@ test("product and AI analytics forward the action safe metadata", () => {
   );
   const aiCalls = [...aiAction.matchAll(/trackAiEvent\(\{([\s\S]*?)\n\s*\}\)/g)];
 
-  assert.match(productTracker, /metadata\?: SafeCapabilityMetadata/);
-  assert.match(productTracker, /trackServerEvent\(\{[\s\S]*metadata,/);
+  assert.match(productTracker, /metadata\?: SafeCapabilityContext/);
+  assert.match(productTracker, /trackCatCareAnalyticsEvent\(\{[\s\S]*metadata,/);
   assert.ok(aiCalls.length >= 8);
   assert.ok(
     aiCalls.every((call) => call[1].includes("metadata: safeMetadata")),
@@ -50,10 +50,9 @@ test("publish owns one correlation id for Audit and PostHog", () => {
   );
 
   assert.equal((publish.match(/randomUUID\(\)/g) ?? []).length, 1);
-  assert.match(publish, /recordCatCareAuditEvent\(\{[\s\S]*correlationId,/);
   assert.match(
     publish,
-    /trackCatCareProductEvent\([\s\S]*correlation_id: correlationId/
+    /fanOutSafeCapabilityContext\([\s\S]*correlation_id: correlationId[\s\S]*trackCatCareProductEvent\([\s\S]*context[\s\S]*recordCatCareAuditEvent/
   );
 });
 

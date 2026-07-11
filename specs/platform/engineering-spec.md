@@ -30,7 +30,7 @@ GNE-241 keeps the public entries intentionally small:
 | -- | -- | -- |
 | `@xwlc/core` | `packages/core/src/index.ts` | existing provider-free service contracts, auth inputs, billing, payment, AI, provider descriptors |
 | `@xwlc/ui` | `packages/ui/src/index.tsx` | existing reusable UI primitives |
-| `@xwlc/platform` | `packages/platform/src/index.ts` | runtime-agnostic actor/session/auth-result contracts, owner/email checks, email verification port, analytics event port, outbox port |
+| `@xwlc/platform` | `packages/platform/src/index.ts` | runtime-agnostic actor/session/auth-result contracts, owner/email checks, safe capability context, generic share-credential authorization states, email verification port, analytics event port, outbox port |
 | `@xwlc/db` | `packages/db/src/index.ts` | schema version contracts, RLS policy names, owner/token scope helpers, migration/RLS evidence shapes |
 
 The new packages expose contracts and pure helpers only. Supabase SSR clients,
@@ -44,7 +44,7 @@ objects remain adapter concerns outside these public entries.
 | -- | -- | -- |
 | `@xwlc/core` | provider-free types, result contracts, errors, config shapes, version contracts | React, Supabase SDK, Next.js, provider SDKs, product domain objects, runtime request/response types |
 | `@xwlc/ui` | reusable UI primitives, layout primitives, form/state display components | product business rules, provider clients, server-only code |
-| `@xwlc/platform` | server-side facades for Auth, AI, Billing, Entitlement, Audit, Outbox, analytics, provider adapters | cat-care tables, product prompts, product page state, Next/Vercel-only request handling |
+| `@xwlc/platform` | runtime-agnostic contracts and pure helpers for Auth, safe capability context, generic share-credential authorization states, AI, Billing, Entitlement, Audit, Outbox, analytics, and provider ports | cat-care tables, share-token persistence rows, product prompts, product page state, credential generation/hashing, Next/Vercel-only request handling |
 | `@xwlc/db` | migration conventions, RLS conventions, schema version contracts, DB verification helpers | app routes, React UI, product-specific business tables as reusable platform objects, runtime request/response types |
 | Reference Product | cat profiles, care plans, care tasks, share links, submissions, product copy, page flows | platform internals, service-role wrappers, reusable provider contracts |
 
@@ -143,6 +143,21 @@ modules.
 
 ## Product Object Boundary
 
+`@xwlc/platform` owns the exact four-key safe capability context contract:
+`correlation_id`, `resource_id`, `resource_type`, and `request_source`. Its pure
+validator rejects unknown keys, URLs, whitespace/private text, oversized
+values, and bearer-like resource identifiers before cross-capability use.
+Identifiers are allowlisted to UUIDs or `namespace:suffix`, where the suffix is
+another UUID or a bounded lowercase low-entropy business slug. Client-provided
+opaque ids and dangerous `private`, `secret`, `token`, credential, auth, or API
+key semantics are not valid capability context.
+
+It also owns the provider-free authorization result contract for a generic
+anonymous share credential: anonymous actor shape plus `valid`, `expired`,
+`revoked`, `invalid`, and `unavailable` resolution. Node `crypto` generation,
+hashing, and constant-time verification remain in the app server adapter. The
+package does not own product persistence rows or raw credentials.
+
 The following names are product-specific during MVP3 and must not appear inside
 platform packages unless a later issue explicitly revises the boundary:
 
@@ -153,15 +168,17 @@ care_plan
 care_plans
 care_task
 care_tasks
-share_token
-share_tokens
+product share-token persistence rows
 care_submission
 care_submissions
 sitter
 temporary care
 ```
 
-GNE-243 should convert this list into a machine-checkable boundary rule.
+Generic share-credential authorization contracts are explicitly allowed in
+`@xwlc/platform`; CatCare share-token rows, DTOs, queries, and page state are
+not. GNE-243 should keep the product table/object list machine-checkable without
+blocking provider-free credential contracts.
 
 ## Handoff To Later Child Issues
 

@@ -1,7 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { buildCatCarePlanGenerationPrompt } from "./plan-ai-generation.ts";
+import {
+  buildCatCarePlanGenerationPrompt,
+  normalizeGenerationRequestId
+} from "./plan-ai-generation.ts";
+
+test("generation request metadata accepts only a UUID from the client", () => {
+  const fallback = "123e4567-e89b-12d3-a456-426614174000";
+  const clientUuid = "223e4567-e89b-42d3-a456-426614174000";
+
+  assert.equal(normalizeGenerationRequestId(clientUuid, fallback), clientUuid);
+  for (const value of [
+    "private:customer-record",
+    "secret:abcdefghijklmnopqrstuvwxyz",
+    "abcdefghijklmnopqrstuvwxyz1234567890",
+    "not-a-uuid"
+  ]) {
+    assert.equal(normalizeGenerationRequestId(value, fallback), fallback);
+  }
+});
 
 test("catcare AI plan generation prompt uses structured context without handoff text", () => {
   const prompt = buildCatCarePlanGenerationPrompt({

@@ -4,11 +4,12 @@ import test from "node:test";
 import {
   createShareTokenCredential,
   hashShareTokenSecret,
-  resolveShareTokenGate,
   verifyShareTokenSecret
 } from "./share-token-gate.ts";
+import { resolveShareTokenGate } from "@xwlc/platform";
 
 const now = new Date("2026-07-10T10:00:00.000Z");
+const tokenHash = hashShareTokenSecret("a".repeat(32)).data;
 const record = {
   expiresAt: "2026-07-11T10:00:00.000Z",
   ownerId: "owner-id",
@@ -16,7 +17,6 @@ const record = {
   resourceType: "care_plan",
   revokedAt: null,
   scope: "care_plan",
-  tokenHash: hashShareTokenSecret("a".repeat(32)).data,
   tokenId: "token-id"
 };
 
@@ -30,8 +30,8 @@ test("share-token credentials return the raw secret only at creation", () => {
 
 test("share-token hashing and verification reject malformed or mismatched secrets", () => {
   assert.equal(hashShareTokenSecret("short").ok, false);
-  assert.equal(verifyShareTokenSecret("b".repeat(32), record.tokenHash), false);
-  assert.equal(verifyShareTokenSecret("a".repeat(32), record.tokenHash), true);
+  assert.equal(verifyShareTokenSecret("b".repeat(32), tokenHash), false);
+  assert.equal(verifyShareTokenSecret("a".repeat(32), tokenHash), true);
 });
 
 test("share-token gate returns a portable anonymous actor for a valid token", () => {
@@ -40,7 +40,7 @@ test("share-token gate returns a portable anonymous actor for a valid token", ()
       now,
       record,
       resourceAvailable: true,
-      secret: "a".repeat(32)
+      secretVerified: true
     }),
     {
       actor: {
@@ -59,18 +59,18 @@ test("share-token gate returns a portable anonymous actor for a valid token", ()
 
 test("share-token gate normalizes invalid, expired, revoked, and unavailable", () => {
   assert.equal(
-    resolveShareTokenGate({ now, record: null, secret: "a".repeat(32) }).status,
+    resolveShareTokenGate({ now, record: null, secretVerified: false }).status,
     "invalid"
   );
   assert.equal(
-    resolveShareTokenGate({ now, record, secret: "b".repeat(32) }).status,
+    resolveShareTokenGate({ now, record, secretVerified: false }).status,
     "invalid"
   );
   assert.equal(
     resolveShareTokenGate({
       now,
       record: { ...record, expiresAt: now.toISOString() },
-      secret: "a".repeat(32)
+      secretVerified: true
     }).status,
     "expired"
   );
@@ -78,7 +78,7 @@ test("share-token gate normalizes invalid, expired, revoked, and unavailable", (
     resolveShareTokenGate({
       now,
       record: { ...record, revokedAt: "2026-07-10T09:00:00.000Z" },
-      secret: "a".repeat(32)
+      secretVerified: true
     }).status,
     "revoked"
   );
@@ -87,7 +87,7 @@ test("share-token gate normalizes invalid, expired, revoked, and unavailable", (
       now,
       record,
       resourceAvailable: false,
-      secret: "a".repeat(32)
+      secretVerified: true
     }).status,
     "unavailable"
   );
@@ -95,7 +95,7 @@ test("share-token gate normalizes invalid, expired, revoked, and unavailable", (
     resolveShareTokenGate({
       now,
       record: { ...record, expiresAt: "not-a-date" },
-      secret: "a".repeat(32)
+      secretVerified: true
     }).status,
     "unavailable"
   );

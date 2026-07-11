@@ -660,6 +660,18 @@ records together, split the CatCare billing page into minimal local sections
 before closing the issue. This is a CatCare product-view boundary, not a shared
 Billing UI package.
 
+GNE-266 CAPABILITY foundation-hardening note, 2026-07-11:
+The exact-four capability context and generic anonymous share-credential state
+machine now use the `@xwlc/platform` public entry. Runtime Node crypto, CatCare
+share rows, anonymous-view DTOs, and product copy stay app-local. CatCare owns
+its event schema and property allowlist; the common Analytics transport owns
+only the provider adapter, bounded primitive filtering, envelope protection,
+value-level secret rejection, and route-name-independent URL redaction.
+PostHog single-event capture uses `/i/v0/e/`. A tested fan-out helper supplies
+one validated context instance to capability consumers, and unsafe client
+generation identifiers are replaced with a server UUID. This is the durable
+Travel-product reuse boundary; it does not introduce Travel DTOs or UI.
+
 GNE-267 structure guardrail, 2026-07-09:
 CAP-07 must use its failure/retry/idempotency pass to keep `apps/web/lib/services/billing.ts`
 from becoming the sink for every Billing/Credit concern. If ledger write,

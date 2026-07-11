@@ -28,6 +28,12 @@ export function resolveSafeAnalyticsCurrentUrl({
   return sanitizeAnalyticsUrl(`${safeProtocol}://${host}${normalizedPath}`);
 }
 
+const uuidPathSegmentPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const tokenLikePathSegmentPattern = /^[A-Za-z0-9_-]{24,}$/;
+const dangerousPathSegmentPattern =
+  /^(?:api[-_]?key|auth|authorization|bearer|credential|github_pat_|gh[pousr]_|phx_|secret|sk_(?:live|test)_|token|xox[baprs]-)/i;
+
 function sanitizeAnalyticsUrl(value: string): string | null {
   try {
     const url = new URL(value);
@@ -40,13 +46,40 @@ function sanitizeAnalyticsUrl(value: string): string | null {
       return null;
     }
 
-    const pathname = url.pathname.replace(
-      /^\/s\/[^/]+/,
-      "/s/[token]"
-    );
+    const pathname = url.pathname
+      .split("/")
+      .map(sanitizeAnalyticsPathSegment)
+      .join("/");
 
-    return `${url.protocol}//${url.host}${pathname}${url.search}${url.hash}`;
+    return `${url.protocol}//${url.host}${pathname}`;
   } catch {
     return null;
   }
+}
+
+function sanitizeAnalyticsPathSegment(segment: string): string {
+  if (!segment) {
+    return segment;
+  }
+
+  let decoded: string;
+
+  try {
+    decoded = decodeURIComponent(segment);
+  } catch {
+    return "[redacted]";
+  }
+
+  if (uuidPathSegmentPattern.test(decoded)) {
+    return decoded;
+  }
+
+  if (
+    dangerousPathSegmentPattern.test(decoded) ||
+    tokenLikePathSegmentPattern.test(decoded)
+  ) {
+    return "[redacted]";
+  }
+
+  return segment;
 }

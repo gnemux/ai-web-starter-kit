@@ -927,20 +927,27 @@ GNE-290 icon-quality correction on 2026-07-07:
   the inspected owner-scoped tables. The local raw token/password state file
   and temporary QA scripts were removed after evidence capture.
 
-Latest `GNE-266` CAPABILITY checkpoint on 2026-07-10:
+Latest `GNE-266` CAPABILITY hardening checkpoint on 2026-07-11:
 
-- Local implementation is complete. Anonymous capability access now shares a
-  common share-token gate, while anonymous-view assembly is split from token
-  credential and lifecycle handling.
-- PostHog receives an exact-four allowlist of resource metadata plus one
-  correlation chain across Audit, Outbox, AI, Billing, Credit, and PostHog.
-  Bearer tokens in `/s/<token>` URLs are redacted before analytics delivery.
-- Local verification and independent review passed: 41 web tests, typecheck,
-  lint, build, package/release boundaries, AI safety boundaries, and diff
-  checks.
-- Live PostHog and Production observation remain `not_run`, pending merge,
-  deploy, and the required user action. This checkpoint does not claim a
-  Linear status transition.
+- Cross-capability context and generic anonymous share-credential states now
+  live in the runtime-agnostic `@xwlc/platform` public entry. Node crypto,
+  CatCare persistence, anonymous-view DTOs, and product copy remain app-local.
+- CatCare event names and property allowlists now live in a product analytics
+  adapter. The shared transport accepts bounded primitives, protects envelope
+  fields, rejects sensitive or opaque values, removes query/hash data, and
+  redacts token-like path segments without depending on a product route name.
+- PostHog server capture now uses the documented `/i/v0/e/` single-event
+  endpoint. A validated context fan-out helper supplies the same object to
+  Audit, Analytics, and other capability consumers; unsafe client generation
+  identifiers are replaced with a server UUID before reuse.
+- Three independent review rounds resolved value-smuggling and future-route
+  redaction findings. Final evidence passed 48 web tests, 4 platform contract
+  tests, full `pnpm test`, typecheck, lint, production build, package/release/AI
+  boundaries, and diff checks. No UI, schema, or migration changed.
+- The controlled local share GET returned `200`. Live PostHog event lookup in
+  the connected project remains `not_run`: an opaque hash comparison proved
+  the local env project token targets a different PostHog project. No token was
+  printed, and this checkpoint does not claim cross-project observation.
 
 ## Next Steps
 

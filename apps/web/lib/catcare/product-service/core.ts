@@ -13,6 +13,7 @@ import {
   createOwnerScope,
   type DbBoundaryResult
 } from "@xwlc/db";
+import type { SafeCapabilityContext } from "@xwlc/platform";
 
 import {
   createSupabaseServerClient,
@@ -21,12 +22,11 @@ import {
 import { getCurrentUserClaims } from "../../services/auth";
 import { getSupabasePublicConfig } from "../../supabase/config";
 import type { Database } from "../../supabase/database.types";
-import { trackServerEvent } from "../../analytics/server";
-import type {
-  ProductAnalyticsEvent,
-  ProductAnalyticsProperties
-} from "../../analytics/server-properties";
-import type { SafeCapabilityMetadata } from "../../analytics/safe-capability-metadata";
+import {
+  trackCatCareAnalyticsEvent,
+  type CatCareAnalyticsEvent,
+  type CatCareAnalyticsProperties
+} from "../analytics";
 import {
   getLifeStageFromBirthDate,
   isCatBreedId,
@@ -2508,19 +2508,16 @@ export function mapCareEvent(row: CareEventRow): CatCareEvent {
 
 export async function trackCatCareProductEvent(
   ownerId: string,
-  event: ProductAnalyticsEvent,
-  properties: Omit<ProductAnalyticsProperties, "provider">,
-  metadata?: SafeCapabilityMetadata
+  event: CatCareAnalyticsEvent,
+  properties: CatCareAnalyticsProperties,
+  metadata?: SafeCapabilityContext
 ) {
-  await trackServerEvent({
+  await trackCatCareAnalyticsEvent({
     distinctId: ownerId,
     event,
     metadata,
-    module: "catcare",
-    properties: {
-      provider: CATCARE_ANALYTICS_PROVIDER,
-      ...properties
-    }
+    properties,
+    provider: CATCARE_ANALYTICS_PROVIDER
   });
 }
 

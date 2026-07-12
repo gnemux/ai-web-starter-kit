@@ -31,6 +31,20 @@ Prefer the smallest complete change that satisfies the current issue.
 - If the small path is not enough, explain the concrete constraint that requires
   a larger change before implementing it.
 
+### Appropriate Capability Boundary
+
+Minimal Responsible Implementation applies to product-local scope. When the
+issue, user, or specification explicitly requires a shared foundation, package
+consumption, or second-product reuse:
+
+- implement the smallest durable reusable capability boundary, not merely the
+  shortest current-product patch;
+- require the named next consumer to reuse it without copying product DTOs, UI,
+  or provider adapters;
+- keep product-specific assembly and adapters outside the common boundary;
+- do not invent generic APIs beyond known consumers;
+- report the reuse contract and the rationale for what was promoted or deferred.
+
 Minimal does not mean skipping correctness. For auth, payment, security,
 database, webhook, analytics, quota, and provider code, preserve validation,
 authorization, idempotency, logging or observability, error handling, RLS,

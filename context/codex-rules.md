@@ -20,6 +20,11 @@ For CatCare UI or owner-flow work, also read
 `specs/reference-product/catcare-ui-guidelines.md`; for CatCare icon or
 illustration work, also read `apps/web/public/catcare/icons/icon-spec.md`.
 
+For the Sol root-thread command `按项目规范执行当前 Linear 任务。`, use
+`specs/collaboration/agent-orchestration.md` as the executable orchestration
+contract. Do not infer task selection, delegation, or stop behavior from chat
+history alone.
+
 ## SDD Rule
 
 Do not implement a non-trivial feature directly from a vague request.

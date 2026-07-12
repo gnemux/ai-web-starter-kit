@@ -7,7 +7,8 @@
 - [x] Critical submission effects repair on retry; Audit uses deterministic safe IDs; AI/PostHog failures remain non-destructive.
 - [x] Platform `5/5`, Web `72/72`, full typecheck/lint/test/build and boundary checks pass; Terra review is READY.
 - [x] No UI, schema, migration, provider config, live payment, or real AI changes.
-- [ ] GitHub PR, CI, and merge remain pending publication.
+- [x] GitHub PR #74 merged as `767e742`; required CI and the Vercel bot automatic deployment succeeded. The stable shared test URL returned `200`, while the SSO-protected unique deployment URL returned `302`.
+- [x] No manual deployment, online database mutation/migration, live Provider call, or Provider configuration operation was performed.
 
 ## Functional Checks
 

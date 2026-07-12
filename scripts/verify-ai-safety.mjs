@@ -60,6 +60,8 @@ function walk(dir) {
 const envExample = read(".env.example");
 const aiService = read("apps/web/lib/services/ai.ts");
 const billingService = read("apps/web/lib/services/billing.ts");
+const billingLedger = read("apps/web/lib/services/billing-ledger.ts");
+const billingLedgerCommit = read("apps/web/lib/services/billing-ledger-commit.ts");
 const aiModels = read("apps/web/lib/providers/ai-models.ts");
 const billingMigration = read(
   "supabase/migrations/20260621130735_create_billing_foundation.sql"
@@ -137,19 +139,19 @@ expect(
 );
 
 const commitAiCreditUsage = section(
-  billingService,
+  billingLedger,
   "export async function commitAiCreditUsage",
   "export async function findCommittedAiCreditUsage"
 );
 expect(
-  commitAiCreditUsage.includes(".insert(") &&
-    !commitAiCreditUsage.includes(".upsert("),
+  billingLedger.includes(".insert(") &&
+    !billingLedger.includes(".upsert("),
   "AI Credit usage commits must insert first so duplicate events are observable."
 );
 expect(
-  commitAiCreditUsage.includes("isUniqueViolation") &&
-    billingService.includes("deduplicated: true") &&
-    billingService.includes("consumedCredits: 0"),
+  billingLedger.includes('result.error?.code !== "23505"') &&
+    billingLedgerCommit.includes("deduplicated") &&
+    billingLedgerCommit.includes("toCommit(usage.data, 0, true)"),
   "Duplicate AI Credit usage must return a deduplicated 0-Credit outcome."
 );
 expect(

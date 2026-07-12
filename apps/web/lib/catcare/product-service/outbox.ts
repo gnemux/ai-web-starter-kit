@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 
 import type { Json } from "../../supabase/database.types";
+import { createSupabaseCatCareOutboxWorkerStore, runCatCareOutboxBatch, type CatCareOutboxDispatcher } from "./outbox-worker.ts";
+
+export * from "./outbox-worker.ts";
 
 type ServiceResult<T> =
   | { ok: true; data: T }
@@ -104,6 +107,17 @@ export async function recordCatCareOutboxEvent(
   }
 
   return serviceOk({ correlationId: item.correlation_id });
+}
+
+export async function runCatCareOutboxWorker(dispatcher: CatCareOutboxDispatcher) {
+  const { createSupabaseAdminClient } = await import("../../supabase/server");
+  const clientResult = createSupabaseAdminClient();
+  if (!clientResult.ok) return clientResult;
+  try {
+    return serviceOk(await runCatCareOutboxBatch({ dispatcher, store: createSupabaseCatCareOutboxWorkerStore(clientResult.data) }));
+  } catch {
+    return serviceError("system_error", "The outbox worker is temporarily unavailable.");
+  }
 }
 
 function pickAllowedPayload(

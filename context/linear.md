@@ -985,6 +985,8 @@ minimum path. Its internal order is Audit / Correlation ID -> Outbox -> AI draft
 with human review -> Entitlement / Usage -> Sandbox / Test Mode -> Health /
 Trace / Metrics.
 
+GNE-267 implementation keeps `@xwlc/platform` root compatibility while splitting capability/share-gate internals, keeps runtime adapters in `apps/web`, uses the existing Outbox schema, and separates Billing Credit/usage coordination so same-key retry converges. Travel reuse is proven through the public package entry, not by moving CatCare DTOs into packages.
+
 CAP-02 owner-visible audit addendum is folded directly into `GNE-262`, not a
 third-level task. CAP-02 owns the owner-facing share/security activity surface,
 private-link bearer-risk copy, and correlation id handoff needed for later

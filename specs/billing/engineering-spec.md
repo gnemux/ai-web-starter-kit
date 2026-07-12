@@ -1,5 +1,9 @@
 # Billing Engineering Spec
 
+## GNE-267 Credit / Usage Commit Boundary
+
+AI credit and usage coordination lives in `billing-ledger` as `reserved -> credit -> committed`. The reservation is acquired before Provider invocation, so an active same-key request blocks a second Provider call and the reconciliation function itself refuses mutation until its five-minute lease is stale. Every usage transition uses a `status=reserved` compare-and-set. Provider execution has a 60-second boundary, strictly shorter than the lease; throw/timeout fails the reservation, records a safe failure event, and charges zero. A credit row is not effective consumption until usage is committed. If Provider output succeeded and credit exists but finalization is pending, the output is delivered with accounting marked pending and later stale reconciliation commits it. If credit creation fails, the reservation fails and the failed request is never charged. Query errors never masquerade as not-found.
+
 ## Ownership
 
 - Linear milestone: `MVP2 扩展底座`

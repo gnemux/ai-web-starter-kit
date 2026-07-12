@@ -950,6 +950,33 @@ Latest `GNE-266` CAPABILITY hardening checkpoint on 2026-07-11:
   the local env project token targets a different PostHog project. No token was
   printed, and this checkpoint does not claim cross-project observation.
 
+GNE-267 local implementation checkpoint on 2026-07-12:
+
+- Final local status: `READY` after independent Terra review and four bounded
+  correction rounds. `@xwlc/platform` preserves its root API while capability
+  context/share gate internals are split; Platform tests pass `5/5`, including
+  a root-import-only Travel compile/consumption proof.
+- The Outbox worker uses the existing table with status/attempt/time/update CAS,
+  a five-minute processing lease, deterministic retry, three-attempt dead
+  letter, internal-only failure categories, non-starving ready selection, and
+  destination idempotency requirements.
+- Billing/AI uses the existing usage states as a leased
+  `reserved -> credit -> committed` saga. Active duplicates cannot mutate or
+  invoke the Provider twice; stale reconciliation and every transition enforce
+  `reserved` CAS. Provider execution has a 60-second timeout, throw/timeout
+  writes a safe failure event and charges zero, and successful output can be
+  returned with explicit accounting-pending state until reconciliation.
+- Anonymous submission retries repair required Audit/Outbox effects. Audit
+  idempotency is atomic through a deterministic UUID derived only from safe
+  versioned fields; same-content retries collide on the primary key, while
+  meaningful safe-content updates produce a new event ID.
+- Final evidence passes Web tests `72/72`, Platform tests `5/5`, full-repo
+  `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`, AI safety,
+  release/package boundaries, and `git diff --check`. No UI, schema, migration,
+  live Provider, payment, or deployment configuration changed.
+- Publication is still pending at this checkpoint: GitHub commit, PR, CI, and
+  merge have not yet run.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

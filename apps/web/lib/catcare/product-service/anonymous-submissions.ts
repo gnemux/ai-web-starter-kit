@@ -16,6 +16,7 @@ import {
   requiresAnonymousCareSubmissionNote
 } from "./anonymous-submission-policy";
 import { recordCatCareAuditEvent } from "./audit";
+import { ensureCriticalSubmissionEffects } from "./critical-effects";
 import {
   clearCatCarePlanDetailCache,
   clearCatCarePlanSummaryCache,
@@ -41,6 +42,7 @@ export type AnonymousCareSubmissionMutation = AnonymousCareTaskSubmissionView & 
 
 type AnonymousCareSubmissionSlotView = AnonymousCareTaskSubmissionView & {
   idempotencyKey: string;
+  submissionId: string;
 };
 
 export async function submitAnonymousCareSubmissionFromFormData(
@@ -246,7 +248,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
         tokenResult.data.ownerId,
         tokenResult.data.resourceId
       );
-      void recordCatCareAuditEvent({
+      const auditResult = await recordCatCareAuditEvent({
         actorType: "anonymous_token",
         correlationId,
         eventName: "care_submission_created",
@@ -263,7 +265,13 @@ export async function submitAnonymousCareSubmissionFromFormData(
         taskId: task.id,
         tokenRecordId: tokenResult.data.tokenId
       });
-      void recordSubmissionOutbox({
+      if (!auditResult.ok) {
+        return serviceError(
+          "system_error",
+          "The submission was saved, but its activity record could not be written. Retry safely with the same submission reference."
+        );
+      }
+      const outboxResult = await recordSubmissionOutbox({
         abnormal: updateResult.data.abnormal,
         correlationId,
         idempotencyKey: existingResult.data.idempotencyKey,
@@ -274,6 +282,9 @@ export async function submitAnonymousCareSubmissionFromFormData(
         taskTitle: task.title,
         visitTime
       });
+      if (!outboxResult.ok) {
+        return serviceError("system_error", "The submission was saved, but its delivery record could not be written. Retry safely with the same submission reference.");
+      }
       void trackCatCareProductEvent(
         "anonymous_token",
         "catcare_submission_created",
@@ -298,6 +309,23 @@ export async function submitAnonymousCareSubmissionFromFormData(
       });
     }
 
+    const existingSubmission = existingResult.data;
+    const retryEffects = await ensureCriticalSubmissionEffects({
+      writeAudit: () => recordCatCareAuditEvent({
+        actorType: "anonymous_token", correlationId, eventName: "care_submission_created",
+        idempotencyKey: existingSubmission.idempotencyKey, ownerId: tokenResult.data.ownerId,
+        properties: { abnormal: existingSubmission.abnormal, service_date: serviceDate, status: existingSubmission.status, visit_time: visitTime },
+        resourceId: tokenResult.data.resourceId, resourceType: tokenResult.data.resourceType,
+        taskId: task.id, tokenRecordId: tokenResult.data.tokenId
+      }),
+      writeOutbox: () => recordSubmissionOutbox({
+        abnormal: existingSubmission.abnormal, correlationId,
+        idempotencyKey: existingSubmission.idempotencyKey, ownerId: tokenResult.data.ownerId,
+        serviceDate, status: existingSubmission.status, submissionId: existingSubmission.submissionId,
+        taskTitle: task.title, visitTime
+      })
+    });
+    if (!retryEffects.ok) return serviceError("system_error", "The submission is saved, but its Audit or delivery record is still unavailable. Retry with the same submission reference.");
     clearCatCarePlanCaches(
       tokenResult.data.ownerId,
       tokenResult.data.resourceId
@@ -340,6 +368,22 @@ export async function submitAnonymousCareSubmissionFromFormData(
     }
 
     if (duplicateResult.data) {
+      const duplicate = duplicateResult.data;
+      const effects = await ensureCriticalSubmissionEffects({
+        writeAudit: () => recordCatCareAuditEvent({
+          actorType: "anonymous_token", correlationId, eventName: "care_submission_created",
+          idempotencyKey: duplicate.idempotencyKey, ownerId: tokenResult.data.ownerId,
+          properties: { abnormal: duplicate.abnormal, service_date: serviceDate, status: duplicate.status, visit_time: visitTime },
+          resourceId: tokenResult.data.resourceId, resourceType: tokenResult.data.resourceType,
+          taskId: task.id, tokenRecordId: tokenResult.data.tokenId
+        }),
+        writeOutbox: () => recordSubmissionOutbox({
+          abnormal: duplicate.abnormal, correlationId, idempotencyKey: duplicate.idempotencyKey,
+          ownerId: tokenResult.data.ownerId, serviceDate, status: duplicate.status,
+          submissionId: duplicate.submissionId, taskTitle: task.title, visitTime
+        })
+      });
+      if (!effects.ok) return serviceError("system_error", "The concurrent submission is saved, but its Audit or delivery record is unavailable. Retry with the same submission reference.");
       clearCatCarePlanCaches(
         tokenResult.data.ownerId,
         tokenResult.data.resourceId
@@ -358,7 +402,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
   }
 
   clearCatCarePlanCaches(tokenResult.data.ownerId, tokenResult.data.resourceId);
-  void recordCatCareAuditEvent({
+  const auditResult = await recordCatCareAuditEvent({
     actorType: "anonymous_token",
     correlationId,
     eventName: "care_submission_created",
@@ -375,7 +419,13 @@ export async function submitAnonymousCareSubmissionFromFormData(
     taskId: task.id,
     tokenRecordId: tokenResult.data.tokenId
   });
-  void recordSubmissionOutbox({
+  if (!auditResult.ok) {
+    return serviceError(
+      "system_error",
+      "The submission was saved, but its activity record could not be written. Retry safely with the same submission reference."
+    );
+  }
+  const outboxResult = await recordSubmissionOutbox({
     abnormal: insertResult.data.abnormal,
     correlationId,
     idempotencyKey,
@@ -386,6 +436,9 @@ export async function submitAnonymousCareSubmissionFromFormData(
     taskTitle: task.title,
     visitTime
   });
+  if (!outboxResult.ok) {
+    return serviceError("system_error", "The submission was saved, but its delivery record could not be written. Retry safely with the same submission reference.");
+  }
   void trackCatCareProductEvent(
     "anonymous_token",
     "catcare_submission_created",
@@ -508,7 +561,7 @@ async function getAnonymousSubmissionBySlot(
 ): Promise<ServiceResult<AnonymousCareSubmissionSlotView | null>> {
   const result = await client
     .from("care_submissions")
-    .select("status, note, abnormal, idempotency_key, created_at")
+    .select("id, status, note, abnormal, idempotency_key, created_at")
     .eq("owner_id", ownerId)
     .eq("plan_id", planId)
     .eq("task_id", taskId)
@@ -531,6 +584,7 @@ async function getAnonymousSubmissionBySlot(
           abnormal: submission.abnormal,
           idempotencyKey: submission.idempotency_key,
           note: submission.note,
+          submissionId: submission.id,
           serviceDate,
           status: submission.status,
           submittedAt: submission.created_at

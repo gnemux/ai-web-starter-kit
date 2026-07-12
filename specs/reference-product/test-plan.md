@@ -1,5 +1,15 @@
 # Test Plan: MVP3 Reference Product
 
+## GNE-267 Resilience Matrix
+
+- Gate outcomes expose no private plan data on failure.
+- Repeated submission remains idempotent.
+- Outbox covers sent, retry, dead letter, and competing claims.
+- Outbox ready rows cannot be starved by future retries or active processing leases.
+- Billing reserves before Provider use; credit-only partial state is not effective usage and reconciliation converges without a second Provider call.
+- AI/PostHog failure is non-destructive; critical Audit failure is explicit.
+- Audit retries use a deterministic safe UUID insert, so concurrent same-content writes are atomic without storing notes or secrets.
+
 ## Unit Tests
 
 - `pnpm test:package-boundaries`

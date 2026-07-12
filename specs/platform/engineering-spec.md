@@ -1,5 +1,9 @@
 # Engineering Spec: MVP3 Platform Package Boundary
 
+## GNE-267 Durable Capability Modules
+
+`@xwlc/platform` keeps its existing root exports while capability-context validation and the runtime-neutral share-token gate live in separate internal modules. A second product imports only the package root and supplies its own resource type/scope; Node crypto, Supabase, Next.js, and product DTOs remain app adapters.
+
 ## Scope
 
 GNE-240 defines package boundaries and dependency direction for MVP3 PLATFORM.

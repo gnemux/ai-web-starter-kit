@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import type { PlatformActorType } from "@xwlc/platform";
 import type { Json } from "../../supabase/database.types";
@@ -46,7 +46,7 @@ export type CatCareAuditEventRow = {
   token_record_id: string | null;
 };
 
-export type CatCareAuditInsert = Omit<CatCareAuditEventRow, "id" | "occurred_at">;
+export type CatCareAuditInsert = Omit<CatCareAuditEventRow, "occurred_at">;
 
 export type CatCareAuditInput = {
   actorType: PlatformActorType;
@@ -80,7 +80,7 @@ const allowedEventData: Record<CatCareAuditEventName, readonly string[]> = {
 };
 
 export function buildCatCareAuditInsert(input: CatCareAuditInput): CatCareAuditInsert {
-  return {
+  const event = {
     actor_type: input.actorType,
     correlation_id: input.correlationId || randomUUID(),
     event_data: pickAllowedEventData(input.eventName, input.properties ?? {}),
@@ -92,6 +92,7 @@ export function buildCatCareAuditInsert(input: CatCareAuditInput): CatCareAuditI
     task_id: input.taskId ?? null,
     token_record_id: input.tokenRecordId ?? null
   };
+  return { ...event, id: input.idempotencyKey ? deterministicAuditId(event) : randomUUID() };
 }
 
 export async function recordCatCareAuditEvent(
@@ -108,10 +109,29 @@ export async function recordCatCareAuditEvent(
   const result = await clientResult.data.from("audit_events").insert(event);
 
   if (result.error) {
-    return serviceError("system_error", result.error.message);
+    if (result.error.code === "23505") return serviceOk({ correlationId: event.correlation_id });
+    return serviceError("audit_write_failed", "The activity record could not be written.");
   }
 
   return serviceOk({ correlationId: event.correlation_id });
+}
+
+function deterministicAuditId(event: Omit<CatCareAuditInsert, "id">) {
+  const digest = createHash("sha256").update(JSON.stringify({
+    actor_type: event.actor_type,
+    event_data: event.event_data,
+    event_name: event.event_name,
+    idempotency_key: event.idempotency_key,
+    owner_id: event.owner_id,
+    resource_id: event.resource_id,
+    resource_type: event.resource_type,
+    task_id: event.task_id,
+    token_record_id: event.token_record_id,
+    version: 1
+  })).digest("hex").slice(0, 32).split("");
+  digest[12] = "5";
+  digest[16] = ((Number.parseInt(digest[16], 16) & 3) | 8).toString(16);
+  return `${digest.slice(0, 8).join("")}-${digest.slice(8, 12).join("")}-${digest.slice(12, 16).join("")}-${digest.slice(16, 20).join("")}-${digest.slice(20).join("")}`;
 }
 
 export async function getCatCareAuditActivities(

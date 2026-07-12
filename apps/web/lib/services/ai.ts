@@ -34,9 +34,15 @@ import { createConfiguredAiProvider } from "@/lib/providers/server";
 import { getCurrentAccount } from "./auth";
 import {
   commitAiCreditUsage,
+  clearBillingCacheForOwner,
+  failAiCreditUsage,
   findCommittedAiCreditUsage,
-  getCurrentBillingEntitlementsForGate
+  getCurrentBillingEntitlementsForGate,
+  reconcileReservedAiCreditUsage,
+  reserveAiCreditUsage
 } from "./billing";
+import { isBillingReservationStale } from "./billing-ledger-commit";
+import { buildSafeAiProviderFailureObservation, executeAiProviderWithTimeout } from "./ai-provider-execution";
 
 const aiCreditFeatureKey = "ai_tokens" as const;
 
@@ -340,18 +346,46 @@ export async function generateAiText(
 
   const provider = providerFactoryResult.data;
 
-  const textResult = await provider.generateText({
-    userId: ownerId,
-    purpose: input.purpose,
-    prompt: input.prompt,
-    model: modelConfig.providerModelId,
-    metadata: {
-      ...(safeMetadata ?? {}),
-      idempotency_key: idempotencyKey
+  if (requestedCredits > 0) {
+    const reservation = await reserveAiCreditUsage({
+      credits: requestedCredits,
+      idempotencyKey,
+      metadata: { purpose: input.purpose, request_id: requestId },
+      ownerId
+    });
+    if (!reservation.ok) return reservation;
+    if (!reservation.data.acquired) {
+      if (isBillingReservationStale(reservation.data.usage)) {
+        const reconciliation = await reconcileReservedAiCreditUsage({ idempotencyKey, ownerId });
+        if (reconciliation.ok && reconciliation.data.status === "committed") {
+          clearBillingCacheForOwner(ownerId);
+        }
+      }
+      return serviceOk(buildAiResponse({ idempotencyKey, model: modelConfig.id, provider: provider.descriptor.provider, providerModelId: modelConfig.providerModelId, mode: provider.descriptor.mode, reason: "duplicate", remainingCredits: modelAccess.remainingCredits, requestId, requestedCredits, status: "blocked" }));
     }
-  });
+  }
+
+  const execution = await executeAiProviderWithTimeout(() =>
+    provider.generateText({
+      userId: ownerId,
+      purpose: input.purpose,
+      prompt: input.prompt,
+      model: modelConfig.providerModelId,
+      metadata: { ...(safeMetadata ?? {}), idempotency_key: idempotencyKey }
+    })
+  );
+  if (!execution.ok) {
+    if (requestedCredits > 0) await failAiCreditUsage({ idempotencyKey, ownerId });
+    const observation = buildSafeAiProviderFailureObservation();
+    await trackAiEvent({ distinctId: ownerId, event: "ai_request_failed", metadata: safeMetadata, mode: provider.descriptor.mode, model: modelConfig.id, provider: provider.descriptor.provider, providerModelId: modelConfig.providerModelId, reason: observation.reason, remainingCredits: modelAccess.remainingCredits, requestedCredits, result: observation.result, source: input.purpose, usageRecordStatus: "not_recorded" });
+    return serviceOk(buildAiResponse({ idempotencyKey, model: modelConfig.id, provider: provider.descriptor.provider, providerModelId: modelConfig.providerModelId, mode: provider.descriptor.mode, reason: "provider_failed", remainingCredits: modelAccess.remainingCredits, requestId, requestedCredits, status: "failed" }));
+  }
+  const textResult = execution.data;
 
   if (!textResult.ok) {
+    if (requestedCredits > 0) {
+      await failAiCreditUsage({ idempotencyKey, ownerId });
+    }
     await trackAiEvent({
       consumedCredits: 0,
       distinctId: ownerId,
@@ -486,6 +520,10 @@ export async function generateAiText(
     );
   }
 
+  if (usageCommitResult?.ok && !usageCommitResult.data.accountingPending) {
+    clearBillingCacheForOwner(ownerId);
+  }
+
   await trackAiEvent({
     consumedCredits: usageCommitResult?.data.consumedCredits ?? 0,
     distinctId: ownerId,
@@ -495,7 +533,7 @@ export async function generateAiText(
     model: textResult.data.model,
     provider: textResult.data.provider,
     providerModelId: textResult.data.providerModelId,
-    reason: usageCommitResult ? "usage_recorded" : "allowed",
+    reason: usageCommitResult?.data.accountingPending ? "usage_record_failed" : usageCommitResult ? "usage_recorded" : "allowed",
     remainingCredits:
       modelAccess.remainingCredits === null
         ? null
@@ -507,19 +545,19 @@ export async function generateAiText(
     requestedCredits,
     result: "succeeded",
     source: input.purpose,
-    usageRecordStatus: usageCommitResult ? "recorded" : "not_recorded"
+    usageRecordStatus: usageCommitResult?.data.accountingPending ? "not_recorded" : usageCommitResult ? "recorded" : "not_recorded"
   });
 
   return serviceOk(
     buildAiResponse({
       consumedCredits: usageCommitResult?.data.consumedCredits ?? 0,
-      creditStatus: usageCommitResult ? "committed" : "not_recorded",
+      creditStatus: usageCommitResult && !usageCommitResult.data.accountingPending ? "committed" : "not_recorded",
       idempotencyKey,
       model: textResult.data.model,
       provider: textResult.data.provider,
       providerModelId: textResult.data.providerModelId,
       mode: textResult.data.mode,
-      reason: usageCommitResult ? "usage_recorded" : "allowed",
+      reason: usageCommitResult?.data.accountingPending ? "usage_record_failed" : usageCommitResult ? "usage_recorded" : "allowed",
       remainingCredits:
         modelAccess.remainingCredits === null
           ? null
@@ -532,7 +570,7 @@ export async function generateAiText(
       requestedCredits,
       status: "succeeded",
       text: textResult.data.text,
-      usageRecordStatus: usageCommitResult ? "recorded" : "not_recorded",
+      usageRecordStatus: usageCommitResult?.data.accountingPending ? "not_recorded" : usageCommitResult ? "recorded" : "not_recorded",
       usage: textResult.data.usage
     })
   );

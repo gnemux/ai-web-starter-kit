@@ -114,3 +114,14 @@ test("share-token contract resolves portable authorization states without runtim
     "unavailable"
   );
 });
+
+test("a Travel product consumes the public gate without CatCare DTOs or runtime adapters", () => {
+  const outcome = resolveShareTokenGate({
+    now: new Date("2026-07-11T10:00:00.000Z"),
+    record: { ...record, resourceType: "travel_itinerary", scope: "itinerary_view" },
+    secretVerified: true
+  });
+  assert.equal(outcome.status, "valid");
+  assert.equal(outcome.actor.resourceType, "travel_itinerary");
+  assert.equal(outcome.actor.scope, "itinerary_view");
+});

@@ -1,5 +1,15 @@
 # GNE-261 Capability Action Map
 
+## GNE-267 Failure Boundaries
+
+| Capability | Durable boundary | Failure behavior |
+| --- | --- | --- |
+| Share gate | `@xwlc/platform` root API | stable gate outcomes; app owns safe copy |
+| Anonymous submit | product idempotency key | repeated submit converges; critical Audit failure is explicit |
+| Outbox | conditional claim + idempotency key | deterministic retry, bounded safe failure code, dead letter |
+| AI/Billing | focused ledger commit | provider failure costs zero; partial commit is retryable |
+| PostHog | observation-only transport | capture failure never changes business truth |
+
 ## Scope
 
 GNE-261 maps MVP3 Reference Product business actions to capability contracts so

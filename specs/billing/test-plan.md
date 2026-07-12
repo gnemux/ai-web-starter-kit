@@ -1,5 +1,16 @@
 # Billing Test Plan
 
+## GNE-267 Partial Failure
+
+- Same-key reservation prevents a second Provider invocation.
+- Active concurrent reservation remains untouched; only a stale lease reconciles.
+- Direct reconciliation enforces the lease and usage transitions enforce reserved-state CAS.
+- Provider throw/60-second timeout fails safely before lease expiry, emits safe observation, and charges zero.
+- Finalize failure remains reserved and reconciliation reuses the credit row.
+- Provider output remains deliverable while accounting is pending; pending usage is not effective quota consumption.
+- Reservation without credit compensates to failed; DB errors stay errors.
+- A completed duplicate returns zero newly consumed Credit.
+
 ## Static Checks
 
 ```bash

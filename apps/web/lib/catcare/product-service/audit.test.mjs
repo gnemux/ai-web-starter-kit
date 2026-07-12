@@ -29,6 +29,10 @@ test("catcare audit payload keeps bearer-link secrets and private notes out", ()
     abnormal: true,
     status: "exception"
   });
+  const retry = buildCatCareAuditInsert({ actorType: "anonymous_token", correlationId: "different_corr", eventName: "care_submission_created", idempotencyKey: "anonymous:plan:2026-07-07:0930:submission-ref", ownerId: "owner-id", properties: { abnormal: true, status: "exception" }, resourceId: "plan-id", resourceType: "care_plan", taskId: "task-id" });
+  const update = buildCatCareAuditInsert({ actorType: "anonymous_token", correlationId: "different_corr", eventName: "care_submission_created", idempotencyKey: "anonymous:plan:2026-07-07:0930:submission-ref", ownerId: "owner-id", properties: { abnormal: false, status: "completed" }, resourceId: "plan-id", resourceType: "care_plan", taskId: "task-id" });
+  assert.equal(retry.id, event.id);
+  assert.notEqual(update.id, event.id);
 });
 
 test("catcare audit activity is owner-readable without internal ids", () => {

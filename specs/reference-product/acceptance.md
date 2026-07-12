@@ -1,5 +1,14 @@
 # Acceptance: MVP3 Reference Product
 
+## GNE-267 Evidence
+
+- [x] Package root API stays compatible and Travel root-import consumption is proven.
+- [x] Outbox lease/CAS/retry/dead-letter and Billing reservation/CAS/timeout/reconciliation paths have executable tests.
+- [x] Critical submission effects repair on retry; Audit uses deterministic safe IDs; AI/PostHog failures remain non-destructive.
+- [x] Platform `5/5`, Web `72/72`, full typecheck/lint/test/build and boundary checks pass; Terra review is READY.
+- [x] No UI, schema, migration, provider config, live payment, or real AI changes.
+- [ ] GitHub PR, CI, and merge remain pending publication.
+
 ## Functional Checks
 
 - [x] Signed-out users opening `/catcare` are redirected to login with `next=/catcare`.

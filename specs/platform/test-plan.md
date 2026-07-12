@@ -1,5 +1,11 @@
 # Test Plan: MVP3 Platform Package Boundary
 
+## GNE-267 Compatibility And Travel Consumption
+
+- Import capability/share-gate APIs through the package root.
+- Verify invalid, expired, revoked, unavailable, and valid outcomes.
+- Verify a Travel itinerary consumes the gate without CatCare types or internal imports.
+
 ## GNE-241 Checks
 
 GNE-241 is a minimal public-entry task. Required checks:

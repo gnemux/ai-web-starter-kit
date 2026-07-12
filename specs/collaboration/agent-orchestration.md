@@ -129,13 +129,58 @@ Sol selects exactly one primary writer for each core module:
 
 | Route | Use when | Review |
 | --- | --- | --- |
-| Sol | Small, well-bounded work where orchestration context is essential | Sol self-review for low risk; Terra Reviewer for high risk |
-| Terra | Judgment-heavy implementation, cross-file tracing, or complex failure analysis | Sol for low/medium risk; separate Terra Reviewer thread for high risk |
+| Sol | Default route for small or medium work that Sol can complete safely while retaining the orchestration context | Sol self-review for low risk; Terra Reviewer for high risk |
+| Terra | A bounded implementation where delegation materially reduces context pressure, improves isolation, or supplies judgment-heavy cross-file tracing | Sol for low/medium risk; separate Terra Reviewer thread for high risk |
 | Luna | Deterministic edits, generated/mechanical changes, or prescribed verification | Sol unless the affected surface is high risk |
 
 Sol must not delegate merely to create activity. Delegation is appropriate only
 when the assignment is bounded and improves speed, context isolation, or review
 quality.
+
+## Token-Efficient Agent Budget
+
+Agent count is a quality and latency control, not a completion requirement.
+`agents.max_threads = 6` is an exceptional concurrency ceiling; it is not a
+target for normal Issue execution.
+
+Sol applies these defaults automatically:
+
+1. Sol implements directly unless delegation has a concrete benefit that
+   outweighs duplicated context and verification cost.
+2. Low-risk documentation, configuration, isolated tests, and narrow
+   single-module changes use Sol only.
+3. Medium-risk single-module or coherent cross-file changes normally use Sol
+   as writer. Sol may add one read-only reviewer when the acceptance boundary
+   is easy to miss.
+4. High-risk work requires independent review under the Review Risk Rules, but
+   high risk alone does not require a delegated writer. The preferred pattern
+   is Sol writer plus one Terra Reviewer when Sol can safely implement it.
+5. Use one Terra writer only when implementation is genuinely judgment-heavy,
+   independently bounded, or would otherwise overload the root orchestration
+   context. Use Luna only for clearly mechanical work.
+6. A normal Issue may use at most one delegated writer and one independent
+   reviewer, ordinarily in sequence. More Agents or parallel writers require
+   explicit user instruction or multiple non-overlapping subtasks with a
+   documented latency benefit.
+7. Child Agents receive a bounded task packet and read only the applicable
+   specs, files, dependencies, and acceptance evidence. They must not repeat a
+   broad project audit already completed by Sol.
+
+Verification is similarly budgeted:
+
+- the writer runs targeted tests while implementing;
+- the reviewer reads the stable diff and runs only checks needed to validate
+  findings or high-risk contracts;
+- Sol runs the required full-repository verification once after fixes settle;
+- a full suite is repeated only when a later fix can affect it or fresh
+  evidence invalidates the previous run.
+
+Review should start after the implementation and targeted checks are stable.
+The reviewer returns one consolidated finding set; the original writer fixes
+that set in one batch where practical. Re-review is limited to changed or
+previously failing surfaces unless a new P0/P1 finding proves the wider diff
+must be revisited. Correctness and required acceptance evidence always take
+priority over token savings.
 
 ## Single-Writer Rule
 

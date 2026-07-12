@@ -1,5 +1,23 @@
 # Acceptance: MVP3 Reference Product
 
+## GNE-270 Evidence
+
+- [x] Fresh owner A/B, valid, expired, tampered, regenerated, revoked, direct
+  anonymous read/write, Audit/Outbox, PostHog, and evidence-leakage checks are
+  recorded in `security-negative-verification.md` without bearer credentials.
+- [x] The final test link is revoked, the plan has zero active share tokens,
+  and the temporary second-owner account plus cascading product rows are
+  removed from the shared cloud test project.
+- [x] A disposable local Supabase reset applied all 16 repository migrations;
+  four rollback-only ACCESS security SQL suites passed.
+- [x] Platform tests pass `5/5` and Web tests pass `76/76`; full repository
+  publication checks remain required after the evidence diff is stable.
+- [x] Travel can reuse the platform share gate, safe capability context,
+  telemetry envelope, negative matrix, and adapter acceptance contract while
+  retaining product-specific DTO/store/whitelist rules.
+- [x] GNE-271 still owns cloud migration-history reconciliation; GNE-270 does
+  not close GNE-234 or authorize automatic entry into the next child issue.
+
 ## GNE-268 Evidence
 
 - [x] `reviewer-baseline.md` defines safe owner A, owner B, anonymous, Billing
@@ -269,7 +287,7 @@
   `/catcare/results`, and `/catcare/plans/3c3ec881-fc2d-4b32-b3f1-d15866347d78`:
   pages rendered authenticated owner content with no horizontal overflow.
 - Mobile `390px` smoke passed for valid anonymous
-  `/s/fd75V-mHDP1uxS1XiZF2KwSCT-PpWAnYoa66M5MGF9Q` and invalid
+  `/s/[redacted-valid-token]` and invalid
   `/s/invalid-token-smoke`: both rendered Chinese ACCESS copy with no horizontal
   overflow; invalid token showed no care content.
 - Anonymous submit smoke submitted one current-day task. The visible visit

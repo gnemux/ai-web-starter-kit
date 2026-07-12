@@ -100,6 +100,7 @@ test("share-token contract resolves portable authorization states without runtim
   );
   assert.equal(
     resolveShareTokenGate({
+      now: new Date("2026-07-11T10:00:00.000Z"),
       record: { ...record, revokedAt: "2026-07-11T09:00:00.000Z" },
       secretVerified: true
     }).status,
@@ -107,6 +108,7 @@ test("share-token contract resolves portable authorization states without runtim
   );
   assert.equal(
     resolveShareTokenGate({
+      now: new Date("2026-07-11T10:00:00.000Z"),
       record,
       resourceAvailable: false,
       secretVerified: true

@@ -1033,6 +1033,10 @@ GNE-252 plan-creation recovery checkpoint on 2026-07-12:
   release boundaries, production build, and `git diff --check`. Independent
   Terra review reported no P0-P3 blocker. Deployed no-routine and post-routine
   recovery smoke remains required before closing the reopened GNE-252.
+- PR CI also exposed a pre-existing date-dependent Platform test: two status
+  assertions omitted the explicit test clock and became `expired` on
+  2026-07-12. The test now supplies its intended fixed `now`; Platform `5/5`
+  and the full root `pnpm test` pass without changing runtime behavior.
 
 ## Next Steps
 

@@ -15,7 +15,7 @@ Snapshot time: 2026-07-12 (Asia/Shanghai).
 | Evidence | Result |
 | --- | --- |
 | Stable test URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Git commit | `0aa196aafa8b40b51ecbb433f2d90a1d76132cb5` |
+| Git commit | `ad6e33dae7f5a54501e2a6e6dc889cb34ab5f561` |
 | Git relation | GNE-269 branch is fast-forwarded to local `origin/main`; deployed commit matches |
 | GitHub CI | `pass`: `checks` completed with `success` |
 | Vercel deployment | `pass`: GitHub commit status reported `Deployment has completed`; browser loaded the stable URL |
@@ -42,7 +42,7 @@ Supabase or PostHog environment exists.
 | Anonymous private-link view | `pass` | Fresh token route explicitly displayed `匿名访问`, showed only authorized handoff content, one day/two visits/seven executions, and no owner navigation |
 | Anonymous submission | `pass` | Submitted one safe `completed` result for the first visit; the public page changed from 0/3 to 1/3 and confirmed owner visibility |
 | Owner result review | `pass` | Owner result page showed `真实提交`, 1/6 completed, five missing results, no abnormal note, and the submitted `主粮` result |
-| AI entitlement / credit decision | `pass` | Plan generation passed through the active entitlement/credit gate and consumed exactly one unit; header changed from 19/65 to 18/65 |
+| AI entitlement / credit decision | `pass` | The same test plan consumed exactly one unit for generation (19/65 to 18/65) and one for its result recap (18/65 to 17/65); the recap was stored and displayed on the Owner result page |
 | Paywall / sandbox checkout or existing entitlement | `pass` | Active Pro entitlement allowed generation; the add-on checkout opened in explicit Test Mode and no payment form was submitted |
 
 The full private share URL and bearer token are intentionally excluded from
@@ -72,7 +72,7 @@ The connected cloud test project was queried read-only through the database
 tool. No direct SQL write, migration, history repair, or seed was performed.
 The authorized product-flow run itself created one clearly named test cat, one
 published plan, one anonymous submission, and the matching AI usage/credit
-consumption fact, as recorded below.
+consumption facts for plan generation and result recap, as recorded below.
 
 | Safe aggregate | Count / result |
 | --- | ---: |
@@ -83,7 +83,7 @@ consumption fact, as recorded below.
 | Active share tokens | 4 |
 | Billing orders | 30 |
 | Active entitlements | 9 |
-| Committed usage rows | 40 |
+| Committed usage rows | 41 |
 | Audit events | 73 |
 | Outbox events | 8 |
 
@@ -93,12 +93,19 @@ All eight Outbox rows were still `pending`; this is recorded evidence, not a
 Runbook implementation change.
 
 The resumed GNE-269 run produced one published test plan, six task definitions,
-one completed submission, one committed usage row, and one matching credit
-consumption row. For that plan, read-only facts show `care_plan_published`,
-`share_link_created`, `share_page_viewed`, and `care_submission_created` Audit
-events. The submission owns one correlated `owner_notification` Outbox row in
-`pending` state with attempt count zero. Audit actor types distinguish the owner
-actions (`user`) from public view/submission (`anonymous_token`).
+one completed submission, and two committed usage/credit pairs: plan generation
+and the same plan's result recap. For that plan, read-only facts show
+`care_plan_published`, `share_link_created`, `share_page_viewed`, and
+`care_submission_created` Audit events. The submission owns one correlated
+`owner_notification` Outbox row in `pending` state with attempt count zero.
+Audit actor types distinguish the owner actions (`user`) from public
+view/submission (`anonymous_token`).
+
+The stored mock recap matches the real 1/6 result: one completed item, no
+exceptions, five unsubmitted items, and no overdue item. Its usage row is
+`committed`, carries purpose `catcare_result_recap`, and links to exactly one
+credit-ledger consume. The earlier unauthorized response created no usage row,
+so the successful retry did not double-charge.
 
 Schema-history parity is `fail`: the cloud test database has the runtime data
 categories required by the journey, but its 11 recorded migrations do not

@@ -1045,7 +1045,8 @@ GNE-269 Reviewer Runbook completion checkpoint on 2026-07-12:
 
 - After saving enabled routines for `GNE269 验收猫`, the deployed flow created
   and published one 2026-07-12 plan with six task definitions and seven
-  scheduled executions. Mock AI usage moved exactly once from 19/65 to 18/65.
+  scheduled executions. Mock AI plan generation moved usage from 19/65 to
+  18/65; the same plan's stored result recap then moved it to 17/65.
 - A fresh private link rendered the explicit anonymous boundary with no owner
   navigation. One safe completed result changed the first visit from 0/3 to
   1/3; the owner result page then showed one real submission out of six.
@@ -1053,8 +1054,13 @@ GNE-269 Reviewer Runbook completion checkpoint on 2026-07-12:
   `share_link_created` Audit events, anonymous-token view/submission Audit
   events, and one correlated pending owner-notification Outbox row. Raw share
   credentials are excluded from repository and Linear evidence.
+- The stored recap summarizes the real 1/6 result as one completion, no
+  exception, five missing submissions, and no overdue item. Read-only ledger
+  evidence contains one new committed `catcare_result_recap` usage and exactly
+  one linked credit consume; the preceding unauthorized response wrote no usage
+  row and caused no double-charge.
 - Current safe totals are 3 cats, 5 plans, 83 task definitions, 25 submissions,
-  4 active share tokens, 40 committed usage rows, 73 Audit events, and 8 Outbox
+  4 active share tokens, 41 committed usage rows, 73 Audit events, and 8 Outbox
   rows. All Outbox rows remain pending; the Runbook records this state without
   running a worker or changing implementation.
 - Reviewer decision is `go` for GNE-269. Repository/cloud migration-history

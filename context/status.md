@@ -1067,6 +1067,31 @@ GNE-269 Reviewer Runbook completion checkpoint on 2026-07-12:
   reproducibility remains owned by GNE-271 and must close before the final
   v0.3.0 release conclusion. Do not enter the next child from this checkpoint.
 
+GNE-270 security-negative verification checkpoint on 2026-07-12:
+
+- Cross-owner, anonymous direct access, valid, expired, tampered, regenerated,
+  revoked, whitelist/idempotency, and durable telemetry redaction checks pass.
+  The bearer values remained browser-only and were not committed to evidence.
+- The final test link was revoked and the tested plan has zero active share
+  tokens. The temporary second-owner account and cascading CatCare rows were
+  deleted from the shared cloud test project.
+- A disposable local Supabase reset applied all 16 repository migrations.
+  Four rollback-only ACCESS security SQL suites passed; Platform tests pass
+  `5/5` and Web tests pass `76/76`.
+- PostHog contains the share-view and link-created events. Their observed
+  schemas contain bounded context/resource/result fields and no raw-token,
+  token-hash, authorization, or bearer properties.
+- Independent Terra review found and removed one historical full bearer URL
+  from acceptance evidence. The repository-wide rescan found only explicit
+  synthetic test fixtures; final review is `READY` with no P0-P3 finding.
+- Foundation judgment: Travel can reuse the platform share gate, safe
+  capability context, telemetry envelope, negative matrix, and adapter
+  acceptance contract. Product stores, DTOs, whitelists, CatCare Audit event
+  types, and the Supabase Outbox store remain application-local until a second
+  real consumer proves the extraction seam.
+- Exact cloud migration-history parity remains GNE-271 scope. This checkpoint
+  does not close GNE-234 and must not automatically start GNE-271.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

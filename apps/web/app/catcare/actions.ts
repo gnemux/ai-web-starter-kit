@@ -39,6 +39,7 @@ import {
   buildCatCarePlanGenerationPrompt,
   normalizeGenerationRequestId
 } from "./plans/plan-ai-generation";
+import { getPlanCreateErrorRedirect } from "./plans/plan-create-error";
 import { buildCatCarePlanAiRecapPrompt } from "./plans/plan-ai-recap";
 import { buildPlanResultSummary } from "./plans/plan-result-summary";
 
@@ -367,7 +368,15 @@ export async function createCatCarePlanAction(formData: FormData) {
 
   if (!result.ok) {
     if (result.error.code === "validation_error") {
-      redirect("/catcare/plans?plan_error=validation");
+      redirect(
+        getPlanCreateErrorRedirect(
+          result.error.fields,
+          formData
+            .getAll("catIds")
+            .map((value) => String(value).trim())
+            .find(Boolean)
+        )
+      );
     }
 
     throw new Error(result.error.message);

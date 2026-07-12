@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | partial smoke pass for PostHog production event reception and required shared properties; full Production Smoke Path not recorded |
+| Latest production status | automatic main deployment for `1c2de2c` succeeded; stable validation URL returned HTTP 200 from `sin1`; full Production Smoke Path not recorded |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | `2bd2572` for the latest recorded Vercel deployment; canonical Production URL still protected/owner-verified only |
+| Latest production commit | `1c2de2c6ab8f414279220031e7d5dd27563bfc3f` |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | No current `ANALYTICS-06` blocker recorded. Full Production Smoke Path is still not recorded in this file. AI production smoke is `not_run` until a real provider is configured and deployed. GNE-250 deployed Reference Product smoke is `not_run` until PRODUCT / ACCESS / CAPABILITY create the minimum deployed business path. |
-| Next owner action | Before online release, verify Supabase Auth URL configuration, apply any missing reviewed Supabase migrations to the target project, confirm Vercel Production env entries, merge and redeploy the Vercel Function region config, verify the next deployment reports `regions=["sin1"]`, then run the full Production Smoke Path. |
+| Current blocked items | Full Production Smoke Path is still not recorded. AI production smoke is `not_run` until a real provider is configured and deployed. The reference/staging/test Supabase migration history does not exactly match the 16 repository migrations; GNE-271 owns reconciliation evidence. |
+| Next owner action | Privately confirm two independent reviewer accounts and one active share link for GNE-269; reconcile migration-history parity in GNE-271; run the full deployed Reference Product smoke in GNE-250. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -135,10 +135,13 @@ Record configured/missing/unknown only. Do not record values.
 
 ## Latest Production Deployment
 
-Latest recorded Vercel Production deployment: 2026-06-29 15:21 CST, commit
-`2bd2572`, deployment status `success`. Direct smoke against the generated
-Vercel deployment URL redirected to Vercel SSO, so this is deployment/build
-evidence, not a full public Production Smoke Path pass.
+Latest recorded Vercel automatic `main` deployment: 2026-07-12, commit
+`1c2de2c6ab8f414279220031e7d5dd27563bfc3f`, deployment status `success`.
+GitHub CI also completed successfully. The stable validation URL returned
+HTTP 200 and its response reported Vercel region `sin1`. This is deployment and
+entry-point evidence, not a full Production Smoke Path pass. Although Vercel
+labels the target `Production`, MVP3 still uses reference/staging/test provider
+resources and has no true production Supabase project.
 
 ## Latest Preview Deployment
 
@@ -150,9 +153,9 @@ No full Production Smoke Path has been recorded in this file yet. AI production
 smoke is also not recorded as passed; GNE-160 defines the repository-level
 checklist and budget guard only.
 
-GNE-250 deployed Reference Product smoke is `not_run / blocked by later MVP3
-parents` until PRODUCT, ACCESS, and CAPABILITY provide the minimum business path
-and RLS/provider evidence.
+GNE-250 deployed Reference Product smoke is `not_run`. PRODUCT, ACCESS, and
+CAPABILITY prerequisites are now complete, so GNE-250 may run later in the
+declared VERIFY sequence; VERIFY-01 does not start it early.
 
 ## Current Release Configuration Notes
 
@@ -163,7 +166,7 @@ and RLS/provider evidence.
 - Creem may be enabled only for controlled `GNE-100` test-mode verification, with test secrets server-only and `PAYMENT_LIVE_ENABLED=false`.
 - Required repository migrations include the Payment events migration and the Billing entitlement source-idempotency migration. The target Supabase project migration history must be checked before release.
 - Vercel environment variable changes require a new deployment before the changed values can be verified.
-- Vercel Functions should run in `sin1` while the current Supabase project is in `ap-southeast-1`. Verify the next Production deployment reports `regions=["sin1"]` before treating the region alignment as passed.
+- Vercel Functions should run in `sin1` while the current Supabase project is in `ap-southeast-1`. The 2026-07-12 stable validation response reported `sin1`; repeat this check during the full GNE-250 smoke before making a final release claim.
 
 ## 2026-06-20 19:58 CST - production PostHog event verification
 

@@ -995,6 +995,28 @@ Codex orchestration efficiency checkpoint on 2026-07-12:
   fixes settle. Extra full-suite or review rounds require changed risk or a new
   blocking finding.
 
+GNE-268 VERIFY baseline checkpoint on 2026-07-12:
+
+- Added `specs/reference-product/reviewer-baseline.md` as the safe handoff for
+  reviewer roles, test-data preparation, stable URL, deployed commit, package
+  versions, schema evidence, cleanup, and downstream VERIFY ownership. It
+  stores no passwords, raw share links, private care content, or provider
+  secrets.
+- Automatic Vercel deployment and GitHub CI passed for main commit `1c2de2c`;
+  the stable validation URL returned HTTP 200 from `sin1`. This is an MVP3
+  validation deployment over reference/staging/test providers, not evidence of
+  a true production Supabase environment or a full product smoke pass.
+- Read-only Supabase aggregates confirm CatCare, anonymous-share, Billing,
+  entitlement, credit, and usage data categories exist. Only one owner
+  currently owns CatCare cat rows, so the second reviewer identity must use a
+  separate private credential and create data on demand or rely on the
+  rollback-only isolation checks in GNE-270.
+- Exact migration-history parity is not established: the repository contains
+  16 migrations through `20260709013908`, while the connected test project
+  records 11 history rows through `20260708124436`, with a different
+  share-token migration timestamp. VERIFY-01 does not change the database;
+  GNE-271 must reconcile this evidence before the final v0.3.0 decision.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

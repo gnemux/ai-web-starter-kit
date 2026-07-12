@@ -1,5 +1,22 @@
 # Acceptance: MVP3 Reference Product
 
+## GNE-268 Evidence
+
+- [x] `reviewer-baseline.md` defines safe owner A, owner B, anonymous, Billing
+  sandbox, and AI mock/no-op/sandbox preparation without committed credentials
+  or bearer links.
+- [x] Stable validation URL, deployed commit `1c2de2c`, successful GitHub CI and
+  Vercel deployment, HTTP 200 entry check, and `sin1` observation are recorded.
+- [x] Workspace package versions, logical `catcare-mvp3` contract, repository
+  migration range, and read-only reference/test data aggregates are recorded.
+- [x] Exact remote migration-history parity is explicitly `fail`, not hidden:
+  the remote history has 11 rows versus 16 repository migrations and records a
+  different share-token migration timestamp. GNE-271 owns reconciliation.
+- [x] Full runbook, security-negative checks, patch/migration rehearsal,
+  provider evidence consolidation, deployed product smoke, live AI/payment,
+  and true production database verification remain assigned to their declared
+  later VERIFY issues or `not_run` boundaries.
+
 ## GNE-267 Evidence
 
 - [x] Package root API stays compatible and Travel root-import consumption is proven.

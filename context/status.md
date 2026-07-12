@@ -982,6 +982,19 @@ GNE-267 local implementation checkpoint on 2026-07-12:
   online database mutation/migration, live Provider call, or Provider
   configuration operation was performed.
 
+Codex orchestration efficiency checkpoint on 2026-07-12:
+
+- Sol is now the default writer for low/medium work it can safely complete;
+  high risk requires independent review but does not automatically require a
+  delegated implementation Agent.
+- Normal execution is limited to at most one delegated writer and one
+  independent reviewer, ordinarily sequential. `max_threads = 6` remains an
+  exceptional capacity ceiling rather than a usage target.
+- Writers run targeted checks, reviewers validate the stable diff and risk
+  surfaces, and Sol runs the final full-repository verification once after
+  fixes settle. Extra full-suite or review rounds require changed risk or a new
+  blocking finding.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

@@ -6,7 +6,11 @@
 
 ## Integration Tests
 
-- Not applicable. No runtime integration behavior changes.
+- Runtime application integration is not applicable for documentation-only
+  workflow changes.
+- Agent orchestration changes require a live Linear read-only simulation that
+  proves parent selection, child fallback order, dependency state, exact
+  `parentId`, and zero mutations.
 
 ## Browser / E2E Checks
 
@@ -24,6 +28,11 @@
 - Check `specs/collaboration/engineering-spec.md` documents the owner-authored no-op trigger commit remediation for already-reviewed PRs that were merged with a blocked contributor-authored deployment commit.
 - Check `.github/pull_request_template.md` no longer contains a default Supabase-only checklist.
 - Check `context/status.md` records the documentation update.
+- Parse `.codex/config.toml` and `.codex/agents/*.toml`; confirm three agents,
+  `max_depth = 1`, and read-only Terra Reviewer.
+- Run the simulation in `specs/collaboration/agent-orchestration.md` and confirm
+  it selects one child, leaves the parent open, and does not enter the next
+  child.
 
 ## Regression Risks
 

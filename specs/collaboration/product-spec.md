@@ -17,7 +17,7 @@
 
 - 明确开发者、Repo 拥有者和 AI Coding Agent 的协作责任。
 - 让 AI 在开始开发前检查当前分支、工作区状态和任务范围。
-- 让 AI 默认遵循 Minimal Implementation First，优先做最小可验收闭环，减少过度设计、过度抽象和一次性组件库。
+- 让 AI 对产品局部改动默认遵循 Minimal Responsible Implementation，优先做最小可验收闭环；涉及通用底座或第二产品复用时选择最小但耐久的合适能力边界。
 - 防止 AI 或开发者在旧功能分支上继续开发新任务。
 - 防止直接在 `main` 上实现新功能或修复，除非用户明确要求且风险已说明。
 - 固化当前 Vercel 规则：非 `main` 分支不自动部署，`main` 合并后触发 Production。
@@ -66,6 +66,7 @@ kick off Linear task
 - AI Coding Agent should treat `v0.2.0` as the last stable release marker. If local `main` is behind `origin/main` or does not contain `v0.2.0`, fetch/pull before implementation.
 - AI Coding Agent 实现 MVP 功能时必须优先选择最小可工作的改动；不得无必要引入新依赖、新抽象或大型组件库；但安全、支付、Auth、数据库代码不能以“最小”为理由省略校验、幂等、日志、权限、RLS、Webhook 校验或环境隔离。
 - 最小可工作改动不能牺牲已经确认的产品交互、局部更新、数据一致性、可访问性基础或高保真 UI 要求；如果最小改法会让同页操作退化为整页刷新、丢失用户输入或破坏产品规范，它不算可验收实现。
+- 当任务明确涉及通用底座、Package 公共入口或第二产品复用时，以“最小耐久可复用能力边界”为准，而非代码行数最少；下一产品应无需复制当前产品 DTO、UI 或 provider adapter，产品专属组装仍留在产品层。
 - AI Coding Agent 如果发现当前在 `main` 且需要实现新任务，应先从 `main` 新开本地分支。
 - AI Coding Agent 如果发现当前在旧任务分支、已 merge 分支或与新任务不匹配的分支，应提示用户并建议先切回 `main` 再新开分支。
 - AI Coding Agent 如果工作区已有未提交变更，不得擅自切分支、覆盖或丢弃，应先说明状态并保护已有变更。

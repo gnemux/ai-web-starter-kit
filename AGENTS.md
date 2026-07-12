@@ -11,12 +11,14 @@ Before making code or documentation changes, read:
 5. The relevant file under `integrations/` when touching a third-party service
 6. `context/supabase-workflow.md` when touching Supabase schema, RLS, Auth, Storage, Realtime, or database-backed features
 7. `specs/deploy/engineering-spec.md` and the relevant deploy memory document when touching deployment status, Preview / Production verification, production monitoring, environment matrices, or deploy-related Linear issues
+8. `specs/collaboration/agent-orchestration.md` when asked to execute the current Linear task by project convention
 
 ## Working Rules
 
 - Use Specification Driven Development: product spec first, engineering spec second, implementation third, verification last.
 - Keep changes scoped to the Linear issue or user request.
-- Follow Minimal Implementation First: prefer the smallest working change, reuse existing code, and avoid speculative abstractions or one-off component libraries.
+- Follow Minimal Responsible Implementation for product-local work: prefer the smallest complete change, reuse existing code, and avoid speculative abstractions.
+- For shared foundation or a named second-product reuse target, choose the smallest durable capability boundary that the next product can consume without copying the current product's DTOs, UI, or provider-specific code.
 - Prefer durable patterns over one-off patches.
 - Do not commit secrets, API keys, customer data, private credentials, or real tokens.
 - Do not invent provider behavior. Read the integration document before coding against Supabase, Vercel, analytics, payment, email, or AI APIs.
@@ -48,6 +50,11 @@ Before making code or documentation changes, read:
 6. Make focused changes.
 7. Run relevant checks.
 8. Summarize what changed, the current branch, verification, what remains, and the next best-practice step.
+
+When a Sol root thread receives `按项目规范执行当前 Linear 任务。`, it must
+follow `specs/collaboration/agent-orchestration.md` for task selection,
+delegation, review, operation gates, Linear writeback, and the one-issue stop
+condition.
 
 ## Linear
 

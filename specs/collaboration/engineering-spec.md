@@ -9,6 +9,8 @@
 - `AGENTS.md`
 - `context/codex-rules.md`
 - `context/status.md`
+- `.codex/config.toml`
+- `.codex/agents/*`
 - `specs/collaboration/*`
 - GitHub PR workflow
 - Vercel deployment workflow
@@ -40,9 +42,15 @@ read project rules
 -> summarize branch and next PR action
 ```
 
-## Minimal Implementation First
+The automatic Sol root-thread workflow is defined separately in
+`specs/collaboration/agent-orchestration.md`. This file keeps the general
+collaboration lifecycle; the orchestration spec owns current-task selection,
+Sol/Terra/Luna routing, single-writer rules, review routing, approval gates,
+Linear writeback, and the one-issue stop condition.
 
-AI Coding Agent must use a minimal-implementation-first rule for MVP work. The intent is to reduce overbuilding while preserving correctness and reviewability.
+## Minimal Responsible Implementation And Appropriate Boundaries
+
+For product-local MVP work, AI Coding Agent must use a minimal-responsible-implementation rule. The intent is to reduce overbuilding while preserving correctness and reviewability.
 
 - Prefer the smallest working change.
 - Do not introduce new dependencies unless clearly necessary.
@@ -52,6 +60,13 @@ AI Coding Agent must use a minimal-implementation-first rule for MVP work. The i
 - Before adding code, check whether existing code can be modified or deleted.
 - If a larger change is necessary, state why the smaller path is insufficient before implementing it.
 - For security, payment, auth, and database code, minimal does not mean skipping validation, idempotency, logging, permission checks, RLS, webhook verification, or environment isolation.
+
+When shared foundation, package consumption, or second-product reuse is an explicit requirement:
+
+- choose the smallest durable capability boundary that satisfies the known consumers, rather than the fewest changed lines;
+- prove the next product can consume the boundary without copying the current product's DTOs, UI, or provider-specific adapter;
+- keep product-specific assembly and adapters outside the shared boundary;
+- do not generalize beyond named consumers and confirmed extension points.
 
 ## Branch Rules For AI Agents
 

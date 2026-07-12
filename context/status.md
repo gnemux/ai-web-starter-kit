@@ -974,8 +974,13 @@ GNE-267 local implementation checkpoint on 2026-07-12:
   `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`, AI safety,
   release/package boundaries, and `git diff --check`. No UI, schema, migration,
   live Provider, payment, or deployment configuration changed.
-- Publication is still pending at this checkpoint: GitHub commit, PR, CI, and
-  merge have not yet run.
+- Publication completed through GitHub PR #74 and merge commit `767e742`.
+  Required GitHub CI succeeded, the Vercel bot's automatic deployment
+  succeeded, and the stable shared test URL
+  `https://ai-web-starter-kit-web.vercel.app/` returned `200`. The unique
+  deployment URL returned the expected SSO `302`. No manual deployment,
+  online database mutation/migration, live Provider call, or Provider
+  configuration operation was performed.
 
 ## Next Steps
 

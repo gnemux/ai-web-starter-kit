@@ -1017,6 +1017,23 @@ GNE-268 VERIFY baseline checkpoint on 2026-07-12:
   share-token migration timestamp. VERIFY-01 does not change the database;
   GNE-271 must reconcile this evidence before the final v0.3.0 decision.
 
+GNE-252 plan-creation recovery checkpoint on 2026-07-12:
+
+- GNE-269's deployed run proved that the submitted dates were valid; the new
+  test cat had no reusable routine or enabled routine item. The service
+  correctly rejected task generation, but the owner page mislabeled every
+  validation failure as a date error.
+- The product-local fix preserves the routine and date safety rules, maps
+  validation fields to bounded `routine`, `date`, `cats`, or `validation`
+  states, keeps only a valid selected cat UUID in the recovery URL, and gives
+  the routine case a direct recovery action.
+- `/catcare/plans?cat_id=...` now selects only the intended cat by default;
+  plans opened without a target keep the existing plan-tier selection behavior.
+- Local verification passes 76 Web tests, full lint/typecheck, package and
+  release boundaries, production build, and `git diff --check`. Independent
+  Terra review reported no P0-P3 blocker. Deployed no-routine and post-routine
+  recovery smoke remains required before closing the reopened GNE-252.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

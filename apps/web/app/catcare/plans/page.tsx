@@ -13,6 +13,11 @@ import {
 } from "../owner-flow-components";
 import { createCatCarePlanAction } from "../actions";
 import { DateRangeInputsClient } from "./date-range-inputs-client";
+import {
+  parsePlanCreateErrorKind,
+  shouldSelectPlanCatByDefault,
+  type PlanCreateErrorKind
+} from "./plan-create-error";
 import { PlanCreateSubmitButton } from "./plan-create-submit-button";
 import {
   getCatCarePlanListWorkspace,
@@ -70,6 +75,11 @@ export default async function CatCarePlansPage({
   const aiReviewState = getAiTextReviewState();
   const generationRequestId = randomUUID();
   const showPlanPaywall = query.paywall === "ai_quota" || !hasAiQuota;
+  const selectedCatId =
+    result.ok && result.data.cats.some((cat) => cat.id === query.cat_id)
+      ? query.cat_id
+      : null;
+  const planError = parsePlanCreateErrorKind(query.plan_error);
 
   return (
     <>
@@ -133,8 +143,11 @@ export default async function CatCarePlansPage({
                   {showPlanPaywall ? (
                     <PlanQuotaPaywallCard currentPlan={currentPlan} />
                   ) : null}
-                  {query.plan_error === "validation" ? (
-                    <PlanFormErrorCard />
+                  {planError ? (
+                    <PlanFormErrorCard
+                      kind={planError}
+                      selectedCatId={selectedCatId}
+                    />
                   ) : null}
                   <CatCareField label="照护猫咪">
                     <div className="grid gap-2 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-2 sm:grid-cols-2">
@@ -149,7 +162,11 @@ export default async function CatCarePlansPage({
                         >
                           <input
                             className="sr-only"
-                            defaultChecked={!disabled}
+                            defaultChecked={shouldSelectPlanCatByDefault({
+                              catId: cat.id,
+                              disabled,
+                              selectedCatId
+                            })}
                             disabled={disabled}
                             name="catIds"
                             type="checkbox"
@@ -317,14 +334,64 @@ function PlanQuotaPaywallCard({
   );
 }
 
-function PlanFormErrorCard() {
+function PlanFormErrorCard({
+  kind,
+  selectedCatId
+}: {
+  kind: PlanCreateErrorKind;
+  selectedCatId: string | null | undefined;
+}) {
+  const content = getPlanFormErrorContent(kind);
+  const routineHref = selectedCatId
+    ? `/catcare/routines?cat_id=${encodeURIComponent(selectedCatId)}`
+    : "/catcare/routines";
+
   return (
     <section className="rounded-2xl border border-[#f0d7a6] bg-[#fff9ed] p-4">
+      <h3 className="text-base font-semibold text-[#6f4700]">
+        {content.title}
+      </h3>
       <p className="text-sm font-semibold leading-6 text-[#8a5a00]">
-        请补全照护日期：开始日期不能早于今天，结束日期不能早于开始日期。
+        {content.description}
       </p>
+      {kind === "routine" ? (
+        <div className="mt-3">
+          <CatCareButton href={routineHref} variant="secondary">
+            去设置喂养习惯
+          </CatCareButton>
+        </div>
+      ) : null}
     </section>
   );
+}
+
+function getPlanFormErrorContent(kind: PlanCreateErrorKind) {
+  if (kind === "routine") {
+    return {
+      description:
+        "所选猫咪还没有可生成任务的喂养习惯。先保存至少一条启用的习惯，再回来生成清单。",
+      title: "先补充喂养习惯"
+    };
+  }
+
+  if (kind === "date") {
+    return {
+      description: "开始日期不能早于今天，结束日期不能早于开始日期。",
+      title: "请检查照护日期"
+    };
+  }
+
+  if (kind === "cats") {
+    return {
+      description: "请选择至少一只猫咪后再生成照护清单。",
+      title: "请选择照护猫咪"
+    };
+  }
+
+  return {
+    description: "请检查当前选择和交接信息后重试。",
+    title: "清单暂未生成"
+  };
 }
 
 function formatPlanAiMode(mode: string) {

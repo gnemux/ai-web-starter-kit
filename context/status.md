@@ -1031,14 +1031,35 @@ GNE-252 plan-creation recovery checkpoint on 2026-07-12:
   plans opened without a target keep the existing plan-tier selection behavior.
 - Local verification passes 76 Web tests, full lint/typecheck, package and
   release boundaries, production build, and `git diff --check`. Independent
-  Terra review reported no P0-P3 blocker. Deployed no-routine and post-routine
-  recovery smoke remains required before closing the reopened GNE-252.
+  Terra review reported no P0-P3 blocker. PR #78 was merged as `0aa196a`; main
+  CI and Vercel passed. The deployed no-routine recovery preserved the target
+  cat, showed the routine CTA, consumed no AI unit, and created no plan.
 - PR CI also exposed a pre-existing date-dependent Platform test: the
   unavailable-resource assertion omitted the explicit test clock and became
   `expired` on 2026-07-12. It now uses a pre-expiry clock, while the revoked
   assertion uses a post-expiry clock to preserve revoked-over-expired
   precedence. Platform `5/5` and the full root `pnpm test` pass without
   changing runtime behavior.
+
+GNE-269 Reviewer Runbook completion checkpoint on 2026-07-12:
+
+- After saving enabled routines for `GNE269 验收猫`, the deployed flow created
+  and published one 2026-07-12 plan with six task definitions and seven
+  scheduled executions. Mock AI usage moved exactly once from 19/65 to 18/65.
+- A fresh private link rendered the explicit anonymous boundary with no owner
+  navigation. One safe completed result changed the first visit from 0/3 to
+  1/3; the owner result page then showed one real submission out of six.
+- Read-only cloud facts for the plan include owner `care_plan_published` and
+  `share_link_created` Audit events, anonymous-token view/submission Audit
+  events, and one correlated pending owner-notification Outbox row. Raw share
+  credentials are excluded from repository and Linear evidence.
+- Current safe totals are 3 cats, 5 plans, 83 task definitions, 25 submissions,
+  4 active share tokens, 40 committed usage rows, 73 Audit events, and 8 Outbox
+  rows. All Outbox rows remain pending; the Runbook records this state without
+  running a worker or changing implementation.
+- Reviewer decision is `go` for GNE-269. Repository/cloud migration-history
+  reproducibility remains owned by GNE-271 and must close before the final
+  v0.3.0 release conclusion. Do not enter the next child from this checkpoint.
 
 ## Next Steps
 

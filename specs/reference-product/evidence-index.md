@@ -210,6 +210,29 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 | `payment_events` RLS with no public policy | Informational | No | Intentional server/webhook-only boundary; do not add public policy merely to clear the Advisor info. |
 | AI dashboard stale failure-model wording | Low | No | Correct dashboard description during Analytics maintenance; do not reintroduce a failure-only product model. |
 
+## Future Product Handoff Gates
+
+These are trigger-based handoff requirements, not fixed assignments to the
+current MVP4/MVP5 issue numbers. Future planning may merge, rename, or replace
+those issues. When Travel is formally scoped, map every triggered row to an
+active issue with an owner and acceptance criteria.
+
+| Capability | Becomes mandatory when | Future owner category |
+| --- | --- | --- |
+| Isolated Supabase/PostHog production environment | Before the first real user or live-provider operation | Travel Deployment / Environment |
+| Supabase leaked-password protection | Before public signup opens | Travel Auth / Security |
+| Live AI quality, cost, budget, rate limit, and degradation | Before enabling a live AI provider | Travel AI Production Gate |
+| Real Outbox delivery | Before promising email, SMS, or notification delivery | Travel Notification / Async |
+| Provider-free Outbox state machine and safe deterministic event-ID helper extraction | When Travel is the second consumer and would otherwise copy CatCare logic | Travel Platform Extraction |
+| Live payment, refund, tax, and reconciliation | Before the first real charge | Travel Payment Production Gate |
+| Stale AI/PostHog dashboard metadata | During the next Analytics maintenance pass | Analytics Maintenance |
+
+GNE-274 may complete without creating every future issue in advance. A real
+capability must not be enabled or described as ready until its triggered row is
+mapped to a then-current issue. Untriggered rows stay deferred. The lack of a
+public `payment_events` policy remains an intentional server/webhook-only
+design and is not implementation work.
+
 ## Handoff To The Decision Issues
 
 GNE-272 evidence coverage is complete. GNE-250 VERIFY-06 must now reproduce the

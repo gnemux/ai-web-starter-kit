@@ -193,15 +193,15 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 | Package patch and database upgrade | GNE-271 | `package-db-upgrade-verification.md` |
 | Product/access/capability acceptance history | GNE-231 / GNE-232 / GNE-233 children | `acceptance.md`, capability/action and security specs |
 | Cross-system evidence index | GNE-272 | This document |
+| Final deployment smoke reproduction | GNE-250 | Must complete before GNE-273 |
 | Final v0.3.0 decision | GNE-273 | Not executed by GNE-272 |
 | Product/Travel extension decision | GNE-274 | Not executed by GNE-272 |
-| Final deployment smoke reproduction | GNE-250 | Not executed by GNE-272 |
 
 ## Not Run And Decision Caveats
 
 | Item | Risk | Blocks GNE-272 | Required treatment |
 | --- | --- | --- | --- |
-| GNE-250 final deployment-environment smoke reproduction | Medium | No | Keep `not_run`; GNE-273 must not describe it as passed before GNE-250 produces evidence. |
+| GNE-250 final deployment-environment smoke reproduction | Medium | No | Execute as VERIFY-06; GNE-273 is blocked until GNE-250 produces a pass result or an explicit blocking/not-run risk. |
 | True production Supabase/PostHog isolation | Low for MVP3, high before real users | No | Not enabled in MVP3; create and migrate an isolated production environment before live users, real payment, or real AI cost. |
 | Live AI provider quality/cost | Low for MVP3 | No | Remains a later provider gate; current evidence is mock/no-op/sandbox/test only. |
 | Live payment, settlement, refund, tax, dispute | Low for MVP3, high before commerce | No | Remains under the production-payment gate; current orders are sandbox or Creem Test Mode. |
@@ -212,10 +212,10 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 
 ## Handoff To The Decision Issues
 
-GNE-272 evidence coverage is complete. GNE-273 can use this index to separate
-verified MVP3 facts from `not_run` and future production gates. It must not turn
-the still-pending GNE-250 smoke, real Outbox delivery, live providers, or true
-production isolation into passed claims.
+GNE-272 evidence coverage is complete. GNE-250 VERIFY-06 must now reproduce the
+deployed product smoke. After that gate, GNE-273 can use this index and the
+smoke result to separate verified MVP3 facts from `not_run` and future
+production gates. It must not turn real Outbox delivery, live providers, or
+true production isolation into passed claims.
 
-Completing this index does not close GNE-234 and does not activate GNE-273.
-
+Completing this index does not close GNE-234 and activates GNE-250, not GNE-273.

@@ -1187,10 +1187,11 @@ GNE-273 v0.3.0 decision checkpoint on 2026-07-13:
   journey, signed-out anonymous submission, RLS/security negatives,
   AI/Billing/Credit return, Audit/Outbox enqueue, PostHog observation, package
   patch, 17-file empty-database rebuild/cloud parity, GitHub CI, and Vercel.
-- The fresh `catcare_submission_created` analytics event remains absent even
-  though trusted submission/Audit/Outbox/result facts passed. Real Outbox
-  delivery, separate production Supabase/PostHog, live AI/payment, and
-  Cloudflare/Hono implementation remain explicit trigger-based gates.
+- At GNE-273 decision time, the fresh `catcare_submission_created` analytics
+  event remained absent even though trusted submission/Audit/Outbox/result
+  facts passed. The later GNE-266 deployed repair rerun received that event;
+  real Outbox delivery, separate production Supabase/PostHog, live AI/payment,
+  and Cloudflare/Hono implementation remain explicit trigger-based gates.
 - Cloudflare/Hono adapter readiness is `Conditional`: reusable packages are
   runtime-agnostic and expose Actor/Session, owner/scope, safe context, generic
   share-gate, DB-boundary, and provider-port contracts, while actual Worker
@@ -1222,17 +1223,27 @@ GNE-266 Analytics reliable-delivery repair checkpoint on 2026-07-13:
   against CatCare fire-and-forget Analytics. Full test, typecheck, lint,
   production build, package/release boundaries, and diff checks pass.
 - Independent Terra targeted re-review is `READY` with no remaining P0-P3.
-  GitHub publication, automatic Vercel deployment, deployed anonymous
-  view/submission smoke, and fresh PostHog observation remain required before
-  GNE-266 and GNE-233 can return to Done.
+- PR #89 passed GitHub CI and merged as
+  `82e918794350c53a8bc9a828050420f42e74c86b`. Vercel automatic deployment
+  completed successfully at 2026-07-13 04:45:34 UTC.
+- Fresh deployed plan `8e84b9b1-7d82-4b20-b2f5-8c056b137a66` produced an
+  authorized anonymous view and one completed submission. The anonymous page
+  changed from `0/6` to `1/6`, and the Owner result page showed the same real
+  completion.
+- PostHog project 476986 received `catcare_share_page_viewed` and
+  `catcare_submission_created`. The submission event, anonymous-token Audit,
+  and pending Owner-notification Outbox row shared correlation ID
+  `1aa1180a-7a0f-43ab-934d-975d586c5909`; Analytics stored only the redacted
+  `/s/[redacted]` URL and no raw token or private note.
+- The GNE-266 reliable-delivery defect is closed by deployed evidence. Parent
+  GNE-233 may return to Done after its child/status audit; this execution must
+  stop before activating GNE-274.
 
 ## Next Steps
 
-1. Complete only the reopened GNE-266 reliable-delivery PR, required CI,
-   merge, automatic Vercel verification, deployed anonymous view/submission
-   smoke, and fresh PostHog read-only evidence.
-2. Return GNE-266 and parent GNE-233 to Done only after the deployed evidence
-   passes. Keep GNE-274 blocked and do not activate it in this execution.
+1. Publish the GNE-266 evidence-only closeout, then return GNE-266 and parent
+   GNE-233 to Done after the final child/status audit.
+2. Keep GNE-274 blocked and do not activate it in this execution.
 3. Keep GNE-234 open. Run GNE-274 in a separate later root task to decide the
    Travel/product-expansion path.
 4. Keep `v0.2.0` as the sealed MVP2 baseline and use

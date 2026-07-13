@@ -128,7 +128,7 @@ export async function getAnonymousCarePlanView(
       resourceType: tokenResult.data.resourceType,
       tokenRecordId: tokenResult.data.tokenId
     });
-    void trackCatCareProductEvent(
+    await trackCatCareProductEvent(
       "anonymous_token",
       "catcare_share_link_rejected",
       { outcome: outcome.status, result: "rejected" },
@@ -237,7 +237,7 @@ export async function getAnonymousCarePlanView(
     resourceType: tokenResult.data.resourceType,
     tokenRecordId: tokenResult.data.tokenId
   });
-  void trackCatCareProductEvent(
+  await trackCatCareProductEvent(
     "anonymous_token",
     "catcare_share_page_viewed",
     { outcome: "valid", result: "success" },

@@ -231,7 +231,7 @@ export async function createCatCarePlanFromFormData(
 
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_created", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_plan_created", {
     care_event_count: planTasksResult.data.eventCount,
     cat_count: selectedCats.length,
     item_count: planTasksResult.data.itemCount,
@@ -556,7 +556,7 @@ export async function updateCatCarePlanTasksFromFormData(
 
     clearCatCarePlanSummaryCache(ownerResult.data);
     clearCatCarePlanDetailCache(ownerResult.data, planId);
-    void trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
+    await trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
       enabled_task_count: nextTasks.filter((task) => task.enabled).length,
       task_count: nextTasks.length
     });
@@ -589,7 +589,7 @@ export async function updateCatCarePlanTasksFromFormData(
 
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
     enabled_task_count: (tasksResult.data ?? []).filter((task) => task.enabled).length,
     task_count: tasksResult.data?.length ?? 0
   });
@@ -997,6 +997,7 @@ export async function publishCatCarePlan(
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
+  const analyticsDeliveries: Promise<void>[] = [];
   fanOutSafeCapabilityContext(
     {
       correlation_id: correlationId,
@@ -1006,7 +1007,7 @@ export async function publishCatCarePlan(
     },
     [
       (context) => {
-        void trackCatCareProductEvent(
+        analyticsDeliveries.push(trackCatCareProductEvent(
           ownerResult.data,
           "catcare_plan_published",
           {
@@ -1015,7 +1016,7 @@ export async function publishCatCarePlan(
             result: "success"
           },
           context
-        );
+        ));
       },
       (context) => {
         void recordCatCareAuditEvent({
@@ -1032,6 +1033,7 @@ export async function publishCatCarePlan(
       }
     ]
   );
+  await Promise.all(analyticsDeliveries);
 
   return serviceOk({
     ...mapPlan(data),
@@ -1077,7 +1079,7 @@ export async function closeCatCarePlan(
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_closed", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_plan_closed", {
     plan_status: data.status
   });
 
@@ -1160,7 +1162,7 @@ export async function deleteCatCarePlan(
   clearCatCarePlanSummaryCache(ownerResult.data);
   clearCatCarePlanDetailCache(ownerResult.data, planId);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_plan_deleted", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_plan_deleted", {
     plan_status: plan.status
   });
 

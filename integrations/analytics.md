@@ -146,6 +146,23 @@ New instrumentation must follow this contract before a reviewer treats it as val
 - Analytics events may observe Auth, Payment, Billing, AI, and quota behavior, but these systems must keep their own trusted facts in services and database tables.
 - Reviewers should expand a fresh PostHog event and verify both shared properties and event-specific properties. A row appearing in Activity is not enough if the properties are missing.
 
+### Server Delivery Reliability
+
+- Product and capability services must `await` their server Analytics facade.
+  Do not leave a PostHog request as an unmanaged `void` Promise after the
+  business handler returns; serverless runtimes may end that request before
+  capture completes.
+- The shared server transport bounds one capture attempt to 1 second and
+  converts Provider exceptions, timeouts, and non-success responses into safe
+  warnings. These failures must not turn an already committed business fact,
+  Audit record, Outbox record, Billing result, or page result into failure.
+- Warning metadata is limited to the event name plus bounded status/error
+  information. It must not include `distinct_id`, event properties, private
+  content, URLs containing bearer credentials, tokens, or Provider payloads.
+- This contract is best-effort observation with a bounded awaited attempt; it
+  is not durable delivery. Add an Analytics queue/outbox only when a real
+  product requires replay, compensation, or an explicit delivery guarantee.
+
 ## PostHog Funnel And Dashboard Templates
 
 `GNE-124` owns reusable PostHog funnel and dashboard templates for MVP2/MVP3 reviewer acceptance. These templates are observation surfaces only; they do not make PostHog the source of truth for Auth, Billing, Payment, Entitlement, AI, or quota state.

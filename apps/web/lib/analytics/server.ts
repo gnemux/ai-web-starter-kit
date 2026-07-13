@@ -11,6 +11,7 @@ import {
   readOptionalPublicEnv,
   type AnalyticsModule
 } from "./config";
+import { deliverAnalyticsSafely } from "./delivery";
 import { resolveSafeAnalyticsCurrentUrl } from "./request-context";
 import { buildPostHogCaptureRequest } from "./posthog-capture";
 import { sanitizeServerProperties } from "./server-properties";
@@ -49,42 +50,38 @@ export async function trackServerEvent({
     return;
   }
 
-  try {
-    const requestContextProperties = await getServerRequestContextProperties();
+  await deliverAnalyticsSafely({
+    event,
+    deliver: async (signal) => {
+      const requestContextProperties = await getServerRequestContextProperties();
 
-    const request = buildPostHogCaptureRequest({
-      apiKey: posthogKey,
-      distinctId,
-      event,
-      host: posthogHost,
-      properties: {
-        ...getAnalyticsBaseProperties(module),
-        ...requestContextProperties,
-        ...(metadataResult.data ?? {}),
-        ...sanitizeServerProperties(properties)
-      }
-    });
-    const response = await fetch(request.url, {
-      body: request.body,
-      cache: "no-store",
-      headers: {
-        "content-type": "application/json"
-      },
-      method: "POST"
-    });
-
-    if (!response.ok) {
-      console.warn("PostHog server capture failed", {
+      const request = buildPostHogCaptureRequest({
+        apiKey: posthogKey,
+        distinctId,
         event,
-        status: response.status
+        host: posthogHost,
+        properties: {
+          ...getAnalyticsBaseProperties(module),
+          ...requestContextProperties,
+          ...(metadataResult.data ?? {}),
+          ...sanitizeServerProperties(properties)
+        }
       });
-    }
-  } catch (error) {
-    console.warn("PostHog server capture failed", {
-      event,
-      message: error instanceof Error ? error.message : "unknown_error"
-    });
-  }
+      const response = await fetch(request.url, {
+        body: request.body,
+        cache: "no-store",
+        headers: {
+          "content-type": "application/json"
+        },
+        method: "POST",
+        signal
+      });
+
+      return { ok: response.ok, status: response.status };
+    },
+    onWarning: (details) =>
+      console.warn("PostHog server capture failed", details)
+  });
 }
 
 async function getServerRequestContextProperties(): Promise<

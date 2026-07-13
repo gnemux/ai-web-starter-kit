@@ -142,7 +142,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
       resourceType: tokenResult.data.resourceType,
       tokenRecordId: tokenResult.data.tokenId
     });
-    void trackCatCareProductEvent(
+    await trackCatCareProductEvent(
       "anonymous_token",
       "catcare_share_link_rejected",
       { outcome: "unavailable", result: "rejected" },
@@ -285,7 +285,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
       if (!outboxResult.ok) {
         return serviceError("system_error", "The submission was saved, but its delivery record could not be written. Retry safely with the same submission reference.");
       }
-      void trackCatCareProductEvent(
+      await trackCatCareProductEvent(
         "anonymous_token",
         "catcare_submission_created",
         { result: "updated" },
@@ -439,7 +439,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
   if (!outboxResult.ok) {
     return serviceError("system_error", "The submission was saved, but its delivery record could not be written. Retry safely with the same submission reference.");
   }
-  void trackCatCareProductEvent(
+  await trackCatCareProductEvent(
     "anonymous_token",
     "catcare_submission_created",
     { result: "created" },

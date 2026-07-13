@@ -376,7 +376,7 @@ export async function copyCatCareRoutineFromFormData(
   clearRoutineSourceCatCache(ownerResult.data);
   clearRoutineOwnerItemKeyCache(ownerResult.data);
   clearDefaultRoutineCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_routine_copied", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_routine_copied", {
     item_count: copiedItems.length,
     source: "owner_flow"
   });
@@ -546,7 +546,7 @@ export async function saveCatCareRoutineFromFormData(
   clearRoutineSourceCatCache(ownerResult.data);
   clearRoutineOwnerItemKeyCache(ownerResult.data);
   clearDefaultRoutineCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_routine_saved", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_routine_saved", {
     enabled_item_count: allItems.filter((item) => item.enabled).length,
     item_count: allItems.length,
     custom_item_count: customItems.length,

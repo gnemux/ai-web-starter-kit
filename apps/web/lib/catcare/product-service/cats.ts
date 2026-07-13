@@ -113,7 +113,7 @@ export async function createCatCareCatFromFormData(
   clearCatListCache(ownerResult.data);
   clearCatSummaryCache(ownerResult.data);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_cat_created", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_cat_created", {
     breed: cat.breed,
     has_photo: Boolean(cat.photoUrl),
     source: "owner_flow"
@@ -227,7 +227,7 @@ export async function updateCatCareCatFromFormData(
   clearCatListCache(ownerResult.data);
   clearCatSummaryCache(ownerResult.data);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_cat_updated", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_cat_updated", {
     breed: cat.breed,
     has_photo: Boolean(cat.photoUrl),
     source: "owner_flow"
@@ -284,7 +284,7 @@ export async function deleteCatCareCatById(
   clearCatCareEventListCache(ownerResult.data);
   clearCatCareWorkspaceStatsCache(ownerResult.data);
   clearRoutineSourceCatCache(ownerResult.data);
-  void trackCatCareProductEvent(ownerResult.data, "catcare_cat_deleted", {
+  await trackCatCareProductEvent(ownerResult.data, "catcare_cat_deleted", {
     source: "owner_flow"
   });
 

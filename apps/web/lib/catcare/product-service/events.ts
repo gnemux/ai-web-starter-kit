@@ -8,8 +8,6 @@ import {
   CARE_EVENT_SELECT,
   CatCareEvent,
   CatCareEventsWorkspace,
-  clearCatCareEventListCache,
-  clearCatCareWorkspaceStatsCache,
   getAuthenticatedOwnerId,
   loadCareEvents,
   loadCatSummaries,
@@ -104,8 +102,6 @@ export async function createCatCareEventFromFormData(
     return mapSupabaseError(result.error);
   }
 
-  clearCatCareEventListCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
 
   return serviceOk(mapCareEvent(result.data));
 }
@@ -150,8 +146,6 @@ export async function updateCatCareEventFromFormData(
     return mapSupabaseError(result.error);
   }
 
-  clearCatCareEventListCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
 
   return serviceOk(mapCareEvent(result.data));
 }
@@ -191,8 +185,6 @@ export async function deleteCatCareEventFromFormData(
     return mapSupabaseError(result.error);
   }
 
-  clearCatCareEventListCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
 
   return serviceOk({ id: result.data.id });
 }

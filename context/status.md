@@ -1292,6 +1292,17 @@ GNE-274 product-expansion decision checkpoint on 2026-07-13:
 
 ## Next Steps
 
+2026-07-13 GNE-288 corrective lifecycle update (local, not deployed):
+
+- Production refresh inconsistency was traced to five-minute process-local
+  caches holding different owner-data snapshots across Vercel instances.
+- The corrective design removes mutable CatCare process caches, makes every cat
+  delete a tombstone, hides mutable child rows through RLS, and keeps plan/result
+  history through immutable `care_plan_cats` snapshots with `（已删除）` labels.
+- Local clean-db rebuild, lifecycle SQL/RLS tests, existing CatCare security
+  tests, 82 web tests, typecheck, package-boundary verification, and production
+  build pass. The cloud test database has not been migrated in this checkpoint.
+
 1. Publish the GNE-274 product-expansion decision, then close only GNE-274
    after CI, merge, automatic deployment, and Linear evidence sync pass.
 2. Keep GNE-234 open and do not activate another Issue in this execution.

@@ -25,7 +25,8 @@ export const catCareAuditEventNames = [
   "share_page_viewed",
   "invalid_or_revoked_token_rejected",
   "care_submission_created",
-  "owner_boundary_denied"
+  "owner_boundary_denied",
+  "cat_profile_archived"
 ] as const;
 
 export type CatCareAuditEventName = (typeof catCareAuditEventNames)[number];
@@ -41,7 +42,7 @@ export type CatCareAuditEventRow = {
   occurred_at: string;
   owner_id: string | null;
   resource_id: string | null;
-  resource_type: "care_plan" | null;
+  resource_type: "care_plan" | "cat_profile" | null;
   task_id: string | null;
   token_record_id: string | null;
 };
@@ -56,7 +57,7 @@ export type CatCareAuditInput = {
   ownerId?: string | null;
   properties?: Record<string, Json | undefined>;
   resourceId?: string | null;
-  resourceType?: "care_plan" | null;
+  resourceType?: "care_plan" | "cat_profile" | null;
   taskId?: string | null;
   tokenRecordId?: string | null;
 };
@@ -70,6 +71,7 @@ export type CatCareAuditActivity = {
 };
 
 const allowedEventData: Record<CatCareAuditEventName, readonly string[]> = {
+  cat_profile_archived: ["deletion_mode"],
   care_plan_published: ["task_count"],
   care_submission_created: ["abnormal", "service_date", "status", "visit_time"],
   invalid_or_revoked_token_rejected: ["reason"],
@@ -202,6 +204,8 @@ export function mapCatCareAuditActivity(
       return activity(row, "success", "照看者提交了照护结果", formatSubmissionSummary(data));
     case "owner_boundary_denied":
       return activity(row, "warning", "已拒绝越权操作", "系统阻止了不属于当前主人的访问。");
+    case "cat_profile_archived":
+      return activity(row, "warning", "猫咪档案已归档", "日常数据已隐藏，历史计划与结果继续保留。");
   }
 }
 

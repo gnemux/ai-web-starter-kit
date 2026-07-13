@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 import { ErrorState } from "@xwlc/ui";
 
@@ -21,7 +22,7 @@ export default async function CatCareCatDetailPage({
   searchParams
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ delete_error?: string; plan_id?: string; saved?: string }>;
 }) {
   const { id } = await params;
   const query = await searchParams;
@@ -37,6 +38,26 @@ export default async function CatCareCatDetailPage({
   return (
     <>
       <CatCareToast message={getCatDetailToastMessage(query.saved, context.locale)} />
+      {query.delete_error ? (
+        <div className="mx-auto mb-5 w-full max-w-[1196px] rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-950">
+          {query.delete_error === "active_share_link"
+            ? context.locale === "en"
+              ? "This profile is still exposed by an active share link. Revoke that link first."
+              : "这只猫咪仍在一个有效分享链接中。请先进入计划撤销分享链接，再删除档案。"
+            : query.delete_error === "active_plan"
+            ? context.locale === "en"
+              ? "This profile is still used by an active care plan. Close or delete that plan first."
+              : "这只猫咪仍在进行中的照护计划里。请先关闭或删除该计划，再删除档案。"
+            : context.locale === "en"
+              ? "The profile could not be deleted. No data was changed; please try again."
+              : "档案暂时无法删除，数据没有变化，请稍后重试。"}
+          {query.plan_id ? (
+            <Link className="ml-2 underline" href={`/catcare/plans/${query.plan_id}`}>
+              {context.locale === "en" ? "Open plan" : "查看计划"}
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
       {!catResult.ok ? (
         <ErrorState
           badgeLabel="需检查"

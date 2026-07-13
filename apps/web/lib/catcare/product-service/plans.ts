@@ -12,6 +12,7 @@ import { recordCatCareAuditEvent } from "./audit";
 
 import {
   CARE_EVENT_SELECT,
+  CARE_PLAN_CAT_SELECT,
   CAT_SELECT,
   CareEventRow,
   CareRoutineItemRow,
@@ -23,15 +24,13 @@ import {
   CreatePlanInput,
   ROUTINE_ITEM_SELECT,
   ROUTINE_SELECT,
-  clearCatCarePlanDetailCache,
-  clearCatCarePlanSummaryCache,
-  clearCatCareWorkspaceStatsCache,
   getAuthenticatedOwnerId,
   loadCatItemAssignments,
   loadLegacyCareItems,
   loadOwnerLibraryItems,
   mapCatItemAssignment,
   mapPlan,
+  mapPlanParticipant,
   mapSubmission,
   mapSupabaseError,
   mapTask,
@@ -40,12 +39,10 @@ import {
   normalizePlanInput,
   normalizePlanVisitCount,
   normalizeTaskTimeHint,
-  readCatCarePlanDetailCache,
   trackCatCareProductEvent,
   withPlanVisitCount,
   withRelatedItemInstruction,
   withTaskScopeTitle,
-  writeCatCarePlanDetailCache
 } from "./core";
 
 export async function createCatCarePlanFromFormData(
@@ -113,6 +110,7 @@ export async function createCatCarePlanFromFormData(
     .from("cats")
     .select(CAT_SELECT)
     .eq("owner_id", ownerResult.data)
+    .is("deleted_at", null)
     .in("id", inputResult.data.catIds);
 
   if (catsResult.error) {
@@ -123,9 +121,9 @@ export async function createCatCarePlanFromFormData(
     .map((catId) => (catsResult.data ?? []).find((cat) => cat.id === catId))
     .filter((cat): cat is CatRow => Boolean(cat));
 
-  if (selectedCats.length === 0) {
-    return serviceError("validation_error", "Choose at least one cat.", {
-      catIds: "required"
+  if (selectedCats.length !== inputResult.data.catIds.length) {
+    return serviceError("validation_error", "One or more selected cats are no longer active.", {
+      catIds: "stale"
     });
   }
 
@@ -203,6 +201,23 @@ export async function createCatCarePlanFromFormData(
     return mapSupabaseError(planError);
   }
 
+  const participantsResult = await clientResult.data
+    .from("care_plan_cats")
+    .insert(
+      selectedCats.map((cat, sortOrder) => ({
+        cat_id: cat.id,
+        cat_name_snapshot: cat.name,
+        plan_id: plan.id,
+        sort_order: sortOrder
+      }))
+    )
+    .select(CARE_PLAN_CAT_SELECT);
+
+  if (participantsResult.error) {
+    await clientResult.data.from("care_plans").delete().eq("id", plan.id);
+    return mapSupabaseError(participantsResult.error);
+  }
+
   const { data: taskRows, error: taskError } = await clientResult.data
     .from("care_tasks")
     .insert(
@@ -229,8 +244,6 @@ export async function createCatCarePlanFromFormData(
     return mapSupabaseError(taskError);
   }
 
-  clearCatCarePlanSummaryCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
   await trackCatCareProductEvent(ownerResult.data, "catcare_plan_created", {
     care_event_count: planTasksResult.data.eventCount,
     cat_count: selectedCats.length,
@@ -244,6 +257,7 @@ export async function createCatCarePlanFromFormData(
 
   return serviceOk({
     ...mapPlan(plan),
+    participants: (participantsResult.data ?? []).map(mapPlanParticipant),
     tasks: (taskRows ?? []).map(mapTask),
     submissions: []
   });
@@ -323,9 +337,6 @@ export async function saveCatCarePlanAiRecap(input: {
     return mapSupabaseError(error);
   }
 
-  clearCatCarePlanSummaryCache(ownerResult.data);
-  clearCatCarePlanDetailCache(ownerResult.data, input.planId);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
 
   return serviceOk({
     ...mapPlan(data),
@@ -554,8 +565,6 @@ export async function updateCatCarePlanTasksFromFormData(
       return mapSupabaseError(planUpdateResult.error);
     }
 
-    clearCatCarePlanSummaryCache(ownerResult.data);
-    clearCatCarePlanDetailCache(ownerResult.data, planId);
     await trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
       enabled_task_count: nextTasks.filter((task) => task.enabled).length,
       task_count: nextTasks.length
@@ -587,8 +596,6 @@ export async function updateCatCarePlanTasksFromFormData(
     return mapSupabaseError(planUpdateResult.error);
   }
 
-  clearCatCarePlanSummaryCache(ownerResult.data);
-  clearCatCarePlanDetailCache(ownerResult.data, planId);
   await trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
     enabled_task_count: (tasksResult.data ?? []).filter((task) => task.enabled).length,
     task_count: tasksResult.data?.length ?? 0
@@ -994,9 +1001,6 @@ export async function publishCatCarePlan(
     return mapSupabaseError(error);
   }
 
-  clearCatCarePlanSummaryCache(ownerResult.data);
-  clearCatCarePlanDetailCache(ownerResult.data, planId);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
   const analyticsDeliveries: Promise<void>[] = [];
   fanOutSafeCapabilityContext(
     {
@@ -1076,9 +1080,6 @@ export async function closeCatCarePlan(
     return mapSupabaseError(error);
   }
 
-  clearCatCarePlanSummaryCache(ownerResult.data);
-  clearCatCarePlanDetailCache(ownerResult.data, planId);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
   await trackCatCareProductEvent(ownerResult.data, "catcare_plan_closed", {
     plan_status: data.status
   });
@@ -1159,9 +1160,6 @@ export async function deleteCatCarePlan(
     return mapSupabaseError(deleteResult.error);
   }
 
-  clearCatCarePlanSummaryCache(ownerResult.data);
-  clearCatCarePlanDetailCache(ownerResult.data, planId);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
   await trackCatCareProductEvent(ownerResult.data, "catcare_plan_deleted", {
     plan_status: plan.status
   });
@@ -1186,16 +1184,6 @@ export async function getCatCarePlanDetail(
   }
 
   const includeSubmissions = options.includeSubmissions !== false;
-  const cachedPlan = readCatCarePlanDetailCache(
-    ownerResult.data,
-    planId,
-    includeSubmissions
-  );
-
-  if (cachedPlan) {
-    return serviceOk(cachedPlan);
-  }
-
   const planResult = await clientResult.data
     .from("care_plans")
     .select(
@@ -1227,9 +1215,15 @@ export async function getCatCarePlanDetail(
           .eq("owner_id", ownerResult.data)
           .eq("plan_id", planId)
           .order("created_at", { ascending: false });
-  const [tasksResult, submissionsResult] = await Promise.all([
+  const participantsQuery = clientResult.data
+    .from("care_plan_cats")
+    .select(CARE_PLAN_CAT_SELECT)
+    .eq("plan_id", planId)
+    .order("sort_order", { ascending: true });
+  const [tasksResult, submissionsResult, participantsResult] = await Promise.all([
     tasksQuery,
-    submissionsQuery
+    submissionsQuery,
+    participantsQuery
   ]);
 
   if (tasksResult.error) {
@@ -1240,18 +1234,16 @@ export async function getCatCarePlanDetail(
     return mapSupabaseError(submissionsResult.error);
   }
 
+  if (participantsResult.error) {
+    return mapSupabaseError(participantsResult.error);
+  }
+
   const plan = {
     ...mapPlan(planResult.data),
+    participants: (participantsResult.data ?? []).map(mapPlanParticipant),
     submissions: (submissionsResult?.data ?? []).map(mapSubmission),
     tasks: (tasksResult.data ?? []).map(mapTask)
   };
-
-  writeCatCarePlanDetailCache(
-    ownerResult.data,
-    planId,
-    includeSubmissions,
-    plan
-  );
 
   return serviceOk(plan);
 }

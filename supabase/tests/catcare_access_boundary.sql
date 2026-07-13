@@ -146,7 +146,7 @@ values
     '13000000-0000-0000-0000-000000000001',
     '23000000-0000-0000-0000-000000000001',
     'GNE259 Owner A plan',
-    'published',
+    'draft',
     current_date,
     current_date + 1
   ),
@@ -155,10 +155,18 @@ values
     '13000000-0000-0000-0000-000000000002',
     '23000000-0000-0000-0000-000000000002',
     'GNE259 Owner B plan',
-    'published',
+    'draft',
     current_date,
     current_date + 1
   );
+
+insert into public.care_plan_cats (plan_id, cat_id, cat_name_snapshot, sort_order)
+values
+  ('73000000-0000-0000-0000-000000000001', '23000000-0000-0000-0000-000000000001', 'GNE259 Owner A Cat', 0),
+  ('73000000-0000-0000-0000-000000000002', '23000000-0000-0000-0000-000000000002', 'GNE259 Owner B Cat', 0);
+
+update public.care_plans
+set status = 'published', published_at = now();
 
 insert into public.care_tasks (id, plan_id, category, title, instructions, required, enabled)
 values

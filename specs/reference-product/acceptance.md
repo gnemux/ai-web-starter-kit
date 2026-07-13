@@ -562,3 +562,27 @@
   valid/expired/revoked/invalid/unavailable state resolution. CatCare DTOs,
   persistence rows, raw secrets, and Node crypto remain in the app layer.
 - No schema, migration, or UI behavior changes are introduced.
+
+## GNE-288 Cat Profile Archival Acceptance
+
+- “删除档案” never hard-deletes a cat. Successful archival removes the cat and
+  its mutable aggregate data from active pages on the next request, independent
+  of which Vercel instance handles that request.
+- Draft/published plans and active share links produce a recoverable conflict
+  with a link to the blocking plan; the route must not redirect to success when
+  the service reports failure.
+- Reviewed/closed plans, tasks, submissions, and recap history are retained.
+  Every historical participant uses its immutable name snapshot and archived
+  participants display `（已删除）`.
+- Direct cat hard delete is denied, cross-owner archival is denied, and one
+  atomic redacted audit row records a successful archive.
+- The cat-photo bucket is private. An authenticated owner can retrieve only a
+  photo referenced by their active cat through the application proxy; anonymous,
+  cross-owner, archived-cat, unreferenced-object, and legacy-public-URL access
+  is denied.
+- A legacy multi-cat plan cannot resolve or snapshot a participant from another
+  owner during migration backfill; an invalid foreign reference becomes a
+  neutral deleted-participant tombstone.
+- A clean local migration rebuild, dedicated lifecycle SQL test, existing
+  CatCare security SQL tests, 82 web tests, typecheck, package boundaries, and
+  production build must pass before remote migration or merge is considered.

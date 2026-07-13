@@ -14,6 +14,8 @@ export type CatItemAssignmentRow =
   Database["public"]["Tables"]["cat_item_assignments"]["Row"];
 export type CareEventRow = Database["public"]["Tables"]["care_events"]["Row"];
 export type CarePlanRow = Database["public"]["Tables"]["care_plans"]["Row"];
+export type CarePlanCatRow =
+  Database["public"]["Tables"]["care_plan_cats"]["Row"];
 export type CareTaskRow = Database["public"]["Tables"]["care_tasks"]["Row"];
 export type CareTaskInsert = Database["public"]["Tables"]["care_tasks"]["Insert"];
 export type CareSubmissionRow =
@@ -190,7 +192,7 @@ export type CatCareSubmission = {
 export type CatCarePlan = {
   id: string;
   ownerId: string;
-  catId: string;
+  catId: string | null;
   title: string;
   status: CarePlanStatus;
   generationSource: CarePlanRow["generation_source"];
@@ -206,8 +208,16 @@ export type CatCarePlan = {
   updatedAt: string;
   taskCount?: number;
   submissionCount?: number;
+  participants: CatCarePlanParticipant[];
   tasks: CatCareTask[];
   submissions: CatCareSubmission[];
+};
+
+export type CatCarePlanParticipant = {
+  catId: string | null;
+  deletedAt: string | null;
+  nameSnapshot: string;
+  sortOrder: number;
 };
 
 export type CatCareWorkspace = {

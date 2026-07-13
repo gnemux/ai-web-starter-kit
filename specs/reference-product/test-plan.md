@@ -680,3 +680,29 @@
 - Server Action validation could diverge from database constraints.
 - Product capability copy could make GNE-233 look done before capability wiring exists.
 - Future ACCESS work must avoid logging raw private-link tokens.
+
+## GNE-288 Cat Profile Lifecycle Regression
+
+- Rebuild a clean local Supabase database twice from repository migrations.
+- Prove draft/published plans and active share links block archival.
+- Prove database invariants reject a foreign-owner participant, reject a new
+  active plan for an archived cat, and prevent archived participant history
+  from being republished; plan writes and archival must lock the same cat rows.
+- Prove reviewed/closed history permits archival without physically deleting
+  cats, routines, items, events, tasks, submissions, or plan snapshots.
+- Under the owner role, prove archived aggregate data is invisible while plan
+  history remains visible and uses `（已删除）` participant labels.
+- Prove another owner cannot archive the cat and authenticated users cannot
+  issue a direct `DELETE` against `cats`.
+- Rebuild to the migration immediately before GNE-288, load the committed
+  cross-owner legacy-plan fixture, apply the GNE-288 migration, and prove the
+  foreign participant becomes a neutral tombstone without exposing its id or
+  name.
+- Prove `cat-photos` is private and only an active, same-owner, referenced photo
+  is readable/updateable/deletable. Anonymous, archived-cat, cross-owner, and
+  uploaded-but-unreferenced objects must not be listable; legacy public URLs
+  must stop working after the bucket transition.
+- Prove a historical plan whose legacy primary cat was archived can still move
+  through its remaining lifecycle.
+- Run CatCare owner RLS, anonymous access, share-token, share-link, storage,
+  unit, typecheck, package-boundary, and production-build regressions.

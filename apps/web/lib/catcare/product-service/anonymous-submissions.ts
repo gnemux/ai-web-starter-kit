@@ -18,9 +18,6 @@ import {
 import { recordCatCareAuditEvent } from "./audit";
 import { ensureCriticalSubmissionEffects } from "./critical-effects";
 import {
-  clearCatCarePlanDetailCache,
-  clearCatCarePlanSummaryCache,
-  clearCatCareWorkspaceStatsCache,
   mapSupabaseError,
   mapTask,
   trackCatCareProductEvent
@@ -244,10 +241,6 @@ export async function submitAnonymousCareSubmissionFromFormData(
         return mapSupabaseError(updateResult.error);
       }
 
-      clearCatCarePlanCaches(
-        tokenResult.data.ownerId,
-        tokenResult.data.resourceId
-      );
       const auditResult = await recordCatCareAuditEvent({
         actorType: "anonymous_token",
         correlationId,
@@ -326,10 +319,6 @@ export async function submitAnonymousCareSubmissionFromFormData(
       })
     });
     if (!retryEffects.ok) return serviceError("system_error", "The submission is saved, but its Audit or delivery record is still unavailable. Retry with the same submission reference.");
-    clearCatCarePlanCaches(
-      tokenResult.data.ownerId,
-      tokenResult.data.resourceId
-    );
     return serviceOk({
       ...existingResult.data,
       alreadySubmitted: true,
@@ -384,10 +373,6 @@ export async function submitAnonymousCareSubmissionFromFormData(
         })
       });
       if (!effects.ok) return serviceError("system_error", "The concurrent submission is saved, but its Audit or delivery record is unavailable. Retry with the same submission reference.");
-      clearCatCarePlanCaches(
-        tokenResult.data.ownerId,
-        tokenResult.data.resourceId
-      );
       return serviceOk({
         ...duplicateResult.data,
         alreadySubmitted: true,
@@ -401,7 +386,6 @@ export async function submitAnonymousCareSubmissionFromFormData(
     return mapSupabaseError(insertResult.error);
   }
 
-  clearCatCarePlanCaches(tokenResult.data.ownerId, tokenResult.data.resourceId);
   const auditResult = await recordCatCareAuditEvent({
     actorType: "anonymous_token",
     correlationId,
@@ -501,11 +485,6 @@ function recordSubmissionOutbox({
   });
 }
 
-function clearCatCarePlanCaches(ownerId: string, planId: string) {
-  clearCatCarePlanDetailCache(ownerId, planId);
-  clearCatCarePlanSummaryCache(ownerId);
-  clearCatCareWorkspaceStatsCache(ownerId);
-}
 
 function createAnonymousSubmissionIdempotencyKey(
   serviceDate: string,

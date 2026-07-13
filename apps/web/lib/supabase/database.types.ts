@@ -21,13 +21,14 @@ export type Database = {
             | "share_page_viewed"
             | "invalid_or_revoked_token_rejected"
             | "care_submission_created"
-            | "owner_boundary_denied";
+            | "owner_boundary_denied"
+            | "cat_profile_archived";
           id: string;
           idempotency_key: string | null;
           occurred_at: string;
           owner_id: string | null;
           resource_id: string | null;
-          resource_type: "care_plan" | null;
+          resource_type: "care_plan" | "cat_profile" | null;
           task_id: string | null;
           token_record_id: string | null;
         };
@@ -42,13 +43,14 @@ export type Database = {
             | "share_page_viewed"
             | "invalid_or_revoked_token_rejected"
             | "care_submission_created"
-            | "owner_boundary_denied";
+            | "owner_boundary_denied"
+            | "cat_profile_archived";
           id?: string;
           idempotency_key?: string | null;
           occurred_at?: string;
           owner_id?: string | null;
           resource_id?: string | null;
-          resource_type?: "care_plan" | null;
+          resource_type?: "care_plan" | "cat_profile" | null;
           task_id?: string | null;
           token_record_id?: string | null;
         };
@@ -63,13 +65,14 @@ export type Database = {
             | "share_page_viewed"
             | "invalid_or_revoked_token_rejected"
             | "care_submission_created"
-            | "owner_boundary_denied";
+            | "owner_boundary_denied"
+            | "cat_profile_archived";
           id?: string;
           idempotency_key?: string | null;
           occurred_at?: string;
           owner_id?: string | null;
           resource_id?: string | null;
-          resource_type?: "care_plan" | null;
+          resource_type?: "care_plan" | "cat_profile" | null;
           task_id?: string | null;
           token_record_id?: string | null;
         };
@@ -475,6 +478,7 @@ export type Database = {
           photo_url: string | null;
           safety_notes: string | null;
           notes: string | null;
+          deleted_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -490,6 +494,7 @@ export type Database = {
           photo_url?: string | null;
           safety_notes?: string | null;
           notes?: string | null;
+          deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -505,6 +510,7 @@ export type Database = {
           photo_url?: string | null;
           safety_notes?: string | null;
           notes?: string | null;
+          deleted_at?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -922,7 +928,7 @@ export type Database = {
         Row: {
           id: string;
           owner_id: string;
-          cat_id: string;
+          cat_id: string | null;
           routine_id: string | null;
           title: string;
           status: "draft" | "published" | "reviewed" | "closed";
@@ -946,7 +952,7 @@ export type Database = {
         Insert: {
           id?: string;
           owner_id: string;
-          cat_id: string;
+          cat_id?: string | null;
           routine_id?: string | null;
           title: string;
           status?: "draft" | "published" | "reviewed" | "closed";
@@ -970,7 +976,7 @@ export type Database = {
         Update: {
           id?: string;
           owner_id?: string;
-          cat_id?: string;
+          cat_id?: string | null;
           routine_id?: string | null;
           title?: string;
           status?: "draft" | "published" | "reviewed" | "closed";
@@ -990,6 +996,36 @@ export type Database = {
           closed_at?: string | null;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_plan_cats: {
+        Row: {
+          id: string;
+          plan_id: string;
+          cat_id: string | null;
+          cat_name_snapshot: string;
+          cat_deleted_at: string | null;
+          sort_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          plan_id: string;
+          cat_id?: string | null;
+          cat_name_snapshot: string;
+          cat_deleted_at?: string | null;
+          sort_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          plan_id?: string;
+          cat_id?: string | null;
+          cat_name_snapshot?: string;
+          cat_deleted_at?: string | null;
+          sort_order?: number;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -1232,7 +1268,17 @@ export type Database = {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      soft_delete_cat_profile: {
+        Args: { target_cat_id: string };
+        Returns: Array<{
+          outcome: string;
+          deleted_at: string | null;
+          blocking_plan_id: string | null;
+          blocking_reason: string | null;
+        }>;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

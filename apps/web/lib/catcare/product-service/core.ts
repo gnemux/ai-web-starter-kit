@@ -46,6 +46,7 @@ import type {
   CatItemAssignmentRow,
   CareEventRow,
   CarePlanRow,
+  CarePlanCatRow,
   CareTaskRow,
   CareTaskInsert,
   CareSubmissionRow,
@@ -67,6 +68,7 @@ import type {
   CatCareEventsWorkspace,
   CatCareSubmission,
   CatCarePlan,
+  CatCarePlanParticipant,
   CatCareWorkspace,
   CatCareWorkspaceStats,
   CatCareCatsWorkspace,
@@ -85,6 +87,7 @@ export type {
   CatItemAssignmentRow,
   CareEventRow,
   CarePlanRow,
+  CarePlanCatRow,
   CareTaskRow,
   CareTaskInsert,
   CareSubmissionRow,
@@ -106,6 +109,7 @@ export type {
   CatCareEventsWorkspace,
   CatCareSubmission,
   CatCarePlan,
+  CatCarePlanParticipant,
   CatCareWorkspace,
   CatCareWorkspaceStats,
   CatCareCatsWorkspace,
@@ -125,10 +129,9 @@ import {
   OWNER_ITEM_SELECT,
   CAT_ITEM_ASSIGNMENT_SELECT,
   CARE_EVENT_SELECT,
+  CARE_PLAN_CAT_SELECT,
   CATCARE_ANALYTICS_PROVIDER,
   MAX_ROUTINE_FREQUENCY_COUNT,
-  catCareOwnerCacheTtlMs,
-  catListCacheTtlMs,
   routineItemDefinitions
 } from "./constants";
 export {
@@ -141,100 +144,11 @@ export {
   OWNER_ITEM_SELECT,
   CAT_ITEM_ASSIGNMENT_SELECT,
   CARE_EVENT_SELECT,
+  CARE_PLAN_CAT_SELECT,
   CATCARE_ANALYTICS_PROVIDER,
   MAX_ROUTINE_FREQUENCY_COUNT,
-  catCareOwnerCacheTtlMs,
-  catListCacheTtlMs,
   routineItemDefinitions
 } from "./constants";
-
-export const catSummaryCacheTtlMs = catCareOwnerCacheTtlMs;
-export const catCareWorkspaceStatsCacheTtlMs = catCareOwnerCacheTtlMs;
-export const catCarePlanSummaryCacheTtlMs = catCareOwnerCacheTtlMs;
-export const catCarePlanDetailCacheTtlMs = catCareOwnerCacheTtlMs;
-export const catCareEventListCacheTtlMs = catCareOwnerCacheTtlMs;
-export const ownerLibraryItemCacheTtlMs = catCareOwnerCacheTtlMs;
-export const catItemAssignmentCacheTtlMs = catCareOwnerCacheTtlMs;
-export const routineSourceCatCacheTtlMs = catCareOwnerCacheTtlMs;
-export const routineOwnerItemKeyCacheTtlMs = catCareOwnerCacheTtlMs;
-export const defaultRoutineCacheTtlMs = catCareOwnerCacheTtlMs;
-export const catSummaryCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatCareCatSummary[];
-  }
->();
-export const catListCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatCareCat[];
-  }
->();
-export const catCareWorkspaceStatsCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatCareWorkspaceStats;
-  }
->();
-export const catCarePlanSummaryCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatCarePlan[];
-  }
->();
-export const catCarePlanDetailCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatCarePlan;
-  }
->();
-export const catCareEventListCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatCareEvent[];
-  }
->();
-export const ownerLibraryItemCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatCareLibraryItem[];
-  }
->();
-export const catItemAssignmentCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatItemAssignmentRow[];
-  }
->();
-export const routineSourceCatCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: string[];
-  }
->();
-export const routineOwnerItemKeyCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: Record<string, string[]>;
-  }
->();
-export const defaultRoutineCache = new Map<
-  string,
-  {
-    expiresAt: number;
-    value: CatCareRoutine | null;
-  }
->();
 
 export const listCachedActiveCatalogRows = unstable_cache(
   async function listCachedActiveCatalogRows(): Promise<ProductCatalogRow[]> {
@@ -292,108 +206,42 @@ export async function loadCatSummaries(
   client: AppSupabaseClient,
   ownerId: string
 ): Promise<ServiceResult<CatCareCatSummary[]>> {
-  const cachedCats = readCatSummaryCache(ownerId);
-
-  if (cachedCats) {
-    return serviceOk(cachedCats);
-  }
-
   const catsResult = await client
     .from("cats")
     .select(CAT_SUMMARY_SELECT)
     .eq("owner_id", ownerId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (catsResult.error) {
     return mapSupabaseError(catsResult.error);
   }
 
-  const cats = (catsResult.data ?? []).map(mapCatSummary);
-  writeCatSummaryCache(ownerId, cats);
-
-  return serviceOk(cats);
-}
-
-export function readCatSummaryCache(ownerId: string) {
-  const entry = catSummaryCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    catSummaryCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeCatSummaryCache(ownerId: string, value: CatCareCatSummary[]) {
-  catSummaryCache.set(ownerId, {
-    expiresAt: Date.now() + catSummaryCacheTtlMs,
-    value
-  });
-}
-
-export function clearCatSummaryCache(ownerId: string) {
-  catSummaryCache.delete(ownerId);
+  return serviceOk((catsResult.data ?? []).map(mapCatSummary));
 }
 
 export async function loadCats(
   client: AppSupabaseClient,
   ownerId: string
 ): Promise<ServiceResult<CatCareCat[]>> {
-  const cachedCats = readCatListCache(ownerId);
-
-  if (cachedCats) {
-    return serviceOk(cachedCats);
-  }
-
   const catsResult = await client
     .from("cats")
     .select(CAT_SELECT)
     .eq("owner_id", ownerId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (catsResult.error) {
     return mapSupabaseError(catsResult.error);
   }
 
-  const cats = (catsResult.data ?? []).map(mapCat);
-  writeCatListCache(ownerId, cats);
-
-  return serviceOk(cats);
-}
-
-export function readCatListCache(ownerId: string) {
-  const entry = catListCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    catListCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeCatListCache(ownerId: string, value: CatCareCat[]) {
-  catListCache.set(ownerId, {
-    expiresAt: Date.now() + catListCacheTtlMs,
-    value
-  });
-}
-
-export function clearCatListCache(ownerId: string) {
-  catListCache.delete(ownerId);
+  return serviceOk((catsResult.data ?? []).map(mapCat));
 }
 
 export async function loadCatCareWorkspaceStats(
   client: AppSupabaseClient,
   ownerId: string
 ): Promise<ServiceResult<CatCareWorkspaceStats>> {
-  const cachedStats = readCatCareWorkspaceStatsCache(ownerId);
-
-  if (cachedStats) {
-    return serviceOk(cachedStats);
-  }
-
   const [
     plansCountResult,
     publishedPlansResult,
@@ -446,156 +294,30 @@ export async function loadCatCareWorkspaceStats(
     return itemCountResult;
   }
 
-  const stats = {
+  return serviceOk({
     eventCount: eventsResult.count ?? 0,
     itemCount: itemCountResult.data,
     planCount: plansCountResult.count ?? 0,
     publishedPlanCount: publishedPlansResult.count ?? 0,
     routineCount: routinesResult.count ?? 0,
     submissionCount: submissionsResult.count ?? 0
-  };
-  writeCatCareWorkspaceStatsCache(ownerId, stats);
-
-  return serviceOk(stats);
-}
-
-export function readCatCareWorkspaceStatsCache(ownerId: string) {
-  const entry = catCareWorkspaceStatsCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    catCareWorkspaceStatsCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeCatCareWorkspaceStatsCache(
-  ownerId: string,
-  value: CatCareWorkspaceStats
-) {
-  catCareWorkspaceStatsCache.set(ownerId, {
-    expiresAt: Date.now() + catCareWorkspaceStatsCacheTtlMs,
-    value
   });
-}
-
-export function clearCatCareWorkspaceStatsCache(ownerId: string) {
-  catCareWorkspaceStatsCache.delete(ownerId);
 }
 
 export async function loadCatCarePlanSummaries(
   client: AppSupabaseClient,
   ownerId: string
 ): Promise<ServiceResult<CatCarePlan[]>> {
-  const cachedPlans = readCatCarePlanSummaryCache(ownerId);
-
-  if (cachedPlans) {
-    return serviceOk(cachedPlans);
-  }
-
-  const plansResult = await loadCatCarePlans(client, ownerId, {
+  return loadCatCarePlans(client, ownerId, {
     includeSubmissionCount: true,
     summaryOnly: true
   });
-
-  if (!plansResult.ok) {
-    return plansResult;
-  }
-
-  writeCatCarePlanSummaryCache(ownerId, plansResult.data);
-
-  return plansResult;
-}
-
-export function readCatCarePlanSummaryCache(ownerId: string) {
-  const entry = catCarePlanSummaryCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    catCarePlanSummaryCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeCatCarePlanSummaryCache(
-  ownerId: string,
-  value: CatCarePlan[]
-) {
-  catCarePlanSummaryCache.set(ownerId, {
-    expiresAt: Date.now() + catCarePlanSummaryCacheTtlMs,
-    value
-  });
-}
-
-export function clearCatCarePlanSummaryCache(ownerId: string) {
-  catCarePlanSummaryCache.delete(ownerId);
-}
-
-export function readCatCarePlanDetailCache(
-  ownerId: string,
-  planId: string,
-  includeSubmissions: boolean
-) {
-  const key = makeCatCarePlanDetailCacheKey(ownerId, planId, includeSubmissions);
-  const entry = catCarePlanDetailCache.get(key);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    catCarePlanDetailCache.delete(key);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeCatCarePlanDetailCache(
-  ownerId: string,
-  planId: string,
-  includeSubmissions: boolean,
-  value: CatCarePlan
-) {
-  catCarePlanDetailCache.set(
-    makeCatCarePlanDetailCacheKey(ownerId, planId, includeSubmissions),
-    {
-      expiresAt: Date.now() + catCarePlanDetailCacheTtlMs,
-      value
-    }
-  );
-}
-
-export function clearCatCarePlanDetailCache(ownerId: string, planId?: string) {
-  if (!planId) {
-    for (const key of catCarePlanDetailCache.keys()) {
-      if (key.startsWith(`${ownerId}:`)) {
-        catCarePlanDetailCache.delete(key);
-      }
-    }
-    return;
-  }
-
-  catCarePlanDetailCache.delete(makeCatCarePlanDetailCacheKey(ownerId, planId, true));
-  catCarePlanDetailCache.delete(makeCatCarePlanDetailCacheKey(ownerId, planId, false));
-}
-
-export function makeCatCarePlanDetailCacheKey(
-  ownerId: string,
-  planId: string,
-  includeSubmissions: boolean
-) {
-  return `${ownerId}:${planId}:${includeSubmissions ? "with-submissions" : "tasks-only"}`;
 }
 
 export async function loadOwnerLibraryItems(
   client: AppSupabaseClient,
   ownerId: string
 ): Promise<ServiceResult<CatCareLibraryItem[]>> {
-  const cachedItems = readOwnerLibraryItemCache(ownerId);
-
-  if (cachedItems) {
-    return serviceOk(cachedItems);
-  }
-
   const libraryItemsResult = await client
     .from("owner_item_library")
     .select(OWNER_ITEM_SELECT)
@@ -611,47 +333,13 @@ export async function loadOwnerLibraryItems(
     return mapSupabaseError(libraryItemsResult.error);
   }
 
-  const libraryItems = (libraryItemsResult.data ?? []).map(mapLibraryItem);
-  writeOwnerLibraryItemCache(ownerId, libraryItems);
-
-  return serviceOk(libraryItems);
-}
-
-export function readOwnerLibraryItemCache(ownerId: string) {
-  const entry = ownerLibraryItemCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    ownerLibraryItemCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeOwnerLibraryItemCache(
-  ownerId: string,
-  value: CatCareLibraryItem[]
-) {
-  ownerLibraryItemCache.set(ownerId, {
-    expiresAt: Date.now() + ownerLibraryItemCacheTtlMs,
-    value
-  });
-}
-
-export function clearOwnerLibraryItemCache(ownerId: string) {
-  ownerLibraryItemCache.delete(ownerId);
+  return serviceOk((libraryItemsResult.data ?? []).map(mapLibraryItem));
 }
 
 export async function loadCatItemAssignments(
   client: AppSupabaseClient,
   ownerId: string
 ): Promise<ServiceResult<CatItemAssignmentRow[] | null>> {
-  const cachedAssignments = readCatItemAssignmentCache(ownerId);
-
-  if (cachedAssignments) {
-    return serviceOk(cachedAssignments);
-  }
-
   const assignmentsResult = await client
     .from("cat_item_assignments")
     .select(CAT_ITEM_ASSIGNMENT_SELECT)
@@ -666,47 +354,13 @@ export async function loadCatItemAssignments(
     return mapSupabaseError(assignmentsResult.error);
   }
 
-  const assignments = (assignmentsResult.data ?? []) as CatItemAssignmentRow[];
-  writeCatItemAssignmentCache(ownerId, assignments);
-
-  return serviceOk(assignments);
-}
-
-export function readCatItemAssignmentCache(ownerId: string) {
-  const entry = catItemAssignmentCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    catItemAssignmentCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeCatItemAssignmentCache(
-  ownerId: string,
-  value: CatItemAssignmentRow[]
-) {
-  catItemAssignmentCache.set(ownerId, {
-    expiresAt: Date.now() + catItemAssignmentCacheTtlMs,
-    value
-  });
-}
-
-export function clearCatItemAssignmentCache(ownerId: string) {
-  catItemAssignmentCache.delete(ownerId);
+  return serviceOk((assignmentsResult.data ?? []) as CatItemAssignmentRow[]);
 }
 
 export async function loadRoutineSourceCatIds(
   client: AppSupabaseClient,
   ownerId: string
 ): Promise<ServiceResult<string[]>> {
-  const cachedCatIds = readRoutineSourceCatCache(ownerId);
-
-  if (cachedCatIds) {
-    return serviceOk(cachedCatIds);
-  }
-
   const routinesResult = await client
     .from("care_routines")
     .select("cat_id")
@@ -717,32 +371,7 @@ export async function loadRoutineSourceCatIds(
     return mapSupabaseError(routinesResult.error);
   }
 
-  const catIds = (routinesResult.data ?? []).map((routine) => routine.cat_id);
-  writeRoutineSourceCatCache(ownerId, catIds);
-
-  return serviceOk(catIds);
-}
-
-export function readRoutineSourceCatCache(ownerId: string) {
-  const entry = routineSourceCatCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    routineSourceCatCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeRoutineSourceCatCache(ownerId: string, value: string[]) {
-  routineSourceCatCache.set(ownerId, {
-    expiresAt: Date.now() + routineSourceCatCacheTtlMs,
-    value
-  });
-}
-
-export function clearRoutineSourceCatCache(ownerId: string) {
-  routineSourceCatCache.delete(ownerId);
+  return serviceOk((routinesResult.data ?? []).map((routine) => routine.cat_id));
 }
 
 export async function loadDefaultRoutine(
@@ -750,12 +379,6 @@ export async function loadDefaultRoutine(
   ownerId: string,
   catId: string
 ): Promise<ServiceResult<CatCareRoutine | null>> {
-  const cachedRoutine = readDefaultRoutineCache(ownerId, catId);
-
-  if (cachedRoutine !== undefined) {
-    return serviceOk(cachedRoutine);
-  }
-
   const routineResult = await client
     .from("care_routines")
     .select(ROUTINE_SELECT)
@@ -769,7 +392,6 @@ export async function loadDefaultRoutine(
   }
 
   if (!routineResult.data) {
-    writeDefaultRoutineCache(ownerId, catId, null);
     return serviceOk(null);
   }
 
@@ -783,61 +405,16 @@ export async function loadDefaultRoutine(
     return mapSupabaseError(itemsResult.error);
   }
 
-  const routine = {
+  return serviceOk({
     ...mapRoutine(routineResult.data),
     items: (itemsResult.data ?? []).map(mapRoutineItem)
-  };
-
-  writeDefaultRoutineCache(ownerId, catId, routine);
-
-  return serviceOk(routine);
-}
-
-export function readDefaultRoutineCache(ownerId: string, catId: string) {
-  const key = makeDefaultRoutineCacheKey(ownerId, catId);
-  const entry = defaultRoutineCache.get(key);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    defaultRoutineCache.delete(key);
-    return undefined;
-  }
-
-  return entry.value;
-}
-
-export function writeDefaultRoutineCache(
-  ownerId: string,
-  catId: string,
-  value: CatCareRoutine | null
-) {
-  defaultRoutineCache.set(makeDefaultRoutineCacheKey(ownerId, catId), {
-    expiresAt: Date.now() + defaultRoutineCacheTtlMs,
-    value
   });
-}
-
-export function clearDefaultRoutineCache(ownerId: string) {
-  for (const key of defaultRoutineCache.keys()) {
-    if (key.startsWith(`${ownerId}:`)) {
-      defaultRoutineCache.delete(key);
-    }
-  }
-}
-
-export function makeDefaultRoutineCacheKey(ownerId: string, catId: string) {
-  return `${ownerId}:${catId}`;
 }
 
 export async function loadCareEvents(
   client: AppSupabaseClient,
   ownerId: string
 ): Promise<ServiceResult<CatCareEvent[]>> {
-  const cachedEvents = readCatCareEventListCache(ownerId);
-
-  if (cachedEvents) {
-    return serviceOk(cachedEvents);
-  }
-
   const eventsResult = await client
     .from("care_events")
     .select(CARE_EVENT_SELECT)
@@ -849,32 +426,7 @@ export async function loadCareEvents(
     return mapSupabaseError(eventsResult.error);
   }
 
-  const events = (eventsResult.data ?? []).map(mapCareEvent);
-  writeCatCareEventListCache(ownerId, events);
-
-  return serviceOk(events);
-}
-
-export function readCatCareEventListCache(ownerId: string) {
-  const entry = catCareEventListCache.get(ownerId);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    catCareEventListCache.delete(ownerId);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeCatCareEventListCache(ownerId: string, value: CatCareEvent[]) {
-  catCareEventListCache.set(ownerId, {
-    expiresAt: Date.now() + catCareEventListCacheTtlMs,
-    value
-  });
-}
-
-export function clearCatCareEventListCache(ownerId: string) {
-  catCareEventListCache.delete(ownerId);
+  return serviceOk((eventsResult.data ?? []).map(mapCareEvent));
 }
 
 export async function loadCatCarePlans(
@@ -929,9 +481,15 @@ export async function loadCatCarePlans(
         )
         .in("plan_id", planIds)
         .order("created_at", { ascending: false });
-  const [tasksResult, submissionsResult] = await Promise.all([
+  const participantsQuery = client
+    .from("care_plan_cats")
+    .select(CARE_PLAN_CAT_SELECT)
+    .in("plan_id", planIds)
+    .order("sort_order", { ascending: true });
+  const [tasksResult, submissionsResult, participantsResult] = await Promise.all([
     tasksQuery,
-    submissionsQuery
+    submissionsQuery,
+    participantsQuery
   ]);
 
   if (tasksResult?.error) {
@@ -940,6 +498,10 @@ export async function loadCatCarePlans(
 
   if (submissionsResult?.error) {
     return mapSupabaseError(submissionsResult.error);
+  }
+
+  if (participantsResult.error) {
+    return mapSupabaseError(participantsResult.error);
   }
 
   // ponytail: list/workspace pages only need counts; plan detail uses the full loader.
@@ -959,6 +521,9 @@ export async function loadCatCarePlans(
           mapSubmission
         )
       );
+  const participantsByPlan = groupByPlan(
+    ((participantsResult.data ?? []) as CarePlanCatRow[]).map(mapPlanParticipant)
+  );
 
   return serviceOk(
     plans.map((plan) => ({
@@ -969,6 +534,7 @@ export async function loadCatCarePlans(
       submissionCount: options.summaryOnly && submissionsResult
         ? (submissionCounts.get(plan.id) ?? 0)
         : undefined,
+      participants: participantsByPlan.get(plan.id) ?? [],
       tasks: tasksByPlan.get(plan.id) ?? [],
       submissions: submissionsByPlan.get(plan.id) ?? []
     }))
@@ -1077,8 +643,41 @@ export function normalizeCatInput(input: {
 export function isAllowedCatPhotoUrl(value: string) {
   return (
     isCatIllustrationSrc(value) ||
-    value.includes("/storage/v1/object/public/cat-photos/")
+    /^\/api\/catcare\/cat-photos\/[0-9a-f-]{36}$/i.test(value)
   );
+}
+
+export function getCatPhotoProxyUrl(catId: string) {
+  return `/api/catcare/cat-photos/${catId}`;
+}
+
+export function getCatPhotoStoragePath(
+  value: string | null,
+  ownerId: string
+) {
+  if (!value || isCatIllustrationSrc(value)) {
+    return null;
+  }
+
+  const legacyMarker = "/storage/v1/object/public/cat-photos/";
+  const markerIndex = value.indexOf(legacyMarker);
+  let candidate = value;
+
+  try {
+    candidate = markerIndex >= 0
+      ? decodeURIComponent(value.slice(markerIndex + legacyMarker.length))
+      : value;
+  } catch {
+    return null;
+  }
+  const escapedOwnerId = ownerId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  return new RegExp(
+    `^${escapedOwnerId}/[0-9a-f-]{36}\\.(?:jpg|png|webp)$`,
+    "i"
+  ).test(candidate)
+    ? candidate
+    : null;
 }
 
 export async function uploadCatPhotoIfPresent(
@@ -1115,8 +714,7 @@ export async function uploadCatPhotoIfPresent(
     return serviceError("system_error", "Cat photo upload failed.");
   }
 
-  const { data } = supabase.storage.from("cat-photos").getPublicUrl(path);
-  return serviceOk(data.publicUrl);
+  return serviceOk(path);
 }
 
 export function normalizePlanInput(input: {
@@ -1925,12 +1523,6 @@ export async function loadRoutineOwnerItemKeys(
   ownerId: string,
   catId: string
 ): Promise<ServiceResult<Set<string>>> {
-  const cachedKeys = readRoutineOwnerItemKeyCache(ownerId, [catId]);
-
-  if (cachedKeys) {
-    return serviceOk(new Set(cachedKeys[catId] ?? []));
-  }
-
   const routineResult = await client
     .from("care_routines")
     .select(ROUTINE_SELECT)
@@ -1944,7 +1536,6 @@ export async function loadRoutineOwnerItemKeys(
   }
 
   if (!routineResult.data) {
-    writeRoutineOwnerItemKeyCache(ownerId, [catId], { [catId]: [] });
     return serviceOk(new Set());
   }
 
@@ -1963,44 +1554,7 @@ export async function loadRoutineOwnerItemKeys(
     .filter((item): item is RoutineOwnerItemReference => Boolean(item))
     .map((item) => makeOwnerItemKey(item.itemType, item.name));
 
-  writeRoutineOwnerItemKeyCache(ownerId, [catId], { [catId]: keys });
-
   return serviceOk(new Set(keys));
-}
-
-export function readRoutineOwnerItemKeyCache(ownerId: string, catIds: string[]) {
-  const key = makeRoutineOwnerItemKeyCacheKey(ownerId, catIds);
-  const entry = routineOwnerItemKeyCache.get(key);
-
-  if (!entry || entry.expiresAt <= Date.now()) {
-    routineOwnerItemKeyCache.delete(key);
-    return null;
-  }
-
-  return entry.value;
-}
-
-export function writeRoutineOwnerItemKeyCache(
-  ownerId: string,
-  catIds: string[],
-  value: Record<string, string[]>
-) {
-  routineOwnerItemKeyCache.set(makeRoutineOwnerItemKeyCacheKey(ownerId, catIds), {
-    expiresAt: Date.now() + routineOwnerItemKeyCacheTtlMs,
-    value
-  });
-}
-
-export function clearRoutineOwnerItemKeyCache(ownerId: string) {
-  for (const key of routineOwnerItemKeyCache.keys()) {
-    if (key.startsWith(`${ownerId}:`)) {
-      routineOwnerItemKeyCache.delete(key);
-    }
-  }
-}
-
-export function makeRoutineOwnerItemKeyCacheKey(ownerId: string, catIds: string[]) {
-  return `${ownerId}:${[...catIds].sort().join(",")}`;
 }
 
 export async function loadRoutineOwnerItemKeysByCatId(
@@ -2008,14 +1562,6 @@ export async function loadRoutineOwnerItemKeysByCatId(
   ownerId: string,
   catIds: string[]
 ): Promise<ServiceResult<Record<string, string[]>>> {
-  const cachedKeys = readRoutineOwnerItemKeyCache(ownerId, catIds);
-
-  if (cachedKeys) {
-    return serviceOk(
-      Object.fromEntries(catIds.map((catId) => [catId, cachedKeys[catId] ?? []]))
-    );
-  }
-
   const keysByCatId = Object.fromEntries(
     catIds.map((catId) => [catId, new Set<string>()])
   ) as Record<string, Set<string>>;
@@ -2042,8 +1588,6 @@ export async function loadRoutineOwnerItemKeysByCatId(
 
   if (routineIds.length === 0) {
     const emptyKeys = Object.fromEntries(catIds.map((catId) => [catId, []]));
-    writeRoutineOwnerItemKeyCache(ownerId, catIds, emptyKeys);
-
     return serviceOk(emptyKeys);
   }
 
@@ -2071,8 +1615,6 @@ export async function loadRoutineOwnerItemKeysByCatId(
   const keys = Object.fromEntries(
     catIds.map((catId) => [catId, Array.from(keysByCatId[catId] ?? [])])
   );
-
-  writeRoutineOwnerItemKeyCache(ownerId, catIds, keys);
 
   return serviceOk(keys);
 }
@@ -2357,7 +1899,10 @@ export function mapCat(row: CatRow): CatCareCat {
     lifeStage: row.life_stage,
     breed: row.breed,
     weightKg: row.weight_kg,
-    photoUrl: row.photo_url,
+    photoUrl:
+      row.photo_url && !isCatIllustrationSrc(row.photo_url)
+        ? getCatPhotoProxyUrl(row.id)
+        : row.photo_url,
     safetyNotes: row.safety_notes,
     notes: row.notes,
     createdAt: row.created_at,
@@ -2521,11 +2066,14 @@ export async function trackCatCareProductEvent(
   });
 }
 
-export function mapPlan(row: CarePlanRow): Omit<CatCarePlan, "tasks" | "submissions"> {
+export function mapPlan(
+  row: CarePlanRow
+): Omit<CatCarePlan, "tasks" | "submissions"> {
   return {
     id: row.id,
     ownerId: row.owner_id,
     catId: row.cat_id,
+    participants: [],
     title: row.title,
     status: row.status,
     aiInputSummary: row.ai_input_summary,
@@ -2539,6 +2087,18 @@ export function mapPlan(row: CarePlanRow): Omit<CatCarePlan, "tasks" | "submissi
     closedAt: row.closed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at
+  };
+}
+
+export function mapPlanParticipant(
+  row: CarePlanCatRow
+): CatCarePlanParticipant & { planId: string } {
+  return {
+    catId: row.cat_id,
+    deletedAt: row.cat_deleted_at,
+    nameSnapshot: row.cat_name_snapshot,
+    planId: row.plan_id,
+    sortOrder: row.sort_order
   };
 }
 

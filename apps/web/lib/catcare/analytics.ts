@@ -28,6 +28,7 @@ export type CatCareAnalyticsProperties = {
   care_event_count?: number;
   cat_count?: number;
   custom_item_count?: number;
+  deletion_mode?: "soft";
   enabled_item_count?: number;
   enabled_task_count?: number;
   has_existing_routine?: boolean;

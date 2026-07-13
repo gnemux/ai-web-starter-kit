@@ -1,6 +1,16 @@
 import type { CatCarePlan } from "@/lib/catcare/product-service";
 
 export function formatPlanCatNames(plan: CatCarePlan) {
+  if (plan.participants.length > 0) {
+    return plan.participants
+      .map((participant) =>
+        participant.deletedAt
+          ? `${participant.nameSnapshot}（已删除）`
+          : participant.nameSnapshot
+      )
+      .join("、");
+  }
+
   const summary = plan.aiInputSummary;
   const names =
     summary && typeof summary === "object" && !Array.isArray(summary)
@@ -16,6 +26,10 @@ export function formatPlanCatNames(plan: CatCarePlan) {
 }
 
 export function getPlanCatNames(plan: CatCarePlan) {
+  if (plan.participants.length > 0) {
+    return plan.participants.map((participant) => participant.nameSnapshot);
+  }
+
   const formatted = formatPlanCatNames(plan);
   return formatted === "当前猫咪" || formatted === "未选择猫咪"
     ? []

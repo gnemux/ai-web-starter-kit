@@ -10,12 +10,6 @@ import {
   CatCareRoutineWorkspace,
   ROUTINE_ITEM_SELECT,
   ROUTINE_SELECT,
-  clearCatCareWorkspaceStatsCache,
-  clearCatItemAssignmentCache,
-  clearDefaultRoutineCache,
-  clearOwnerLibraryItemCache,
-  clearRoutineOwnerItemKeyCache,
-  clearRoutineSourceCatCache,
   dedupeLibraryItems,
   getAuthenticatedOwnerId,
   loadCatCareAssignedItems,
@@ -252,6 +246,7 @@ export async function copyCatCareRoutineFromFormData(
     .from("cats")
     .select("id")
     .eq("owner_id", ownerResult.data)
+    .is("deleted_at", null)
     .in("id", [sourceCatId, targetCatId]);
 
   if (catsResult.error) {
@@ -370,12 +365,6 @@ export async function copyCatCareRoutineFromFormData(
     return syncResult;
   }
 
-  clearOwnerLibraryItemCache(ownerResult.data);
-  clearCatItemAssignmentCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
-  clearRoutineSourceCatCache(ownerResult.data);
-  clearRoutineOwnerItemKeyCache(ownerResult.data);
-  clearDefaultRoutineCache(ownerResult.data);
   await trackCatCareProductEvent(ownerResult.data, "catcare_routine_copied", {
     item_count: copiedItems.length,
     source: "owner_flow"
@@ -463,6 +452,7 @@ export async function saveCatCareRoutineFromFormData(
     .select("id")
     .eq("owner_id", ownerResult.data)
     .eq("id", catId)
+    .is("deleted_at", null)
     .single();
 
   if (catResult.error) {
@@ -540,12 +530,6 @@ export async function saveCatCareRoutineFromFormData(
     return syncResult;
   }
 
-  clearOwnerLibraryItemCache(ownerResult.data);
-  clearCatItemAssignmentCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
-  clearRoutineSourceCatCache(ownerResult.data);
-  clearRoutineOwnerItemKeyCache(ownerResult.data);
-  clearDefaultRoutineCache(ownerResult.data);
   await trackCatCareProductEvent(ownerResult.data, "catcare_routine_saved", {
     enabled_item_count: allItems.filter((item) => item.enabled).length,
     item_count: allItems.length,

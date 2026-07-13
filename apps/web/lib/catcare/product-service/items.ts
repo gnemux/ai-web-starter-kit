@@ -11,9 +11,6 @@ import {
   CatCareItemsWorkspace,
   CatCareLibraryItem,
   OWNER_ITEM_SELECT,
-  clearCatCareWorkspaceStatsCache,
-  clearCatItemAssignmentCache,
-  clearOwnerLibraryItemCache,
   dedupeLibraryItems,
   findOrCreateOwnerItem,
   getAuthenticatedOwnerId,
@@ -194,8 +191,6 @@ export async function createCatCareItemFromFormData(
     return libraryResult;
   }
 
-  clearOwnerLibraryItemCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
 
   return serviceOk({
     catId: input.data.currentCatId ?? null,
@@ -288,8 +283,6 @@ export async function unassignCatCareItemFromFormData(
     return mapSupabaseError(result.error);
   }
 
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
-  clearCatItemAssignmentCache(ownerResult.data);
 
   return serviceOk({ catId, id: result.data?.id ?? id });
 }
@@ -340,9 +333,6 @@ export async function deleteCatCareLibraryItemFromFormData(
     return mapSupabaseError(result.error);
   }
 
-  clearOwnerLibraryItemCache(ownerResult.data);
-  clearCatItemAssignmentCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
 
   return serviceOk({ currentCatId, id: result.data.id });
 }
@@ -384,7 +374,6 @@ export async function updateCatCareLibraryItemNotesFromFormData(
     return mapSupabaseError(result.error);
   }
 
-  clearOwnerLibraryItemCache(ownerResult.data);
 
   return serviceOk({ currentCatId, id: result.data.id, notes: result.data.notes });
 }
@@ -444,8 +433,6 @@ export async function updateCatCareLibraryItemFromFormData(
     return mapSupabaseError(result.error);
   }
 
-  clearOwnerLibraryItemCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
 
   return serviceOk({ currentCatId, item: mapLibraryItem(result.data) });
 }

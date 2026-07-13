@@ -1210,7 +1210,7 @@ GNE-266 Analytics reliable-delivery repair checkpoint on 2026-07-13:
   `void trackCatCareProductEvent(...)` calls. Vercel could end the request
   lifecycle before the nested PostHog fetch completed.
 - All current CatCare server product-event calls now await the product
-  Analytics facade. The shared server transport bounds capture at 3 seconds
+  Analytics facade. The shared server transport bounds capture at 1 second
   and safely settles Provider exceptions, HTTP failures, and timeouts without
   reversing committed business facts.
 - The existing synchronous safe-context fan-out and Audit behavior remain

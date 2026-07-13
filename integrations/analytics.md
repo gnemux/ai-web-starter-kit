@@ -152,7 +152,7 @@ New instrumentation must follow this contract before a reviewer treats it as val
   Do not leave a PostHog request as an unmanaged `void` Promise after the
   business handler returns; serverless runtimes may end that request before
   capture completes.
-- The shared server transport bounds one capture attempt to 3 seconds and
+- The shared server transport bounds one capture attempt to 1 second and
   converts Provider exceptions, timeouts, and non-success responses into safe
   warnings. These failures must not turn an already committed business fact,
   Audit record, Outbox record, Billing result, or page result into failure.

@@ -64,15 +64,26 @@ test("analytics non-success response is observed and still settles", async () =>
 
 test("analytics timeout aborts delivery and settles with a safe warning", async () => {
   const warnings = [];
+  let abortedBySignal = false;
 
-  assert.equal(serverAnalyticsDeliveryTimeoutMs, 3_000);
+  assert.equal(serverAnalyticsDeliveryTimeoutMs, 1_000);
   await assert.doesNotReject(() =>
     deliverAnalyticsSafely({
       deliver: (signal) =>
         new Promise((_, reject) => {
-          signal.addEventListener("abort", () => reject(signal.reason), {
-            once: true
-          });
+          const guard = setTimeout(
+            () => reject(new Error("timeout signal did not abort delivery")),
+            250
+          );
+          signal.addEventListener(
+            "abort",
+            () => {
+              abortedBySignal = true;
+              clearTimeout(guard);
+              reject(signal.reason);
+            },
+            { once: true }
+          );
         }),
       event: "catcare_submission_created",
       onWarning: (details) => warnings.push(details),
@@ -80,6 +91,7 @@ test("analytics timeout aborts delivery and settles with a safe warning", async 
     })
   );
 
+  assert.equal(abortedBySignal, true);
   assert.equal(warnings.length, 1);
   assert.equal(warnings[0].event, "catcare_submission_created");
   assert.equal(typeof warnings[0].message, "string");

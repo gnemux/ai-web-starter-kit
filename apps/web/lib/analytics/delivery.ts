@@ -1,4 +1,4 @@
-export const serverAnalyticsDeliveryTimeoutMs = 3_000;
+export const serverAnalyticsDeliveryTimeoutMs = 1_000;
 
 export async function deliverAnalyticsSafely({
   deliver,

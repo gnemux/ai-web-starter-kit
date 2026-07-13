@@ -666,7 +666,7 @@
   of leaving an unmanaged `void trackCatCareProductEvent(...)` Promise.
 - Assert Provider exceptions, HTTP failures, and an abort-aware short timeout
   settle with a safe warning while preserving the already successful business
-  result. Lock the shared server capture timeout at 3 seconds.
+  result. Lock the shared server capture timeout at 1 second.
 - Re-run a deployed anonymous share view and submission, then verify fresh
   `catcare_share_page_viewed` and `catcare_submission_created` events in the
   current PostHog test Project with safe shared properties and correlation IDs.

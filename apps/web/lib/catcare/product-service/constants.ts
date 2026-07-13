@@ -1,7 +1,7 @@
 import type { CareRoutineItemRow } from "./types";
 
 export const CAT_SELECT =
-  "id, owner_id, name, gender, birth_date, life_stage, breed, weight_kg, photo_url, safety_notes, notes, created_at, updated_at";
+  "id, owner_id, name, gender, birth_date, life_stage, breed, weight_kg, photo_url, safety_notes, notes, deleted_at, created_at, updated_at";
 export const CAT_SUMMARY_SELECT = "id, name";
 export const ROUTINE_SELECT =
   "id, owner_id, cat_id, title, source, is_default, notes, created_at, updated_at";
@@ -17,10 +17,10 @@ export const CAT_ITEM_ASSIGNMENT_SELECT =
   "id, owner_id, cat_id, owner_item_id, default_amount, default_frequency, instructions, visible_to_sitter, created_at, updated_at";
 export const CARE_EVENT_SELECT =
   "id, owner_id, cat_id, event_type, title, note, related_item_name, severity, occurred_on, started_on, ended_on, created_at, updated_at";
+export const CARE_PLAN_CAT_SELECT =
+  "id, plan_id, cat_id, cat_name_snapshot, cat_deleted_at, sort_order, created_at";
 export const CATCARE_ANALYTICS_PROVIDER = "posthog";
 export const MAX_ROUTINE_FREQUENCY_COUNT = 12;
-export const catCareOwnerCacheTtlMs = 5 * 60_000;
-export const catListCacheTtlMs = catCareOwnerCacheTtlMs;
 
 export const routineItemDefinitions = [
   { category: "meal", key: "dry_food", sortOrder: 0, title: "主粮", fallbackFrequency: "daily_2", fallbackTime: "08:30,18:30", fallbackInstructions: "50g" },

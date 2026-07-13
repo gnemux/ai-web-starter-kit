@@ -93,7 +93,7 @@ The product pages may import public contracts from `@xwlc/core`, `@xwlc/ui`, `@x
 
 - `id uuid primary key`
 - `owner_id uuid not null references auth.users(id)`
-- `cat_id uuid not null references public.cats(id)`
+- optional legacy primary `cat_id`; it is cleared when that cat is archived
 - optional `routine_id`
 - `title text not null`
 - `status text not null`: `draft`, `published`, `reviewed`, `closed`
@@ -101,6 +101,39 @@ The product pages may import public contracts from `@xwlc/core`, `@xwlc/ui`, `@x
 - `generation_source text not null`: `manual`, `template`, `ai_mock`
 - `ai_input_summary jsonb not null`
 - optional start/end dates, handoff notes, generation/lifecycle timestamps, timestamps
+
+### `public.care_plan_cats`
+
+- immutable plan participant rows with `plan_id`, optional live `cat_id`,
+  `cat_name_snapshot`, optional `cat_deleted_at`, and `sort_order`
+- every newly created plan writes one participant row per selected cat
+- plan and result pages use these snapshots; an archived participant is shown
+  as `猫名（已删除）`
+
+### Cat profile lifecycle
+
+- Owner-facing delete is always logical deletion through
+  `soft_delete_cat_profile`; normal clients have no `cats` hard-delete grant.
+- A draft/published plan or active share link blocks archival. Reviewed/closed
+  history does not block it.
+- Active-plan and participant writes acquire a database row lock on every live
+  cat, while archival locks the same rows before checking blockers. This
+  serializes plan creation/publishing against archival instead of relying on a
+  stale RLS statement snapshot.
+- Every plan is inserted as `draft`; publishing is a separate transition that
+  succeeds only after all relational participants are present and active.
+- Archived cats and their mutable routines, routine items, care items, events,
+  and item assignments are hidden by RLS. Rows are retained for audit and a
+  separately governed future retention/purge workflow.
+- `cat-photos` is a private bucket. The database stores an owner-scoped object
+  path, while active photos are returned only through the authenticated
+  `/api/catcare/cat-photos/:catId` route. Storage read/update/delete policies
+  require both ownership and a live cat reference, so archived photos are not
+  listable or retrievable even through legacy public URLs.
+- Plans, tasks, submissions, recap data, and participant name snapshots remain
+  readable. Archival writes an atomic `cat_profile_archived` audit event.
+- Mutable owner/product reads are not cached in process-local memory; only the
+  global active product catalog may use a bounded shared cache.
 
 ### `public.care_tasks`
 

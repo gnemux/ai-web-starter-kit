@@ -97,9 +97,22 @@ values
 
 insert into public.care_plans (id, owner_id, cat_id, title, status, start_on, end_on)
 values
-  ('72000000-0000-0000-0000-000000000001', '12000000-0000-0000-0000-000000000001', '22000000-0000-0000-0000-000000000001', 'Owner A published plan', 'published', current_date, current_date + 1),
+  ('72000000-0000-0000-0000-000000000001', '12000000-0000-0000-0000-000000000001', '22000000-0000-0000-0000-000000000001', 'Owner A published plan', 'draft', current_date, current_date + 1),
   ('72000000-0000-0000-0000-000000000002', '12000000-0000-0000-0000-000000000001', '22000000-0000-0000-0000-000000000001', 'Owner A draft plan', 'draft', current_date, current_date + 1),
-  ('72000000-0000-0000-0000-000000000003', '12000000-0000-0000-0000-000000000002', '22000000-0000-0000-0000-000000000002', 'Owner B published plan', 'published', current_date, current_date + 1);
+  ('72000000-0000-0000-0000-000000000003', '12000000-0000-0000-0000-000000000002', '22000000-0000-0000-0000-000000000002', 'Owner B published plan', 'draft', current_date, current_date + 1);
+
+insert into public.care_plan_cats (plan_id, cat_id, cat_name_snapshot, sort_order)
+values
+  ('72000000-0000-0000-0000-000000000001', '22000000-0000-0000-0000-000000000001', 'Owner A Cat', 0),
+  ('72000000-0000-0000-0000-000000000002', '22000000-0000-0000-0000-000000000001', 'Owner A Cat', 0),
+  ('72000000-0000-0000-0000-000000000003', '22000000-0000-0000-0000-000000000002', 'Owner B Cat', 0);
+
+update public.care_plans
+set status = 'published', published_at = now()
+where id in (
+  '72000000-0000-0000-0000-000000000001',
+  '72000000-0000-0000-0000-000000000003'
+);
 
 insert into public.share_tokens (
   id,

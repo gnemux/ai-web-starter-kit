@@ -133,6 +133,10 @@ export default async function CatCareCatsPage({
 }
 
 function getCatsToastMessage(value: string | undefined, locale: "zh" | "en") {
+  if (value === "already_deleted") {
+    return locale === "en" ? "Cat profile is already deleted" : "猫咪档案已删除";
+  }
+
   if (value !== "deleted") {
     return null;
   }

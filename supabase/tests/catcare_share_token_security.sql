@@ -133,8 +133,16 @@ values
 
 insert into public.care_plans (id, owner_id, cat_id, title, status, start_on, end_on)
 values
-  ('71000000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-000000000001', '21000000-0000-0000-0000-000000000001', 'Owner A plan', 'published', current_date, current_date + 1),
-  ('71000000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-000000000002', '21000000-0000-0000-0000-000000000002', 'Owner B plan', 'published', current_date, current_date + 1);
+  ('71000000-0000-0000-0000-000000000001', '11000000-0000-0000-0000-000000000001', '21000000-0000-0000-0000-000000000001', 'Owner A plan', 'draft', current_date, current_date + 1),
+  ('71000000-0000-0000-0000-000000000002', '11000000-0000-0000-0000-000000000002', '21000000-0000-0000-0000-000000000002', 'Owner B plan', 'draft', current_date, current_date + 1);
+
+insert into public.care_plan_cats (plan_id, cat_id, cat_name_snapshot, sort_order)
+values
+  ('71000000-0000-0000-0000-000000000001', '21000000-0000-0000-0000-000000000001', 'Owner A Cat', 0),
+  ('71000000-0000-0000-0000-000000000002', '21000000-0000-0000-0000-000000000002', 'Owner B Cat', 0);
+
+update public.care_plans
+set status = 'published', published_at = now();
 
 insert into public.share_tokens (
   id,

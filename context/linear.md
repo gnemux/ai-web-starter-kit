@@ -344,6 +344,16 @@ service implementation was moved into `packages/*`. Local verification passed
 with `pnpm typecheck`, `pnpm lint`, `pnpm test:package-boundaries`,
 `pnpm test:release-boundaries`, `pnpm build`, and `git diff --check`.
 
+GNE-288 corrective lifecycle note (2026-07-13): the issue was reopened after a
+production cat-delete refresh defect exposed per-instance stale owner caches and
+hard-delete history loss. The accepted replacement is universal logical delete:
+active pages hide archived cats and their mutable aggregate children; plans,
+tasks, submissions, recap data, and immutable participant name snapshots remain;
+historical pages append `（已删除）`; draft/published plans and active share links
+block archival; direct authenticated hard delete is revoked; and successful
+archival writes a redacted atomic audit event. Remote migration and merge remain
+gated after local verification.
+
 GNE-253 PRODUCT-05 scope update: this issue is now the owner-side
 APP/UX continuation after GNE-252 and GNE-288. It does not reopen GNE-252 and
 does not introduce ACCESS. Phase 1 must first pull the GNE-252 owner plan

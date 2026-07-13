@@ -46,12 +46,12 @@ end;
 $$;
 
 select pg_temp.assert_eq(
-  'cat photo bucket remains public for known object URLs',
+  'cat photo bucket is private and keeps upload limits',
   (
     select count(*)
     from storage.buckets
     where id = 'cat-photos'
-      and public = true
+      and public = false
       and file_size_limit = 5242880
       and allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp']
   ),
@@ -59,19 +59,7 @@ select pg_temp.assert_eq(
 );
 
 select pg_temp.assert_eq(
-  'public bucket has no broad listing policy',
-  (
-    select count(*)
-    from pg_policies
-    where schemaname = 'storage'
-      and tablename = 'objects'
-      and policyname = 'Cat photos are publicly readable'
-  ),
-  0
-);
-
-select pg_temp.assert_eq(
-  'owner write policies remain present',
+  'cat photo policies include upload plus active-only read update and delete',
   (
     select count(*)
     from pg_policies
@@ -79,28 +67,31 @@ select pg_temp.assert_eq(
       and tablename = 'objects'
       and policyname in (
         'Owners can upload their cat photos',
-        'Owners can update their cat photos',
-        'Owners can delete their cat photos'
+        'Owners can read active cat photos',
+        'Owners can update their active cat photos',
+        'Owners can delete their active cat photos'
       )
       and roles = array['authenticated']::name[]
   ),
-  3
+  4
 );
 
 select pg_temp.assert_eq(
-  'authenticated owners have a folder-scoped read policy',
+  'read update and delete policies all require an active referenced cat',
   (
     select count(*)
     from pg_policies
     where schemaname = 'storage'
       and tablename = 'objects'
-      and policyname = 'Owners can read their cat photos'
-      and roles = array['authenticated']::name[]
-      and cmd = 'SELECT'
-      and qual like '%foldername%'
-      and qual like '%auth.uid%'
+      and policyname in (
+        'Owners can read active cat photos',
+        'Owners can update their active cat photos',
+        'Owners can delete their active cat photos'
+      )
+      and coalesce(qual, '') like '%deleted_at IS NULL%'
+      and coalesce(qual, '') like '%photo_url%'
   ),
-  1
+  3
 );
 
 insert into auth.users (
@@ -122,7 +113,7 @@ values
     '00000000-0000-0000-0000-000000000000',
     'authenticated',
     'authenticated',
-    'gne271-storage-owner-a@example.test',
+    'gne288-storage-owner-a@example.test',
     '$2a$10$linked.only.catcare.storage.a',
     now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
@@ -135,7 +126,7 @@ values
     '00000000-0000-0000-0000-000000000000',
     'authenticated',
     'authenticated',
-    'gne271-storage-owner-b@example.test',
+    'gne288-storage-owner-b@example.test',
     '$2a$10$linked.only.catcare.storage.b',
     now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
@@ -144,17 +135,47 @@ values
     now()
   );
 
+insert into public.cats (id, owner_id, name, photo_url, deleted_at)
+values
+  (
+    '24000000-0000-0000-0000-000000000001',
+    '14000000-0000-0000-0000-000000000001',
+    'Owner A Active Cat',
+    '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000001.webp',
+    null
+  ),
+  (
+    '24000000-0000-0000-0000-000000000002',
+    '14000000-0000-0000-0000-000000000001',
+    'Owner A Archived Cat',
+    '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000002.webp',
+    now()
+  ),
+  (
+    '24000000-0000-0000-0000-000000000003',
+    '14000000-0000-0000-0000-000000000002',
+    'Owner B Active Cat',
+    '14000000-0000-0000-0000-000000000002/34000000-0000-0000-0000-000000000003.webp',
+    null
+  );
+
 insert into storage.objects (bucket_id, name, owner_id, metadata)
 values
   (
     'cat-photos',
-    '14000000-0000-0000-0000-000000000001/owner-a.webp',
+    '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000001.webp',
     '14000000-0000-0000-0000-000000000001',
     '{}'::jsonb
   ),
   (
     'cat-photos',
-    '14000000-0000-0000-0000-000000000002/owner-b.webp',
+    '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000002.webp',
+    '14000000-0000-0000-0000-000000000001',
+    '{}'::jsonb
+  ),
+  (
+    'cat-photos',
+    '14000000-0000-0000-0000-000000000002/34000000-0000-0000-0000-000000000003.webp',
     '14000000-0000-0000-0000-000000000002',
     '{}'::jsonb
   );
@@ -162,7 +183,7 @@ values
 set local role anon;
 
 select pg_temp.assert_eq(
-  'anonymous clients cannot enumerate public cat photos',
+  'anonymous clients cannot enumerate private cat photos',
   (select count(*) from storage.objects where bucket_id = 'cat-photos'),
   0
 );
@@ -175,18 +196,27 @@ select set_config('request.jwt.claim.sub', '14000000-0000-0000-0000-000000000001
 select set_config('storage.allow_delete_query', 'true', true);
 
 select pg_temp.assert_eq(
-  'owner can read only their own photo rows',
+  'owner can read only the photo referenced by their active cat',
   (select count(*) from storage.objects where bucket_id = 'cat-photos'),
   1
 );
 
 select pg_temp.assert_affected(
-  'owner can update their own photo row',
+  'owner can update their active cat photo row',
   $$update storage.objects
     set user_metadata = '{"probe":"owner-a"}'::jsonb
     where bucket_id = 'cat-photos'
-      and name = '14000000-0000-0000-0000-000000000001/owner-a.webp'$$,
+      and name = '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000001.webp'$$,
   1
+);
+
+select pg_temp.assert_affected(
+  'owner cannot update their archived cat photo row',
+  $$update storage.objects
+    set user_metadata = '{"probe":"archived"}'::jsonb
+    where bucket_id = 'cat-photos'
+      and name = '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000002.webp'$$,
+  0
 );
 
 select pg_temp.assert_affected(
@@ -194,24 +224,26 @@ select pg_temp.assert_affected(
   $$update storage.objects
     set user_metadata = '{"probe":"cross-owner"}'::jsonb
     where bucket_id = 'cat-photos'
-      and name = '14000000-0000-0000-0000-000000000002/owner-b.webp'$$,
-  0
-);
-
-select pg_temp.assert_affected(
-  'owner cannot delete another owner photo row',
-  $$delete from storage.objects
-    where bucket_id = 'cat-photos'
-      and name = '14000000-0000-0000-0000-000000000002/owner-b.webp'$$,
+      and name = '14000000-0000-0000-0000-000000000002/34000000-0000-0000-0000-000000000003.webp'$$,
   0
 );
 
 insert into storage.objects (bucket_id, name, owner_id, metadata)
 values (
   'cat-photos',
-  '14000000-0000-0000-0000-000000000001/new-owner-a.webp',
+  '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000004.webp',
   '14000000-0000-0000-0000-000000000001',
   '{}'::jsonb
+);
+
+select pg_temp.assert_eq(
+  'an uploaded but unreferenced object is not readable or listable',
+  (
+    select count(*)
+    from storage.objects
+    where name = '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000004.webp'
+  ),
+  0
 );
 
 select pg_temp.expect_reject(
@@ -219,17 +251,33 @@ select pg_temp.expect_reject(
   $$insert into storage.objects (bucket_id, name, owner_id, metadata)
     values (
       'cat-photos',
-      '14000000-0000-0000-0000-000000000002/cross-owner.webp',
+      '14000000-0000-0000-0000-000000000002/34000000-0000-0000-0000-000000000005.webp',
       '14000000-0000-0000-0000-000000000001',
       '{}'::jsonb
     )$$
 );
 
 select pg_temp.assert_affected(
-  'owner can delete their own photo row',
+  'owner cannot delete their archived cat photo row',
   $$delete from storage.objects
     where bucket_id = 'cat-photos'
-      and name = '14000000-0000-0000-0000-000000000001/owner-a.webp'$$,
+      and name = '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000002.webp'$$,
+  0
+);
+
+select pg_temp.assert_affected(
+  'owner cannot delete another owner photo row',
+  $$delete from storage.objects
+    where bucket_id = 'cat-photos'
+      and name = '14000000-0000-0000-0000-000000000002/34000000-0000-0000-0000-000000000003.webp'$$,
+  0
+);
+
+select pg_temp.assert_affected(
+  'owner can delete their active cat photo row',
+  $$delete from storage.objects
+    where bucket_id = 'cat-photos'
+      and name = '14000000-0000-0000-0000-000000000001/34000000-0000-0000-0000-000000000001.webp'$$,
   1
 );
 

@@ -10,13 +10,9 @@ import { getCurrentBillingPlanId } from "../../services/billing";
 import {
   CAT_SELECT,
   CatCareCat,
-  clearCatCareEventListCache,
-  clearCatCareWorkspaceStatsCache,
-  clearCatItemAssignmentCache,
-  clearCatListCache,
-  clearCatSummaryCache,
-  clearRoutineSourceCatCache,
   getAuthenticatedOwnerId,
+  getCatPhotoProxyUrl,
+  getCatPhotoStoragePath,
   mapCat,
   mapSupabaseError,
   normalizeCatInput,
@@ -63,7 +59,8 @@ export async function createCatCareCatFromFormData(
   const countResult = await clientResult.data
     .from("cats")
     .select("id", { count: "exact", head: true })
-    .eq("owner_id", ownerResult.data);
+    .eq("owner_id", ownerResult.data)
+    .is("deleted_at", null);
 
   if (countResult.error) {
     return mapSupabaseError(countResult.error);
@@ -110,9 +107,6 @@ export async function createCatCareCatFromFormData(
   }
 
   const cat = mapCat(data);
-  clearCatListCache(ownerResult.data);
-  clearCatSummaryCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
   await trackCatCareProductEvent(ownerResult.data, "catcare_cat_created", {
     breed: cat.breed,
     has_photo: Boolean(cat.photoUrl),
@@ -142,6 +136,7 @@ export async function getCatCareCatDetail(
     .select(CAT_SELECT)
     .eq("owner_id", ownerResult.data)
     .eq("id", catId)
+    .is("deleted_at", null)
     .single();
 
   if (error) {
@@ -174,6 +169,15 @@ export async function updateCatCareCatFromFormData(
 
   if (!inputResult.ok) {
     return inputResult;
+  }
+
+  if (
+    inputResult.data.photoUrl?.startsWith("/api/catcare/cat-photos/") &&
+    inputResult.data.photoUrl !== getCatPhotoProxyUrl(id)
+  ) {
+    return serviceError("validation_error", "Choose a valid cat photo.", {
+      photoUrl: "invalid"
+    });
   }
 
   const clientResult = await createSupabaseServerClient();
@@ -209,13 +213,18 @@ export async function updateCatCareCatFromFormData(
     weight_kg: inputResult.data.weightKg
   };
 
-  update.photo_url = photoResult.data ?? inputResult.data.photoUrl;
+  if (photoResult.data) {
+    update.photo_url = photoResult.data;
+  } else if (inputResult.data.photoUrl !== getCatPhotoProxyUrl(id)) {
+    update.photo_url = inputResult.data.photoUrl;
+  }
 
   const { data, error } = await clientResult.data
     .from("cats")
     .update(update)
     .eq("owner_id", ownerResult.data)
     .eq("id", id)
+    .is("deleted_at", null)
     .select(CAT_SELECT)
     .single();
 
@@ -224,9 +233,6 @@ export async function updateCatCareCatFromFormData(
   }
 
   const cat = mapCat(data);
-  clearCatListCache(ownerResult.data);
-  clearCatSummaryCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
   await trackCatCareProductEvent(ownerResult.data, "catcare_cat_updated", {
     breed: cat.breed,
     has_photo: Boolean(cat.photoUrl),
@@ -236,9 +242,59 @@ export async function updateCatCareCatFromFormData(
   return serviceOk(cat);
 }
 
+export async function getCatCareCatPhotoById(
+  id: string
+): Promise<ServiceResult<{ body: ArrayBuffer; contentType: string }>> {
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const ownerResult = await getAuthenticatedOwnerId(clientResult.data);
+
+  if (!ownerResult.ok) {
+    return ownerResult;
+  }
+
+  const catResult = await clientResult.data
+    .from("cats")
+    .select("photo_url")
+    .eq("owner_id", ownerResult.data)
+    .eq("id", id)
+    .is("deleted_at", null)
+    .maybeSingle();
+
+  if (catResult.error) {
+    return mapSupabaseError(catResult.error);
+  }
+
+  const path = getCatPhotoStoragePath(
+    catResult.data?.photo_url ?? null,
+    ownerResult.data
+  );
+
+  if (!path) {
+    return serviceError("not_found", "Cat photo not found.");
+  }
+
+  const downloadResult = await clientResult.data.storage
+    .from("cat-photos")
+    .download(path);
+
+  if (downloadResult.error) {
+    return serviceError("not_found", "Cat photo not found.");
+  }
+
+  return serviceOk({
+    body: await downloadResult.data.arrayBuffer(),
+    contentType: downloadResult.data.type || "application/octet-stream"
+  });
+}
+
 export async function deleteCatCareCatFromFormData(
   formData: FormData
-): Promise<ServiceResult<{ id: string }>> {
+): Promise<ServiceResult<{ deletedAt: string | null; id: string }>> {
   const id = String(formData.get("id") ?? "").trim();
 
   return deleteCatCareCatById(id);
@@ -246,7 +302,7 @@ export async function deleteCatCareCatFromFormData(
 
 export async function deleteCatCareCatById(
   id: string
-): Promise<ServiceResult<{ id: string }>> {
+): Promise<ServiceResult<{ deletedAt: string | null; id: string }>> {
 
   if (!id) {
     return serviceError("validation_error", "Choose a valid cat profile.", {
@@ -266,27 +322,42 @@ export async function deleteCatCareCatById(
     return ownerResult;
   }
 
-  const { data, error } = await clientResult.data
-    .from("cats")
-    .delete()
-    .eq("owner_id", ownerResult.data)
-    .eq("id", id)
-    .select("id")
-    .maybeSingle();
+  const { data, error } = await clientResult.data.rpc(
+    "soft_delete_cat_profile",
+    { target_cat_id: id }
+  );
 
   if (error) {
     return mapSupabaseError(error);
   }
 
-  clearCatListCache(ownerResult.data);
-  clearCatSummaryCache(ownerResult.data);
-  clearCatItemAssignmentCache(ownerResult.data);
-  clearCatCareEventListCache(ownerResult.data);
-  clearCatCareWorkspaceStatsCache(ownerResult.data);
-  clearRoutineSourceCatCache(ownerResult.data);
-  await trackCatCareProductEvent(ownerResult.data, "catcare_cat_deleted", {
-    source: "owner_flow"
-  });
+  const outcome = data?.[0];
 
-  return serviceOk({ id: data?.id ?? id });
+  if (!outcome || outcome.outcome === "not_found") {
+    return serviceError("not_found", "Cat profile not found.");
+  }
+
+  if (outcome.outcome === "active_plan_conflict") {
+    return serviceError(
+      "validation_error",
+      "请先处理包含这只猫咪的进行中照护计划，再删除档案。",
+      {
+        planId: outcome.blocking_plan_id ?? "unknown",
+        reason: outcome.blocking_reason ?? "active_plan"
+      }
+    );
+  }
+
+  if (outcome.outcome !== "soft_deleted" && outcome.outcome !== "already_deleted") {
+    return serviceError("system_error", "Cat profile could not be deleted.");
+  }
+
+  if (outcome.outcome === "soft_deleted") {
+    await trackCatCareProductEvent(ownerResult.data, "catcare_cat_deleted", {
+      deletion_mode: "soft",
+      source: "owner_flow"
+    });
+  }
+
+  return serviceOk({ deletedAt: outcome.deleted_at, id });
 }

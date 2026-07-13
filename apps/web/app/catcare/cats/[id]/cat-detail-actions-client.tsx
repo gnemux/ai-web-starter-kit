@@ -25,8 +25,8 @@ export function CatDetailActionsClient({
     confirmDelete: locale === "en" ? "Confirm delete" : "确认删除",
     deleteDescription:
       locale === "en"
-        ? "This will permanently remove this cat profile and its related CatCare records."
-        : "这会永久删除这只猫咪档案，并同步删除它关联的 CatCare 照护数据。",
+        ? "This hides the profile and its routines, items, and events from active pages. Completed plan history stays available and is marked as deleted. Active plans must be handled first."
+        : "删除后，档案、习惯、用品和事件会从日常页面隐藏；已完成的计划与结果仍会保留，并标注“已删除”。进行中的计划需先处理。",
     deleteProfile: locale === "en" ? "Delete profile" : "删除档案",
     deleteTitle: locale === "en" ? "Delete this profile?" : "删除这只猫咪档案？",
     edit: locale === "en" ? "Edit profile" : "编辑档案",

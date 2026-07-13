@@ -85,7 +85,7 @@ select pg_temp.assert_eq(
       )
       and roles = '{authenticated}'
   ),
-  32
+  31
 );
 
 insert into auth.users (
@@ -159,8 +159,16 @@ values
 
 insert into public.care_plans (id, owner_id, cat_id, routine_id, title, status, start_on, end_on)
 values
-  ('70000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Owner A plan', 'published', current_date, current_date + 1),
-  ('70000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000002', 'Owner B plan', 'published', current_date, current_date + 1);
+  ('70000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', '30000000-0000-0000-0000-000000000001', 'Owner A plan', 'draft', current_date, current_date + 1),
+  ('70000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002', '30000000-0000-0000-0000-000000000002', 'Owner B plan', 'draft', current_date, current_date + 1);
+
+insert into public.care_plan_cats (plan_id, cat_id, cat_name_snapshot, sort_order)
+values
+  ('70000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001', 'Owner A Cat', 0),
+  ('70000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000002', 'Owner B Cat', 0);
+
+update public.care_plans
+set status = 'published', published_at = now();
 
 insert into public.care_tasks (id, plan_id, category, title)
 values

@@ -11,6 +11,7 @@ export type {
   CatCareItemTag,
   CatCareLibraryItem,
   CatCarePlan,
+  CatCarePlanParticipant,
   CatCarePlanListWorkspace,
   CatCareRoutine,
   CatCareRoutineItem,
@@ -61,6 +62,7 @@ export {
   createCatCareCatFromFormData,
   deleteCatCareCatById,
   deleteCatCareCatFromFormData,
+  getCatCareCatPhotoById,
   getCatCareCatDetail,
   updateCatCareCatFromFormData
 } from "./product-service/cats";

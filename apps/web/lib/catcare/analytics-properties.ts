@@ -2,6 +2,7 @@ import type { CatCareAnalyticsProperties } from "./analytics";
 
 const stringProperties = [
   "breed",
+  "deletion_mode",
   "outcome",
   "plan_status",
   "result",

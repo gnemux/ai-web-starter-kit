@@ -1177,38 +1177,48 @@ GNE-250 deployed-product smoke checkpoint on 2026-07-13:
   capability. GNE-234 remains open and this checkpoint must not activate
   GNE-273.
 
+GNE-273 v0.3.0 decision checkpoint on 2026-07-13:
+
+- The decision is `Go` for the declared MVP3 scope: Reference Product and
+  public-package consumption pass with no blocking defect in the shared
+  reference/staging/test environment. This is not a production launch
+  approval, and future production gates do not invalidate the completed scope.
+- The verified path covers package boundaries, the deployed Owner/private-link
+  journey, signed-out anonymous submission, RLS/security negatives,
+  AI/Billing/Credit return, Audit/Outbox enqueue, PostHog observation, package
+  patch, 17-file empty-database rebuild/cloud parity, GitHub CI, and Vercel.
+- The fresh `catcare_submission_created` analytics event remains absent even
+  though trusted submission/Audit/Outbox/result facts passed. Real Outbox
+  delivery, separate production Supabase/PostHog, live AI/payment, and
+  Cloudflare/Hono implementation remain explicit trigger-based gates.
+- Cloudflare/Hono adapter readiness is `Conditional`: reusable packages are
+  runtime-agnostic and expose Actor/Session, owner/scope, safe context, generic
+  share-gate, DB-boundary, and provider-port contracts, while actual Worker
+  Auth/Email/D1/KV/Queues adapters and non-RLS acceptance are not implemented.
+- The next product may proceed to GNE-274 for the separate product-expansion
+  judgment. GNE-273 changes no business code, schema,
+  migration, provider configuration, or page capability; it does not close
+  GNE-234 or activate GNE-274.
+- Detailed evidence is in `specs/reference-product/v0.3.0-decision.md`.
+
 ## Next Steps
 
-1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish
-   GNE-258 only as ACCESS technical foundation, then run GNE-290 from prototype
-   screen 06 through 11 before claiming final product quality for the share and
-   sitter flow.
-2. Before changing GitHub repository visibility to Public, merge the current
-   open-source preparation branch through the normal PR path. Historical
-   Supabase staging identifiers, Creem test object IDs, and operator-email
-   evidence are accepted by the Repo Owner as non-blocking; no history rewrite
-   is planned for this visibility switch.
-3. Treat the current cloud Supabase project as reference/staging/test for MVP3 validation. Production Supabase is not enabled during MVP3; if a template asks for Production evidence, record `not_run / not enabled in MVP3`.
-4. Before any future online release or production gate, apply repository Supabase migrations through the reviewed workflow; do not rely on dashboard-only schema edits.
-5. Configure Supabase Auth URL settings for the deployed validation domain that is actually used; production Auth URL settings become a separate gate only when a true production Supabase project exists.
-6. Configure Vercel env entries from `.env.example` and `context/environment-matrix.md`, keeping server-only Supabase, Payment, AI, Email, Storage, and SMS secrets out of `NEXT_PUBLIC_`; redeploy after any env change before using the deployment as evidence.
-7. Continue MVP3 under `GNE-231 PRODUCT`; `GNE-228 PLAN`, `GNE-229 PLATFORM`,
-   and the non-deployed parts of `GNE-230 DELIVERY` are Done. The route
-   validates a Reference Product consuming platform packages; it does not
-   continue the old Product Validation Kit CP chain.
-8. Keep MVP3 on the 小团队 WIP rule: one parent issue carries the main implementation at a time; child issues stay under their parent issue and should not be assigned to the MVP3 milestone view or given Linear labels. Use the milestone diagrams and parent issue sections as the starting point for newcomer onboarding and reviewer acceptance.
-9. During `GNE-228`, keep the confirmed PLAN decisions visible: Linear + repo evidence sync, short task branches from `main`, single monorepo with package boundaries, current Supabase as reference/staging/test only, Supabase + Vercel mainline, Cloudflare/Hono adapter-readiness only, and AI/Billing mock/no-op/sandbox/test only.
-10. Treat the PLAN gate as failed if product-specific cat-care objects enter platform packages, if work starts from old pre-`v0.2.0` branches, if child issues are executed out of sequence without an explicit decision, if production Supabase/live payment/real AI become MVP3 blockers, if private tokens/private content appear in evidence, or if the final Reviewer path cannot connect page/data/RLS/deploy/analytics/CI/version evidence.
-11. In `GNE-229`, keep the MVP3 target convention to `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`; current code should not reintroduce the old `@starter/*` workspace namespace. Product-specific cat-care objects must stay outside platform packages.
-12. In `GNE-230`, do not rebuild GitHub/Vercel/Supabase delivery. Validate only package化后的新增交付风险: `apps/web` consumes `@xwlc/*`, CI catches package/boundary failures, Reference Product env differences are recorded, product migrations continue through repo migrations, deployed smoke can reproduce the minimum product path, and failures can be classified as app/package/env/migration/RLS/provider. Use forward fix / expand-contract for database changes instead of promising DB rollback.
-13. In `GNE-232`, verify private-link lifecycle and risks: creation, use, expiry, revocation, repeated access, repeated submit, forwarded links, guessed tokens, raw-token log leakage, and anonymous abuse prevention.
-14. In `GNE-233`, keep the internal order Audit / Correlation ID -> Outbox -> AI draft with human review -> Entitlement / Usage -> Sandbox / Test Mode -> Health / Trace / Metrics. Do not let AI or Payment work block the PRODUCT or ACCESS minimum path.
-15. In `GNE-234`, execute the 30-minute Reviewer Runbook, then produce the final v0.3.0 decision: whether the package-consumption approach is valid, which capabilities enter XWLC v0.3.0, which need rework, and whether the next real product can start from v0.3.0.
-16. Before activating each MVP3 child issue, check whether it satisfies the milestone's minimum child-issue construction template: target, rationale, possible file/directories, outputs, non-goals, reviewer verification, documentation sync, and not_run/risk records.
-17. Use `GNE-201` for any production payment, live payment, merchant settlement, refund, reconciliation, invoice, or real user payment planning.
-18. Treat `GNE-75 FUTURE GROWTH-00` as a future/backlog horizontal growth parent. Do not attach it to MVP3 Reference Product, MVP4, MVP5, or MVP6 unless a later product-growth decision explicitly reopens that scope.
-19. Keep all new route-level UI copy in the shared i18n dictionary with Chinese and English entries.
-20. Future AI-assisted tasks should follow `specs/collaboration/engineering-spec.md`; future deployment, monitoring, smoke test, or environment-matrix tasks should follow `specs/deploy/engineering-spec.md` and update the relevant memory document instead of relying on chat history.
+1. Complete only the GNE-273 evidence PR, required CI, merge, automatic Vercel
+   verification, and Linear writeback in the current execution; then stop.
+2. Keep GNE-234 open. Run GNE-274 in a separate later root task to decide the
+   Travel/product-expansion path; do not activate it from GNE-273.
+3. Keep `v0.2.0` as the sealed MVP2 baseline and use
+   `specs/reference-product/v0.3.0-decision.md` as the MVP3 decision record.
+4. Treat the current cloud Supabase/PostHog resources as
+   reference/staging/test. Separate production providers, live AI/payment,
+   real Outbox delivery, and Cloudflare/Hono implementation remain
+   trigger-based future gates.
+5. Keep product-specific objects outside `@xwlc/*`, preserve public-package
+   imports and the one-parent/one-child WIP rule, and map future production
+   gates to then-current Issues only when their trigger occurs.
+6. Future deployment, monitoring, smoke, environment, schema, or Provider work
+   must follow the repository specs and update durable evidence rather than
+   relying on chat history.
 
 ## Risks
 

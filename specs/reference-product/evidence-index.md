@@ -194,7 +194,7 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 | Product/access/capability acceptance history | GNE-231 / GNE-232 / GNE-233 children | `acceptance.md`, capability/action and security specs |
 | Cross-system evidence index | GNE-272 | This document |
 | Final deployment smoke reproduction | GNE-250 | `deployed-smoke-verification.md` |
-| Final v0.3.0 decision | GNE-273 | Not executed by GNE-272 |
+| Final v0.3.0 decision | GNE-273 | `v0.3.0-decision.md` |
 | Product/Travel extension decision | GNE-274 | Not executed by GNE-272 |
 
 ## Not Run And Decision Caveats
@@ -235,12 +235,12 @@ design and is not implementation work.
 
 ## Handoff To The Decision Issues
 
-GNE-272 evidence coverage and the GNE-250 deployed smoke are now recorded.
-GNE-273 can use this index and `deployed-smoke-verification.md` to separate
+GNE-272 evidence coverage, the GNE-250 deployed smoke, and the GNE-273 Go
+decision are now recorded. `v0.3.0-decision.md` separates
 verified MVP3 facts, non-blocking concerns, `not_run`, and future production
-gates. It must not turn the missing fresh submission analytics event, real
+gates without turning the missing fresh submission analytics event, real
 Outbox delivery, live providers, or true production isolation into passed
 claims.
 
-This handoff does not close GNE-234 and does not activate GNE-273 from the
-GNE-250 execution thread.
+This handoff does not close GNE-234 and does not activate GNE-274 from the
+GNE-273 execution thread.

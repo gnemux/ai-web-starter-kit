@@ -19,6 +19,7 @@ import {
   type CatCarePlan
 } from "@/lib/catcare/product-service";
 import { CatCareAiRecapPanel } from "../../plan-ai-recap-client";
+import { formatPlanCatNames } from "../../plan-cat-names";
 import {
   buildPlanResultSummary,
   type PlanOverdueEntry,
@@ -106,6 +107,9 @@ function PlanResults({
           </h1>
           <p className="mt-2 text-sm leading-6 text-[#526177]">
             主人侧查看照看者提交状态、异常重点和后续复盘入口。
+          </p>
+          <p className="mt-1 text-sm font-semibold leading-6 text-[#526177]">
+            照护猫咪：{formatPlanCatNames(plan)}
           </p>
         </div>
         <CatCareButton href="/catcare/results" variant="secondary">

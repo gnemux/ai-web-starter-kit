@@ -49,7 +49,8 @@ MVP2 扩展底座
 
 MVP3 Reference Product：双底座架构与 Package 消费验证
 -> use the cat temporary care-plan Reference Product to prove that product repos can consume the XWLC platform foundation through versioned packages instead of copying Starter Kit source
--> current execution parents are `GNE-228` through `GNE-234`: PLAN, PLATFORM, DELIVERY, PRODUCT, ACCESS, CAPABILITY, and VERIFY
+-> current execution parents are `GNE-228` through `GNE-234`, followed by `GNE-298`: PLAN, PLATFORM, DELIVERY, PRODUCT, ACCESS, CAPABILITY, VERIFY, and TEMPLATE
+-> `GNE-298` starts only after `GNE-234`; it generates and verifies a separate clean template candidate without deleting CatCare, Demo, or evidence from the research repository
 
 Future Growth / Backlog
 -> keep `GNE-75 FUTURE GROWTH-00` as a horizontal growth and feedback capability outside MVP3/MVP4/MVP5/MVP6 until a real product-growth decision reopens it
@@ -134,9 +135,11 @@ position in this list.
 - MVP3 should not be blocked by real Payment or real AI provider readiness. It uses sandbox/mock/no-op paths first, with product acceptance handled only after the Reference Product path is stable.
 - MVP3 remains on the Supabase + Vercel mainline while preserving Cloudflare/Hono adapter readiness through runtime-agnostic package contracts. Do not implement Cloudflare/Hono in MVP3 unless a later decision explicitly creates an adapter spike.
 - MVP3 uses the 4-package naming convention `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`. Do not mix in a 5-package naming scheme during MVP3 unless a later v0.3.x decision explicitly splits packages.
-- MVP3 execution starts with `GNE-228 / MVP3-01 PLAN`, then proceeds through `GNE-229 PLATFORM`, `GNE-230 DELIVERY`, `GNE-231 PRODUCT`, `GNE-232 ACCESS`, `GNE-233 CAPABILITY`, and `GNE-234 VERIFY`.
+- MVP3 execution starts with `GNE-228 / MVP3-01 PLAN`, proceeds through `GNE-229 PLATFORM`, `GNE-230 DELIVERY`, `GNE-231 PRODUCT`, `GNE-232 ACCESS`, `GNE-233 CAPABILITY`, and `GNE-234 VERIFY`, then enters `GNE-298 TEMPLATE` only after the final MVP3 verification gate.
 - MVP3 follows a 小团队 WIP rule: keep the main implementation on one parent issue at a time. The next parent can be reviewed ahead, but child issues should not be executed out of their parent issue sequence.
-- MVP3 child issues are now created under `GNE-228` through `GNE-234`. They should stay off the milestone view and carry no Linear labels; the seven parent issues remain the milestone-level navigation and acceptance surface.
+- MVP3 child issues are created under `GNE-228` through `GNE-234` and `GNE-298`. They should stay off the milestone view and carry no Linear labels; the eight parent issues remain the milestone-level navigation and acceptance surface. `GNE-298` runs `GNE-301 -> GNE-302 -> GNE-303` and stops after the current child instead of entering the next automatically.
+- The first template candidate inherits `packages/*` as a version-stamped local workspace snapshot with source-commit provenance. Central registry publishing and cross-repository upgrades remain trigger-based work for a second real consumer, not claims of `GNE-298`.
+- GNE-301 freezes the TEMPLATE boundary in `specs/template/*`: one research/evidence repository, one separately generated clean candidate, and one independently deployed repository per real product. It changes no runtime code or database.
 - MVP3 CatCare is a small Reference Product, not a demo reskin. It must be good enough to prove that the common foundation can support a real product flow, even though live payment, live AI, and full business automation remain out of MVP3 scope.
 - For GNE-280 UI/SYSTEM, the binding UI reference is `specs/reference-product/prototypes/v6-regenerated-normalized/` plus `specs/reference-product/gne-278-product-flow.md`. Older uploaded prototype images and discarded prototype drafts are historical input only and must not override the regenerated split screens or Markdown specs.
 - GNE-280 is limited to the CatCare UI/SYSTEM baseline for `/`, `/login?next=/catcare`, `/catcare`, `/account/billing`, and `/account/usage`. Full cat profile, routine, plan generation, private share, sitter checklist, owner result, ACCESS, live AI, and live payment flows belong to later PRODUCT/ACCESS/CAPABILITY issues.

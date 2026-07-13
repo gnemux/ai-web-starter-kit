@@ -1,0 +1,207 @@
+# Clean Template Candidate Quick Start Contract
+
+## Status
+
+This is the cold-start contract approved by GNE-301. The generator and candidate
+do not exist yet, so every execution step below is `not_run` in GNE-301. GNE-302
+must implement the local generation commands; GNE-303 must follow this guide
+from a clean directory without borrowing source-workspace caches.
+
+## Prerequisites
+
+- Node.js 22;
+- pnpm 9.15.0;
+- the repository-pinned Supabase CLI version selected by GNE-302;
+- Docker/Colima only for the disposable local Supabase verification;
+- no real provider key or shared cloud database access.
+
+Before using a Supabase command, run `supabase --version` and the relevant
+`--help`. The baseline migration itself must have been created by GNE-302 with
+`supabase migration new foundation_baseline`; a template user does not rename
+or recreate it.
+
+## 1. Generate Into An Empty Directory
+
+GNE-302 must expose one repository script with this stable interface:
+
+```bash
+pnpm template:generate \
+  --config specs/template/fixtures/smoke-product.json \
+  --output /tmp/xwlc-template-smoke
+```
+
+The exact internal script path is not part of the public contract. The command
+must reject a non-empty output directory, unknown config keys, unsafe paths,
+unclassified source inputs, and incomplete license/provenance data.
+
+Expected result:
+
+- output exists only after generation and verification complete;
+- `template-version.json` records the full source commit, template/manifest
+  version, package versions, lockfile hash, baseline filename/schema version,
+  provider modes, and notices version;
+- no `.git`, worktree metadata, `node_modules`, `.next`, `.turbo`, `.vercel`,
+  `.env.local`, source absolute path, secret, CatCare, Demo, or MVP evidence is
+  present.
+
+## 2. Verify Determinism
+
+```bash
+pnpm template:generate \
+  --config specs/template/fixtures/smoke-product.json \
+  --output /tmp/xwlc-template-smoke-a
+
+pnpm template:generate \
+  --config specs/template/fixtures/smoke-product.json \
+  --output /tmp/xwlc-template-smoke-b
+
+pnpm template:compare \
+  /tmp/xwlc-template-smoke-a \
+  /tmp/xwlc-template-smoke-b
+```
+
+After the documented normalization allowlist, file paths, contents, modes,
+lockfile, and manifest facts must match. GNE-302 may choose another internal
+comparison implementation, but these two public script names and pass/fail
+semantics must remain stable once published.
+
+## 3. Install Without Source Caches
+
+Change into one generated output and confirm it is not resolving dependencies
+from the research worktree:
+
+```bash
+cd /tmp/xwlc-template-smoke-a
+pnpm install --frozen-lockfile
+pnpm test:package-boundaries
+pnpm test:release-boundaries
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+The generated workspace owns its local `packages/*` snapshot and lockfile. It
+must not use `link:` paths or absolute paths pointing at `ai-web-starter-kit`.
+
+## 4. Configure Local Safe Modes
+
+```bash
+cp .env.example .env.local
+```
+
+Use placeholders or disposable local values only. The default contract is:
+
+```text
+NEXT_PUBLIC_APP_NAME=Template Smoke Product
+NEXT_PUBLIC_PRODUCT_ID=template-smoke
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_ENV=local
+AUTH_PROVIDER=supabase
+DATABASE_PROVIDER=supabase
+NEXT_PUBLIC_ANALYTICS_PROVIDER=none
+PAYMENT_PROVIDER=sandbox
+PAYMENT_MODE=sandbox
+PAYMENT_LIVE_ENABLED=false
+AI_PROVIDER=mock
+EMAIL_PROVIDER=noop
+STORAGE_PROVIDER=noop
+SMS_PROVIDER=noop
+```
+
+Supabase public/local keys are filled only from the disposable local instance.
+Service-role values stay in the ignored local file and never appear in logs,
+screenshots, Linear, generated manifests, or evidence. No PostHog key is needed
+for the disabled/no-op Analytics path.
+
+Before starting Supabase, inspect the generated local tooling inputs:
+
+- `supabase/config.toml` has a neutral `project_id` derived from the product
+  config, documented fixed local ports, and Auth site/redirect URLs matching the
+  local app URL; it contains no research or cloud project identity;
+- `supabase/seed.sql` is empty/comment-only or deterministic and product-neutral;
+- `supabase/.gitignore` excludes local state and secrets;
+- `supabase/README.md` describes the independent foundation baseline and forbids
+  linking/resetting the shared cloud test project.
+
+## 5. Rebuild A Disposable Empty Database
+
+Do not link to, reset, or mutate the shared cloud test project.
+
+```bash
+supabase --version
+supabase start
+supabase db --help
+supabase db reset
+supabase db reset
+```
+
+Both resets must apply the single candidate baseline and produce the same schema
+and deterministic neutral seed state. Verify:
+
+- the migration ledger head equals the recorded baseline filename;
+- retained foundation tables, constraints, indexes, triggers, RLS, and grants
+  match the acceptance manifest;
+- `demo_items`, CatCare/care tables, CatCare Storage, product Audit/Outbox event
+  unions, and user/customer rows are absent;
+- owner A cannot read/update owner B, anonymous roles cannot access protected
+  tables, ownership cannot be transferred by UPDATE, and `payment_events`
+  remains service-only.
+- authenticated users can SELECT only their own Billing/Subscription/
+  Entitlement/Credit/Usage facts and cannot INSERT, UPDATE, or DELETE them;
+- `user_profiles` permits only owner SELECT/INSERT/UPDATE and no user DELETE;
+- `set_updated_at()` has fixed `search_path` and no direct EXECUTE grant for
+  `PUBLIC`, `anon`, or `authenticated`.
+
+## 6. Start And Review Pages
+
+```bash
+pnpm dev
+```
+
+Review at least:
+
+- `/` signed out and signed in;
+- `/login` sign-in/sign-up/error and safe `next` behavior;
+- `/account`, `/account/billing`, `/account/usage`;
+- `/product` placeholder and signed-out redirect;
+- 404, loading, empty, error, and disabled Provider states;
+- one mobile viewport and the accepted MVP3 desktop widths.
+
+The neutral identity must be visible and no CatCare route, text, icon, image,
+table, or navigation item may appear. Missing optional Provider configuration
+must not break install, build, home, login, or account pages.
+
+## 7. Inspect Security And Provenance
+
+```bash
+pnpm template:verify
+git diff --check
+```
+
+The verification command must cover pollution/secret scanning, dependency and
+asset notices, CSP including `frame-ancestors`, Referrer-Policy,
+X-Content-Type-Options, session-cookie expectations, safe return paths, package
+public-root boundaries, and manifest/source-version consistency.
+
+## External Test Deployment Gate
+
+Creating a new GitHub repository, pushing the candidate/Smoke Product, creating
+or configuring a Vercel project, or entering cloud environment variables is not
+part of this local Quick Start. GNE-303 performs those steps only after explicit
+approval for the named target. Without approval, record `not_run` and return a
+Conditional result rather than claiming independent deployment passed.
+
+If approved later, Vercel uses Root Directory `apps/web`, Framework Preset
+`Next.js`, workspace access outside the Root Directory, Install Command
+`cd ../.. && pnpm install --frozen-lockfile`, Build Command
+`cd ../.. && pnpm turbo run build --filter=@xwlc/web`, and Output Directory
+`.next`. `apps/web/vercel.json` is the only candidate deployment configuration.
+The research repository's automatic deployment after its own merge is not
+candidate evidence.
+
+## Cleanup
+
+Generated directories and local Supabase containers are disposable, but do not
+delete them automatically when they may contain reviewer evidence or user
+changes. Record the paths and ask before destructive cleanup.

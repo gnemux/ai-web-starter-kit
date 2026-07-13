@@ -1,0 +1,202 @@
+# Test Plan: Clean Template Candidate
+
+## Status And Ownership
+
+GNE-301 defines this test matrix but changes no runtime artifact. Therefore the
+current execution result for candidate tests is `not_run`. GNE-302 owns source
+refactor/generator/regression evidence; GNE-303 owns independent artifact,
+empty-database, page, and optional external deployment evidence.
+
+Allowed result values are `pass`, `fail`, `blocked`, and `not_run`. A nearby
+passing check cannot replace an unrun required check.
+
+## GNE-301 Architecture Checks
+
+| Check | Method | Expected |
+| --- | --- | --- |
+| source baseline | compare inventory to `596286a` | 103 App Router files, 59 below `app/catcare`, 78 app-library files, 142 public assets, four packages and 18 migrations match |
+| current coupling | inspect home/login/account/nav/footer imports | all CatCare shell coupling is listed |
+| package boundary | inspect every package file/spec | Core Demo/default pricing catalog, UI fixed BrandMark and Platform product fixtures are Transform/Exclude; four package roles and local-snapshot limitation match |
+| runtime/tooling allowlist | inspect app/root/Supabase build inputs | proxy, instrumentation, package/config, root ignores/editor/PR template, AI safety script, Vercel, Supabase config/seed/ignore/README are classified |
+| migration disposition | inspect all 18 SQL files | every file has Fold/Exclude/Contract-only treatment |
+| lifecycle boundary | inspect GNE-288 implementation and template contract | CatCare code is excluded; archive/history rule is Contract only with a second-consumer trigger |
+| spec-template lifecycle handoff | inspect `specs/_template/engineering-spec.md` disposition | template is Transform, so GNE-302 can add the neutral decision checklist without copying CatCare implementation |
+| UI/asset boundary | inspect components and `public/catcare` | generic transforms and product exclusions are explicit |
+| operation gates | compare orchestration and Issue | research PR flow differs from new repo/Vercel/database gates |
+| docs consistency | cross-read product/engineering/manifest/Quick Start/acceptance/context | no conflicting directory or readiness claim |
+
+## GNE-302 Source And Generator Tests
+
+### Import And Ownership
+
+- packages import no app/product/runtime SDK code;
+- platform app modules import no CatCare/Demo DTO, table, event, copy, route, or
+  asset;
+- product modules consume only public `@xwlc/*` roots and the documented
+  platform app facade;
+- client code imports no service-role or server-only module;
+- thin routes do not hide reverse dependencies.
+
+Run the positive check and negative fixtures for package internals, product
+imports from platform, and server modules from client code.
+
+### Manifest And Generation
+
+- every candidate input is classified;
+- an unclassified file fails generation;
+- non-empty output fails without overwrite;
+- path traversal and source-output nesting fail;
+- a transform is named, deterministic, and traceable;
+- failure leaves no apparently complete output;
+- identical source/config produces identical normalized output;
+- a brand/config change modifies only allowlisted product/config/asset paths;
+- candidate manifest/source/package/schema/license facts agree.
+- shared packages expose no fixed product brand, plan/price/quota catalog,
+  product feature key or validation/demo copy; negative fixtures that re-add a
+  hard-coded brand or catalog fail the boundary check;
+- template metadata uses the pinned source commit timestamp rather than wall
+  clock time, so identical inputs remain byte-identical after normalization;
+- generated package manifests contain exact external dependency versions, the
+  lockfile agrees, and CI Actions are immutable-SHA pinned or have a reviewed
+  explicit exception.
+
+### Pollution And Secret Negatives
+
+Inject each fixture independently and require failure:
+
+1. CatCare import/path/copy;
+2. CatCare or Demo SQL table;
+3. current environment/project/Issue/PR identifier;
+4. source absolute path or workspace link;
+5. `.env.local`, key/token/password-shaped value, private note;
+6. `.git`, worktree, cache, build output, or log;
+7. unknown binary or asset without provenance.
+
+### Research Repository Regression
+
+After structural changes settle, run once:
+
+```bash
+git diff --check
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+Verify the CatCare Owner/private-link/anonymous/Owner path and Demo navigation
+only to the degree affected by moved imports/routes. GNE-302 must not change
+accepted product behavior under the guise of extraction.
+
+## GNE-303 Independent Candidate Tests
+
+### Clean Install And Build
+
+Follow `quickstart.md` from a new directory with no source `node_modules`,
+`.next`, Turbo cache, worktree metadata, or undeclared environment variables.
+
+Required:
+
+```text
+frozen install
+package boundary check
+release boundary check
+lint
+typecheck
+unit/integration tests
+build
+git diff --check
+```
+
+### Page And Responsive Matrix
+
+| Surface | States | Viewports |
+| --- | --- | --- |
+| home | signed out, signed in, long copy | mobile plus 1366x768, 1440x900, 1470x798, 1920x1080 |
+| login | sign in, sign up, confirmation failure, invalid/external `next` | mobile + desktop |
+| account | profile success/error, sign out, long identity | mobile + desktop |
+| Billing | sandbox configured, disabled/not configured, error | mobile + desktop |
+| Usage/AI | mock/no-op, disabled, quota/error | mobile + desktop |
+| product placeholder | signed in, signed out redirect, empty/loading/error | mobile + desktop |
+| 404/error | neutral recovery action and keyboard/focus behavior | mobile + desktop |
+
+No horizontal scroll, clipped controls, `overflow-hidden` fake adaptation,
+whole-page refresh regression, CatCare identity, or invented Provider success.
+
+### Database And RLS Matrix
+
+Use only disposable local/isolated empty Supabase:
+
+- reset from empty succeeds twice with identical retained schema;
+- candidate history contains only its independent baseline;
+- source and candidate schema versions/provenance match the manifest;
+- only retained foundation tables are present;
+- all exposed tables have RLS and explicit grants;
+- `user_profiles`: anon denied; owner SELECT/INSERT/UPDATE only; cross-owner and
+  DELETE denied;
+- each Billing orders/subscriptions/entitlements/Credit/Usage table: anon
+  denied; owner SELECT only; all authenticated INSERT/UPDATE/DELETE denied;
+- `payment_events`: anon/authenticated SELECT/INSERT/UPDATE/DELETE all denied;
+- service role can perform the operational writes required by all retained
+  foundation facts;
+- UPDATE cannot transfer ownership;
+- anon and unauthenticated access are rejected;
+- service-only `payment_events` is inaccessible to public roles;
+- unique source/idempotency constraints reject duplicates;
+- views/functions/triggers have reviewed execution/search-path behavior;
+- seed is empty or deterministic neutral data.
+- `set_updated_at()` has an empty/fixed `search_path`, is trigger-only for app
+  roles, and direct EXECUTE is revoked from `PUBLIC`, anon and authenticated.
+
+Run advisors when available and classify every remaining item. Local success is
+not Production migration evidence.
+
+### Security And Supply Chain
+
+- CSP has a reviewed `frame-ancestors` policy;
+- Referrer-Policy and X-Content-Type-Options are present;
+- Auth/session cookie expectations and safe return paths pass negatives;
+- no service key or secret appears in browser bundles/logs/evidence;
+- all dependencies are represented by the committed lockfile;
+- root license and third-party/asset notices cover redistributed inputs;
+- optional Analytics disabled path works; enabled test path emits only bounded
+  neutral properties and no CatCare/private payload.
+
+### Independent Repository And Deployment
+
+Only after explicit approval:
+
+- initialize a new candidate or Smoke repository without source history;
+- push only the generated artifact;
+- create/configure an isolated Vercel test project;
+- record source commit, candidate/template version, deployment commit, URL, CI,
+  and environment-key presence without values;
+- verify Vercel Root Directory `apps/web`, Next.js preset, outside-root workspace
+  access, frozen root install, filtered `@xwlc/web` build, `.next` output and the
+  sole app-level config match the approved contract;
+- verify disabled/sandbox/mock paths at the deployed URL.
+
+Without approval this section is `not_run`, and final status cannot be full Go.
+
+## Review Strategy
+
+GNE-301 and GNE-302 require an independent Terra Reviewer because the boundary
+touches shared package APIs, Auth/RLS, migration derivation, supply chain, and a
+broad future refactor. The reviewer is read-only and returns consolidated
+findings. The original writer fixes them, then reruns only affected checks plus
+the final required repository check.
+
+## Failure Conditions
+
+Any of these is blocking:
+
+- product/Demo/environment/history pollution;
+- product code imported by packages or platform app modules;
+- configuration requires editing platform/package core;
+- generation is delete-after-copy, non-deterministic, or overwrites output;
+- clean install/build depends on the source workspace;
+- independent empty reset fails or RLS/ownership negatives fail;
+- Provider absence breaks required pages/build;
+- secret, license, or provenance uncertainty;
+- unrun external deployment described as pass;
+- source CatCare/Demo regression caused by extraction.

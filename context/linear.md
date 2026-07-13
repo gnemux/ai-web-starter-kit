@@ -21,7 +21,7 @@ MVP2 扩展底座
 
 MVP3 Reference Product：双底座架构与 Package 消费验证
 ├── ID: f85fc4d2-304b-406b-94aa-12f303b0acbc
-└── Parent issues: GNE-228, GNE-229, GNE-230, GNE-231, GNE-232, GNE-233, GNE-234
+└── Parent issues: GNE-228, GNE-229, GNE-230, GNE-231, GNE-232, GNE-233, GNE-234, GNE-298
 
 MVP4 国内外双模式底座
 ├── ID: 5eed1508-a480-44d1-aa39-efebe17dd4f9
@@ -96,7 +96,8 @@ MVP3 Reference Product：双底座架构与 Package 消费验证
 ├── GNE-231 MVP3-04 PRODUCT [APP/DATA] 主人侧 Reference Product 最小业务闭环
 ├── GNE-232 MVP3-05 ACCESS [SECURITY] 私密分享、匿名访问与提交边界
 ├── GNE-233 MVP3-06 CAPABILITY [AI/BILLING/OUTBOX/AUDIT] 平台能力接入真实业务
-└── GNE-234 MVP3-07 VERIFY [QA] 交叉验证、升级演练与 v0.3.0 结论
+├── GNE-234 MVP3-07 VERIFY [QA] 交叉验证、升级演练与 v0.3.0 结论
+└── GNE-298 MVP3-08 TEMPLATE [ARCH/PRODUCT] 纯净基础母版候选
 
 Future / Backlog 横向能力
 └── GNE-75 FUTURE GROWTH-00 [GROWTH] 通用增长营销与反馈闭环
@@ -110,8 +111,9 @@ MVP5 真实海外垂直产品验证
 
 `GNE-168` records the detailed MVP1-MVP6 mapping. `GNE-190` is an MVP2 consensus document, not an implementation parent. `GNE-167` is MVP2-only integrations: provider matrix, env naming, mock/no-op/sandbox strategy, and interface boundaries. `GNE-193` owns MVP4 overseas / China adapter, env template, mock, and launch-checklist planning. `GNE-201` owns future production payment readiness for real vertical products.
 
-MVP3 execution now starts with `GNE-228 / MVP3-01 PLAN`, then follows
-`GNE-229` through `GNE-234`. The stage validates a Reference Product and a
+MVP3 execution now starts with `GNE-228 / MVP3-01 PLAN`, follows
+`GNE-229` through `GNE-234`, then enters `GNE-298` only after VERIFY is Done.
+The stage validates a Reference Product and a
 package-consumed platform foundation, not the old Product Validation Kit. MVP3
 uses the 4-package naming convention `@xwlc/core`, `@xwlc/ui`,
 `@xwlc/platform`, and `@xwlc/db`; do not mix in the previous 5-package naming
@@ -144,7 +146,8 @@ PostHog, GitHub CI, package version, and schema version evidence.
 
 MVP3 parent dependency chain is linear by design: `GNE-228` blocks `GNE-229`,
 `GNE-229` blocks `GNE-230`, `GNE-230` blocks `GNE-231`, `GNE-231` blocks
-`GNE-232`, `GNE-232` blocks `GNE-233`, and `GNE-233` blocks `GNE-234`. This is
+`GNE-232`, `GNE-232` blocks `GNE-233`, `GNE-233` blocks `GNE-234`, and
+`GNE-234` blocks `GNE-298`. This is
 the 小团队 WIP rule for MVP3: one parent issue should carry the main
 implementation at a time; the next parent can be reviewed ahead, but should not
 start a separate implementation track unless the team deliberately accepts that
@@ -153,7 +156,7 @@ tradeoff.
 MVP3 child issues were created on 2026-06-26 after the parent-issue charter was
 approved. These child issues are attached to their parent issues, carry no
 Linear labels, and should remain `No milestone` so the milestone view stays
-focused on the seven parent issues. Parent issues should now act as navigation,
+focused on the eight parent issues. Parent issues should now act as navigation,
 boundary, input/output, and reviewer-acceptance charters; implementation
 details, SQL, commands, screenshots, runbook records, and final evidence belong
 inside child issues or specs/context documents.
@@ -161,7 +164,7 @@ inside child issues or specs/context documents.
 On 2026-06-26, the MVP3 milestone and execution issues were strengthened for
 newcomer and reviewer readability. The milestone now contains Mermaid diagrams
 for dual-foundation architecture, the business loop, data flow, and reviewer
-verification flow. The seven parent issues now include purpose, rationale,
+verification flow. The eight parent issues now include purpose, rationale,
 boundaries, code-architecture role, reusable-platform value, product value,
 reviewer actions, and verification method. Key child issues add concrete
 templates for glossary/diagrams, package boundaries, delivery evidence, product
@@ -198,7 +201,8 @@ failure/retry/idempotency behavior in enough detail for implementation and
 review. `GNE-251` now includes the unified Reference Product state model. The
 parent chain remains linear: `GNE-228` blocks `GNE-229`, `GNE-229` blocks
 `GNE-230`, `GNE-230` blocks `GNE-231`, `GNE-231` blocks `GNE-232`, `GNE-232`
-blocks `GNE-233`, and `GNE-233` blocks `GNE-234`. No labels were added.
+blocks `GNE-233`, `GNE-233` blocks `GNE-234`, and the later TEMPLATE parent
+adds `GNE-234` blocks `GNE-298`. No labels were added.
 
 Several overlap-prone child issues have explicit boundaries: `GNE-248` defines
 the minimum app/package/db version-location method while `GNE-272` aggregates
@@ -699,7 +703,27 @@ GNE-234 VERIFY
 ├── GNE-250 VERIFY-06 部署环境 smoke 复现
 ├── GNE-273 VERIFY-07 v0.3.0 结论
 └── GNE-274 VERIFY-08 产品扩展判定
+
+GNE-298 TEMPLATE
+├── GNE-301 TEMPLATE-01 [ARCH] 提取边界、三仓职责与生成清单
+├── GNE-302 TEMPLATE-02 [BUILD/UI] 独立母版候选、中性产品壳与必要 UI
+└── GNE-303 TEMPLATE-03 [VERIFY/QA] Smoke Product、空库重建与独立部署验收
 ```
+
+`GNE-298` is blocked by `GNE-234` and is the only TEMPLATE parent in the MVP3
+sequence. Its children remain `No milestone`, carry no labels, and execute in
+the fixed order `GNE-301 -> GNE-302 -> GNE-303`; automatic orchestration must
+stop after the selected child. The current research repository may use its
+normal verified branch/PR flow, while creating or writing a new candidate or
+Smoke GitHub repository and configuring a Vercel test project require explicit
+approval for that execution.
+
+GNE-301 is the documentation-only architecture gate. Its binding repository
+outputs are `specs/template/product-spec.md`, `engineering-spec.md`,
+`extraction-manifest.md`, `quickstart.md`, `test-plan.md`, and `acceptance.md`.
+It classifies the current routes, imports, assets, packages, and all 18 source
+migrations without moving runtime code or creating a candidate. GNE-302 must
+consume this boundary and may not silently redefine it during implementation.
 
 GNE-240 owns detailed package dependency rules for the GNE-229 parent. GNE-242
 uses the MVP3 target namespace directly: `@xwlc/core`, `@xwlc/ui`,
@@ -960,6 +984,7 @@ GNE-231 MVP3-04 PRODUCT [APP/DATA] 主人侧 Reference Product 最小业务闭�
 GNE-232 MVP3-05 ACCESS [SECURITY] 私密分享、匿名访问与提交边界
 GNE-233 MVP3-06 CAPABILITY [AI/BILLING/OUTBOX/AUDIT] 平台能力接入真实业务
 GNE-234 MVP3-07 VERIFY [QA] 交叉验证、升级演练与 v0.3.0 结论
+GNE-298 MVP3-08 TEMPLATE [ARCH/PRODUCT] 纯净基础母版候选
 
 Retired legacy route, not current MVP3 execution:
 The old Product Validation Kit parent and CP task line was replaced by

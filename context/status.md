@@ -1290,9 +1290,46 @@ GNE-274 product-expansion decision checkpoint on 2026-07-13:
   documentation-only, does not close GNE-234, and must not activate another
   Issue.
 
-## Next Steps
+GNE-298 template-candidate planning checkpoint on 2026-07-13:
 
-2026-07-13 GNE-288 corrective lifecycle update (local, not deployed):
+- Linear now has one MVP3 TEMPLATE parent (`GNE-298`) and exactly three ordered
+  children: `GNE-301 ARCH -> GNE-302 BUILD/UI -> GNE-303 VERIFY/QA`.
+- `GNE-298` is blocked by `GNE-234`. The repository's formal project, Linear,
+  and architecture context now includes this parent so a future root task can
+  select it through the normal automatic orchestration rules.
+- The candidate will use version-stamped local workspace package snapshots and
+  an independent Supabase CLI-generated timestamp baseline with schema/source
+  provenance. Registry publishing and cross-repository upgrades wait for a
+  second real consumer.
+- The commercial acceptance surface now includes a cold-start Quick Start,
+  dependency/asset license provenance, security headers, deterministic neutral
+  seed behavior, and explicit external GitHub/Vercel approval gates.
+- This checkpoint changes planning documentation only. It changes no runtime
+  code, page, schema, migration, Provider configuration, database, deployment,
+  or external repository.
+
+GNE-301 extraction-architecture checkpoint on 2026-07-13:
+
+- GNE-234 passed its parent acceptance and is Done after all eight VERIFY
+  children, PR #92 CI, and the automatic Vercel deployment completed.
+- GNE-298 and its first child GNE-301 are In Progress. GNE-301 is the only
+  active TEMPLATE child and must stop before GNE-302.
+- The source inventory at `596286a` records 103 App Router files, 59 CatCare
+  route files, 78 app-library files, 142 CatCare public assets, four workspace
+  packages, and 18 repository migrations.
+- `specs/template/*` now freezes the product boundary, current/target trees,
+  route/service/UI classifications, all 18 migration dispositions, generator
+  manifest contract, cold-start path, test matrix, external gates, and future
+  triggers. Package files are classified individually, required App/Supabase/
+  Vercel toolchain inputs are explicit, and foundation RLS grants are fixed per
+  role and operation. No runtime code, migration, database, candidate
+  repository, deployment, or Provider configuration changed in GNE-301.
+- GNE-288's archive behavior is recorded as a product-design lifecycle contract:
+  hide archived entities from active surfaces and retain immutable historical
+  snapshots with a deleted marker. Its CatCare implementation remains excluded;
+  shared implementation waits for a second real consumer.
+
+2026-07-13 GNE-288 corrective lifecycle update:
 
 - Production refresh inconsistency was traced to five-minute process-local
   caches holding different owner-data snapshots across Vercel instances.
@@ -1301,20 +1338,26 @@ GNE-274 product-expansion decision checkpoint on 2026-07-13:
   history through immutable `care_plan_cats` snapshots with `（已删除）` labels.
 - Local clean-db rebuild, lifecycle SQL/RLS tests, existing CatCare security
   tests, 82 web tests, typecheck, package-boundary verification, and production
-  build pass. The cloud test database has not been migrated in this checkpoint.
+  build passed. PR #93 and follow-up result-label PR #94 were merged; the shared
+  test database migration and automatic Vercel deployment were verified before
+  GNE-288 closed.
 
-1. Publish the GNE-274 product-expansion decision, then close only GNE-274
-   after CI, merge, automatic deployment, and Linear evidence sync pass.
-2. Keep GNE-234 open and do not activate another Issue in this execution.
+## Next Steps
+
+1. Complete only `GNE-301`: independently review and publish the approved
+   extraction architecture, then sync its evidence and close that child.
+2. Keep `GNE-298` In Progress and do not activate `GNE-302` in the same
+   execution. Implementation begins only in a new root task after `GNE-301`
+   passes its stop gate.
 3. Keep `v0.2.0` as the sealed MVP2 baseline and use
    `specs/reference-product/v0.3.0-decision.md` as the MVP3 decision record.
 4. Treat the current cloud Supabase/PostHog resources as
    reference/staging/test. Separate production providers, live AI/payment,
    real Outbox delivery, and Cloudflare/Hono implementation remain
    trigger-based future gates.
-5. Generate a clean template candidate, then start the next product in a
-   separate repository from an approved product spec while consuming public
-   package roots.
+5. In `GNE-302`, generate a clean template candidate from the approved
+   allowlisted manifest. In `GNE-303`, independently verify it and create any
+   external GitHub/Vercel test target only after target-specific approval.
 6. Keep product-specific objects outside `@xwlc/*`, preserve public-package
    imports and the one-parent/one-child WIP rule, and map future production
    gates to then-current Issues only when their trigger occurs.

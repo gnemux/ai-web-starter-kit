@@ -95,10 +95,51 @@ Project `476986` received these fresh `env=production` events after
 | `catcare_submission_created` | 0 |
 
 The fresh share-view event and both AI completion events all had `app`, `env`,
-`module`, `mvp_stage`, `market`, `version`, and `correlation_id`. The missing
-fresh submission event is a non-blocking observability concern: the trusted
-submission, Audit, Outbox, result page, and Credit/usage facts all passed, but
-GNE-273 must not claim that every step produced fresh PostHog evidence.
+`module`, `mvp_stage`, `market`, `version`, and `correlation_id`. The table
+records the original GNE-250 run: the trusted submission, Audit, Outbox, result
+page, and Credit/usage facts passed, but that run did not produce a fresh
+submission event. The later GNE-266 repair verification below closes this
+specific observability gap without rewriting the historical result.
+
+## GNE-266 Reliable-Delivery Repair Verification
+
+The repaired server Analytics delivery path was merged by
+[PR #89](https://github.com/gnemux/ai-web-starter-kit/pull/89) as commit
+`82e918794350c53a8bc9a828050420f42e74c86b`. GitHub CI run
+[29224603456](https://github.com/gnemux/ai-web-starter-kit/actions/runs/29224603456)
+passed, and Vercel reported `Deployment has completed` at
+2026-07-13 04:45:34 UTC.
+
+A fresh one-day plan used the existing deployment-test cat and mock AI in the
+shared reference/staging/test environment. The run consumed one test AI quota,
+created plan `8e84b9b1-7d82-4b20-b2f5-8c056b137a66`, published it, generated a
+new private link, opened the authorized anonymous projection, and submitted
+one completed result. The anonymous page changed from `0/6` to `1/6`; the
+Owner result page showed one real completion, five missing items, and the test
+note. No live Provider, payment, schema, migration, or environment change was
+used.
+
+PostHog project `476986` received both required events for that plan:
+
+| Event | UTC timestamp | Correlation ID | Result |
+| --- | --- | --- | --- |
+| `catcare_share_page_viewed` | 2026-07-13 04:59:41 | `a3dfb4f1-91b0-4963-8829-2f99ff30a503` | `success`, `valid` |
+| `catcare_submission_created` | 2026-07-13 05:00:32 | `1aa1180a-7a0f-43ab-934d-975d586c5909` | `created` |
+
+The submission event carried `request_source=catcare_anonymous_submit`,
+`provider=posthog`, `resource_type=care_plan`, and the expected shared test
+environment properties. Its URL property was
+`https://ai-web-starter-kit-web.vercel.app/s/[redacted]`; no raw share token or
+private note reached the queried Analytics properties.
+
+Read-only Supabase verification found one non-abnormal completed submission,
+the matching `anonymous_token` `share_page_viewed` and
+`care_submission_created` Audit rows, and one pending Owner-notification
+Outbox row. The submission Audit row, Outbox row, and PostHog submission event
+all shared correlation ID `1aa1180a-7a0f-43ab-934d-975d586c5909`; the trusted
+submission, Audit, and Outbox also shared the same idempotency key. This proves
+the repaired deployed path reaches PostHog while preserving the business,
+Audit, and Outbox facts.
 
 ## Security And Lifecycle Notes
 
@@ -129,9 +170,9 @@ GNE-273 must not claim that every step produced fresh PostHog evidence.
 ## Final Assessment
 
 The package-consuming application, deployed runtime, current cloud schema,
-owner/anonymous service boundary, Audit/Outbox, Billing/Credit, and mock AI
-operate together on the stable online test environment. Most expected
-analytics events arrived, but the fresh submission event did not; GNE-273 owns
-the final risk treatment rather than this smoke pre-deciding it. The next
-decision issue must also preserve the explicit production-provider `not_run`
-boundaries.
+owner/anonymous service boundary, Audit/Outbox, Billing/Credit, mock AI, and
+PostHog operate together on the stable online test environment. The original
+GNE-250 run missed the fresh submission event; the deployed GNE-266 repair
+rerun received both share-view and submission events with matching trusted
+correlation evidence. The explicit production-provider `not_run` boundaries
+remain unchanged.

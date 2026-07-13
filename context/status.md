@@ -1149,6 +1149,34 @@ GNE-272 cross-system evidence checkpoint on 2026-07-13:
   real Provider operation, or page capability changed. GNE-234 remains open
   and this checkpoint must not activate GNE-273.
 
+GNE-250 deployed-product smoke checkpoint on 2026-07-13:
+
+- The stable Vercel URL on `main` commit `d7bfeb6` returned HTTP 200 from
+  `sin1`; GitHub CI run `29218432852` and the automatic Vercel deployment both
+  passed before the product smoke began.
+- The deployed owner journey created a GNE-250 cat and reusable routine,
+  generated and published a one-day plan, exercised the private-link route and
+  one anonymous-token submission, reviewed the real result, and generated a
+  mock AI recap. Test entitlement usage moved from 17/65 to 15/65; no real
+  charge or live-provider call occurred.
+- An independent active-link pass explicitly logged out a synthetic GNE-250
+  account before opening the link in a fresh tab. The signed-out page exposed
+  only the authorized cat/date/task projection, had no Owner navigation, and
+  accepted one idempotent submission; this closes the gap found by Terra's
+  first review.
+- Trusted Supabase facts confirm the six-task plan, anonymous-token Audit,
+  idempotent submission, pending owner-notification Outbox row, two committed
+  usage/Credit pairs, and exact 17/17 cloud/repository migration parity.
+- Fresh PostHog evidence arrived for cat, routine, plan, publish, share,
+  result-open, and both AI actions. A fresh `catcare_submission_created` event
+  was not observed, so the result is `pass with non-blocking concerns` and the
+  final decision must preserve that observability caveat.
+- Detailed evidence is in
+  `specs/reference-product/deployed-smoke-verification.md`. GNE-250 changes no
+  business code, schema, migrations, provider configuration, or page
+  capability. GNE-234 remains open and this checkpoint must not activate
+  GNE-273.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

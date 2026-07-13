@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | automatic main deployment for `1c2de2c` succeeded; stable validation URL returned HTTP 200 from `sin1`; full Production Smoke Path not recorded |
+| Latest production status | automatic main deployment for `d7bfeb6` succeeded; full deployed CatCare smoke passed with non-blocking concerns |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | `1c2de2c6ab8f414279220031e7d5dd27563bfc3f` |
+| Latest production commit | `d7bfeb644f3ff7f2ab6a79ceb03fb3de19ff6565` |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | Full Production Smoke Path is still not recorded. AI production smoke is `not_run` until a real provider is configured and deployed. The reference/staging/test Supabase migration history does not exactly match the 16 repository migrations; GNE-271 owns reconciliation evidence. |
-| Next owner action | Privately confirm two independent reviewer accounts and one active share link for GNE-269; reconcile migration-history parity in GNE-271; run the full deployed Reference Product smoke in GNE-250. |
+| Current blocked items | No GNE-250 deployment blocker. Fresh `catcare_submission_created` PostHog evidence was absent although trusted database/Audit/Outbox facts passed. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
+| Next owner action | Publish and review the GNE-250 evidence-only PR, verify its automatic main deployment, then close only GNE-250. Do not activate GNE-273 from this run. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -135,11 +135,12 @@ Record configured/missing/unknown only. Do not record values.
 
 ## Latest Production Deployment
 
-Latest recorded Vercel automatic `main` deployment: 2026-07-12, commit
-`1c2de2c6ab8f414279220031e7d5dd27563bfc3f`, deployment status `success`.
-GitHub CI also completed successfully. The stable validation URL returned
-HTTP 200 and its response reported Vercel region `sin1`. This is deployment and
-entry-point evidence, not a full Production Smoke Path pass. Although Vercel
+Latest recorded Vercel automatic `main` deployment: 2026-07-13, commit
+`d7bfeb644f3ff7f2ab6a79ceb03fb3de19ff6565`, deployment status `success`.
+GitHub CI run `29218432852` also completed successfully. The stable validation
+URL returned HTTP 200 and its response reported Vercel region `sin1`. GNE-250
+then passed the full deployed CatCare product path with the concerns recorded
+in `specs/reference-product/deployed-smoke-verification.md`. Although Vercel
 labels the target `Production`, MVP3 still uses reference/staging/test provider
 resources and has no true production Supabase project.
 
@@ -149,13 +150,66 @@ No Preview deployment result has been recorded in this file yet.
 
 ## Production Smoke Path
 
-No full Production Smoke Path has been recorded in this file yet. AI production
-smoke is also not recorded as passed; GNE-160 defines the repository-level
-checklist and budget guard only.
+The full deployed Reference Product smoke was recorded by GNE-250 on
+2026-07-13. The online owner-to-share-to-result path, mock AI, test Billing,
+Supabase facts, GitHub CI, Vercel, package versions, and schema parity passed.
+One fresh PostHog submission event was not observed, so the result is `pass
+with non-blocking concerns`, not an unconditional production-readiness claim.
+Live-provider AI smoke remains `not_run`; GNE-160 defines only its checklist
+and budget guard.
 
-GNE-250 deployed Reference Product smoke is `not_run`. PRODUCT, ACCESS, and
-CAPABILITY prerequisites are now complete, so GNE-250 may run later in the
-declared VERIFY sequence; VERIFY-01 does not start it early.
+## 2026-07-13 10:12 CST - GNE-250 deployed CatCare smoke
+
+### Deployment Metadata
+
+| Field | Value |
+| --- | --- |
+| Linear issue | `GNE-250` |
+| Environment | Vercel Production target with reference/staging/test providers |
+| Deployment type | automatic main plus smoke-test update |
+| Trigger | merge to `main` |
+| Branch | `main` |
+| Commit | `d7bfeb644f3ff7f2ab6a79ceb03fb3de19ff6565` |
+| Vercel URL | `https://ai-web-starter-kit-web.vercel.app` |
+| Actor | Codex / Sol |
+| Verifier | Codex / Sol plus independent Terra review: READY |
+| Provider values | same-as-current-single-service |
+| Notes | No secrets, raw share token, live payment, live AI, provider reconfiguration, or migration. A synthetic staging-only account/plan supported the independent signed-out link proof. |
+
+### Provider Configuration Status
+
+| Key or provider | Production | Preview | Notes |
+| --- | --- | --- | --- |
+| NEXT_PUBLIC_APP_ENV | unknown | unknown | Runtime events reported `env=production`; Vercel entry was not inspected. |
+| NEXT_PUBLIC_PRODUCT_ID | unknown | unknown | Runtime events included required app/product metadata; Vercel entry was not inspected. |
+| NEXT_PUBLIC_APP_URL | unknown | unknown | Stable routes and server-side event URLs were valid; entry source is unknown. |
+| AUTH_PROVIDER / DATABASE_PROVIDER | unknown | unknown | Login/session and deployed Supabase writes passed; selector entries were not inspected. |
+| NEXT_PUBLIC_ANALYTICS_PROVIDER | unknown | unknown | Fresh PostHog events arrived, with one submission-event concern; entry was not inspected. |
+| PAYMENT_PROVIDER / PAYMENT_MODE | unknown | unknown | Runtime pages reported test data and no real charge; entries were not inspected. |
+| AI_PROVIDER | unknown | unknown | Plan generation and recap completed in mock mode; entry was not inspected. |
+| NEXT_PUBLIC_SUPABASE_URL / public key | unknown | unknown | Browser Auth/data and connected read-only verification passed; values were not inspected. |
+| Supabase server key | unknown | unknown | Audit/Outbox/usage writes passed; the entry and value were not inspected. |
+| NEXT_PUBLIC_POSTHOG_KEY / host | unknown | unknown | Project 476986 received the fresh event set; entries were not inspected. |
+
+### Smoke Test Result
+
+| Check | Status | Evidence | Next action |
+| --- | --- | --- | --- |
+| Stable URL / region | pass | HTTP 200; `sin1` | None |
+| Owner session and CatCare | pass | Created the GNE-250 cat and reusable routine | None |
+| Plan generation / publish | pass | Six tasks, seven executions, published on the deployed URL | None |
+| Private-link route / submission | pass | Explicit logout, fresh active `/s/<redacted>` projection, one idempotent submission, `anonymous_token` Audit | Preserve raw-token exclusion |
+| Owner result / mock AI recap | pass | 1/6 real result and recap; two committed usage/Credit pairs | None |
+| Billing / entitlement | pass in test boundary | 17/65 -> 15/65; no real charge | Keep live payment `not_run` |
+| Supabase / migration | pass | Trusted facts agree; 17/17 migrations | No migration needed |
+| PostHog | concern | Eight fresh event categories arrived; fresh submission event absent | Carry into GNE-273 decision |
+| Browser console | pass | No warning/error messages on tested pages | None |
+
+### Rollback Plan
+
+No rollback is required because no runtime code, schema, provider config, or
+deployment setting changed. The evidence-only branch can be closed without
+affecting the deployed product if publication fails.
 
 ## Current Release Configuration Notes
 

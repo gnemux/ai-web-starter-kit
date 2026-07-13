@@ -8,10 +8,10 @@ boundary, package consumption, database upgrade, Billing/AI facts, Audit,
 Outbox, PostHog, GitHub CI, and Vercel deployment are each backed by a named
 owner issue, a repository record, or a live read-only query.
 
-This index is not the v0.3.0 Go / Conditional Go / No-Go decision. It also does
-not replace `GNE-250`, which still owns the final deployment-environment smoke
-reproduction. Counts below are snapshots, not product KPIs or promises about a
-separate production environment.
+This index is not the v0.3.0 Go / Conditional Go / No-Go decision. GNE-250 now
+records the final deployment-environment smoke in
+`deployed-smoke-verification.md`. Counts below are snapshots, not product KPIs
+or promises about a separate production environment.
 
 ## Evidence Scope And Definitions
 
@@ -193,7 +193,7 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 | Package patch and database upgrade | GNE-271 | `package-db-upgrade-verification.md` |
 | Product/access/capability acceptance history | GNE-231 / GNE-232 / GNE-233 children | `acceptance.md`, capability/action and security specs |
 | Cross-system evidence index | GNE-272 | This document |
-| Final deployment smoke reproduction | GNE-250 | Must complete before GNE-273 |
+| Final deployment smoke reproduction | GNE-250 | `deployed-smoke-verification.md` |
 | Final v0.3.0 decision | GNE-273 | Not executed by GNE-272 |
 | Product/Travel extension decision | GNE-274 | Not executed by GNE-272 |
 
@@ -201,7 +201,7 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 
 | Item | Risk | Blocks GNE-272 | Required treatment |
 | --- | --- | --- | --- |
-| GNE-250 final deployment-environment smoke reproduction | Medium | No | Execute as VERIFY-06; GNE-273 is blocked until GNE-250 produces a pass result or an explicit blocking/not-run risk. |
+| Fresh `catcare_submission_created` during GNE-250 smoke | Low/Medium observability concern | No | Trusted Supabase/Audit/Outbox/result facts passed, but the fresh PostHog event was absent; GNE-273 must preserve this caveat. |
 | True production Supabase/PostHog isolation | Low for MVP3, high before real users | No | Not enabled in MVP3; create and migrate an isolated production environment before live users, real payment, or real AI cost. |
 | Live AI provider quality/cost | Low for MVP3 | No | Remains a later provider gate; current evidence is mock/no-op/sandbox/test only. |
 | Live payment, settlement, refund, tax, dispute | Low for MVP3, high before commerce | No | Remains under the production-payment gate; current orders are sandbox or Creem Test Mode. |
@@ -235,10 +235,12 @@ design and is not implementation work.
 
 ## Handoff To The Decision Issues
 
-GNE-272 evidence coverage is complete. GNE-250 VERIFY-06 must now reproduce the
-deployed product smoke. After that gate, GNE-273 can use this index and the
-smoke result to separate verified MVP3 facts from `not_run` and future
-production gates. It must not turn real Outbox delivery, live providers, or
-true production isolation into passed claims.
+GNE-272 evidence coverage and the GNE-250 deployed smoke are now recorded.
+GNE-273 can use this index and `deployed-smoke-verification.md` to separate
+verified MVP3 facts, non-blocking concerns, `not_run`, and future production
+gates. It must not turn the missing fresh submission analytics event, real
+Outbox delivery, live providers, or true production isolation into passed
+claims.
 
-Completing this index does not close GNE-234 and activates GNE-250, not GNE-273.
+This handoff does not close GNE-234 and does not activate GNE-273 from the
+GNE-250 execution thread.

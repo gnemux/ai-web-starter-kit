@@ -160,26 +160,26 @@ migration-history parity.
 Repository migration range:
 
 - first: `20260618070613_create_data_template.sql`;
-- latest: `20260709013908_restore_ai_credit_units.sql`;
-- count: 16 migration files.
+- latest: `20260712122026_restrict_public_cat_photo_listing.sql`;
+- count: 17 migration files.
 
-The connected reference/staging/test project reported 11 migration-history
-rows, from `20260618070613_create_data_template` through
-`20260708124436_add_outbox_idempotency_key`.
+The connected reference/staging/test project reports the same 17 timestamps,
+from `20260618070613_create_data_template` through
+`20260712122026_restrict_public_cat_photo_listing`.
 
-Observed parity status: `fail` for exact migration-history parity.
+Observed parity status: `pass` after GNE-271 reconciliation and the approved
+main-to-staging migration workflow.
 
-- The remote history did not list repository versions `20260703050143`,
-  `20260703155601`, `20260704033000`, `20260704043000`, or
-  `20260709013908`.
-- The share-token migration is recorded remotely as `20260707022833`, while
-  the repository file is `20260707012636_create_catcare_share_tokens.sql`.
-- Runtime tables and aggregate test data are present, but their presence does
-  not repair or explain migration-history drift.
+- The former missing history rows were recorded only after exhaustive schema
+  equivalence checks; this history repair does not mean old SQL was replayed.
+- The former share-token timestamp mismatch was reconciled only after its
+  runtime effect was shown equivalent to the repository migration.
+- The 17th migration was applied normally from reviewed `main` by GitHub
+  Actions run `29214674101`, not by history repair or Dashboard editing.
 
-Do not apply, rename, or rewrite migrations during VERIFY-01. `GNE-271` must
-reconcile repository files, remote migration history, and runtime schema before
-the final v0.3.0 decision claims repeatable database upgrades.
+See `package-db-upgrade-verification.md` for empty-database, cloud, RLS, data,
+CI, deployment, and rollback evidence. Do not rename or rewrite the historical
+migrations after this checkpoint.
 
 ## Not Run And Handoff Gates
 
@@ -187,7 +187,7 @@ the final v0.3.0 decision claims repeatable database upgrades.
 | --- | --- | --- |
 | Full 30-minute Reviewer Runbook | `not_run` | Owned by `GNE-269` |
 | Cross-owner and token negative matrix | `not_run` | Owned by `GNE-270` |
-| Package patch and migration rehearsal | `not_run` | Owned by `GNE-271`; must include the parity finding above |
+| Package patch and migration rehearsal | `pass` | Completed by `GNE-271`; see `package-db-upgrade-verification.md` |
 | Consolidated provider evidence | `not_run` | Owned by `GNE-272` |
 | Full deployed product smoke | `not_run` | Owned by `GNE-250` |
 | Live AI and live payment | `not_run` | Explicitly outside MVP3 |

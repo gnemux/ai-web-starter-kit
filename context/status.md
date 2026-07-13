@@ -1092,6 +1092,32 @@ GNE-270 security-negative verification checkpoint on 2026-07-12:
 - Exact cloud migration-history parity remains GNE-271 scope. This checkpoint
   does not close GNE-234 and must not automatically start GNE-271.
 
+GNE-271 package/database upgrade verification checkpoint on 2026-07-13:
+
+- The reusable package patch path remains compatible at `@xwlc/* 0.1.1`, with
+  Web consuming public exports rather than package internals.
+- An isolated disposable Supabase rebuilt the original 16 migrations and the
+  final 17-migration chain from empty state. Five rollback-only security suites
+  plus full typecheck, lint, test, build, and GitHub CI passed.
+- The connected reference/staging/test database runtime schema was exhaustively
+  matched before its 11-row ledger was reconciled to the 16 existing repository
+  timestamps. This records verified history only; it does not claim old SQL was
+  replayed. The mismatched share-token timestamp was reconciled after proving
+  equivalent effects.
+- PR #82 merged as `4c32d53`. GitHub Actions run `29214674101` then applied the
+  reviewed 17th migration from `main` with `target=staging`; cloud history now
+  ends at `20260712122026_restrict_public_cat_photo_listing`.
+- The public object delivery contract remains intact, while anonymous metadata
+  enumeration is removed and owner read/write access is UUID-folder scoped.
+  Rollback-only cloud behavior checks passed and left no temporary user or
+  Storage rows.
+- Key business aggregates did not change, all AI Credit postconditions pass,
+  the public-bucket listing Advisor finding is gone, Vercel deployment passed,
+  and the stable test URL returned HTTP 200.
+- Detailed evidence is in
+  `specs/reference-product/package-db-upgrade-verification.md`. GNE-234 remains
+  open; this checkpoint must not activate GNE-272.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

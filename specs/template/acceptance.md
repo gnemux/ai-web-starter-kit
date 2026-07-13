@@ -1,0 +1,110 @@
+# Acceptance: Clean Template Extraction
+
+## GNE-301 Result
+
+This section is the completion gate for the current architecture Issue. It does
+not mark the GNE-302 implementation or GNE-303 smoke as complete.
+
+| Requirement | Result | Evidence |
+| --- | --- | --- |
+| current directory and architecture reflect `main` | pass | `engineering-spec.md` baseline, tree, counts, and coupling list |
+| target research/candidate/product directories are fixed | pass | `engineering-spec.md` target trees |
+| one product per repository/deployment | pass | singular `modules/product` rule |
+| three artifact responsibilities are explicit | pass | `product-spec.md` |
+| Keep/Transform/Exclude is executable | pass | `extraction-manifest.md` path/owner/action/check tables |
+| all 18 migrations are classified | pass | migration disposition table, including GNE-288 lifecycle migration |
+| independent CLI-created candidate baseline is defined | pass | engineering database contract |
+| package snapshot/provenance boundary is explicit | pass | no registry or cross-repository upgrade claim |
+| mixed package files are classified | pass | Core Demo/pricing catalog, UI fixed brand and Platform product fixtures are Transform/Exclude, not blanket Keep |
+| runtime/tooling allowlist is complete | pass | app/root/Supabase/Vercel input rows, including root ignores/editor/PR template and AI safety script |
+| RLS/grant operations are explicit | pass | per-table, per-role, per-operation foundation matrix |
+| entity archive/history reuse boundary is explicit | pass | CatCare code Exclude; lifecycle rule Contract only with second-consumer trigger |
+| lifecycle contract has a legal template transform | pass | `specs/_template/engineering-spec.md` is Transform, not byte-preserving Keep |
+| UI/asset/license boundary is explicit | pass | component/asset table and notices requirement |
+| security/Provider/external gates are explicit | pass | engineering, Quick Start, and test plan |
+| GNE-302/GNE-303 verification path is fixed | pass | `quickstart.md` and `test-plan.md` |
+| runtime code/schema/database/external resources changed | not_run / intentionally none | GNE-301 is documentation-only |
+
+## Reviewer Sampling Checklist
+
+The independent reviewer must sample at least these sixteen real source paths and
+confirm that the manifest decision, target, and verification are unambiguous:
+
+1. `apps/web/app/page.tsx` — Transform;
+2. `apps/web/app/login/page.tsx` — Transform;
+3. `apps/web/app/account/account-shell.tsx` — Transform;
+4. `apps/web/components/workspace-nav.tsx` — Transform;
+5. `apps/web/components/catcare-icons.tsx` — Exclude;
+6. `apps/web/lib/services/auth.ts` — Transform;
+7. `apps/web/lib/catcare/product-service/outbox-worker.ts` — Exclude/Contract only;
+8. `packages/core/src/data.ts` — Transform; retain neutral profile vocabulary and exclude Demo DTO/table;
+9. `packages/platform/src/travel-consumer.compile.ts` — Exclude fixture from candidate;
+10. `packages/platform/src/index.ts` — Keep as neutral local package snapshot;
+11. `apps/web/proxy.ts` — Transform and include as an app runtime input;
+12. `supabase/config.toml` — Transform to neutral local identity/Auth URLs;
+13. `supabase/seed.sql` — Transform to empty/deterministic neutral seed;
+14. `20260618070613_create_data_template.sql` — Fold profile/function, exclude Demo;
+15. `20260708112135_create_audit_events.sql` — Exclude/Contract only;
+16. `20260713092452_catcare_soft_delete_plan_participants.sql` — Exclude CatCare implementation, retain lifecycle contract only.
+
+The reviewer also confirms that source migrations remain unchanged and that no
+candidate filename or history entry was invented in GNE-301.
+
+## GNE-302 Implementation Gate
+
+GNE-302 may be considered complete only when:
+
+- the research repository dependency direction matches the approved target or
+  an explicitly documented, reviewer-approved equivalent;
+- home/login/account/Billing/Usage/product placeholder consume neutral config
+  and platform boundaries with no CatCare/Demo reverse import;
+- package and release boundary checks include meaningful negative fixtures;
+- allowlist generation is safe, deterministic, atomic, and exhaustive;
+- `template-version.json`, dependency/asset notices, and the independent
+  foundation migration are produced with traceable provenance;
+- one generated candidate installs, lints, typechecks, tests, and builds in an
+  isolated clean directory;
+- candidate pollution/security checks pass;
+- CatCare and Demo behavior affected by moves has not regressed;
+- an independent Terra Reviewer has no unresolved blocking finding;
+- the run stops without activating GNE-303.
+
+## GNE-303 Verification Gate
+
+Full Go requires:
+
+- a second fresh generation with identical normalized output;
+- independent clean install/build/tests and neutral page/responsive review;
+- two disposable empty-database resets with RLS/grant/ownership negatives;
+- security headers, session/cookie, safe return, secret, dependency, license,
+  and asset provenance verification;
+- a temporary Smoke Product whose identity changes without platform/package
+  edits;
+- an approved independent GitHub/Vercel test deployment with traceable commit
+  and environment-key status.
+
+If the external repository/deployment operation is not approved, all local
+gates may support **Conditional Go**, but the deployment row remains `not_run`.
+Product pollution, non-reproducible generation/build/database, failed RLS, or a
+secret/license issue is **No-Go**.
+
+## Capability Classification At Parent Completion
+
+| Class | Meaning |
+| --- | --- |
+| template-ready | generated, independently verified, and safe for candidate use |
+| safe-disabled | adapter/route remains but optional provider absence is explicit and tested |
+| pattern-only | proven in CatCare but not copied or packaged without a second consumer |
+| deferred-gate | becomes required only when its documented product/production trigger occurs |
+| not-run | no evidence and no completion claim |
+
+Parent GNE-298 cannot close until every retained capability is assigned exactly
+one class with evidence and every `not_run`/deferred item has an owner category
+and trigger.
+
+## Stop Rule
+
+After GNE-301 documentation, review, publication, and Linear evidence are
+complete, stop. Leave GNE-298 In Progress, leave GNE-302 unchanged, and do not
+generate a candidate, initialize a Smoke Product, deploy, or write a database
+as part of this Issue.

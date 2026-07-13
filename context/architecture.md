@@ -45,17 +45,19 @@ Start with one implementation, but keep the app code provider-agnostic where it 
 ## MVP3 Reference Product Architecture
 
 MVP3 started from `GNE-228 / MVP3-01 PLAN` and validated the Reference
-Product route through `GNE-229` to `GNE-234`. It is no longer driven by the old
-Product Validation Kit CP chain; that route has been retired from current
-planning and should not be treated as a fallback MVP3/MVP4-MVP6 path. Its job is
+Product route through `GNE-229` to `GNE-234`, then added `GNE-298 TEMPLATE` to
+generate and verify a separate clean template candidate. It is no longer driven
+by the old Product Validation Kit CP chain; that route has been retired from
+current planning and should not be treated as a fallback MVP3/MVP4-MVP6 path. Its job is
 to prove that a separate product consumer can use the XWLC platform foundation
 through public packages without copying Starter Kit source. MVP3 proves this
 inside the monorepo; GNE-274 defines how to generate a separate clean template
-candidate without deleting the evidence product.
+candidate without deleting the evidence product. `GNE-298` is a post-VERIFY
+parent and must not start before `GNE-234` is Done.
 
 The execution order is intentionally linear for 小团队 delivery: PLAN ->
-PLATFORM -> DELIVERY -> PRODUCT -> ACCESS -> CAPABILITY -> VERIFY. Child-task
-lines stay inside the parent issue descriptions until each parent is approved
+PLATFORM -> DELIVERY -> PRODUCT -> ACCESS -> CAPABILITY -> VERIFY -> TEMPLATE.
+Child-task lines stay inside the parent issue descriptions until each parent is approved
 for execution. `GNE-234 VERIFY` owns the 30-minute Reviewer Runbook that checks
 page flow, Supabase data/RLS, Vercel deployment/env, PostHog events, GitHub CI,
 package version, schema version, and patch-upgrade evidence.
@@ -84,6 +86,21 @@ workspaces and app scaffold. The next product should be generated into its own
 repository from that candidate. When independently maintained repositories
 need shared package updates, select and verify an explicit distribution or sync
 channel before claiming multi-repository package delivery.
+
+GNE-298 implements that candidate through `GNE-301 -> GNE-302 -> GNE-303`.
+The candidate keeps `packages/*` as a local workspace snapshot stamped with the
+source commit, template version, dependency and asset-license provenance. Its
+foundation database uses an independent CLI-generated timestamp migration and
+records the source and candidate schema versions; it does not rename or squash
+the research repository history. A central package registry and automatic
+cross-repository upgrades are intentionally deferred until a second real
+consumer creates evidence for the correct distribution boundary.
+
+The binding extraction architecture is under `specs/template/`: the product
+contract is in `product-spec.md`, current/target trees and dependency/database
+rules are in `engineering-spec.md`, and the path/migration disposition is in
+`extraction-manifest.md`. GNE-302 must implement those documents rather than
+re-deciding the repository boundary while moving code.
 
 Current code now uses the MVP3 target package namespace directly:
 `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`. GNE-240 defined

@@ -26,7 +26,9 @@ XWLC 是 XUMENG、WANGWEI、LIZUZHUANG、CHUYI 四位中年人在工作与家庭
 │   └── web/              # Next.js Web 应用
 ├── packages/
 │   ├── core/             # 业务类型、纯逻辑和服务契约
-│   └── ui/               # 可复用 UI 组件
+│   ├── ui/               # 可复用 UI 组件
+│   ├── platform/         # 运行时无关的 Actor、访问门和 Provider ports
+│   └── db/               # Schema、RLS scope 与 migration 证据契约
 ├── specs/                # 产品规格、工程规格、验收和测试计划
 ├── context/              # 项目上下文、状态和协作规则
 ├── integrations/         # 第三方服务接入说明
@@ -40,6 +42,8 @@ XWLC 是 XUMENG、WANGWEI、LIZUZHUANG、CHUYI 四位中年人在工作与家庭
 ## 协作入口
 
 - MVP 路线与阶段边界：`context/project.md`
+- 文档权威层级与归档规则：`context/documentation-architecture.md`
+- 包、应用和产品边界：`context/architecture.md`
 - Linear issue 树镜像与执行顺序：`context/linear.md`
 - 当前完成状态、风险和下一步：`context/status.md`
 - 环境、部署和生产验收记录：`context/environment-matrix.md`、`context/deployment-status.md`
@@ -75,13 +79,14 @@ pnpm lint
 pnpm build
 ```
 
-默认访问地址：
+Next.js 默认从 `3000` 开始选择端口；本项目当前验收命令通常显式使用
+`3003`，实际地址以终端输出为准：
 
 ```text
-http://localhost:3000
+http://localhost:3003
 ```
 
-如果 `3000` 端口已被占用，Next.js 会自动选择下一个可用端口。
+不要仅凭 README 假定端口存活；启动后以终端打印的 Local URL 验证。
 
 ## License
 

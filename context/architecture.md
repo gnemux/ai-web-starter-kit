@@ -44,12 +44,14 @@ Start with one implementation, but keep the app code provider-agnostic where it 
 
 ## MVP3 Reference Product Architecture
 
-MVP3 now starts from `GNE-228 / MVP3-01 PLAN` and validates the Reference
+MVP3 started from `GNE-228 / MVP3-01 PLAN` and validated the Reference
 Product route through `GNE-229` to `GNE-234`. It is no longer driven by the old
 Product Validation Kit CP chain; that route has been retired from current
 planning and should not be treated as a fallback MVP3/MVP4-MVP6 path. Its job is
-to prove that an independent product repo can consume the XWLC platform
-foundation through packages without copying Starter Kit source.
+to prove that a separate product consumer can use the XWLC platform foundation
+through public packages without copying Starter Kit source. MVP3 proves this
+inside the monorepo; GNE-274 defines how to generate a separate clean template
+candidate without deleting the evidence product.
 
 The execution order is intentionally linear for 小团队 delivery: PLAN ->
 PLATFORM -> DELIVERY -> PRODUCT -> ACCESS -> CAPABILITY -> VERIFY. Child-task
@@ -60,12 +62,28 @@ package version, schema version, and patch-upgrade evidence.
 
 MVP3 uses the 4-package convention:
 
-- `@xwlc/core`: config, errors, logging, version, and result contracts;
+- `@xwlc/core`: shared data/API/Auth/provider contracts plus Billing, Payment,
+  Entitlement/Credit, and AI domain contracts and pure helpers;
 - `@xwlc/ui`: reusable layout, forms, state display, and UI primitives;
-- `@xwlc/platform`: Auth, AI, Entitlement, Outbox, Audit, PostHog, and delivery
-  entry points;
-- `@xwlc/db`: migrations, RLS conventions, database access contracts, and Schema
-  Version.
+- `@xwlc/platform`: runtime-neutral Actor/Session/owner checks, email and
+  Analytics/Outbox ports, safe capability context, and generic share-token
+  state resolution;
+- `@xwlc/db`: Schema Version, owner/anonymous access scopes, RLS policy kinds,
+  and migration/RLS evidence contracts.
+
+The four packages are contracts and pure behavior, not a complete runnable
+mother template. They are currently private workspace packages; their patch
+evidence proves monorepo compatibility, not registry or cross-repository update
+delivery. Next.js/Supabase/PostHog adapters, migrations, CI, configuration
+examples, and neutral app composition are required in a template candidate;
+product routes, product migrations, DTOs, events, policies, copy, and assets are
+not.
+
+GNE-274 permits a separate clean template candidate containing the neutral
+workspaces and app scaffold. The next product should be generated into its own
+repository from that candidate. When independently maintained repositories
+need shared package updates, select and verify an explicit distribution or sync
+channel before claiming multi-repository package delivery.
 
 Current code now uses the MVP3 target package namespace directly:
 `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`. GNE-240 defined

@@ -1239,11 +1239,26 @@ GNE-266 Analytics reliable-delivery repair checkpoint on 2026-07-13:
   GNE-233 may return to Done after its child/status audit; this execution must
   stop before activating GNE-274.
 
+GNE-273 final evidence amendment checkpoint on 2026-07-13:
+
+- The v0.3.0 decision remains `Go for the declared MVP3 scope`; the amendment
+  does not broaden it into production approval or change the Cloudflare/Hono
+  `Conditional` judgment.
+- The formal decision and evidence index now accept GNE-266 PR #89 runtime
+  commit `82e9187` and PR #90 evidence/main commit `55553d3`. Main CI run
+  `29225628666` and the Vercel commit status both passed for `55553d3`.
+- The original GNE-250 missing `catcare_submission_created` observation is
+  retained as historical evidence, while the GNE-266 deployed rerun is the
+  superseding result. It is no longer a GNE-274 caveat.
+- This amendment is documentation-only. It changes no business code, page,
+  schema, migration, Provider configuration, live Provider, payment, or
+  production data operation, and it does not activate GNE-274.
+
 ## Next Steps
 
-1. Publish the GNE-266 evidence-only closeout, then return GNE-266 and parent
-   GNE-233 to Done after the final child/status audit.
-2. Keep GNE-274 blocked and do not activate it in this execution.
+1. Publish the final GNE-273 evidence amendment, then close only GNE-273 after
+   CI, merge, automatic deployment, and Linear evidence sync pass.
+2. Keep GNE-274 in Backlog and do not activate it in this execution.
 3. Keep GNE-234 open. Run GNE-274 in a separate later root task to decide the
    Travel/product-expansion path.
 4. Keep `v0.2.0` as the sealed MVP2 baseline and use

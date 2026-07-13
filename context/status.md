@@ -1118,6 +1118,37 @@ GNE-271 package/database upgrade verification checkpoint on 2026-07-13:
   `specs/reference-product/package-db-upgrade-verification.md`. GNE-234 remains
   open; this checkpoint must not activate GNE-272.
 
+GNE-272 cross-system evidence checkpoint on 2026-07-13:
+
+- Added `specs/reference-product/evidence-index.md` as the answer-first,
+  source-backed handoff for GNE-273. It connects product pages, private access,
+  AI/Billing return, Audit/Outbox, PostHog, Supabase, GitHub, Vercel, package,
+  migration, and document evidence without treating chat as a source of truth.
+- Current cloud facts are indexed without private data: 3 cats, 5 plans, 83
+  tasks, 25 submissions, 18 share-token records, 30 test orders, 20
+  entitlements, 80 usage rows, 77 Credit rows, 84 Audit rows, and 8 pending
+  Outbox rows. All Audit/Outbox rows have correlation IDs; deterministic Audit
+  idempotency is explicitly limited to the 8 anonymous-submission effects.
+- A representative Creem Test Mode order remains paid for USD 9.00 and links
+  to exactly one active 100000-credit entitlement plus one 100000-credit grant.
+  CatCare plan-generation and recap usage stays traceable by safe purpose and
+  linked Credit rows.
+- PostHog project 476986 contains the required CatCare, AI, quota, payment, and
+  entitlement events. Across the selected 30-day evidence set, required shared
+  property missing counts are zero and selected share events have no missing
+  correlation ID. PostHog remains observational rather than a business ledger.
+- Current main `16469c5` passed GitHub CI run `29214948129`, Vercel reported a
+  successful deployment, and the stable URL returned HTTP 200 from `sin1`.
+  Supabase migration parity remains 17/17; staging migration run `29214674101`
+  passed.
+- GNE-250 final deployment smoke, true production-provider isolation, live
+  AI/payment, and real Outbox delivery remain explicitly `not_run` with risk
+  and later ownership. The stale AI dashboard “Failure test model” wording is
+  recorded as low-risk Analytics metadata debt, not accepted product behavior.
+- GNE-272 is evidence-only: no business code, schema, provider configuration,
+  real Provider operation, or page capability changed. GNE-234 remains open
+  and this checkpoint must not activate GNE-273.
+
 ## Next Steps
 
 1. Keep `v0.2.0` as the MVP2 baseline. For the current local execution, finish

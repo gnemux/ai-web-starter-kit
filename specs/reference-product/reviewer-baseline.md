@@ -185,10 +185,10 @@ migrations after this checkpoint.
 
 | Item | Status | Reason / next owner |
 | --- | --- | --- |
-| Full 30-minute Reviewer Runbook | `not_run` | Owned by `GNE-269` |
-| Cross-owner and token negative matrix | `not_run` | Owned by `GNE-270` |
+| Full 30-minute Reviewer Runbook | `pass` | Completed by `GNE-269`; see `reviewer-runbook.md` |
+| Cross-owner and token negative matrix | `pass` | Completed by `GNE-270`; see `security-negative-verification.md` |
 | Package patch and migration rehearsal | `pass` | Completed by `GNE-271`; see `package-db-upgrade-verification.md` |
-| Consolidated provider evidence | `not_run` | Owned by `GNE-272` |
+| Consolidated provider evidence | `pass` | Completed by `GNE-272`; see `evidence-index.md` |
 | Full deployed product smoke | `not_run` | Owned by `GNE-250` |
 | Live AI and live payment | `not_run` | Explicitly outside MVP3 |
 | True production database verification | `not_run` | No true production Supabase project exists in MVP3 |

@@ -1,5 +1,24 @@
 # Acceptance: MVP3 Reference Product
 
+## GNE-272 Evidence
+
+- [x] `evidence-index.md` connects the complete CatCare journey to PRODUCT,
+  ACCESS, CAPABILITY, VERIFY, provider, CI, deployment, package, and schema
+  evidence without using chat history as the only source.
+- [x] Live read-only Supabase evidence covers all required product/platform
+  tables plus Order, Entitlement, Usage, Credit, Audit, and Outbox states.
+- [x] Live PostHog evidence covers CatCare, AI, quota, checkout, payment, and
+  entitlement events; selected shared-property and share-correlation missing
+  counts are zero.
+- [x] Current `main` CI, Vercel status, stable URL, package versions, 17/17
+  migration parity, and staging-migration workflow are linked and recorded.
+- [x] Every `not_run` states its risk, blocking effect, and later owner. GNE-250
+  deployment smoke, live providers, true production isolation, and real
+  Outbox delivery are not mislabeled as passed.
+- [x] No business code, schema, provider configuration, live payment, live AI,
+  raw bearer credential, private identity, or private content changed.
+- [x] GNE-234 remains open and GNE-273 is not activated by this evidence index.
+
 ## GNE-271 Evidence
 
 - [x] Package patch evidence confirms reusable packages at `0.1.1` and Web

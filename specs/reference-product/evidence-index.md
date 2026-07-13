@@ -212,7 +212,7 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 | Cross-system evidence index | GNE-272 | This document |
 | Final deployment smoke reproduction | GNE-250 | `deployed-smoke-verification.md` |
 | Final v0.3.0 decision | GNE-273 | `v0.3.0-decision.md` |
-| Product/Travel extension decision | GNE-274 | Not executed by GNE-272 |
+| Next-product extension decision | GNE-274 | `product-expansion-decision.md` |
 
 ## Not Run And Decision Caveats
 
@@ -230,17 +230,17 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 
 These are trigger-based handoff requirements, not fixed assignments to the
 current MVP4/MVP5 issue numbers. Future planning may merge, rename, or replace
-those issues. When Travel is formally scoped, map every triggered row to an
-active issue with an owner and acceptance criteria.
+those issues. When the next product is formally scoped, map every triggered
+row to an active issue with an owner and acceptance criteria.
 
 | Capability | Becomes mandatory when | Future owner category |
 | --- | --- | --- |
-| Isolated Supabase/PostHog production environment | Before the first real user or live-provider operation | Travel Deployment / Environment |
-| Supabase leaked-password protection | Before public signup opens | Travel Auth / Security |
-| Live AI quality, cost, budget, rate limit, and degradation | Before enabling a live AI provider | Travel AI Production Gate |
-| Real Outbox delivery | Before promising email, SMS, or notification delivery | Travel Notification / Async |
-| Provider-free Outbox state machine and safe deterministic event-ID helper extraction | When Travel is the second consumer and would otherwise copy CatCare logic | Travel Platform Extraction |
-| Live payment, refund, tax, and reconciliation | Before the first real charge | Travel Payment Production Gate |
+| Isolated Supabase/PostHog production environment | Before the first real user or live-provider operation | Product Deployment / Environment |
+| Supabase leaked-password protection | Before public signup opens | Product Auth / Security |
+| Live AI quality, cost, budget, rate limit, and degradation | Before enabling a live AI provider | Product AI Production Gate |
+| Real Outbox delivery | Before promising email, SMS, or notification delivery | Product Notification / Async |
+| Provider-free Outbox state machine and safe deterministic event-ID helper extraction | When a second real product would otherwise copy CatCare logic | Product Platform Extraction |
+| Live payment, refund, tax, and reconciliation | Before the first real charge | Product Payment Production Gate |
 | Stale AI/PostHog dashboard metadata | During the next Analytics maintenance pass | Analytics Maintenance |
 
 GNE-274 may complete without creating every future issue in advance. A real

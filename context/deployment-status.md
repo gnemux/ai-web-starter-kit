@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | automatic main deployment for `55553d3` succeeded; the GNE-266 deployed rerun closed the original submission-Analytics concern |
+| Latest production status | automatic main deployment for `9538b09` succeeded; the GNE-273 evidence sync retains the resolved GNE-266 Analytics result |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | `55553d3a2270b3405eeb2e1550dbcc521bcdb815` |
+| Latest production commit | `9538b09226b63e4ff444f1ea642f1d54be8defb1` |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
 | Current blocked items | No MVP3 deployment or Analytics blocker. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
-| Next owner action | Publish and review the final GNE-273 evidence amendment, then close only GNE-273. Do not activate GNE-274 from this run. |
+| Next owner action | Publish and review the GNE-274 product-expansion decision, then close only GNE-274. Keep GNE-234 open and do not activate another Issue. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 

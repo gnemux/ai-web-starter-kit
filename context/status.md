@@ -1254,19 +1254,56 @@ GNE-273 final evidence amendment checkpoint on 2026-07-13:
   schema, migration, Provider configuration, live Provider, payment, or
   production data operation, and it does not activate GNE-274.
 
+GNE-274 product-expansion decision checkpoint on 2026-07-13:
+
+- The decision is `Conditional Go` for generating a separate clean template
+  candidate and creating the next approved product repository from it on the
+  shared reference/staging/test stack. It is not approval for public
+  production, live AI, real payment, promised
+  notifications, or Cloudflare/Hono deployment.
+- The product must consume only public `@xwlc/*` roots and own its routes,
+  services, tables, migrations, specs, tests, DTOs, policies, event unions,
+  allowlists, and pages. CatCare business code is reference material, not a reusable
+  product API.
+- Actor/Auth, Billing/Credit/AI contracts, UI primitives, DB scope/evidence
+  contracts, package boundaries, and release process are direct foundation.
+  Share access and Analytics use the shared contract/adapter with product-owned
+  policy. Audit and Outbox are proven patterns but stay product-bound until a
+  working second consumer would otherwise copy the same semantics.
+- Cloudflare/Hono remains `Conditional`: reusable packages are runtime-neutral,
+  but Worker Auth/Email, D1/KV/Queues, non-RLS repository policy, and its
+  executable security matrix are `not_run`.
+- Separate production providers, leaked-password protection, live AI, real
+  payment, real Outbox delivery, and runtime-adapter work remain trigger-based
+  gates. They must be mapped to then-current Issues when triggered rather than
+  prebound to mutable MVP4/MVP5 identifiers.
+- MVP3 can produce a separately generated clean template candidate now, but the
+  active evidence repository must keep CatCare and demo intact. Promote the
+  candidate to multi-product-proven only after an isolated second consumer
+  validates it and real duplicated seams are reconciled.
+- The `@xwlc/*` packages are currently private workspaces. Their patch evidence
+  proves single-monorepo upgrade safety, not remote installation or shared
+  updates across independent repositories. A distribution/sync channel remains
+  a trigger-based gate when another repository needs a shared update.
+- Detailed evidence is in
+  `specs/reference-product/product-expansion-decision.md`. This checkpoint is
+  documentation-only, does not close GNE-234, and must not activate another
+  Issue.
+
 ## Next Steps
 
-1. Publish the final GNE-273 evidence amendment, then close only GNE-273 after
-   CI, merge, automatic deployment, and Linear evidence sync pass.
-2. Keep GNE-274 in Backlog and do not activate it in this execution.
-3. Keep GNE-234 open. Run GNE-274 in a separate later root task to decide the
-   Travel/product-expansion path.
-4. Keep `v0.2.0` as the sealed MVP2 baseline and use
+1. Publish the GNE-274 product-expansion decision, then close only GNE-274
+   after CI, merge, automatic deployment, and Linear evidence sync pass.
+2. Keep GNE-234 open and do not activate another Issue in this execution.
+3. Keep `v0.2.0` as the sealed MVP2 baseline and use
    `specs/reference-product/v0.3.0-decision.md` as the MVP3 decision record.
-5. Treat the current cloud Supabase/PostHog resources as
+4. Treat the current cloud Supabase/PostHog resources as
    reference/staging/test. Separate production providers, live AI/payment,
    real Outbox delivery, and Cloudflare/Hono implementation remain
    trigger-based future gates.
+5. Generate a clean template candidate, then start the next product in a
+   separate repository from an approved product spec while consuming public
+   package roots.
 6. Keep product-specific objects outside `@xwlc/*`, preserve public-package
    imports and the one-parent/one-child WIP rule, and map future production
    gates to then-current Issues only when their trigger occurs.

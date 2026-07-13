@@ -93,24 +93,34 @@ Each capability track should have:
 
 ## Documentation Source Order
 
-When documents overlap, use this order instead of guessing:
+When documents overlap, use the ownership rules below instead of allowing a
+later or more convenient source to override another source's domain:
 
 1. `context/project.md` defines project stage, milestone boundaries, and
    non-goals.
-2. `context/linear.md` records the current Linear issue tree and issue-specific
-   execution order.
-3. `context/codex-rules.md` and `context/engineering-decision-rules.md` define
+2. Live Linear defines current task state, task-scoped scope, parent/child
+   relations, dependencies, and workflow acceptance checklist. It does not
+   override durable product, engineering, security, or acceptance contracts in
+   the owning repository specs. `context/linear.md` is its repository baseline
+   and recovery aid; it must not override newer live Linear state.
+3. `context/documentation-architecture.md` defines document ownership,
+   authority, lifecycle, and historical-memory rules.
+4. `context/codex-rules.md` and `context/engineering-decision-rules.md` define
    agent workflow, branch safety, and engineering tradeoff rules.
-4. `context/architecture.md` defines package, runtime, and product-boundary
+5. `context/architecture.md` defines package, runtime, and product-boundary
    decisions.
-5. Feature specs under `specs/**` define product and engineering acceptance for
+6. Feature specs under `specs/**` define product and engineering acceptance for
    the active issue.
-6. For CatCare UI work, `specs/reference-product/catcare-ui-guidelines.md` is
+7. For CatCare UI work, `specs/reference-product/catcare-ui-guidelines.md` is
    the product UI/data practice source of truth, and
    `apps/web/public/catcare/icons/icon-spec.md` is the icon/asset source of
    truth.
-7. `context/status.md` records completed facts and verification evidence. It
+8. `context/status.md` records completed facts and verification evidence. It
    should not override newer specs or active Linear issue boundaries.
+
+If Live Linear and an owning repository rule/spec materially conflict, stop the
+task and resolve the conflict in both durable sources. Do not choose one by
+position in this list.
 
 ## Default Assumptions
 

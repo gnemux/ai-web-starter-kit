@@ -1,5 +1,25 @@
 # Acceptance: MVP3 Reference Product
 
+## GNE-271 Evidence
+
+- [x] Package patch evidence confirms reusable packages at `0.1.1` and Web
+  consumption through public workspace exports.
+- [x] A disposable empty database rebuilt the complete 17-migration chain; five
+  rollback-only security suites and full repository verification passed.
+- [x] The shared cloud test database ledger matches all 17 repository
+  timestamps. History-only reconciliation is explicitly distinguished from
+  replaying old migration SQL.
+- [x] PR #82 merged as `4c32d53`; Actions run `29214674101` applied
+  `20260712122026_restrict_public_cat_photo_listing` from `main` to `staging`.
+- [x] Cloud anon/owner/cross-owner Storage behavior passed in a rollback-only
+  transaction, temporary rows were removed, key aggregates were unchanged,
+  and AI Credit postcondition violations are zero.
+- [x] Supabase no longer reports the public-bucket listing lint; Vercel reported
+  a successful automatic deployment and the stable test URL returned HTTP 200.
+- [x] Detailed evidence and rollback boundaries are recorded in
+  `package-db-upgrade-verification.md`.
+- [x] GNE-234 remains open and no next child issue is activated by this result.
+
 ## GNE-270 Evidence
 
 - [x] Fresh owner A/B, valid, expired, tampered, regenerated, revoked, direct

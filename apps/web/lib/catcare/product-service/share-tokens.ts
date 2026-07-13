@@ -174,7 +174,7 @@ export async function createCarePlanShareLink(
     resourceType: shareTokenResourceType,
     tokenRecordId: insertResult.data.id
   });
-  void trackCatCareProductEvent(
+  await trackCatCareProductEvent(
     contextResult.data.ownerId,
     "catcare_share_link_created",
     {
@@ -235,7 +235,7 @@ export async function revokeCarePlanShareLink(
       resourceType: shareTokenResourceType,
       tokenRecordId: revokeResult.data.id
     });
-    void trackCatCareProductEvent(
+    await trackCatCareProductEvent(
       contextResult.data.ownerId,
       "catcare_share_link_revoked",
       { result: "success" },
@@ -269,7 +269,7 @@ export async function resolveCarePlanShareToken(
 
     return outcome.status === "valid"
       ? hashResult
-      : rejectShareTokenOutcome(outcome, correlationId);
+      : await rejectShareTokenOutcome(outcome, correlationId);
   }
 
   const clientResult = createSupabaseAdminClient();
@@ -312,7 +312,7 @@ export async function resolveCarePlanShareToken(
   });
 
   if (outcome.status !== "valid") {
-    return rejectShareTokenOutcome(outcome, correlationId);
+    return await rejectShareTokenOutcome(outcome, correlationId);
   }
 
   const scopeResult = createAnonymousTokenScope(outcome.actor.tokenId);
@@ -329,13 +329,13 @@ export async function resolveCarePlanShareToken(
   return serviceOk(outcome.actor);
 }
 
-function rejectShareTokenOutcome(
+async function rejectShareTokenOutcome(
   outcome: RejectedShareTokenGateOutcome<
     ShareTokenResourceType,
     ShareTokenScope
   >,
   correlationId: string
-): ServiceResult<never> {
+): Promise<ServiceResult<never>> {
   const actor = outcome.actor;
   const status = outcome.status;
 
@@ -349,7 +349,7 @@ function rejectShareTokenOutcome(
     resourceType: actor?.resourceType ?? shareTokenResourceType,
     tokenRecordId: actor?.tokenId
   });
-  void trackCatCareProductEvent(
+  await trackCatCareProductEvent(
     "anonymous_token",
     "catcare_share_link_rejected",
     { outcome: status, result: "rejected" },

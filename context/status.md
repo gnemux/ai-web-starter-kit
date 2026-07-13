@@ -1201,22 +1201,50 @@ GNE-273 v0.3.0 decision checkpoint on 2026-07-13:
   GNE-234 or activate GNE-274.
 - Detailed evidence is in `specs/reference-product/v0.3.0-decision.md`.
 
+GNE-266 Analytics reliable-delivery repair checkpoint on 2026-07-13:
+
+- GNE-266 and parent GNE-233 were reopened after final smoke found a trusted
+  anonymous submission/Audit/Outbox/result fact without a matching fresh
+  `catcare_submission_created` PostHog event.
+- Root cause is the CatCare server services returning after unmanaged
+  `void trackCatCareProductEvent(...)` calls. Vercel could end the request
+  lifecycle before the nested PostHog fetch completed.
+- All current CatCare server product-event calls now await the product
+  Analytics facade. The shared server transport bounds capture at 3 seconds
+  and safely settles Provider exceptions, HTTP failures, and timeouts without
+  reversing committed business facts.
+- The existing synchronous safe-context fan-out and Audit behavior remain
+  unchanged. The first implementation accidentally coupled Audit rejection to
+  an already committed publish result; Terra identified this P2 and the final
+  implementation removed that regression.
+- Web tests pass `80/80`, including Provider failure, HTTP failure, actual
+  AbortSignal timeout, preserved business success, and a structural guard
+  against CatCare fire-and-forget Analytics. Full test, typecheck, lint,
+  production build, package/release boundaries, and diff checks pass.
+- Independent Terra targeted re-review is `READY` with no remaining P0-P3.
+  GitHub publication, automatic Vercel deployment, deployed anonymous
+  view/submission smoke, and fresh PostHog observation remain required before
+  GNE-266 and GNE-233 can return to Done.
+
 ## Next Steps
 
-1. Complete only the GNE-273 evidence PR, required CI, merge, automatic Vercel
-   verification, and Linear writeback in the current execution; then stop.
-2. Keep GNE-234 open. Run GNE-274 in a separate later root task to decide the
-   Travel/product-expansion path; do not activate it from GNE-273.
-3. Keep `v0.2.0` as the sealed MVP2 baseline and use
+1. Complete only the reopened GNE-266 reliable-delivery PR, required CI,
+   merge, automatic Vercel verification, deployed anonymous view/submission
+   smoke, and fresh PostHog read-only evidence.
+2. Return GNE-266 and parent GNE-233 to Done only after the deployed evidence
+   passes. Keep GNE-274 blocked and do not activate it in this execution.
+3. Keep GNE-234 open. Run GNE-274 in a separate later root task to decide the
+   Travel/product-expansion path.
+4. Keep `v0.2.0` as the sealed MVP2 baseline and use
    `specs/reference-product/v0.3.0-decision.md` as the MVP3 decision record.
-4. Treat the current cloud Supabase/PostHog resources as
+5. Treat the current cloud Supabase/PostHog resources as
    reference/staging/test. Separate production providers, live AI/payment,
    real Outbox delivery, and Cloudflare/Hono implementation remain
    trigger-based future gates.
-5. Keep product-specific objects outside `@xwlc/*`, preserve public-package
+6. Keep product-specific objects outside `@xwlc/*`, preserve public-package
    imports and the one-parent/one-child WIP rule, and map future production
    gates to then-current Issues only when their trigger occurs.
-6. Future deployment, monitoring, smoke, environment, schema, or Provider work
+7. Future deployment, monitoring, smoke, environment, schema, or Provider work
    must follow the repository specs and update durable evidence rather than
    relying on chat history.
 

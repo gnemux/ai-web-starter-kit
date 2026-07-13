@@ -23,6 +23,10 @@ or promises about a separate production environment.
   `https://ai-web-starter-kit-web.vercel.app`.
 - Git baseline before this evidence-only change:
   `16469c54d7351cb526febfe622ed78d4cf1de621`.
+- Accepted post-repair runtime baseline:
+  `82e918794350c53a8bc9a828050420f42e74c86b` from PR #89.
+- Accepted post-repair evidence baseline:
+  `55553d3a2270b3405eeb2e1550dbcc521bcdb815` from PR #90.
 - Vercel calls the automatic `main` target `Production`, but MVP3 has no
   separate production Supabase or PostHog environment. This report therefore
   uses `online validation` or `reference/staging/test` for product claims.
@@ -158,6 +162,19 @@ events include attempts, failures, repeated observations, and different time
 windows. A PostHog success event never replaces the corresponding trusted
 order, entitlement, usage, or Credit row.
 
+The trailing-30-day table above is the original GNE-272 snapshot. A later
+GNE-266 deployed repair rerun closed its missing-submission observation:
+
+| Event | UTC timestamp | Safe result |
+| --- | --- | --- |
+| `catcare_share_page_viewed` | 2026-07-13 04:59:41 | `success`, `valid`, with correlation ID |
+| `catcare_submission_created` | 2026-07-13 05:00:32 | `created`, with the same correlation ID as the trusted submission Audit and Outbox effect |
+
+The queried submission event used the redacted `/s/[redacted]` URL and carried
+no raw token or private note. `deployed-smoke-verification.md` owns the detailed
+safe evidence. The original GNE-250 absence is historical and is no longer a
+decision caveat.
+
 The AI dashboard description still refers to the historical “Failure test
 model”. Current formal guidance is stricter: failure evidence must come from a
 service-level fixture, provider failure, or controlled test and must not expose
@@ -173,9 +190,9 @@ non-blocking but should be corrected by the next Analytics maintenance pass.
 | Consumption boundary | Web consumes public workspace exports; Travel root-import compile evidence passed in GNE-267 |
 | Repository/cloud migrations | 17/17, head `20260712122026_restrict_public_cat_photo_listing` |
 | Empty-database rebuild | Pass for all 17 migrations in the isolated GNE-271 rehearsal |
-| Current main CI | [Run 29214948129](https://github.com/gnemux/ai-web-starter-kit/actions/runs/29214948129): success for `16469c5` |
+| Current accepted main CI | [Run 29225628666](https://github.com/gnemux/ai-web-starter-kit/actions/runs/29225628666): success for `55553d3` |
 | Staging migration | [Run 29214674101](https://github.com/gnemux/ai-web-starter-kit/actions/runs/29214674101): success from `main`, `target=staging` |
-| Vercel commit status | Success: `Deployment has completed` for `16469c5` |
+| Vercel commit status | Success: `Deployment has completed` for `55553d3` |
 | Stable URL | HTTP 200 on 2026-07-13; response region `sin1` |
 
 PR #82 delivered the Storage policy forward migration; PR #83 delivered the
@@ -201,7 +218,6 @@ checks, unchanged business aggregates, and forward-fix rollback boundaries.
 
 | Item | Risk | Blocks GNE-272 | Required treatment |
 | --- | --- | --- | --- |
-| Fresh `catcare_submission_created` during GNE-250 smoke | Low/Medium observability concern | No | Trusted Supabase/Audit/Outbox/result facts passed, but the fresh PostHog event was absent; GNE-273 must preserve this caveat. |
 | True production Supabase/PostHog isolation | Low for MVP3, high before real users | No | Not enabled in MVP3; create and migrate an isolated production environment before live users, real payment, or real AI cost. |
 | Live AI provider quality/cost | Low for MVP3 | No | Remains a later provider gate; current evidence is mock/no-op/sandbox/test only. |
 | Live payment, settlement, refund, tax, dispute | Low for MVP3, high before commerce | No | Remains under the production-payment gate; current orders are sandbox or Creem Test Mode. |
@@ -235,12 +251,12 @@ design and is not implementation work.
 
 ## Handoff To The Decision Issues
 
-GNE-272 evidence coverage, the GNE-250 deployed smoke, and the GNE-273 Go
-decision are now recorded. `v0.3.0-decision.md` separates
-verified MVP3 facts, non-blocking concerns, `not_run`, and future production
-gates without turning the missing fresh submission analytics event, real
-Outbox delivery, live providers, or true production isolation into passed
-claims.
+GNE-272 evidence coverage, the GNE-250 deployed smoke, the GNE-266
+reliable-delivery repair, and the GNE-273 Go decision are now recorded.
+`v0.3.0-decision.md` separates verified MVP3 facts, resolved follow-up
+evidence, non-blocking concerns, `not_run`, and future production gates. The
+original missing submission event is resolved; real Outbox delivery, live
+providers, and true production isolation remain unclaimed future gates.
 
 This handoff does not close GNE-234 and does not activate GNE-274 from the
 GNE-273 execution thread.

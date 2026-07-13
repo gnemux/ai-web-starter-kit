@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | automatic main deployment for `d7bfeb6` succeeded; full deployed CatCare smoke passed with non-blocking concerns |
+| Latest production status | automatic main deployment for `55553d3` succeeded; the GNE-266 deployed rerun closed the original submission-Analytics concern |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | `d7bfeb644f3ff7f2ab6a79ceb03fb3de19ff6565` |
+| Latest production commit | `55553d3a2270b3405eeb2e1550dbcc521bcdb815` |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | No GNE-250 deployment blocker. Fresh `catcare_submission_created` PostHog evidence was absent although trusted database/Audit/Outbox facts passed. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
-| Next owner action | Publish and review the GNE-250 evidence-only PR, verify its automatic main deployment, then close only GNE-250. Do not activate GNE-273 from this run. |
+| Current blocked items | No MVP3 deployment or Analytics blocker. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
+| Next owner action | Publish and review the final GNE-273 evidence amendment, then close only GNE-273. Do not activate GNE-274 from this run. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -136,13 +136,14 @@ Record configured/missing/unknown only. Do not record values.
 ## Latest Production Deployment
 
 Latest recorded Vercel automatic `main` deployment: 2026-07-13, commit
-`d7bfeb644f3ff7f2ab6a79ceb03fb3de19ff6565`, deployment status `success`.
-GitHub CI run `29218432852` also completed successfully. The stable validation
-URL returned HTTP 200 and its response reported Vercel region `sin1`. GNE-250
-then passed the full deployed CatCare product path with the concerns recorded
-in `specs/reference-product/deployed-smoke-verification.md`. Although Vercel
-labels the target `Production`, MVP3 still uses reference/staging/test provider
-resources and has no true production Supabase project.
+`55553d3a2270b3405eeb2e1550dbcc521bcdb815`, deployment status `success`.
+GitHub CI run `29225628666` also completed successfully. The accepted runtime
+repair is commit `82e918794350c53a8bc9a828050420f42e74c86b`; the later commit
+publishes its deployed evidence. The stable validation URL returned HTTP 200
+from `sin1`, and the GNE-266 rerun received the previously missing PostHog
+submission event. Although Vercel labels the target `Production`, MVP3 still
+uses reference/staging/test provider resources and has no true production
+Supabase project.
 
 ## Latest Preview Deployment
 
@@ -153,10 +154,11 @@ No Preview deployment result has been recorded in this file yet.
 The full deployed Reference Product smoke was recorded by GNE-250 on
 2026-07-13. The online owner-to-share-to-result path, mock AI, test Billing,
 Supabase facts, GitHub CI, Vercel, package versions, and schema parity passed.
-One fresh PostHog submission event was not observed, so the result is `pass
-with non-blocking concerns`, not an unconditional production-readiness claim.
-Live-provider AI smoke remains `not_run`; GNE-160 defines only its checklist
-and budget guard.
+That historical run did not observe one fresh PostHog submission event. The
+later GNE-266 repair rerun received it with matching trusted correlation
+evidence, so the observability concern is closed. This remains an MVP3 online
+validation result, not unconditional production readiness. Live-provider AI
+smoke remains `not_run`; GNE-160 defines only its checklist and budget guard.
 
 ## 2026-07-13 10:12 CST - GNE-250 deployed CatCare smoke
 

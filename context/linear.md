@@ -224,8 +224,7 @@ GNE-230 DELIVERY
 ├── GNE-245 DELIVERY-01 单仓 CI 覆盖与 package 交付门禁 (Done)
 ├── GNE-246 DELIVERY-02 Reference Product 环境差异确认 (Done)
 ├── GNE-247 DELIVERY-03 Reference Product migration 规范延续 (Done)
-├── GNE-248 DELIVERY-04 app/package/db 最小版本定位 (Done)
-└── GNE-250 DELIVERY-06 部署环境 smoke 复现 (Backlog; deferred until PRODUCT / ACCESS / CAPABILITY)
+└── GNE-248 DELIVERY-04 app/package/db 最小版本定位 (Done)
 
 GNE-249 DELIVERY-05 已取消独立执行并并入 GNE-230：交付失败处理原则
 属于父任务门禁，不再作为单独子任务推进。
@@ -241,9 +240,9 @@ entry, no Reference Product migration is needed yet, and the GNE-244 rehearsal
 provides minimum app/package/db version facts through PR #42, merge commit
 `2bd2572`, `@xwlc/*` `0.1.1`, no DB migration, CI/build evidence, Vercel
 Production deployment success, and local `/catcare` smoke `200 OK`.
-GNE-250 remains intentionally `not_run / blocked by later MVP3 parents` until
-PRODUCT, ACCESS, and CAPABILITY create a deployable business path with data/RLS
-and provider evidence.
+GNE-250 was moved under GNE-234 as VERIFY-06. PRODUCT, ACCESS, and CAPABILITY
+have now created the deployable business path, so its deployment smoke must run
+after VERIFY-05 and before the final v0.3.0 decision.
 
 GNE-243 implementation note: package/import/runtime/privacy boundary checks now
 run through `scripts/verify-package-boundaries.mjs`, exposed as
@@ -687,8 +686,9 @@ GNE-234 VERIFY
 ├── GNE-270 VERIFY-03 安全负向验证
 ├── GNE-271 VERIFY-04 Package patch 与 DB migration 验证
 ├── GNE-272 VERIFY-05 PostHog、Vercel、Supabase、GitHub CI 证据汇总
-├── GNE-273 VERIFY-06 v0.3.0 结论
-└── GNE-274 VERIFY-07 产品扩展判定
+├── GNE-250 VERIFY-06 部署环境 smoke 复现
+├── GNE-273 VERIFY-07 v0.3.0 结论
+└── GNE-274 VERIFY-08 产品扩展判定
 ```
 
 GNE-240 owns detailed package dependency rules for the GNE-229 parent. GNE-242

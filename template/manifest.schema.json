@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/template-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "manifestVersion", "generatorVersion", "noticesInventoryVersion", "candidateVersion", "sourcePackageVersion", "source", "foundation", "artifacts", "productConfigAllowedChanges", "toolchain", "packageSnapshots"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "manifestVersion": { "$ref": "#/$defs/version" },
+    "generatorVersion": { "$ref": "#/$defs/version" },
+    "noticesInventoryVersion": { "$ref": "#/$defs/version" },
+    "candidateVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+-candidate\\.[0-9]+$" },
+    "sourcePackageVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repository", "inputRoot", "derivationSpec"],
+      "properties": { "repository": { "type": "string", "pattern": "^https://github\\.com/" }, "inputRoot": { "const": "template/blueprint" }, "derivationSpec": { "const": "specs/template/extraction-manifest.md" } }
+    },
+    "foundation": {
+      "type": "object", "additionalProperties": false, "required": ["migrationFile", "schemaVersion"],
+      "properties": { "migrationFile": { "type": "string", "pattern": "^supabase/migrations/[0-9]{14}_foundation_baseline\\.sql$" }, "schemaVersion": { "type": "string", "minLength": 1 } }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/artifact" }
+    },
+    "productConfigAllowedChanges": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string" }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "pnpm", "supabaseCli"],
+      "properties": {
+        "node": { "type": "string" },
+        "pnpm": { "type": "string" },
+        "supabaseCli": { "type": "string" }
+      }
+    },
+    "packageSnapshots": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "sourceVersion", "candidateVersion", "decision"],
+        "properties": {
+          "name": { "type": "string" },
+          "sourceVersion": { "type": "string" },
+          "candidateVersion": { "type": "string" },
+          "decision": { "enum": ["keep", "transform"] }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "artifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source", "target", "classification", "owner", "productEditable", "action", "verification", "provenance"],
+      "properties": {
+        "source": { "type": "string", "minLength": 1 }, "target": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" }, "classification": { "enum": ["keep", "transform", "exclude"] }, "owner": { "type": "string", "minLength": 1 }, "productEditable": { "type": "boolean" }, "action": { "enum": ["copy", "generate"] }, "verification": { "type": "array", "minItems": 1, "items": { "type": "string" } }, "provenance": { "$ref": "#/$defs/provenance" }
+      }
+    },
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sourceCommit", "templateVersion"],
+      "properties": { "sourceCommit": { "const": "git:HEAD" }, "templateVersion": { "type": "string" } }
+    }
+  }
+}

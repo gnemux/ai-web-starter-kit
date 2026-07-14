@@ -1,0 +1,23 @@
+{
+  "name": "generated-product",
+  "version": "0.2.0-candidate.1",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test:boundaries": "node scripts/verify-boundaries.mjs",
+    "test:package-boundaries": "pnpm test:boundaries",
+    "test:release": "node scripts/verify-release.mjs",
+    "test:release-boundaries": "pnpm test:release",
+    "test:security": "node scripts/verify-security.mjs",
+    "template:verify": "pnpm test:boundaries && pnpm test:release && pnpm test:security && pnpm --filter @xwlc/web test && node scripts/verify-candidate.mjs",
+    "test": "pnpm test:boundaries && pnpm test:release && pnpm test:security && turbo test"
+  },
+  "devDependencies": {
+    "turbo": "2.9.18",
+    "typescript": "5.9.3"
+  }
+}

@@ -2,10 +2,10 @@
 
 ## Status And Ownership
 
-GNE-301 defines this test matrix but changes no runtime artifact. Therefore the
-current execution result for candidate tests is `not_run`. GNE-302 owns source
-refactor/generator/regression evidence; GNE-303 owns independent artifact,
-empty-database, page, and optional external deployment evidence.
+GNE-301 defined this test matrix. GNE-302 now owns and has executed the source,
+generator, candidate build, and first disposable-database evidence recorded
+below. GNE-303 still owns fresh independent artifact, repeated empty-database,
+page/responsive, Smoke Product, and optional external deployment evidence.
 
 Allowed result values are `pass`, `fail`, `blocked`, and `not_run`. A nearby
 passing check cannot replace an unrun required check.
@@ -87,6 +87,21 @@ pnpm build
 Verify the CatCare Owner/private-link/anonymous/Owner path and Demo navigation
 only to the degree affected by moved imports/routes. GNE-302 must not change
 accepted product behavior under the guise of extraction.
+
+### GNE-302 Execution Record
+
+| Check | Result |
+| --- | --- |
+| manifest/config/secret/path negative tests | pass |
+| deterministic two-output comparison and provenance verification | pass |
+| frozen candidate install, lint and typecheck | pass |
+| package/release/security/unit tests | pass |
+| candidate production build | pass |
+| candidate-only local Supabase reset from one baseline | pass |
+| foundation pgTAP suite | pass (141 full role/table/operation checks) |
+| final research regression suite | pass (lint, typecheck, tests, production build) |
+| independent Terra review | pass (READY after three review rounds) |
+| GNE-303 fresh independent/external verification | not_run |
 
 ## GNE-303 Independent Candidate Tests
 

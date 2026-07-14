@@ -1,0 +1,54 @@
+{
+  "identity": {
+    "id": "smoke-product",
+    "name": "Smoke Product",
+    "mark": "SM",
+    "tagline": "A disposable identity for independent template verification.",
+    "locale": "en-US",
+    "eventNamespace": "smoke_product"
+  },
+  "paths": {
+    "home": "/",
+    "login": "/login",
+    "account": "/account",
+    "product": "/product",
+    "billing": "/account/billing",
+    "usage": "/account/usage"
+  },
+  "home": {
+    "eyebrow": "Independent verification",
+    "title": "Prove the template without product history.",
+    "description": "This disposable identity verifies that configuration changes do not require platform edits.",
+    "primaryAction": "Open product",
+    "primaryHref": "/product",
+    "secondaryAction": "View account",
+    "secondaryHref": "/account"
+  },
+  "login": {
+    "title": "Sign in to Smoke Product",
+    "description": "Use only disposable local verification accounts."
+  },
+  "account": {
+    "title": "Smoke account",
+    "description": "Verify the neutral account and profile boundary."
+  },
+  "capabilities": {
+    "analytics": "disabled",
+    "payment": "disabled",
+    "ai": "disabled"
+  },
+  "navigation": [
+    { "label": "Product", "href": "/product" },
+    { "label": "Account", "href": "/account" }
+  ],
+  "footerLinks": [
+    { "label": "Billing", "href": "/account/billing" },
+    { "label": "Usage", "href": "/account/usage" }
+  ],
+  "theme": {
+    "accent": "#5143a5",
+    "accentSoft": "#e8e5fb",
+    "surface": "#f8f7fc",
+    "ink": "#201d34"
+  }
+}

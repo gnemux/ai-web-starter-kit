@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions, pg_catalog;
-select plan(141);
+select plan(149);
 
 select ok(c.relrowsecurity, format('%s has RLS enabled', expected.table_name))
 from unnest(array['user_profiles','billing_orders','billing_subscriptions','billing_entitlements','billing_credit_ledger','billing_usage_ledger','payment_events']) expected(table_name)
@@ -45,6 +45,8 @@ insert into public.billing_usage_ledger (id, owner_id, feature_key, units, unit,
   ('26000000-0000-0000-0000-000000000002','21000000-0000-0000-0000-000000000002','feature_a',1,'operation','committed','usage:owner-b');
 insert into public.payment_events (id, provider, event_id, event_type, idempotency_key) values
   ('27000000-0000-0000-0000-000000000001','sandbox','event-owner-a','checkout.completed','payment:owner-a');
+
+select throws_ok($$delete from auth.users where id = '21000000-0000-0000-0000-000000000001'$$, '23503', null, 'auth user deletion cannot erase immutable billing facts');
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '21000000-0000-0000-0000-000000000001', true);
@@ -135,6 +137,15 @@ select lives_ok($$insert into public.billing_subscriptions (id,owner_id,plan_id,
 select lives_ok($$insert into public.billing_entitlements (id,owner_id,source_type,source_id,feature_key,allowance_kind,status) values ('24000000-0000-0000-0000-000000000003','21000000-0000-0000-0000-000000000003','subscription','23000000-0000-0000-0000-000000000003','feature_a','boolean','active')$$, 'service inserts entitlement');
 select lives_ok($$insert into public.billing_credit_ledger (id,owner_id,entitlement_id,event_type,amount,unit,idempotency_key,source_type) values ('25000000-0000-0000-0000-000000000003','21000000-0000-0000-0000-000000000003','24000000-0000-0000-0000-000000000003','grant',1,'operation','credit:service','subscription')$$, 'service inserts credit');
 select lives_ok($$insert into public.billing_usage_ledger (id,owner_id,feature_key,units,unit,status,idempotency_key) values ('26000000-0000-0000-0000-000000000003','21000000-0000-0000-0000-000000000003','feature_a',1,'operation','committed','usage:service')$$, 'service inserts usage');
+update public.billing_orders set provider_order_id = 'provider-order-service' where id = '22000000-0000-0000-0000-000000000003';
+update public.billing_subscriptions set provider_subscription_id = 'provider-subscription-service' where id = '23000000-0000-0000-0000-000000000003';
+select throws_ok($$insert into public.billing_orders (owner_id,idempotency_key,plan_id,price_id,status,currency,amount_cents) values ('21000000-0000-0000-0000-000000000003','order:service','starter','starter_month','paid','usd',100)$$, '23505', null, 'order idempotency key rejects duplicates');
+select throws_ok($$insert into public.billing_orders (owner_id,provider,provider_order_id,idempotency_key,plan_id,price_id,status,currency,amount_cents) values ('21000000-0000-0000-0000-000000000003','sandbox','provider-order-service','order:provider-duplicate','starter','starter_month','paid','usd',100)$$, '23505', null, 'order provider identity rejects duplicates');
+select throws_ok($$insert into public.billing_subscriptions (owner_id,provider,provider_subscription_id,plan_id,price_id,status) values ('21000000-0000-0000-0000-000000000003','sandbox','provider-subscription-service','starter','starter_month','active')$$, '23505', null, 'subscription provider identity rejects duplicates');
+select throws_ok($$insert into public.billing_entitlements (owner_id,source_type,source_id,feature_key,allowance_kind,status) values ('21000000-0000-0000-0000-000000000003','subscription','23000000-0000-0000-0000-000000000003','feature_a','boolean','active')$$, '23505', null, 'entitlement source and feature identity rejects duplicates');
+select throws_ok($$insert into public.billing_credit_ledger (owner_id,event_type,amount,unit,idempotency_key,source_type) values ('21000000-0000-0000-0000-000000000003','grant',1,'operation','credit:service','subscription')$$, '23505', null, 'credit idempotency key rejects duplicates');
+select throws_ok($$insert into public.billing_usage_ledger (owner_id,feature_key,units,unit,status,idempotency_key) values ('21000000-0000-0000-0000-000000000003','feature_a',1,'operation','committed','usage:service')$$, '23505', null, 'usage idempotency key rejects duplicates');
+select throws_ok($$insert into public.payment_events (provider,event_id,event_type,idempotency_key) values ('sandbox','service-event','checkout.completed','payment:provider-duplicate')$$, '23505', null, 'payment provider event identity rejects duplicates');
 select is((select count(*)::bigint from public.user_profiles), 3::bigint, 'service reads all profiles');
 select is((select count(*)::bigint from public.billing_orders), 3::bigint, 'service reads all orders');
 select is((select count(*)::bigint from public.billing_subscriptions), 3::bigint, 'service reads all subscriptions');

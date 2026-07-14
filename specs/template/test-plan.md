@@ -1,5 +1,20 @@
 # Test Plan: Clean Template Candidate
 
+## Reopened GNE-302 Strengthening Matrix
+
+| Risk | Required evidence |
+| --- | --- |
+| mother template silently lags research capability source | `pnpm template:drift` pass plus a negative stale-hash fixture |
+| new product must edit platform core | generate pristine candidate, run `product:init` with the Smoke fixture, verify only declared product outputs change |
+| route owns product implementation | boundary check requires `/product` to compose `modules/product` and remain thin |
+| UI/performance are code-only claims | real form/dialog/tabs/popover/toast consumers; account read uses owner cache and write invalidates tag/path |
+| provider mode lies | disabled/safe-adapter/external matrix and missing-environment failure |
+| one Analytics project mixes identities | reserved base-property test and caller override negatives |
+| SSR session leaks through cache | Proxy header forwarding, `getClaims`, force-dynamic account routes and security check |
+| user deletion erases financial history | restrictive owner FK and pgTAP negative |
+| SQL regression passes frontend-only CI | pinned Supabase CLI job runs reset and `supabase test db` |
+| Smoke identity contaminates pristine output | separate state/config hashes and deterministic A/B comparison |
+
 ## Status And Ownership
 
 GNE-301 defined this test matrix. GNE-302 now owns and has executed the source,
@@ -102,6 +117,28 @@ accepted product behavior under the guise of extraction.
 | final research regression suite | pass (lint, typecheck, tests, production build) |
 | independent Terra review | pass (READY after three review rounds) |
 | GNE-303 fresh independent/external verification | not_run |
+
+The table above is the historical PR #96 execution record. The reopened strong
+template rerun is recorded separately so its evidence cannot be confused with
+the earlier 141-check candidate.
+
+### GNE-302 Strengthened Rerun Record
+
+| Check | Result |
+| --- | --- |
+| source drift and inventory gates | pass (14 projected + 18 excluded source files, six Transform/Fold inventories; stale hash, untracked source and changed inventory all fail) |
+| deterministic pristine A/B generation | pass (identical normalized tree hash) |
+| Second Product initialization boundary | pass (exactly four reviewed files differ; repeat/force/rollback behavior is covered) |
+| pristine candidate integrity/install/lint/typecheck/test/build | pass |
+| derived product integrity/install/lint/typecheck/test/build | pass |
+| product route/module/UI/cache/capability/Analytics checks | pass |
+| publishable key/SSR headers/CSP/financial retention/security checks | pass, including real Git tracked-`.env.local` rejection |
+| candidate-only empty database reset | pass twice from the single independent baseline |
+| foundation pgTAP suite | pass (149/149) |
+| local HTTP smoke | pass (`/`, `/login`, Provider-free disabled account/product states and security headers) |
+| cloud database, external candidate repository, or Vercel write | not_run / intentionally outside GNE-302 |
+| independent Terra review | pending at time of this repository record |
+| GNE-303 fresh visual/responsive/external verification | not_run |
 
 ## GNE-303 Independent Candidate Tests
 

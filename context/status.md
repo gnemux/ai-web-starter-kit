@@ -1344,8 +1344,23 @@ GNE-301 extraction-architecture checkpoint on 2026-07-13:
 
 GNE-302 clean-template implementation checkpoint on 2026-07-14:
 
-- Work is isolated on `codex/gne-302-clean-template` in a dedicated worktree;
-  the CatCare research application and its deployment inputs are unchanged.
+- PR #96 merged the first candidate generator, after which product/architecture
+  review found that generation alone did not yet provide a durable strong
+  template. Linear GNE-302 was restored to In Progress before GNE-303.
+- Strengthening is isolated on `codex/gne-302-template-hardening` from current
+  `origin/main`. It adds source-to-template drift detection, portable product
+  initialization, a real product-module workspace, capability registry, real
+  UI/cache/invalidation consumers, multi-product Analytics dimensions,
+  Supabase publishable-key/SSR response-header handling, immutable Billing
+  history protection, production CSP hardening and pinned database CI.
+- Fresh generated-candidate checks, two disposable local resets, independent
+  Terra review, PR publication and merge remain pending. No shared cloud DB,
+  external candidate repository, Vercel project, Production operation or real
+  provider secret has been used.
+
+- Historical PR #96 work was isolated on `codex/gne-302-clean-template`; the
+  current strengthening branch supersedes it while the CatCare research
+  application and deployment inputs remain unchanged.
 - The research repository now contains an explicit 93-file candidate blueprint,
   a schema-validated product configuration, deterministic atomic generator,
   candidate verifier/comparator, negative fixtures, and root test integration.

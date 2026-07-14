@@ -1,5 +1,19 @@
 # Product Spec: Clean Web Starter Template Candidate
 
+## Strong-Template Product Outcome
+
+The candidate is not accepted merely because it can be copied and built. It
+must let a second and later single-product repository initialize a distinct
+identity, keep product implementation in `modules/product`, consume tested
+platform/UI/caching/provider boundaries, and detect when the research
+capability source changes without a reviewed template projection. The template
+optimizes for durable product velocity, not the smallest file count.
+
+The user-facing initialization contract is one `product.config.json` plus
+`pnpm product:init`. A pristine neutral candidate and a derived Smoke Product
+are distinct artifacts. The Smoke identity is disposable evidence and must not
+become the default template identity.
+
 ## Decision
 
 GNE-301 freezes the product boundary for a separately generated clean template

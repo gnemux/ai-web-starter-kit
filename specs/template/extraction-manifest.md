@@ -1,5 +1,18 @@
 # GNE-301 Extraction Manifest And Coupling Inventory
 
+## Capability Source Projection And Drift
+
+`template/blueprint` is a curated neutral projection, not an independent
+untracked implementation source. `template/source-map.json` assigns one
+research capability source to each retained package/platform projection and
+records the reviewed source hash and projection strategy. `pnpm
+template:drift` fails whenever a source changes until the mapped projection is
+reviewed and the recorded hash is intentionally updated. It also inventories
+all files under the watched shared-package, Supabase and Analytics roots; a new
+file must be mapped or explicitly excluded with a reason, so adding a capability
+cannot bypass the drift gate. Candidate-only shell, initialization, baseline
+and product-slot files remain blueprint-owned.
+
 ## Purpose
 
 This document is the human-reviewable source for the machine manifest that
@@ -67,17 +80,37 @@ products.
 
 | Source | Class | Candidate action | Verification |
 | --- | --- | --- | --- |
-| `packages/core/src/auth.ts`, `payment.ts`, `providers.ts`, `ai.ts` | Keep | copy neutral contracts | exported-root compile and no app/runtime SDK import |
+| `packages/core/src/auth.ts`, `payment.ts`, `providers.ts`, `ai.ts` | Transform | project only the provider-free contract subset and remove research-only defaults or compatibility surface | exported-root compile, source hash gate and no app/runtime SDK import |
 | `packages/core/src/billing.ts` | Transform | retain neutral ledger/entitlement decision types and pure rules; move plan IDs/rank, feature keys, default plans/prices/quotas and product copy to generated product config | no `defaultBillingPlans`, default prices, product feature catalog, amount or pricing copy in shared root; configured catalog tests |
-| `packages/core/src/api.ts` | Transform | retain generic `ServiceResult`/error helpers; move or remove Demo input/payload/normalizer | no `DemoItem`, `demoItem*`, or Demo copy from candidate root |
-| `packages/core/src/data.ts` | Transform | retain `UserProfile` and generic access vocabulary only; exclude `DemoItem`, `demo_items`, Demo status/visibility | symbol and table-name negative scan |
+| `packages/core/src/api.ts` | Exclude | mixed Demo API contract is not copied; neutral result/error contracts are projected independently in Platform | no `DemoItem`, `demoItem*`, source path or copied file in candidate |
+| `packages/core/src/data.ts` | Exclude | mixed Demo data contract is not copied; profile ownership is represented by independent candidate contracts | no `DemoItem`, `demo_items`, source path or copied file in candidate |
 | `packages/core/src/index.ts` | Transform | export only retained neutral modules | candidate root import exposes no Demo/product symbol |
-| `packages/platform/src/index.ts`, `capability-context.ts`, `share-token-gate.ts` | Keep | copy provider-free contracts | compile and contract tests |
+| `packages/platform/src/index.ts` | Transform | build a reviewed public-API projection containing neutral actor/session/result/owner, capability, Analytics/email ports and pure public-access decisions | source hash gate, exported-root compile and neutral contract tests |
+| `packages/platform/src/capability-context.ts` | Exclude | research capability context carries product-stage semantics; the candidate defines its smaller neutral capability registry in the projected public root | no source path or product-stage key in candidate |
+| `packages/platform/src/share-token-gate.ts` | Exclude/Contract only | do not copy the single-consumer gate; retain only an independently expressed provider-free access decision in the public projection | no token runtime/crypto/store and pure access-decision tests |
 | `packages/platform/src/travel-consumer.compile.ts` | Exclude | fixture stays in research repository | no Travel/product path or symbol in candidate |
-| `packages/platform/src/capability-contracts.test.mjs` | Transform | retain contract coverage with neutral fixture names and neutral resource types | no CatCare/Travel fixture; negative security cases retained |
-| `packages/ui/src/index.tsx` | Keep/Transform | copy neutral primitives; make `BrandMark` fully props/config-driven or exclude that export and compose brand in app layer | no hard-coded `XWLC`, `X`, subtitle, route or product name in shared rendered output |
-| `packages/db/src/index.ts` | Keep | copy provider-free schema/RLS evidence types | root compile and no concrete product table |
+| `packages/platform/src/capability-contracts.test.mjs` | Exclude | research tests contain product fixtures; candidate owns separate neutral Platform tests | no CatCare/Travel fixture and candidate negative cases pass |
+| `packages/ui/src/index.tsx` | Transform | project neutral primitives, make branding config-driven and add only candidate-consumed interaction/state components | no hard-coded product identity; real page consumers and accessibility checks |
+| `packages/db/src/index.ts` | Transform | project provider-free schema/RLS/ownership evidence contracts and pure validators | source hash gate, root compile and no concrete product table |
 | package `package.json`/`tsconfig.json` files | Transform | keep workspace names/exports/scripts; use exact external dependency versions resolved from the committed lockfile | frozen install and lockfile/package consistency |
+
+### Public API disposition
+
+The candidate package snapshot is intentionally useful, but it does not imply
+that every research implementation is generic. The retained public surface is
+reviewed API by API:
+
+| Package | Retained in candidate | Deliberately deferred or product-owned |
+| --- | --- | --- |
+| `@xwlc/core` | provider contracts, Auth vocabulary, Billing ledger and entitlement decision types, safe internal paths, pure archive/active/deleted-label helpers | mixed Demo API/data files, pricing catalog, feature IDs, product quotas/copy and every CatCare/Demo DTO |
+| `@xwlc/platform` | session/actor/result contracts, authenticated/verified/owner guards, email-verification and Analytics ports, capability registry and provider-free public-access decision | Supabase stores, product event unions, CatCare Audit IDs, Outbox worker/state persistence and concrete email/Payment/AI providers |
+| `@xwlc/ui` | configurable brand/shell, button/card/badge, section header, panel, tabs, progress, dialog and empty/loading/error/long-content states, each consumed by the neutral app | product artwork, domain icons/copy, route policy and a full design system or chart/map library without a real consumer |
+| `@xwlc/db` | schema/RLS/ownership evidence types and pure validation helpers for retained foundation tables | Supabase client/store code, product tables, product migrations, Audit/Outbox persistence and storage buckets |
+
+`Contract only` means the candidate may keep a provider-free decision shape or
+design checklist, not a pretend runtime. A second real product is the trigger
+for extracting repeated Outbox state-machine or deterministic event-ID code;
+until then those implementations stay with their product.
 
 ## Spec Template Classification
 
@@ -204,7 +237,7 @@ env value, and unclassified manifest input; each must fail with a clear reason.
 | map/upload/search kit | Not run | approved product requirement defines a product-independent contract |
 | central package registry/distribution | Not run | two independent product repositories need the same package update |
 | cross-repository upgrade/backfeed automation | Not run | first shared update must enter an already-created product repository |
-| archive/tombstone plus immutable historical snapshot lifecycle | Contract only | a second real product has a mutable entity referenced by published, executed, billed, audited, or otherwise immutable facts and would copy the same lifecycle/presentation rules |
+| archive/tombstone plus immutable historical snapshot lifecycle | Contract + pure helpers; persistence deferred | a second real product would otherwise copy storage, cascade, race-closing or snapshot persistence semantics |
 | multi-tenant policy | Not run | a product has tenants beyond simple owner scope |
 | Cloudflare/Hono adapter | Not run | a product selects that runtime |
 | live AI/payment/notification | Not run | separate provider/production gate is explicitly approved |

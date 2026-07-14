@@ -5,7 +5,8 @@
     "mark": "SP",
     "tagline": "A focused starting point for your next product.",
     "locale": "en-US",
-    "eventNamespace": "starter_product"
+    "eventNamespace": "starter_product",
+    "releaseVersion": "0.1.0"
   },
   "paths": {
     "home": "/",

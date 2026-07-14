@@ -28,7 +28,7 @@ for each row execute function public.set_updated_at();
 
 create table public.billing_orders (
   id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  owner_id uuid not null references auth.users(id) on delete restrict,
   provider text not null default 'sandbox',
   provider_order_id text,
   provider_checkout_session_id text,
@@ -49,7 +49,7 @@ create unique index billing_orders_provider_order_unique_idx on public.billing_o
 
 create table public.billing_subscriptions (
   id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  owner_id uuid not null references auth.users(id) on delete restrict,
   provider text not null default 'sandbox',
   provider_subscription_id text,
   plan_id text not null,
@@ -70,7 +70,7 @@ create unique index billing_subscriptions_provider_unique_idx on public.billing_
 
 create table public.billing_entitlements (
   id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  owner_id uuid not null references auth.users(id) on delete restrict,
   source_type text not null,
   source_id text,
   feature_key text not null,
@@ -95,7 +95,7 @@ create index billing_entitlements_owner_feature_idx on public.billing_entitlemen
 
 create table public.billing_credit_ledger (
   id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  owner_id uuid not null references auth.users(id) on delete restrict,
   entitlement_id uuid references public.billing_entitlements(id) on delete set null,
   event_type text not null check (event_type in ('grant', 'reserve', 'consume', 'release', 'refund', 'expire', 'adjustment')),
   amount numeric(20, 4) not null check (amount <> 0),
@@ -113,7 +113,7 @@ create index billing_credit_ledger_source_idx on public.billing_credit_ledger (s
 
 create table public.billing_usage_ledger (
   id uuid primary key default gen_random_uuid(),
-  owner_id uuid not null references auth.users(id) on delete cascade,
+  owner_id uuid not null references auth.users(id) on delete restrict,
   feature_key text not null,
   units numeric(20, 4) not null check (units > 0),
   unit text not null,

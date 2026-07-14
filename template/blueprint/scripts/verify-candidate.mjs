@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import { lstat, readFile, readdir } from "node:fs/promises";
 import path from "node:path";
+import { generatedProductModule, generatedSupabaseConfig, productState } from "./product-config.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
-const ignored = new Set(["node_modules", ".next", ".turbo", ".vercel", ".temp", ".branches", "coverage", "dist"]);
+const ignored = new Set([".git", "node_modules", ".next", ".turbo", ".vercel", ".temp", ".branches", "coverage", "dist"]);
 const pristineNextEnv = "/// <reference types=\"next\" />\n/// <reference types=\"next/image-types/global\" />\n";
 const generatedNextEnv = `${pristineNextEnv}/// <reference path=\"./.next/types/routes.d.ts\" />\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.\n`;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
@@ -26,6 +27,7 @@ async function listFiles(relative = "") {
   for (const entry of (await readdir(path.join(root, relative), { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
     if (ignored.has(entry.name) || entry.name.endsWith(".tsbuildinfo")) continue;
     const next = path.posix.join(relative, entry.name);
+    if (entry.isFile() && /(?:^|\/)\.env(?:\..+)?$/.test(next) && !next.endsWith(".env.example")) continue;
     if ((await lstat(path.join(root, next))).isSymbolicLink()) throw new Error(`Symlink is forbidden: ${next}`);
     if (entry.isDirectory()) files.push(...await listFiles(next));
     else files.push(next);
@@ -33,10 +35,10 @@ async function listFiles(relative = "") {
   return files;
 }
 
-async function hashFiles(files, normalizeNextEnv = false) {
+async function hashFiles(files, normalizeNextEnv = false, overrides = new Map()) {
   const hash = createHash("sha256");
   for (const file of [...files].sort()) {
-    let bytes = await readFile(path.join(root, file));
+    let bytes = overrides.has(file) ? Buffer.from(overrides.get(file)) : await readFile(path.join(root, file));
     if (normalizeNextEnv && file === "apps/web/next-env.d.ts") {
       const value = bytes.toString("utf8");
       if (value !== pristineNextEnv && value !== generatedNextEnv) throw new Error("next-env.d.ts has an unapproved mutation");
@@ -50,6 +52,7 @@ async function hashFiles(files, normalizeNextEnv = false) {
 const version = JSON.parse(await readFile(path.join(root, "template-version.json"), "utf8"));
 const manifest = JSON.parse(await readFile(path.join(root, "template-manifest.json"), "utf8"));
 const product = JSON.parse(await readFile(path.join(root, "template-product.json"), "utf8"));
+const currentState = JSON.parse(await readFile(path.join(root, "product-state.json"), "utf8"));
 const files = await listFiles();
 const expected = manifest.artifacts.map((entry) => entry.target).sort();
 if (JSON.stringify(files.sort()) !== JSON.stringify(expected)) throw new Error("Candidate artifact inventory differs from the signed manifest");
@@ -58,9 +61,18 @@ if (sha256(JSON.stringify(manifest)) !== version.hashes.manifest) throw new Erro
 if (sha256(JSON.stringify(product)) !== version.hashes.config) throw new Error("Product config hash mismatch");
 if (sha256(await readFile(path.join(root, "pnpm-lock.yaml"))) !== version.hashes.candidateLock) throw new Error("Lockfile hash mismatch");
 if (sha256(await readFile(path.join(root, "THIRD_PARTY_NOTICES.md"))) !== version.notices.hash) throw new Error("Notices hash mismatch");
+const expectedAllowedChanges = ["apps/web/config/product.config.ts", "product.config.json", "product-state.json", "supabase/config.toml"].sort();
+if (JSON.stringify([...manifest.productConfigAllowedChanges].sort()) !== JSON.stringify(expectedAllowedChanges)) throw new Error("Product initialization allowlist is broader than the reviewed four-file boundary");
+if (!["pristine", "derived"].includes(currentState.status)) throw new Error("Unknown product derivation state");
+const normalizedProductOverrides = currentState.status === "derived" ? new Map([
+  ["apps/web/config/product.config.ts", generatedProductModule(product, version.candidateVersion)],
+  ["product.config.json", `${JSON.stringify(product, null, 2)}\n`],
+  ["product-state.json", `${JSON.stringify(productState(product, version.candidateVersion), null, 2)}\n`],
+  ["supabase/config.toml", generatedSupabaseConfig(product)],
+]) : new Map();
 const copyTargets = manifest.artifacts.filter((entry) => entry.action === "copy").map((entry) => entry.target);
 if (await hashFiles(copyTargets, true) !== version.hashes.blueprint) throw new Error("Blueprint copy checksum mismatch");
-if (await hashFiles(files.filter((file) => file !== "template-version.json"), true) !== version.hashes.normalizedContent) throw new Error("Normalized candidate content hash mismatch");
+if (await hashFiles(files.filter((file) => file !== "template-version.json"), true, normalizedProductOverrides) !== version.hashes.normalizedContent) throw new Error("Normalized candidate content hash mismatch outside the reviewed product initialization boundary");
 
 for (const file of files) {
   if (/(?:^|\/)\.env(?:\..+)?$/.test(file) && !file.endsWith(".env.example")) throw new Error(`Private environment file: ${file}`);
@@ -71,7 +83,7 @@ for (const file of files) {
   if (absolutePathSignatures.some((value) => text.includes(value))) throw new Error(`Absolute source path: ${file}`);
   if (secretPattern.test(text)) throw new Error(`Secret-shaped value: ${file}`);
   if (/\bGNE-\d+\b|\bPR\s*#\d+\b/i.test(text) || environmentSignatures.some((value) => text.toLowerCase().includes(value))) throw new Error(`Execution-history identifier: ${file}`);
-  if (productSignatures.some((value) => text.toLowerCase().includes(value))) throw new Error(`Product content pollution: ${file}`);
+  if (!(currentState.status === "derived" && manifest.productConfigAllowedChanges.includes(file)) && productSignatures.some((value) => text.toLowerCase().includes(value))) throw new Error(`Product content pollution: ${file}`);
 }
 
-console.log(`Candidate provenance and full-tree integrity verified: ${version.candidateVersion} from ${version.source.commit}`);
+console.log(`Candidate provenance and full-tree integrity verified (${currentState.status}): ${version.candidateVersion} from ${version.source.commit}`);

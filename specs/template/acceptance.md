@@ -37,9 +37,9 @@ confirm that the manifest decision, target, and verification are unambiguous:
 5. `apps/web/components/catcare-icons.tsx` — Exclude;
 6. `apps/web/lib/services/auth.ts` — Transform;
 7. `apps/web/lib/catcare/product-service/outbox-worker.ts` — Exclude/Contract only;
-8. `packages/core/src/data.ts` — Transform; retain neutral profile vocabulary and exclude Demo DTO/table;
+8. `packages/core/src/data.ts` — Exclude the mixed Demo file; represent only the approved neutral ownership/profile concepts in independent candidate projections;
 9. `packages/platform/src/travel-consumer.compile.ts` — Exclude fixture from candidate;
-10. `packages/platform/src/index.ts` — Keep as neutral local package snapshot;
+10. `packages/platform/src/index.ts` — Transform into a reviewed neutral public-API projection; exclude the research capability-context/share-token files and independently retain only their approved provider-free decisions;
 11. `apps/web/proxy.ts` — Transform and include as an app runtime input;
 12. `supabase/config.toml` — Transform to neutral local identity/Auth URLs;
 13. `supabase/seed.sql` — Transform to empty/deterministic neutral seed;
@@ -71,6 +71,10 @@ GNE-302 may be considered complete only when:
 
 ## GNE-302 Local Implementation Result
 
+The table below records the first PR #96 candidate and is superseded for final
+GNE-302 closure by the Strengthened Completion Gate below. It remains useful
+historical evidence but does not by itself satisfy the reopened Issue.
+
 This is implementation evidence, not the independent GNE-303 release decision.
 
 | Requirement | Result | Evidence |
@@ -87,6 +91,43 @@ This is implementation evidence, not the independent GNE-303 release decision.
 
 The generated candidate remains a candidate artifact. This section does not
 claim multi-product proof, production readiness, or completion of GNE-303.
+
+## GNE-302 Strengthened Completion Gate
+
+GNE-302 may return to Done only when fresh evidence proves:
+
+- source-to-template drift detection passes and a stale source hash fails;
+- default output is neutral while `product:init` derives the Smoke fixture
+  without platform/package edits;
+- `/product` stays thin and `modules/product` owns product composition;
+- UI, local-state interaction, owner cache, tag invalidation, targeted path
+  refresh and capability modes all have real consumers;
+- external modes fail clearly when required environment is absent;
+- Analytics base dimensions cannot be overridden by callers;
+- publishable-key, SSR headers, `getClaims`, CSP and financial-retention checks
+  pass;
+- candidate CI includes disposable migration and pgTAP;
+- a fresh candidate completes frozen install, lint, typecheck, test and build;
+- two disposable local resets and pgTAP pass without a shared cloud database;
+- Terra review has no unresolved blocker;
+- execution stops before GNE-303 and leaves GNE-298 open.
+
+### Strengthened Local Acceptance Evidence
+
+| Requirement | Result | Evidence |
+| --- | --- | --- |
+| source changes cannot silently leave template projections stale | pass | 14 projected + 18 explicitly excluded files, six complete Transform/Fold inventories, and stale-hash/untracked-file/inventory negative fixtures |
+| generation is reproducible | pass | two 112-file fresh outputs from `078a1d9` have the identical normalized tree hash |
+| a new product can initialize without rewriting the platform | pass | Second Product initialization changes exactly the four declared config projections |
+| the mother template remains verifiable after derivation | pass | pristine and derived `template:verify` both validate signed provenance outside the four-file boundary |
+| product/UI/performance/provider seams have real consumers | pass | thin route, product module, interactive workspace, owner cache/invalidation and capability matrix checks |
+| Auth/Analytics/Supabase/security/retention boundaries are enforced | pass | unit, release, security and boundary suites, tracked-private-env negative proof, plus pristine and derived production builds |
+| independent database foundation is reproducible | pass | two disposable local resets and 149/149 pgTAP checks; local volume removed afterwards |
+| local route behavior is executable without Provider secrets | pass | `/` and `/login` return 200; `/product` and `/account` render explicit Auth-disabled states; security headers and no-store responses are present |
+| research product runtime behavior changed | no | implementation is confined to template/spec/context/tooling inputs |
+| shared cloud database or external deployment changed | no | no linked Supabase, new GitHub repository, Vercel project or provider secret used |
+| independent visual/responsive and external-repository proof | not_run | remains GNE-303 scope, not a GNE-302 completion claim |
+| independent Terra review | pending | must be resolved before GNE-302 returns to Done |
 
 ## GNE-303 Verification Gate
 

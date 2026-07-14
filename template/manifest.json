@@ -544,6 +544,36 @@
       }
     },
     {
+      "source": "template/blueprint/apps/web/modules/platform/ai/mock.ts",
+      "target": "apps/web/modules/platform/ai/mock.ts",
+      "classification": "keep",
+      "owner": "platform-app",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "template/blueprint/apps/web/modules/platform/payment/sandbox.ts",
+      "target": "apps/web/modules/platform/payment/sandbox.ts",
+      "classification": "keep",
+      "owner": "platform-app",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "template/blueprint/apps/web/modules/platform/safe-adapters.test.mjs",
+      "target": "apps/web/modules/platform/safe-adapters.test.mjs",
+      "classification": "keep",
+      "owner": "platform-app",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
       "source": "template/blueprint/apps/web/modules/platform/auth/auth-contract.test.mjs",
       "target": "apps/web/modules/platform/auth/auth-contract.test.mjs",
       "classification": "keep",
@@ -748,8 +778,8 @@
       }
     },
     {
-      "source": "template/blueprint/apps/web/modules/product/README.md",
-      "target": "apps/web/modules/product/README.md",
+      "source": "template/blueprint/apps/web/modules/product/product-workspace.tsx",
+      "target": "apps/web/modules/product/product-workspace.tsx",
       "classification": "keep",
       "owner": "product",
       "productEditable": true,
@@ -1190,6 +1220,16 @@
       }
     },
     {
+      "source": "template/blueprint/packages/db/src/db.test.mjs",
+      "target": "packages/db/src/db.test.mjs",
+      "classification": "keep",
+      "owner": "package-db",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
       "source": "template/blueprint/packages/db/tsconfig.json",
       "target": "packages/db/tsconfig.json",
       "classification": "keep",
@@ -1239,6 +1279,16 @@
         "sourceCommit": "git:HEAD",
         "templateVersion": "0.2.0-candidate.1"
       }
+    },
+    {
+      "source": "template/blueprint/packages/platform/src/platform.test.mjs",
+      "target": "packages/platform/src/platform.test.mjs",
+      "classification": "keep",
+      "owner": "package-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
     },
     {
       "source": "template/blueprint/packages/platform/tsconfig.json",
@@ -1292,6 +1342,16 @@
       }
     },
     {
+      "source": "template/blueprint/packages/ui/src/dialog.tsx",
+      "target": "packages/ui/src/dialog.tsx",
+      "classification": "keep",
+      "owner": "package-ui",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
       "source": "template/blueprint/packages/ui/tsconfig.json",
       "target": "packages/ui/tsconfig.json",
       "classification": "keep",
@@ -1343,6 +1403,46 @@
       }
     },
     {
+      "source": "template/blueprint/scripts/product-config.mjs",
+      "target": "scripts/product-config.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "template/blueprint/scripts/lint-source.mjs",
+      "target": "scripts/lint-source.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "negative-fixture"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "template/blueprint/scripts/product-init.mjs",
+      "target": "scripts/product-init.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "template/blueprint/scripts/product-init-lib.mjs",
+      "target": "scripts/product-init-lib.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
       "source": "template/blueprint/scripts/verify-boundaries.mjs",
       "target": "scripts/verify-boundaries.mjs",
       "classification": "keep",
@@ -1375,6 +1475,16 @@
         "sourceCommit": "git:HEAD",
         "templateVersion": "0.2.0-candidate.1"
       }
+    },
+    {
+      "source": "template/blueprint/scripts/verify-product.mjs",
+      "target": "scripts/verify-product.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
     },
     {
       "source": "template/blueprint/scripts/verify-release.mjs",
@@ -1666,10 +1776,30 @@
     },
     {
       "source": "config:product",
-      "target": "template-product.json",
+      "target": "product.config.json",
       "classification": "transform",
       "owner": "product",
       "productEditable": true,
+      "action": "generate",
+      "verification": ["config-hash", "schema", "product-init"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "config:product+manifest",
+      "target": "product-state.json",
+      "classification": "transform",
+      "owner": "product",
+      "productEditable": true,
+      "action": "generate",
+      "verification": ["config-hash", "template-version", "product-init"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "config:product",
+      "target": "template-product.json",
+      "classification": "transform",
+      "owner": "template-platform",
+      "productEditable": false,
       "action": "generate",
       "verification": [
         "config-hash",
@@ -1699,9 +1829,9 @@
   ],
   "productConfigAllowedChanges": [
     "apps/web/config/product.config.ts",
-    "supabase/config.toml",
-    "template-product.json",
-    "template-version.json"
+    "product.config.json",
+    "product-state.json",
+    "supabase/config.toml"
   ],
   "toolchain": {
     "node": "22",
@@ -1718,19 +1848,19 @@
     {
       "name": "@xwlc/ui",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.1.1",
+      "candidateVersion": "0.2.0-candidate.1",
       "decision": "transform"
     },
     {
       "name": "@xwlc/platform",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.1.1",
+      "candidateVersion": "0.2.0-candidate.1",
       "decision": "transform"
     },
     {
       "name": "@xwlc/db",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.1.1",
+      "candidateVersion": "0.2.0-candidate.1",
       "decision": "transform"
     }
   ]

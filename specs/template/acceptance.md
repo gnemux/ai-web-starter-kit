@@ -37,9 +37,9 @@ confirm that the manifest decision, target, and verification are unambiguous:
 5. `apps/web/components/catcare-icons.tsx` — Exclude;
 6. `apps/web/lib/services/auth.ts` — Transform;
 7. `apps/web/lib/catcare/product-service/outbox-worker.ts` — Exclude/Contract only;
-8. `packages/core/src/data.ts` — Transform; retain neutral profile vocabulary and exclude Demo DTO/table;
+8. `packages/core/src/data.ts` — Exclude the mixed Demo file; represent only the approved neutral ownership/profile concepts in independent candidate projections;
 9. `packages/platform/src/travel-consumer.compile.ts` — Exclude fixture from candidate;
-10. `packages/platform/src/index.ts` — Keep as neutral local package snapshot;
+10. `packages/platform/src/index.ts` — Transform into a reviewed neutral public-API projection; exclude the research capability-context/share-token files and independently retain only their approved provider-free decisions;
 11. `apps/web/proxy.ts` — Transform and include as an app runtime input;
 12. `supabase/config.toml` — Transform to neutral local identity/Auth URLs;
 13. `supabase/seed.sql` — Transform to empty/deterministic neutral seed;

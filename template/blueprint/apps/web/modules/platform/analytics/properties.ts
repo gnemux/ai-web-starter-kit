@@ -29,7 +29,7 @@ export function buildAnalyticsBaseProperties(input: { productId: string; appEnvi
   } as const;
 }
 
-export function isSafePosthogPublicKey(value: string | undefined) {
+export function isSafePosthogPublicKey(value: string | undefined): value is string {
   return typeof value === "string" && /^phc_[A-Za-z0-9_-]{8,128}$/.test(value);
 }
 

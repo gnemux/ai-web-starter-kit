@@ -112,6 +112,22 @@ GNE-302 may return to Done only when fresh evidence proves:
 - Terra review has no unresolved blocker;
 - execution stops before GNE-303 and leaves GNE-298 open.
 
+### Strengthened Local Acceptance Evidence
+
+| Requirement | Result | Evidence |
+| --- | --- | --- |
+| source changes cannot silently leave template projections stale | pass | 14-source registry plus stale-hash negative fixture |
+| generation is reproducible | pass | two fresh outputs have the identical normalized tree hash |
+| a new product can initialize without rewriting the platform | pass | Smoke initialization changes exactly the four declared config projections |
+| the mother template remains verifiable after derivation | pass | pristine and derived `template:verify` both validate signed provenance outside the four-file boundary |
+| product/UI/performance/provider seams have real consumers | pass | thin route, product module, interactive workspace, owner cache/invalidation and capability matrix checks |
+| Auth/Analytics/Supabase/security/retention boundaries are enforced | pass | unit, release, security and boundary suites plus candidate production builds |
+| independent database foundation is reproducible | pass | two disposable local resets and 142/142 pgTAP checks; local volume removed afterwards |
+| research product runtime behavior changed | no | implementation is confined to template/spec/context/tooling inputs |
+| shared cloud database or external deployment changed | no | no linked Supabase, new GitHub repository, Vercel project or provider secret used |
+| independent visual/responsive and external-repository proof | not_run | remains GNE-303 scope, not a GNE-302 completion claim |
+| independent Terra review | pending | must be resolved before GNE-302 returns to Done |
+
 ## GNE-303 Verification Gate
 
 Full Go requires:

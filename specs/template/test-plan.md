@@ -118,6 +118,27 @@ accepted product behavior under the guise of extraction.
 | independent Terra review | pass (READY after three review rounds) |
 | GNE-303 fresh independent/external verification | not_run |
 
+The table above is the historical PR #96 execution record. The reopened strong
+template rerun is recorded separately so its evidence cannot be confused with
+the earlier 141-check candidate.
+
+### GNE-302 Strengthened Rerun Record
+
+| Check | Result |
+| --- | --- |
+| source drift positive and stale-hash negative fixture | pass (14 source capabilities / 14 projections) |
+| deterministic pristine A/B generation | pass (identical normalized tree hash) |
+| Smoke Product initialization boundary | pass (exactly four reviewed files differ) |
+| pristine candidate integrity/install/lint/typecheck/test/build | pass |
+| derived Smoke integrity/install/lint/typecheck/test/build | pass |
+| product route/module/UI/cache/capability/Analytics checks | pass |
+| publishable key/SSR headers/CSP/financial retention/security checks | pass |
+| candidate-only empty database reset | pass twice from the single independent baseline |
+| foundation pgTAP suite | pass (142/142) |
+| cloud database, external candidate repository, or Vercel write | not_run / intentionally outside GNE-302 |
+| independent Terra review | pending at time of this repository record |
+| GNE-303 fresh visual/responsive/external verification | not_run |
+
 ## GNE-303 Independent Candidate Tests
 
 ### Clean Install And Build

@@ -8,7 +8,7 @@ This repository is a generated, single-product starting point. It contains one d
 2. Copy `.env.example` to an ignored `.env.local` only when configuring optional providers.
 3. Run `pnpm install --frozen-lockfile`.
 4. Run `pnpm test`, `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
-5. Run `supabase start`, then `supabase db reset` only against the disposable local project.
+5. Run `supabase start`, `supabase db reset`, then `supabase test db` only against the disposable local project.
 6. Run `pnpm --filter @xwlc/web dev` and review `/`, `/login`, `/account`, `/account/billing`, `/account/usage`, and `/product`.
 
 ## Customize safely

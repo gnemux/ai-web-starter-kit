@@ -4,6 +4,15 @@ const internalPathPattern = /^\/(?!\/)[^\s\\]*$/;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const namespacePattern = /^[a-z][a-z0-9_]*$/;
 const hexPattern = /^#[0-9a-fA-F]{6}$/;
+const fixedPaths = {
+  home: "/",
+  login: "/login",
+  account: "/account",
+  product: "/product",
+  billing: "/account/billing",
+  usage: "/account/usage"
+};
+const supportedRoutes = new Set(Object.values(fixedPaths));
 
 function assertKeys(value, allowed, label) {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new TypeError(`${label} must be an object`);
@@ -25,6 +34,7 @@ function assertLinks(value, label) {
     assertKeys(link, ["label", "href"], `${label}[${index}]`);
     assertText(link.label, `${label}[${index}].label`, 48);
     assertPath(link.href, `${label}[${index}].href`);
+    if (!supportedRoutes.has(link.href)) throw new TypeError(`${label}[${index}].href must reference a generated route`);
   }
 }
 
@@ -41,12 +51,16 @@ export function validateProductConfig(config) {
 
   const pathKeys = ["home", "login", "account", "product", "billing", "usage"];
   assertKeys(config.paths, pathKeys, "paths");
-  for (const key of pathKeys) assertPath(config.paths[key], `paths.${key}`);
+  for (const key of pathKeys) {
+    assertPath(config.paths[key], `paths.${key}`);
+    if (config.paths[key] !== fixedPaths[key]) throw new TypeError(`paths.${key} is structural and must remain ${fixedPaths[key]}`);
+  }
 
   assertKeys(config.home, ["eyebrow", "title", "description", "primaryAction", "primaryHref", "secondaryAction", "secondaryHref"], "home");
   for (const key of ["eyebrow", "title", "description", "primaryAction", "secondaryAction"]) assertText(config.home[key], `home.${key}`);
   assertPath(config.home.primaryHref, "home.primaryHref");
   assertPath(config.home.secondaryHref, "home.secondaryHref");
+  if (!supportedRoutes.has(config.home.primaryHref) || !supportedRoutes.has(config.home.secondaryHref)) throw new TypeError("home actions must reference generated routes");
   for (const block of ["login", "account"]) {
     assertKeys(config[block], ["title", "description"], block);
     assertText(config[block].title, `${block}.title`, 120);

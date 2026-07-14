@@ -31,10 +31,15 @@ input, textarea, select { width: 100%; min-height: 46px; padding: 10px 13px; bor
 .tabs a { padding: 8px 14px; border-radius: 999px; }
 .tabs a[aria-current="page"] { color: white; background: var(--accent); }
 .workspace-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.section-header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 28px 0 12px; }
+.section-header h2, .section-header p { margin: 0; }
+.progress { width: 100%; height: 9px; overflow: hidden; border-radius: 999px; background: color-mix(in srgb, var(--ink) 10%, transparent); margin-bottom: 24px; }
+.progress span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
 .popover { margin-top: 18px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--ink) 14%, transparent); }
 .popover summary { cursor: pointer; font-weight: 700; }
 .toast { margin-top: 20px; padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 14px; background: var(--accent-soft); }
 dialog { max-width: 520px; border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); border-radius: 20px; padding: 24px; }
+dialog::backdrop { background: color-mix(in srgb, var(--ink) 45%, transparent); }
 .skeleton { display: grid; gap: 9px; margin-top: 18px; }
 .skeleton span { display: block; height: 12px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 10%, transparent); }
 .skeleton span:nth-child(2) { width: 80%; }

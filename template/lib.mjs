@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { lstat, mkdir, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import Ajv2020 from "ajv/dist/2020.js";
@@ -257,9 +257,9 @@ export async function generateCandidate({ sourceRoot, outputRoot, configFile, dr
   const sourceMapHash = sha256(JSON.stringify(await readJson(path.join(templateRoot, "source-map.json"))));
   if (dryRun) return { blueprintHash, manifestHash, configHash, sourceMapHash, source };
 
-  const temporary = `${path.resolve(outputRoot)}.partial-${process.pid}`;
-  await rm(temporary, { recursive: true, force: true });
-  await mkdir(temporary, { recursive: true });
+  const absoluteOutput = path.resolve(outputRoot);
+  await mkdir(path.dirname(absoluteOutput), { recursive: true });
+  const temporary = await mkdtemp(path.join(path.dirname(absoluteOutput), ".candidate-partial-"));
   try {
     await copyBlueprint(blueprintRoot, temporary, copyArtifacts);
     await writeFile(path.join(temporary, "apps/web/config/product.config.ts"), generatedProductModule(config, manifest.candidateVersion));
@@ -287,7 +287,7 @@ export async function generateCandidate({ sourceRoot, outputRoot, configFile, dr
     };
     await writeFile(path.join(temporary, "template-version.json"), `${JSON.stringify(version, null, 2)}\n`);
     await scanCandidate(temporary);
-    await rename(temporary, path.resolve(outputRoot));
+    await rename(temporary, absoluteOutput);
     return version;
   } catch (error) {
     await rm(temporary, { recursive: true, force: true });

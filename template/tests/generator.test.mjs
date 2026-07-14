@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { mkdtemp, mkdir, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { assertArtifactInventory, assertGenerationMode, assertInventory, assertSafeOutput, hashTree, hashTreeWithOverrides, scanCandidate, validateManifest, validateProductConfig } from "../lib.mjs";
 import schema from "../manifest.schema.json" with { type: "json" };
 import manifest from "../manifest.json" with { type: "json" };
 import product from "../default-product.json" with { type: "json" };
+import { generatedProductModule, generatedSupabaseConfig, productState } from "../blueprint/scripts/product-config.mjs";
+import { initializeProduct } from "../blueprint/scripts/product-init-lib.mjs";
 
 test("manifest and default product satisfy strict schemas", () => {
   assert.equal(validateManifest(manifest, schema), manifest);
@@ -43,6 +45,8 @@ test("product identity and internal paths are bounded", () => {
   assert.throws(() => validateProductConfig({ ...product, identity: { ...product.identity, id: "Bad ID" } }), /Invalid product config/);
   assert.throws(() => validateProductConfig({ ...product, home: { ...product.home, primaryHref: "//evil.example" } }), /Invalid product config/);
   assert.throws(() => validateProductConfig({ ...product, paths: { ...product.paths, product: "/\\\\evil.example" } }), /Invalid product config/);
+  assert.throws(() => validateProductConfig({ ...product, paths: { ...product.paths, product: "/travel" } }), /structural/);
+  assert.throws(() => validateProductConfig({ ...product, navigation: [{ label: "Missing", href: "/missing" }] }), /generated route/);
 });
 
 test("manifest schema rejects undeclared fields and empty inventories", () => {
@@ -130,5 +134,31 @@ test("hash overrides retain provenance for an approved generated declaration", a
       await writeFile(path.join(root, "file.txt"), "source\n");
       return hashTree(root);
     })());
+  } finally { await rm(root, { recursive: true, force: true }); }
+});
+
+test("product initialization is repeatable, force-gated and rolls back all four outputs", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "product-init-"));
+  const version = "0.2.0-candidate.1";
+  const targets = ["product.config.json", "apps/web/config/product.config.ts", "supabase/config.toml", "product-state.json"];
+  try {
+    await mkdir(path.join(root, "apps/web/config"), { recursive: true });
+    await mkdir(path.join(root, "supabase"), { recursive: true });
+    await writeFile(path.join(root, "template-version.json"), JSON.stringify({ candidateVersion: version }));
+    await writeFile(path.join(root, "product.config.json"), `${JSON.stringify(product, null, 2)}\n`);
+    await writeFile(path.join(root, "apps/web/config/product.config.ts"), generatedProductModule(product, version));
+    await writeFile(path.join(root, "supabase/config.toml"), generatedSupabaseConfig(product));
+    await writeFile(path.join(root, "product-state.json"), `${JSON.stringify(productState(product, version), null, 2)}\n`);
+    await initializeProduct({ root, input: path.join(root, "product.config.json") });
+    await initializeProduct({ root, input: path.join(root, "product.config.json") });
+    const replacement = { ...product, identity: { ...product.identity, id: "second-product", name: "Second Product", eventNamespace: "second_product" } };
+    const replacementFile = path.join(root, "replacement.json");
+    await writeFile(replacementFile, JSON.stringify(replacement));
+    await assert.rejects(() => initializeProduct({ root, input: replacementFile }), /--force/);
+    const before = new Map(await Promise.all(targets.map(async (file) => [file, await readFile(path.join(root, file), "utf8")])));
+    await assert.rejects(() => initializeProduct({ root, input: replacementFile, force: true, failAfterRename: 2 }), /Injected/);
+    for (const file of targets) assert.equal(await readFile(path.join(root, file), "utf8"), before.get(file));
+    await initializeProduct({ root, input: replacementFile, force: true });
+    assert.equal(JSON.parse(await readFile(path.join(root, "product-state.json"), "utf8")).identity.id, "second-product");
   } finally { await rm(root, { recursive: true, force: true }); }
 });

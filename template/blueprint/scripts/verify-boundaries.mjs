@@ -42,6 +42,13 @@ const allAppText = appTexts.join("\n");
 for (const primitive of ["Button", "FormField", "Textarea", "Select", "Checkbox", "Card", "Tabs", "Dialog", "Popover", "Toast", "StatePanel"]) {
   if (!new RegExp(`\\b${primitive}\\b`).test(allAppText)) fail(`Shared UI primitive has no candidate consumer: ${primitive}`);
 }
+const ui = await readFile(path.join(root, "packages/ui/src/index.tsx"), "utf8");
+const dialog = await readFile(path.join(root, "packages/ui/src/dialog.tsx"), "utf8");
+const productWorkspace = await readFile(path.join(root, "apps/web/modules/product/product-workspace.tsx"), "utf8");
+if (/function Tabs[\s\S]*?<a\b/.test(ui) || !productWorkspace.includes('import Link from "next/link"') || !productWorkspace.includes("<Tabs")) fail("Tabs must inject application routing instead of owning raw anchors");
+if (!/function Button\(\{ type = "button"/.test(ui)) fail("Shared Button must default to non-submitting behavior");
+for (const contract of ["useId", "showModal()", "onCancel", "onOpenChange(false)", "returnFocus.current?.focus()"] ) if (!dialog.includes(contract)) fail(`Accessible modal contract missing: ${contract}`);
+for (const adapter of ["modules/platform/payment/sandbox.ts", "modules/platform/ai/mock.ts"]) if (!(await filesUnder(path.join(root, "apps/web"))).some((file) => file.endsWith(adapter))) fail(`Safe adapter missing: ${adapter}`);
 const sharedText = (await Promise.all((await filesUnder(path.join(root, "packages"))).filter((file) => /\.(?:ts|tsx)$/.test(file)).map((file) => readFile(file, "utf8")))).join("\n").toLowerCase();
 for (const term of ["defaultbillingplans", "defaultbillingprices", "xwlc", "demo_" + "items", "cat" + "care"]) if (sharedText.includes(term)) fail(`Shared package contains fixed product vocabulary: ${term}`);
 

@@ -103,29 +103,25 @@ must not use `link:` paths or absolute paths pointing at `ai-web-starter-kit`.
 cp .env.example .env.local
 ```
 
-Use placeholders or disposable local values only. The default contract is:
+The file must match the actual generated `.env.example`. Product identity is
+owned by `product.config.json`, not duplicated in environment variables:
 
 ```text
-NEXT_PUBLIC_APP_NAME=Template Smoke Product
-NEXT_PUBLIC_PRODUCT_ID=template-smoke
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_APP_ENV=local
-AUTH_PROVIDER=supabase
-DATABASE_PROVIDER=supabase
-NEXT_PUBLIC_ANALYTICS_PROVIDER=none
-PAYMENT_PROVIDER=disabled
-PAYMENT_MODE=disabled
-PAYMENT_LIVE_ENABLED=false
-AI_PROVIDER=disabled
-EMAIL_PROVIDER=noop
-STORAGE_PROVIDER=noop
-SMS_PROVIDER=noop
+NEXT_PUBLIC_RELEASE_VERSION=0.1.0
+NEXT_PUBLIC_SUPABASE_URL=<local Project URL>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<local Publishable key>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 ```
 
-Supabase public/local keys are filled only from the disposable local instance.
-Service-role values stay in the ignored local file and never appear in logs,
-screenshots, Linear, generated manifests, or evidence. No PostHog key is needed
-for the disabled/no-op Analytics path.
+Only the public URL and Publishable key from the disposable local instance are
+needed. The candidate does not require a service-role key for local page use.
+No PostHog key is needed while Analytics is disabled. Payment `sandbox` and AI
+`mock` use deterministic no-side-effect adapters; external Payment/AI remain
+`not_implemented` until a reviewed adapter exists, regardless of secret values.
 
 Before starting Supabase, inspect the generated local tooling inputs:
 
@@ -147,6 +143,7 @@ supabase start
 supabase db --help
 supabase db reset
 supabase db reset
+supabase test db
 ```
 
 Both resets must apply the single candidate baseline and produce the same schema

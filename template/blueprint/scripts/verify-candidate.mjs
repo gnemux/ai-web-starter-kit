@@ -4,7 +4,7 @@ import path from "node:path";
 import { generatedProductModule, generatedSupabaseConfig, productState } from "./product-config.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
-const ignored = new Set(["node_modules", ".next", ".turbo", ".vercel", ".temp", ".branches", "coverage", "dist"]);
+const ignored = new Set([".git", "node_modules", ".next", ".turbo", ".vercel", ".temp", ".branches", "coverage", "dist"]);
 const pristineNextEnv = "/// <reference types=\"next\" />\n/// <reference types=\"next/image-types/global\" />\n";
 const generatedNextEnv = `${pristineNextEnv}/// <reference path=\"./.next/types/routes.d.ts\" />\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.\n`;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
@@ -27,6 +27,7 @@ async function listFiles(relative = "") {
   for (const entry of (await readdir(path.join(root, relative), { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
     if (ignored.has(entry.name) || entry.name.endsWith(".tsbuildinfo")) continue;
     const next = path.posix.join(relative, entry.name);
+    if (entry.isFile() && /(?:^|\/)\.env(?:\..+)?$/.test(next) && !next.endsWith(".env.example")) continue;
     if ((await lstat(path.join(root, next))).isSymbolicLink()) throw new Error(`Symlink is forbidden: ${next}`);
     if (entry.isDirectory()) files.push(...await listFiles(next));
     else files.push(next);

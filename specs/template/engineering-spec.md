@@ -21,8 +21,9 @@ implementation must additionally provide:
   cookie/cache-header forwarding, pgTAP CI and immutable Billing retention;
 - deployment CSP without `unsafe-eval` and existing header/return-path tests.
 
-Generic logical deletion remains a contract and helper, not a speculative
-universal table. Maps, uploads, search, a module marketplace, package registry,
+Generic logical deletion remains a design contract plus provider-free active/
+historical-label helpers, not a speculative universal table or persistence
+policy. Maps, uploads, search, a module marketplace, package registry,
 cross-repository upgrades, and single-consumer Outbox/Audit extraction remain
 trigger-based work after a real second consumer exists.
 
@@ -350,10 +351,11 @@ copied into the candidate. The reusable foundation value is a design contract:
   impact analysis, not a renamed delete button.
 
 This contract is emitted into the candidate's product engineering-spec template
-as `contract_only`. It adds no generic table, API, hook, UI component, or helper
-in GNE-302. A shared implementation is considered only when a second real
-product has the same mutable-entity/immutable-fact relationship and would
-otherwise duplicate the semantics.
+as `contract_plus_pure_helpers`. GNE-302 retains only `ArchivableRecord`, active
+filtering and historical deleted-label helpers; it adds no generic table, API,
+hook, UI policy or cascade rule. A shared persistence implementation is
+considered only when a second real product has the same mutable-entity/
+immutable-fact relationship and would otherwise duplicate the semantics.
 
 ## Foundation Database Baseline
 

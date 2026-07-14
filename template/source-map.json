@@ -9,6 +9,14 @@
     "packages/platform/src",
     "packages/ui/src"
   ],
+  "watchedInventories": [
+    { "root": "apps/web/lib/services", "hash": "c7e35db4e017e58bace173ad98583ac65f1b163bdda91c255acc231ddfa32f54", "strategy": "auth-billing-payment-ai-internal-return-review", "reviewRule": "Every change requires explicit retain/transform/exclude review against candidate platform adapters." },
+    { "root": "apps/web/lib/providers", "hash": "94fbd4fb1abb5e0a5e560303ef048060a78995c89ca8714a929aad3d5282f25a", "strategy": "provider-boundary-review", "reviewRule": "Provider changes require candidate mode and environment-contract review." },
+    { "root": "apps/web/lib/capabilities", "hash": "a2938d321258b123f3ac7635461aca49dacc3c5a08ffd7e29d152c7b0c18e39d", "strategy": "capability-facade-review", "reviewRule": "Capability changes require public-contract and candidate-consumer review." },
+    { "root": "apps/web/lib/access", "hash": "1be6300d1fd908a3ad6934a4bf8ac0026cc5e40bc036acf9206584dd775eebe1", "strategy": "access-contract-review", "reviewRule": "Access changes require an explicit pattern-only or retained decision." },
+    { "root": "supabase/migrations", "hash": "f99452210ef4c555e8b429983c1fd8b7c0295aae2bc9bf5202ac7d36cf096914", "strategy": "foundation-fold-review", "reviewRule": "Every migration ledger change requires a fresh Fold/Exclude/Contract decision." },
+    { "root": "supabase/tests", "hash": "5e152d0097410a48569aa1914c24e36f3aa574ab34152a5cb50a131d4121b194", "strategy": "database-test-projection-review", "reviewRule": "Every database test change requires candidate RLS/grant/retention coverage review." }
+  ],
   "entries": [
     { "source": "packages/core/src/auth.ts", "sourceHash": "d3e228570c00273b08502f0ceab18e453e746ad0e2a494ed6db3d5e820404687", "targets": ["template/blueprint/packages/core/src/auth.ts"], "strategy": "contract-projection" },
     { "source": "packages/core/src/billing.ts", "sourceHash": "ae131b852b20dc7af9687fec69e0333f94d69d1722d4acaa03947193695bd37f", "targets": ["template/blueprint/packages/core/src/billing.ts"], "strategy": "contract-projection" },

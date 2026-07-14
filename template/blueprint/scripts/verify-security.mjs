@@ -1,4 +1,6 @@
-import { readFile, readdir } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -21,9 +23,14 @@ for (const table of ["billing_orders", "billing_subscriptions", "billing_entitle
 const billingContract = await readFile(path.join(root, "packages/core/src/billing.ts"), "utf8");
 for (const status of ["trialing", "active", "past_due", "canceled", "expired", "refunded"]) if (!billingContract.includes(`\"${status}\"`) || !sql.includes(`'${status}'`)) throw new Error(`Subscription status contract drift: ${status}`);
 for (const eventType of ["grant", "reserve", "consume", "release", "refund", "expire", "adjustment"]) if (!billingContract.includes(`\"${eventType}\"`) || !sql.includes(`'${eventType}'`)) throw new Error(`Credit event contract drift: ${eventType}`);
-for (const name of await readdir(root)) if ([".env.local", ".git", ".vercel"].includes(name)) throw new Error(`Generated private residue present: ${name}`);
+if (!billingContract.includes("providerSubscriptionId: string | null") || !/provider_subscription_id text[,\n]/.test(sql)) throw new Error("Subscription provider id nullability contract drift");
+if (!billingContract.includes("priceId: string;") || !/price_id text not null/.test(sql)) throw new Error("Subscription price id nullability contract drift");
 const ignores = await readFile(path.join(root, ".gitignore"), "utf8");
 for (const expected of ["node_modules/", ".next/", ".turbo/", ".vercel/", ".env.*"]) if (!ignores.includes(expected)) throw new Error(`Repository hygiene ignore missing: ${expected}`);
+if (existsSync(path.join(root, ".git"))) {
+  const tracked = execFileSync("git", ["ls-files"], { cwd: root, encoding: "utf8" }).split("\n").filter(Boolean);
+  for (const file of tracked) if (/(?:^|\/)\.env(?:\..+)?$/.test(file) && !file.endsWith(".env.example") || /(?:^|\/)(?:\.vercel|node_modules|\.next|\.turbo)(?:\/|$)/.test(file)) throw new Error(`Private or generated path must not be tracked: ${file}`);
+}
 const config = await readFile(path.join(root, "apps/web/next.config.ts"), "utf8");
 for (const header of ["frame-ancestors 'none'", "Referrer-Policy", "X-Content-Type-Options", "Permissions-Policy"]) if (!config.includes(header)) throw new Error(`Security header missing: ${header}`);
 if (!config.includes('process.env.NODE_ENV === "development"') || !config.includes(': "script-src \'self\' \'unsafe-inline\'"')) throw new Error("Production CSP must exclude unsafe-eval");
@@ -31,4 +38,6 @@ const proxy = await readFile(path.join(root, "apps/web/modules/platform/supabase
 for (const cookieContract of ["request.cookies.getAll()", "response.cookies.set(name, value, options)", "Object.entries(headers)", "client.auth.getClaims()"] ) if (!proxy.includes(cookieContract)) throw new Error(`Session cookie refresh contract missing: ${cookieContract}`);
 const supabaseConfig = await readFile(path.join(root, "apps/web/modules/platform/supabase/config.ts"), "utf8");
 if (!supabaseConfig.includes("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") || !supabaseConfig.includes("NEXT_PUBLIC_SUPABASE_ANON_KEY")) throw new Error("Publishable-key preference and legacy fallback must both be explicit");
+const analyticsProperties = await readFile(path.join(root, "apps/web/modules/platform/analytics/properties.ts"), "utf8");
+for (const boundary of ["autocapture: false", "capture_pageview: false", "capture_pageleave: false", "disable_session_recording: true"]) if (!analyticsProperties.includes(boundary)) throw new Error(`Analytics automatic collection must stay disabled: ${boundary}`);
 console.log("Security and foundation SQL boundaries verified");

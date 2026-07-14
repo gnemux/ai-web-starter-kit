@@ -30,3 +30,9 @@ test("local Supabase allowlist matches generated confirmation callbacks", async 
     assert.ok(buildEmailConfirmationUrl(origin, "/product").startsWith(`${callback}?next=`));
   }
 });
+
+test("confirmation exchange keeps cookies and forbids caching", async () => {
+  const route = await readFile(new URL("../../../app/auth/confirm/route.ts", import.meta.url), "utf8");
+  for (const contract of ["response.cookies.set(name, value, options)", "Object.entries(headers)", '"Cache-Control", "private, no-store, max-age=0"', '"Pragma", "no-cache"', '"Expires", "0"']) assert.ok(route.includes(contract));
+  assert.ok(route.includes("exchangeCodeForSession"));
+});

@@ -92,6 +92,24 @@ products.
 | `packages/db/src/index.ts` | Keep | copy provider-free schema/RLS evidence types | root compile and no concrete product table |
 | package `package.json`/`tsconfig.json` files | Transform | keep workspace names/exports/scripts; use exact external dependency versions resolved from the committed lockfile | frozen install and lockfile/package consistency |
 
+### Public API disposition
+
+The candidate package snapshot is intentionally useful, but it does not imply
+that every research implementation is generic. The retained public surface is
+reviewed API by API:
+
+| Package | Retained in candidate | Deliberately deferred or product-owned |
+| --- | --- | --- |
+| `@xwlc/core` | provider contracts, service results/errors, actor/profile vocabulary, Billing ledger and entitlement decision types, pure archive/active/deleted-label helpers | pricing catalog, feature IDs, product quotas/copy and every CatCare/Demo DTO |
+| `@xwlc/platform` | session/actor/result contracts, authenticated/verified/owner guards, email-verification and Analytics ports, capability registry and provider-free public-access decision | Supabase stores, product event unions, CatCare Audit IDs, Outbox worker/state persistence and concrete email/Payment/AI providers |
+| `@xwlc/ui` | configurable brand/shell, button/card/badge, section header, panel, tabs, progress, dialog and empty/loading/error/long-content states, each consumed by the neutral app | product artwork, domain icons/copy, route policy and a full design system or chart/map library without a real consumer |
+| `@xwlc/db` | schema/RLS/ownership evidence types and pure validation helpers for retained foundation tables | Supabase client/store code, product tables, product migrations, Audit/Outbox persistence and storage buckets |
+
+`Contract only` means the candidate may keep a provider-free decision shape or
+design checklist, not a pretend runtime. A second real product is the trigger
+for extracting repeated Outbox state-machine or deterministic event-ID code;
+until then those implementations stay with their product.
+
 ## Spec Template Classification
 
 | Source | Class | Candidate action | Verification |
@@ -217,7 +235,7 @@ env value, and unclassified manifest input; each must fail with a clear reason.
 | map/upload/search kit | Not run | approved product requirement defines a product-independent contract |
 | central package registry/distribution | Not run | two independent product repositories need the same package update |
 | cross-repository upgrade/backfeed automation | Not run | first shared update must enter an already-created product repository |
-| archive/tombstone plus immutable historical snapshot lifecycle | Contract only | a second real product has a mutable entity referenced by published, executed, billed, audited, or otherwise immutable facts and would copy the same lifecycle/presentation rules |
+| archive/tombstone plus immutable historical snapshot lifecycle | Contract + pure helpers; persistence deferred | a second real product would otherwise copy storage, cascade, race-closing or snapshot persistence semantics |
 | multi-tenant policy | Not run | a product has tenants beyond simple owner scope |
 | Cloudflare/Hono adapter | Not run | a product selects that runtime |
 | live AI/payment/notification | Not run | separate provider/production gate is explicitly approved |

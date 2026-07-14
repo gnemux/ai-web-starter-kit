@@ -21,8 +21,14 @@ async function observedSourceFiles(candidate) {
   return (await Promise.all(candidate.watchedRoots.map((relative) => listFiles(relative)))).flat().sort();
 }
 
+async function inventoryHash(relative) {
+  const hash = createHash("sha256");
+  for (const file of (await listFiles(relative)).sort()) hash.update(file).update("\0").update(await readFile(path.join(root, file))).update("\0");
+  return hash.digest("hex");
+}
+
 async function verifySourceMap(candidate, observed = undefined) {
-  if (candidate.schemaVersion !== 1 || !Array.isArray(candidate.watchedRoots) || candidate.watchedRoots.length === 0 || !Array.isArray(candidate.entries) || candidate.entries.length === 0 || !Array.isArray(candidate.excludedSources)) {
+  if (candidate.schemaVersion !== 1 || !Array.isArray(candidate.watchedRoots) || candidate.watchedRoots.length === 0 || !Array.isArray(candidate.watchedInventories) || !Array.isArray(candidate.entries) || candidate.entries.length === 0 || !Array.isArray(candidate.excludedSources)) {
     throw new Error("Template source map is missing or invalid");
   }
   const seenSources = new Set();
@@ -56,7 +62,12 @@ async function verifySourceMap(candidate, observed = undefined) {
   const unknown = actual.filter((file) => !declared.includes(file));
   const missing = declared.filter((file) => !actual.includes(file));
   if (unknown.length > 0 || missing.length > 0) throw new Error(`Template source inventory review required. Untracked: ${unknown.join(", ") || "none"}; missing: ${missing.join(", ") || "none"}`);
-  return { sources: seenSources.size, excluded: excluded.size, targets: seenTargets.size };
+  for (const inventory of candidate.watchedInventories) {
+    if (!inventory.root || !inventory.hash || !inventory.strategy || !inventory.reviewRule) throw new Error("Watched inventory requires root, hash, strategy and review rule");
+    const actualHash = await inventoryHash(inventory.root);
+    if (actualHash !== inventory.hash) throw new Error(`Template capability inventory review required for ${inventory.root}: source changed from ${inventory.hash} to ${actualHash}`);
+  }
+  return { sources: seenSources.size, excluded: excluded.size, inventories: candidate.watchedInventories.length, targets: seenTargets.size };
 }
 
 if (process.argv.includes("--negative-fixture")) {
@@ -73,7 +84,14 @@ if (process.argv.includes("--negative-fixture")) {
     if (!String(error).includes("source inventory review required")) throw error;
     console.log("Template drift negative fixture rejected an untracked capability source");
   }
+  const staleInventory = structuredClone(mapping);
+  staleInventory.watchedInventories[0].hash = "0".repeat(64);
+  try { await verifySourceMap(staleInventory); throw new Error("Stale inventory fixture unexpectedly passed"); }
+  catch (error) {
+    if (!String(error).includes("capability inventory review required")) throw error;
+    console.log("Template drift negative fixture rejected a changed Transform/Fold inventory");
+  }
 } else {
   const result = await verifySourceMap(mapping);
-  console.log(`Template source drift gate verified ${result.sources} projected and ${result.excluded} explicitly excluded sources across ${result.targets} projections`);
+  console.log(`Template source drift gate verified ${result.sources} projected and ${result.excluded} explicitly excluded files plus ${result.inventories} Transform/Fold inventories across ${result.targets} projections`);
 }

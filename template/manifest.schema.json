@@ -3,7 +3,7 @@
   "$id": "https://example.invalid/template-manifest.schema.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "manifestVersion", "generatorVersion", "noticesInventoryVersion", "candidateVersion", "sourcePackageVersion", "source", "foundation", "artifacts", "productConfigAllowedChanges", "toolchain", "packageSnapshots"],
+  "required": ["schemaVersion", "manifestVersion", "generatorVersion", "noticesInventoryVersion", "candidateVersion", "sourcePackageVersion", "source", "foundation", "artifacts", "productConfigAllowedChanges", "productExtensions", "toolchain", "packageSnapshots"],
   "properties": {
     "$schema": { "type": "string" },
     "schemaVersion": { "const": 1 },
@@ -31,6 +31,25 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": { "type": "string" }
+    },
+    "productExtensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["editableRoots", "protectedFiles"],
+      "properties": {
+        "editableRoots": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+/$" }
+        },
+        "protectedFiles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$" }
+        }
+      }
     },
     "toolchain": {
       "type": "object",

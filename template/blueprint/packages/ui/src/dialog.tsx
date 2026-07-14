@@ -13,6 +13,6 @@ export function Dialog({ open, onOpenChange, title, description, children }: { o
     if (!open && dialog.open) dialog.close();
   }, [open]);
   return <dialog aria-describedby={descriptionId} aria-labelledby={titleId} onCancel={(event) => { event.preventDefault(); onOpenChange(false); }} onClose={() => { onOpenChange(false); returnFocus.current?.focus(); }} ref={ref}>
-    <h2 id={titleId}>{title}</h2><p id={descriptionId}>{description}</p>{children}
+    <button aria-label="Close dialog" className="dialog-close" onClick={() => onOpenChange(false)} type="button">×</button><h2 id={titleId}>{title}</h2><p id={descriptionId}>{description}</p>{children}
   </dialog>;
 }

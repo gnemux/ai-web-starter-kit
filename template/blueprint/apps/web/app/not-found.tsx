@@ -1,3 +1,4 @@
 import Link from "next/link";
 import { StatePanel } from "@xwlc/ui";
-export default function NotFound() { return <div className="page"><StatePanel kind="error" title="Page not found" description="This route does not exist in the current product." /><Link className="button" href="/">Return home</Link></div>; }
+import { getLocalizedProduct } from "@/modules/platform/i18n/locale";
+export default async function NotFound() { const { messages } = await getLocalizedProduct(); return <div className="page"><StatePanel kind="error" kindLabel={messages.stateError} title={messages.pageNotFound} description={messages.pageNotFoundDescription} /><Link className="button" href="/">{messages.returnHome}</Link></div>; }

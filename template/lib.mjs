@@ -129,6 +129,29 @@ export function assertArtifactInventory(actualFiles, artifacts) {
   return copies;
 }
 
+export function isProductEditablePath(file, manifest) {
+  if (manifest.productConfigAllowedChanges.includes(file)) return true;
+  if (manifest.productExtensions.protectedFiles.includes(file)) return false;
+  return manifest.productExtensions.editableRoots.some((root) => file.startsWith(root));
+}
+
+export function assertCandidateLayers(files, manifest) {
+  const signed = new Set(manifest.artifacts.map((entry) => entry.target));
+  const required = manifest.artifacts.filter((entry) => !entry.productEditable).map((entry) => entry.target);
+  const missing = required.filter((file) => !files.includes(file));
+  const unknown = files.filter((file) => !signed.has(file) && !isProductEditablePath(file, manifest));
+  if (missing.length || unknown.length) {
+    throw new Error(`Candidate layer mismatch. Missing protected files: ${missing.join(", ") || "none"}; undeclared files outside product roots: ${unknown.join(", ") || "none"}`);
+  }
+  for (const file of manifest.productExtensions.protectedFiles) {
+    if (!signed.has(file) || !files.includes(file)) throw new Error(`Protected extension-root file is missing from the signed candidate: ${file}`);
+  }
+  return {
+    protectedFiles: files.filter((file) => !isProductEditablePath(file, manifest)),
+    productFiles: files.filter((file) => isProductEditablePath(file, manifest))
+  };
+}
+
 export function assertGenerationMode({ dryRun, allowDirty }) {
   if (allowDirty && !dryRun) throw new Error("--allow-dirty is permitted only with --dry-run");
 }
@@ -270,7 +293,9 @@ export async function generateCandidate({ sourceRoot, outputRoot, configFile, dr
     await writeFile(path.join(temporary, "template-product.json"), `${JSON.stringify(config, null, 2)}\n`);
     const candidateLockHash = sha256(await readFile(path.join(temporary, "pnpm-lock.yaml")));
     const noticesHash = sha256(await readFile(path.join(temporary, "THIRD_PARTY_NOTICES.md")));
-    const contentHash = await hashTree(temporary);
+    const generatedFiles = await listFiles(temporary);
+    const layers = assertCandidateLayers([...generatedFiles, "template-version.json"], manifest);
+    const contentHash = await hashTree(temporary, layers.protectedFiles.filter((file) => file !== "template-version.json"));
     const version = {
       schemaVersion: 1,
       candidateVersion: manifest.candidateVersion,
@@ -281,7 +306,8 @@ export async function generateCandidate({ sourceRoot, outputRoot, configFile, dr
       notices: { file: "THIRD_PARTY_NOTICES.md", inventoryVersion: manifest.noticesInventoryVersion, hash: noticesHash },
       product: { id: config.identity.id, locale: config.identity.locale, eventNamespace: config.identity.eventNamespace },
       providerModes: config.capabilities,
-      hashes: { manifest: manifestHash, blueprint: blueprintHash, config: configHash, candidateLock: candidateLockHash, normalizedContent: contentHash },
+      integrity: { model: "protected-foundation+editable-product+generated-config", editableRoots: manifest.productExtensions.editableRoots },
+      hashes: { manifest: manifestHash, blueprint: blueprintHash, config: configHash, candidateLock: candidateLockHash, protectedContent: contentHash },
       toolchain: manifest.toolchain,
       packageSnapshots: manifest.packageSnapshots
     };

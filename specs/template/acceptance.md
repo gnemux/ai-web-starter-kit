@@ -143,10 +143,32 @@ Full Go requires:
 - an approved independent GitHub/Vercel test deployment with traceable commit
   and environment-key status.
 
+The local/user acceptance surface must additionally prove: real disposable
+sign-up/sign-in and sign-out, profile persistence after refresh, no full-page
+reload during profile save or locale change, visible English/Chinese copy on
+all primary routes, accessible dismissible Dialog/Toast/Form states, and no
+PostHog browser SDK request while Analytics is disabled. The neutral candidate
+must not claim that a UI-only interaction saved a business fact.
+
 If the external repository/deployment operation is not approved, all local
 gates may support **Conditional Go**, but the deployment row remains `not_run`.
 Product pollution, non-reproducible generation/build/database, failed RLS, or a
 secret/license issue is **No-Go**.
+
+### GNE-303 Local Acceptance Record (2026-07-15)
+
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| neutral + Smoke generation and identity boundary | pass | both candidates verify with protected=115, product=5; only generated identity/config/provenance outputs differ outside reproducible residue |
+| editable-product / protected-platform mutation | pass | changing the existing product workspace remains verifiable; changing a platform file fails the protected foundation hash |
+| repeated neutral generation | pass | two pristine `0.2.0-candidate.2` trees from the same final source commit are byte-identical |
+| clean install/lint/typecheck/test/build | pass | both corrected candidates pass all five packages, 23 contract tests and Next production build; shared first-load JS is about 103 kB |
+| empty local database rebuild | pass | two resets from one baseline; 149/149 pgTAP/RLS/grant tests pass after each reset |
+| real Auth/profile/cache flow | pass | disposable local sign-up, protected return, sign-out/sign-in, in-place profile save, same-URL success, refresh persistence and one matching DB row |
+| i18n/UI/responsive | pass | English/Chinese same-URL switch; shared Form/Dialog/Toast/State controls; 390 px and 1440 px have no horizontal overflow |
+| disabled Analytics | pass | no static PostHog import; SDK is dynamically gated by external mode and a valid public key |
+| shared cloud DB/provider secrets | not_run / intentionally none | isolated local 5532x stack only |
+| external candidate GitHub/Vercel | not_run / target approval required | does not block local Conditional Go |
 
 ## Capability Classification At Parent Completion
 
@@ -164,7 +186,7 @@ and trigger.
 
 ## Stop Rule
 
-After GNE-301 documentation, review, publication, and Linear evidence are
-complete, stop. Leave GNE-298 In Progress, leave GNE-302 unchanged, and do not
-generate a candidate, initialize a Smoke Product, deploy, or write a database
-as part of this Issue.
+After GNE-303 local, independent and approved external evidence is complete,
+stop for user acceptance. Do not automatically close GNE-298, activate another
+Issue, touch the shared cloud database, or create an external repository /
+Vercel project without the target-specific approval recorded for this run.

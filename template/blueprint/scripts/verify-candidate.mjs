@@ -55,7 +55,13 @@ const product = JSON.parse(await readFile(path.join(root, "template-product.json
 const currentState = JSON.parse(await readFile(path.join(root, "product-state.json"), "utf8"));
 const files = await listFiles();
 const expected = manifest.artifacts.map((entry) => entry.target).sort();
-if (JSON.stringify(files.sort()) !== JSON.stringify(expected)) throw new Error("Candidate artifact inventory differs from the signed manifest");
+const isEditable = (file) => manifest.productConfigAllowedChanges.includes(file)
+  || (!manifest.productExtensions.protectedFiles.includes(file) && manifest.productExtensions.editableRoots.some((root) => file.startsWith(root)));
+const required = manifest.artifacts.filter((entry) => !entry.productEditable).map((entry) => entry.target);
+const missing = required.filter((file) => !files.includes(file));
+const unknown = files.filter((file) => !expected.includes(file) && !isEditable(file));
+if (missing.length || unknown.length) throw new Error(`Candidate layer mismatch. Missing protected files: ${missing.join(", ") || "none"}; undeclared files outside product roots: ${unknown.join(", ") || "none"}`);
+for (const file of manifest.productExtensions.protectedFiles) if (!files.includes(file) || !expected.includes(file)) throw new Error(`Protected product-root file missing: ${file}`);
 
 if (sha256(JSON.stringify(manifest)) !== version.hashes.manifest) throw new Error("Manifest hash mismatch");
 if (sha256(JSON.stringify(product)) !== version.hashes.config) throw new Error("Product config hash mismatch");
@@ -70,9 +76,8 @@ const normalizedProductOverrides = currentState.status === "derived" ? new Map([
   ["product-state.json", `${JSON.stringify(productState(product, version.candidateVersion), null, 2)}\n`],
   ["supabase/config.toml", generatedSupabaseConfig(product)],
 ]) : new Map();
-const copyTargets = manifest.artifacts.filter((entry) => entry.action === "copy").map((entry) => entry.target);
-if (await hashFiles(copyTargets, true) !== version.hashes.blueprint) throw new Error("Blueprint copy checksum mismatch");
-if (await hashFiles(files.filter((file) => file !== "template-version.json"), true, normalizedProductOverrides) !== version.hashes.normalizedContent) throw new Error("Normalized candidate content hash mismatch outside the reviewed product initialization boundary");
+const protectedFiles = files.filter((file) => file !== "template-version.json" && !isEditable(file));
+if (await hashFiles(protectedFiles, true, normalizedProductOverrides) !== version.hashes.protectedContent) throw new Error("Protected candidate foundation hash mismatch");
 
 for (const file of files) {
   if (/(?:^|\/)\.env(?:\..+)?$/.test(file) && !file.endsWith(".env.example")) throw new Error(`Private environment file: ${file}`);
@@ -86,4 +91,4 @@ for (const file of files) {
   if (!(currentState.status === "derived" && manifest.productConfigAllowedChanges.includes(file)) && productSignatures.some((value) => text.toLowerCase().includes(value))) throw new Error(`Product content pollution: ${file}`);
 }
 
-console.log(`Candidate provenance and full-tree integrity verified (${currentState.status}): ${version.candidateVersion} from ${version.source.commit}`);
+console.log(`Candidate three-layer integrity verified (${currentState.status}; protected=${protectedFiles.length}; product=${files.filter(isEditable).length}): ${version.candidateVersion} from ${version.source.commit}`);

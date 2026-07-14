@@ -3,7 +3,7 @@ import test from "node:test";
 import { mkdtemp, mkdir, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { assertArtifactInventory, assertGenerationMode, assertInventory, assertSafeOutput, hashTree, hashTreeWithOverrides, scanCandidate, validateManifest, validateProductConfig } from "../lib.mjs";
+import { assertArtifactInventory, assertCandidateLayers, assertGenerationMode, assertInventory, assertSafeOutput, hashTree, hashTreeWithOverrides, isProductEditablePath, scanCandidate, validateManifest, validateProductConfig } from "../lib.mjs";
 import schema from "../manifest.schema.json" with { type: "json" };
 import manifest from "../manifest.json" with { type: "json" };
 import product from "../default-product.json" with { type: "json" };
@@ -27,13 +27,45 @@ test("every concrete candidate artifact has a unique typed source and target", (
   assert.throws(() => assertArtifactInventory(files, [...manifest.artifacts, manifest.artifacts[0]]), /unique/);
 });
 
-test("product initialization can mutate only the four reviewed projections", () => {
+test("generated config stays narrow while declared product roots remain editable", () => {
   assert.deepEqual([...manifest.productConfigAllowedChanges].sort(), [
     "apps/web/config/product.config.ts",
     "product-state.json",
     "product.config.json",
     "supabase/config.toml"
   ]);
+  const layers = assertCandidateLayers([
+    ...manifest.artifacts.map((entry) => entry.target),
+    "apps/web/modules/product/customer-journey.ts",
+    "apps/web/public/product/brand.svg",
+    "specs/product/product-spec.md",
+    "tests/product/product-flow.test.mjs",
+    "supabase/migrations/20260714000000_product_feature.sql"
+  ], manifest);
+  assert.ok(layers.productFiles.includes("apps/web/modules/product/customer-journey.ts"));
+  assert.ok(layers.productFiles.includes("apps/web/modules/product/product-workspace.tsx"));
+  assert.equal(isProductEditablePath("apps/web/modules/platform/auth/actions.ts", manifest), false);
+  assert.ok(layers.protectedFiles.includes(manifest.foundation.migrationFile));
+  assert.throws(() => assertCandidateLayers([...manifest.artifacts.map((entry) => entry.target), "packages/core/src/product-hack.ts"], manifest), /undeclared files outside product roots/);
+  assert.throws(() => assertCandidateLayers(manifest.artifacts.map((entry) => entry.target).filter((file) => file !== manifest.foundation.migrationFile), manifest), /Missing protected files/);
+});
+
+test("product extension edits do not change the protected foundation hash", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "candidate-layers-"));
+  const productFile = "apps/web/modules/product/product-workspace.tsx";
+  const platformFile = "apps/web/modules/platform/auth/actions.ts";
+  try {
+    await mkdir(path.join(root, path.dirname(productFile)), { recursive: true });
+    await mkdir(path.join(root, path.dirname(platformFile)), { recursive: true });
+    await writeFile(path.join(root, productFile), "export const product = 'first';\n");
+    await writeFile(path.join(root, platformFile), "export const platform = 'stable';\n");
+    const protectedFiles = [productFile, platformFile].filter((file) => !isProductEditablePath(file, manifest));
+    const before = await hashTree(root, protectedFiles);
+    await writeFile(path.join(root, productFile), "export const product = 'second';\n");
+    assert.equal(await hashTree(root, protectedFiles), before);
+    await writeFile(path.join(root, platformFile), "export const platform = 'changed';\n");
+    assert.notEqual(await hashTree(root, protectedFiles), before);
+  } finally { await rm(root, { recursive: true, force: true }); }
 });
 
 test("allow-dirty cannot create a candidate", () => {
@@ -139,7 +171,7 @@ test("hash overrides retain provenance for an approved generated declaration", a
 
 test("product initialization is repeatable, force-gated and rolls back all four outputs", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "product-init-"));
-  const version = "0.2.0-candidate.1";
+  const version = "0.2.0-candidate.2";
   const targets = ["product.config.json", "apps/web/config/product.config.ts", "supabase/config.toml", "product-state.json"];
   try {
     await mkdir(path.join(root, "apps/web/config"), { recursive: true });

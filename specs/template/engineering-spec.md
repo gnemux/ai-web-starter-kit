@@ -1,5 +1,18 @@
 # Engineering Spec: Clean Template Extraction Boundary
 
+## 2026-07-14 GNE-303 Verified-Candidate Refinement Contract
+
+GNE-303 may correct review-proven P1 template gaps while it independently
+verifies the candidate. The signed candidate uses three layers: protected
+foundation files remain checksum-verified, product extension roots may evolve
+without copying platform internals, and generated product/config/provenance
+files remain schema- and manifest-controlled. Shared component styling belongs
+to `@xwlc/ui`; the app owns only shell and route composition. PostHog loads
+dynamically only for a valid external configuration. Auth/profile writes use
+the candidate's isolated local Supabase and invalidate the exact owner fact;
+language switching uses a bounded locale cookie plus router refresh rather than
+a full browser reload.
+
 ## 2026-07-14 GNE-302 Strengthening Contract
 
 The first candidate generation proved extraction but did not yet prove a

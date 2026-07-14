@@ -1381,12 +1381,28 @@ GNE-302 clean-template implementation checkpoint on 2026-07-14:
 
 ## Next Steps
 
-1. Complete only `GNE-302`: rerun final clean generation and source/candidate
-   checks, obtain independent Terra review, publish the research change through
-   the normal PR gate, and sync its evidence.
-2. Keep `GNE-298` In Progress and do not activate `GNE-303` in the same
-   execution. Independent artifact/repository/deployment verification begins
-   only in a new root task after `GNE-302` passes its stop gate.
+GNE-303 verified-candidate checkpoint on 2026-07-14:
+
+- GNE-302 completed through PR #97. GNE-303 is the sole active child under
+  GNE-298; GNE-298 remains In Progress.
+- GNE-303 owns independent candidate verification plus the user-approved P1
+  refinements from architecture/product/UI review: visible Auth/profile/cache/
+  locale proof, shared UI consumption, lazy Analytics, and three-layer candidate
+  integrity. CatCare/Demo runtime is unchanged.
+- Work is isolated on `codex/gne-303-template-acceptance`. External candidate
+  GitHub/Vercel creation remains target-gated; shared cloud Supabase is excluded.
+- Corrected neutral and Smoke candidates both pass frozen install, five-package
+  lint/typecheck/tests, production build and three-layer verification. The
+  neutral candidate rebuilt from empty twice with 149/149 DB tests each time.
+  Local browser acceptance passed disposable Auth, protected routing, in-place
+  persisted profile update, English/Chinese switching, shared UI lifecycle and
+  390/1440 responsive checks. External GitHub/Vercel remains `not_run`.
+
+1. Complete only `GNE-303`: generate neutral and Smoke candidates, run clean
+   install/build/test and two isolated local database resets, then perform
+   browser and independent reviewer acceptance.
+2. Keep `GNE-298` In Progress until the user accepts the final evidence. Do not
+   activate another child or parent automatically.
 3. Keep `v0.2.0` as the sealed MVP2 baseline and use
    `specs/reference-product/v0.3.0-decision.md` as the MVP3 decision record.
 4. Treat the current cloud Supabase/PostHog resources as

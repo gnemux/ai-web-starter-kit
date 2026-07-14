@@ -1,0 +1,49 @@
+export const supportedLocales = ["en-US", "zh-CN"] as const;
+export type AppLocale = (typeof supportedLocales)[number];
+
+export const platformMessages = {
+  "en-US": {
+    language: "Language", english: "English", chinese: "中文", primaryNavigation: "Primary navigation", footerNavigation: "Footer navigation",
+    signIn: "Sign in", createAccount: "Create account", email: "Email", password: "Password", passwordHint: "Use at least 8 characters.",
+    authUnavailable: "Authentication is not configured for this local candidate. Start the isolated Supabase environment before signing in.",
+    authRejected: "Authentication is unavailable or the submitted credentials were not accepted.", checkEmail: "Check your email to confirm the new account, then return to sign in.",
+    foundationState: "Foundation state", authenticationReady: "Authentication ready", safeLocalMode: "Safe local mode",
+    authenticationReadyDescription: "The call to action follows the current authenticated account.", safeLocalModeDescription: "Provider credentials are optional and missing capabilities fail safely.",
+    signedIn: "Signed in", displayName: "Display name", displayNameHint: "Optional, up to 120 characters.", saveProfile: "Save profile", saving: "Saving…", signOut: "Sign out",
+    profileSaved: "Profile saved in place. The owner cache was precisely invalidated without a full-page reload.", profileFailed: "The profile could not be saved. Review the value and try again.",
+    authNotConfigured: "Authentication not configured", authNotConfiguredDescription: "Add this product's public Supabase values to enable account sessions.",
+    productBoundary: "Product-owned module", productDescription: "Routes stay thin while product copy, workflows and adapters remain inside the product module.",
+    workspaceOverview: "Overview", workspaceAccount: "Account", workspaceTitle: "Product foundation", workspaceDescription: "Start the first real customer workflow without changing platform internals.",
+    readyTitle: "Ready for a real customer journey", readyDescription: "Replace this neutral module with product behavior while keeping platform contracts intact.",
+    capabilityRegistry: "Capability registry", capabilityHelp: "Why are capability states explicit?", capabilityHelpText: "Disabled capabilities stay off; safe adapters are testable; external modes report missing configuration instead of pretending to work.",
+    interactionTitle: "UI interaction contract", interactionDescription: "These controls demonstrate shared UI behavior only. They do not claim a saved business fact.", reviewInteraction: "Review interaction", interactionConfirmed: "Interaction completed locally; no business data was written.", dialogTitle: "Shared presentation, product-owned command", dialogDescription: "A real product owns authorization and persistence. The shared UI owns focus, dismissal and accessible presentation.", close: "Close", previewWorkflow: "Workflow preview", previewWorkflowValue: "Describe the first complete customer journey.", previewState: "Preview state", previewDraft: "Draft", previewReady: "Ready for review", previewReview: "Require human review before external side effects", previewProgress: "UI asset coverage",
+    billing: "Billing", billingDescription: "A product-configured surface over trusted server-side billing facts.", paymentDisabled: "Payment disabled", paymentDisabledDescription: "Enable sandbox for safe product testing or configure a reviewed external provider.", paymentIncomplete: "Payment configuration incomplete", paymentNotImplemented: "External payment adapter not implemented", paymentSandboxReady: "Payment sandbox ready",
+    usage: "Usage", usageDescription: "Usage and credit state belongs to the authenticated owner and server ledger.", aiDisabled: "AI disabled", aiDisabledDescription: "Enable mock for safe workflow testing or configure a reviewed external provider.", aiIncomplete: "AI configuration incomplete", aiNotImplemented: "External AI adapter not implemented", aiMockReady: "AI mock ready",
+    loading: "Loading", loadingDescription: "Preparing the requested view.", pageNotFound: "Page not found", pageNotFoundDescription: "This route does not exist in the current product.", returnHome: "Return home", somethingWrong: "Something went wrong", somethingWrongDescription: "The request could not be completed safely.", tryAgain: "Try again",
+    stateLoading: "loading", stateEmpty: "empty", stateError: "error", stateForbidden: "forbidden", stateDisabled: "disabled"
+  },
+  "zh-CN": {
+    language: "语言", english: "English", chinese: "中文", primaryNavigation: "主导航", footerNavigation: "页脚导航",
+    signIn: "登录", createAccount: "创建账户", email: "邮箱", password: "密码", passwordHint: "至少使用 8 个字符。",
+    authUnavailable: "当前本地候选尚未配置登录能力。请先启动隔离的 Supabase 环境。",
+    authRejected: "登录服务不可用，或提交的账号信息未通过验证。", checkEmail: "请检查邮箱完成账户确认，然后返回登录。",
+    foundationState: "底座状态", authenticationReady: "登录能力已就绪", safeLocalMode: "安全本地模式",
+    authenticationReadyDescription: "首页入口会根据当前登录状态进入对应页面。", safeLocalModeDescription: "可选 Provider 缺失时会明确降级，不会伪造成功。",
+    signedIn: "已登录", displayName: "显示名称", displayNameHint: "可选，最多 120 个字符。", saveProfile: "保存资料", saving: "保存中…", signOut: "退出登录",
+    profileSaved: "资料已在当前页面更新；所属用户缓存已精确失效，没有整页刷新。", profileFailed: "资料保存失败，请检查内容后重试。",
+    authNotConfigured: "尚未配置登录能力", authNotConfiguredDescription: "配置该产品的 Supabase 公开参数后即可启用账户会话。",
+    productBoundary: "产品自有模块", productDescription: "路由保持薄层，产品文案、流程和适配器由产品模块负责。",
+    workspaceOverview: "概览", workspaceAccount: "账户", workspaceTitle: "产品基础能力", workspaceDescription: "无需修改平台内部代码，即可开始第一个真实客户流程。",
+    readyTitle: "可以开始真实产品旅程", readyDescription: "在产品模块中替换这份中性内容，同时保持平台契约稳定。",
+    capabilityRegistry: "能力注册表", capabilityHelp: "为什么要明确显示能力状态？", capabilityHelpText: "关闭的能力不会偷偷运行；安全适配器可测试；外部模式配置不完整时会明确报错。",
+    interactionTitle: "UI 交互契约", interactionDescription: "这些控件只验证共享 UI 行为，不代表业务数据已经保存。", reviewInteraction: "检查交互", interactionConfirmed: "本地交互已完成，没有写入业务数据。", dialogTitle: "共享展示，产品负责命令", dialogDescription: "真实产品负责授权和持久化，共享 UI 负责焦点、关闭和无障碍展示。", close: "关闭", previewWorkflow: "流程预览", previewWorkflowValue: "描述第一个完整的客户旅程。", previewState: "预览状态", previewDraft: "草稿", previewReady: "待审核", previewReview: "外部副作用发生前必须人工审核", previewProgress: "UI 资产覆盖",
+    billing: "计费", billingDescription: "建立在可信服务端计费事实上的产品配置界面。", paymentDisabled: "支付已关闭", paymentDisabledDescription: "可启用 Sandbox 安全测试，或配置经过审核的外部 Provider。", paymentIncomplete: "支付配置不完整", paymentNotImplemented: "尚未实现外部支付适配器", paymentSandboxReady: "支付 Sandbox 已就绪",
+    usage: "用量", usageDescription: "用量和额度属于已登录用户及服务端账本事实。", aiDisabled: "智能能力已关闭", aiDisabledDescription: "可启用 Mock 安全测试，或配置经过审核的外部 Provider。", aiIncomplete: "智能能力配置不完整", aiNotImplemented: "尚未实现外部智能能力适配器", aiMockReady: "智能能力 Mock 已就绪",
+    loading: "加载中", loadingDescription: "正在准备请求的页面。", pageNotFound: "页面不存在", pageNotFoundDescription: "当前产品中没有这个路由。", returnHome: "返回首页", somethingWrong: "出现问题", somethingWrongDescription: "当前请求未能安全完成。", tryAgain: "重试",
+    stateLoading: "加载中", stateEmpty: "空状态", stateError: "错误", stateForbidden: "无权限", stateDisabled: "已关闭"
+  }
+} as const;
+
+export function isAppLocale(value: string | undefined): value is AppLocale {
+  return supportedLocales.includes(value as AppLocale);
+}

@@ -142,6 +142,31 @@ the earlier 141-check candidate.
 
 ## GNE-303 Independent Candidate Tests
 
+GNE-303 also closes three-party P1 findings with automated and browser evidence:
+locale config/dictionaries are complete for `en-US` and `zh-CN`; changing the
+locale and saving a profile use router/server revalidation without
+`window.location` or `location.reload`; protected files fail checksum drift;
+new files outside declared product roots fail closed; shared UI semantic tokens,
+Dialog, Toast, FormField and state variants have contract tests; and disabled
+Analytics has no static `posthog-js` import.
+
+### GNE-303 Execution Record (2026-07-15)
+
+- source regression: AI/release/package boundaries, template drift and negative
+  fixtures, 14 generator tests, 82 research web tests, and production build pass;
+- neutral and Smoke candidates: frozen install, lint, typecheck, boundary,
+  release, supply-chain, security, 23 package/app contract tests, build and
+  post-build three-layer verification pass independently;
+- a real product-workspace mutation passes candidate integrity while a platform
+  mutation fails the protected foundation hash, closing the independent-review
+  P1 finding;
+- isolated database: baseline applied from empty twice and all 149 tests pass on
+  both runs; no linked/shared project command was used;
+- browser: local sign-up, product protection, profile persistence, precise
+  same-URL update, sign-out/back-in, two locales, shared UI lifecycle, and
+  390/1440 responsive overflow checks pass;
+- external repository/Vercel remains `not_run` until a target-specific approval.
+
 ### Clean Install And Build
 
 Follow `quickstart.md` from a new directory with no source `node_modules`,

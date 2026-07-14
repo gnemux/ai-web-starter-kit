@@ -37,18 +37,20 @@ export async function signUp(formData: FormData) {
   redirect(next);
 }
 
-export async function updateProfile(formData: FormData) {
+export type ProfileActionState = { status: "idle" | "success" | "error"; message: string };
+
+export async function updateProfile(_previous: ProfileActionState, formData: FormData): Promise<ProfileActionState> {
   const client = await createOptionalServerClient();
-  if (!client) redirect(`${productConfig.paths.login}?error=not_configured`);
+  if (!client) return { status: "error", message: "not_configured" };
   const { data, error } = await client.auth.getUser();
-  if (error || !data.user) redirect(`${productConfig.paths.login}?next=${encodeURIComponent(productConfig.paths.account)}`);
+  if (error || !data.user) return { status: "error", message: "not_authenticated" };
   const displayName = String(formData.get("displayName") ?? "").trim();
-  if (displayName.length > 120) redirect(`${productConfig.paths.account}?error=invalid_profile`);
+  if (displayName.length > 120) return { status: "error", message: "invalid_profile" };
   const { error: profileError } = await client.from("user_profiles").upsert({ id: data.user.id, display_name: displayName || null }, { onConflict: "id" });
-  if (profileError) redirect(`${productConfig.paths.account}?error=profile_update_failed`);
+  if (profileError) return { status: "error", message: "profile_update_failed" };
   invalidateOwnerFact("account_profile", data.user.id);
   revalidatePath(productConfig.paths.account);
-  redirect(`${productConfig.paths.account}?message=profile_saved`);
+  return { status: "success", message: "profile_saved" };
 }
 
 export async function signOut() {

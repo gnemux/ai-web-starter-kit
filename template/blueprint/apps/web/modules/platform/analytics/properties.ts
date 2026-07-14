@@ -5,6 +5,16 @@ const numberKeys = new Set(["count", "duration_ms"]);
 const booleanKeys = new Set(["enabled"]);
 const sensitiveKeyPattern = /(?:prompt|result|email|phone|name|token|secret|password|cookie|auth|content|message|payload|url)/i;
 
+export function buildAnalyticsBaseProperties(input: { productId: string; appEnvironment: string | undefined; templateVersion: string; releaseVersion: string | undefined; defaultReleaseVersion: string }) {
+  return {
+    product_id: input.productId,
+    app_environment: input.appEnvironment || "local",
+    template_version: input.templateVersion,
+    release_version: input.releaseVersion || input.defaultReleaseVersion,
+    module: "product"
+  } as const;
+}
+
 export function assertProductEventName(name: string) {
   if (!eventNamePattern.test(name)) throw new TypeError("Analytics event name must be a bounded snake_case identifier");
   return name;

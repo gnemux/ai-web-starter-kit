@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { productConfig } from "./product.config.ts";
-import { assertProductEventName, sanitizeAnalyticsProperties } from "../modules/platform/analytics/properties.ts";
-import { analyticsBaseProperties } from "../modules/platform/analytics/client.ts";
+import { productConfig, templateMetadata } from "./product.config.ts";
+import { assertProductEventName, buildAnalyticsBaseProperties, sanitizeAnalyticsProperties } from "../modules/platform/analytics/properties.ts";
 import { assertCapabilityConfiguration, resolveCapabilityRegistry } from "@xwlc/platform";
 
 test("generated product config has a stable identity and bounded provider modes", () => {
@@ -45,7 +44,8 @@ test("analytics accepts only bounded neutral event properties", () => {
 });
 
 test("analytics injects non-overridable multi-product and environment dimensions", () => {
-  assert.deepEqual(Object.keys(analyticsBaseProperties()).sort(), ["app_environment", "module", "product_id", "release_version", "template_version"]);
+  const base = buildAnalyticsBaseProperties({ productId: productConfig.identity.id, appEnvironment: undefined, templateVersion: templateMetadata.templateVersion, releaseVersion: undefined, defaultReleaseVersion: productConfig.identity.releaseVersion });
+  assert.deepEqual(Object.keys(base).sort(), ["app_environment", "module", "product_id", "release_version", "template_version"]);
   for (const reserved of ["product_id", "app_environment", "template_version", "release_version"]) {
     assert.throws(() => sanitizeAnalyticsProperties({ [reserved]: "forged" }), /analytics/i);
   }

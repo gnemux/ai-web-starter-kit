@@ -1,18 +1,18 @@
 "use client";
 import posthog from "posthog-js";
 import { productConfig, templateMetadata } from "@/config/product.config";
-import { assertProductEventName, sanitizeAnalyticsProperties } from "./properties";
+import { assertProductEventName, buildAnalyticsBaseProperties, sanitizeAnalyticsProperties } from "./properties";
 
 let initialized = false;
 
 export function analyticsBaseProperties() {
-  return {
-    product_id: productConfig.identity.id,
-    app_environment: process.env.NEXT_PUBLIC_APP_ENV || "local",
-    template_version: templateMetadata.templateVersion,
-    release_version: process.env.NEXT_PUBLIC_RELEASE_VERSION || productConfig.identity.releaseVersion,
-    module: "product"
-  } as const;
+  return buildAnalyticsBaseProperties({
+    productId: productConfig.identity.id,
+    appEnvironment: process.env.NEXT_PUBLIC_APP_ENV,
+    templateVersion: templateMetadata.templateVersion,
+    releaseVersion: process.env.NEXT_PUBLIC_RELEASE_VERSION,
+    defaultReleaseVersion: productConfig.identity.releaseVersion
+  });
 }
 
 export function initializeAnalytics() {

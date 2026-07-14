@@ -69,6 +69,25 @@ GNE-302 may be considered complete only when:
 - an independent Terra Reviewer has no unresolved blocking finding;
 - the run stops without activating GNE-303.
 
+## GNE-302 Local Implementation Result
+
+This is implementation evidence, not the independent GNE-303 release decision.
+
+| Requirement | Result | Evidence |
+| --- | --- | --- |
+| approved boundary implemented without changing CatCare/Demo runtime | pass | explicit `template/blueprint` inventory; research regression suite |
+| neutral app, package snapshots and provider modes | pass | generated Home/Auth/Account/Billing/Usage/product surfaces and boundary tests |
+| deterministic, atomic, exhaustive generation | pass | schema validation, inventory/secret/path checks, two-output comparison |
+| exact supply-chain and provenance record | pass | candidate lockfile, notices, Action SHA checks and `template-version.json` hashes |
+| isolated clean install/lint/typecheck/tests/build | pass | generated sibling candidate, frozen install and production build |
+| independent local foundation database | pass | single baseline reset on candidate-only ports; 141 pgTAP checks across anon, owners A/B and service-role operations |
+| shared cloud database or provider secrets used | not_run / intentionally none | GNE-302 local-only gate |
+| independent Terra review and research PR | review pass; PR pending | Terra READY after three review rounds; research PR remains the final close gate |
+| fresh external repository/Vercel smoke | not_run | owned by GNE-303 and separately gated |
+
+The generated candidate remains a candidate artifact. This section does not
+claim multi-product proof, production readiness, or completion of GNE-303.
+
 ## GNE-303 Verification Gate
 
 Full Go requires:

@@ -12,9 +12,14 @@
     "test:release-boundaries": "node scripts/verify-release-boundaries.mjs",
     "typecheck": "turbo typecheck",
     "payment:creem:test-checkout": "node integrations/scripts/creem-test-checkout.mjs",
-    "test": "pnpm test:ai-safety && pnpm test:release-boundaries && pnpm test:package-boundaries && turbo test"
+    "template:generate": "node template/generate.mjs",
+    "template:compare": "node template/compare.mjs",
+    "template:verify": "node template/verify-candidate.mjs",
+    "test:template": "node --test template/tests/*.test.mjs",
+    "test": "pnpm test:ai-safety && pnpm test:release-boundaries && pnpm test:package-boundaries && pnpm test:template && turbo test"
   },
   "devDependencies": {
+    "ajv": "8.17.1",
     "turbo": "^2.5.0",
     "typescript": "^5.8.0"
   }

@@ -2,10 +2,10 @@
 
 ## Status
 
-This is the cold-start contract approved by GNE-301. The generator and candidate
-do not exist yet, so every execution step below is `not_run` in GNE-301. GNE-302
-must implement the local generation commands; GNE-303 must follow this guide
-from a clean directory without borrowing source-workspace caches.
+This cold-start contract was approved by GNE-301 and implemented locally by
+GNE-302. The commands below now exist and have passed the first isolated
+candidate run. GNE-303 must repeat them from a fresh directory without borrowing
+source-workspace caches and owns any separately approved external smoke.
 
 ## Prerequisites
 
@@ -100,10 +100,10 @@ NEXT_PUBLIC_APP_ENV=local
 AUTH_PROVIDER=supabase
 DATABASE_PROVIDER=supabase
 NEXT_PUBLIC_ANALYTICS_PROVIDER=none
-PAYMENT_PROVIDER=sandbox
-PAYMENT_MODE=sandbox
+PAYMENT_PROVIDER=disabled
+PAYMENT_MODE=disabled
 PAYMENT_LIVE_ENABLED=false
-AI_PROVIDER=mock
+AI_PROVIDER=disabled
 EMAIL_PROVIDER=noop
 STORAGE_PROVIDER=noop
 SMS_PROVIDER=noop

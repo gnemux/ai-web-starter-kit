@@ -1342,13 +1342,36 @@ GNE-301 extraction-architecture checkpoint on 2026-07-13:
   test database migration and automatic Vercel deployment were verified before
   GNE-288 closed.
 
+GNE-302 clean-template implementation checkpoint on 2026-07-14:
+
+- Work is isolated on `codex/gne-302-clean-template` in a dedicated worktree;
+  the CatCare research application and its deployment inputs are unchanged.
+- The research repository now contains an explicit 93-file candidate blueprint,
+  a schema-validated product configuration, deterministic atomic generator,
+  candidate verifier/comparator, negative fixtures, and root test integration.
+- A generated candidate owns neutral Home/Auth/Account/Billing/Usage/product
+  placeholder surfaces, local `@xwlc/*` package snapshots, exact dependencies
+  and lockfile, immutable CI Action pins, security headers, notices, and a
+  single independent foundation migration. Optional Analytics, live Payment,
+  and live AI remain safe-disabled or sandboxed.
+- Isolated candidate install, lint, typecheck, boundary/security/unit tests and
+  production build have passed. A disposable local Supabase project on the
+  candidate-only 5532x ports rebuilt from its single baseline and all 142 pgTAP
+  checks passed. No shared cloud database, GitHub candidate repository, Vercel
+  project, provider key, CatCare data, or Demo data was used.
+- Final source regression, deterministic regeneration, independent Terra review,
+  and research PR publication remain the GNE-302 close gates. GNE-303 has not
+  started; fresh independent verification and any approved external candidate
+  repository/deployment remain `not_run`.
+
 ## Next Steps
 
-1. Complete only `GNE-301`: independently review and publish the approved
-   extraction architecture, then sync its evidence and close that child.
-2. Keep `GNE-298` In Progress and do not activate `GNE-302` in the same
-   execution. Implementation begins only in a new root task after `GNE-301`
-   passes its stop gate.
+1. Complete only `GNE-302`: rerun final clean generation and source/candidate
+   checks, obtain independent Terra review, publish the research change through
+   the normal PR gate, and sync its evidence.
+2. Keep `GNE-298` In Progress and do not activate `GNE-303` in the same
+   execution. Independent artifact/repository/deployment verification begins
+   only in a new root task after `GNE-302` passes its stop gate.
 3. Keep `v0.2.0` as the sealed MVP2 baseline and use
    `specs/reference-product/v0.3.0-decision.md` as the MVP3 decision record.
 4. Treat the current cloud Supabase/PostHog resources as

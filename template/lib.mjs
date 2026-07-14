@@ -254,7 +254,8 @@ export async function generateCandidate({ sourceRoot, outputRoot, configFile, dr
   const blueprintHash = await hashTree(blueprintRoot, actualFiles);
   const manifestHash = sha256(JSON.stringify(manifest));
   const configHash = sha256(JSON.stringify(config));
-  if (dryRun) return { blueprintHash, manifestHash, configHash, source };
+  const sourceMapHash = sha256(JSON.stringify(await readJson(path.join(templateRoot, "source-map.json"))));
+  if (dryRun) return { blueprintHash, manifestHash, configHash, sourceMapHash, source };
 
   const temporary = `${path.resolve(outputRoot)}.partial-${process.pid}`;
   await rm(temporary, { recursive: true, force: true });
@@ -275,6 +276,7 @@ export async function generateCandidate({ sourceRoot, outputRoot, configFile, dr
       candidateVersion: manifest.candidateVersion,
       source: { repository: source.repository, commit: source.commit, committedAt: source.committedAt, packageVersion: manifest.sourcePackageVersion },
       generator: { version: manifest.generatorVersion, manifestVersion: manifest.manifestVersion, schemaVersion: manifest.schemaVersion },
+      sourceProjection: { file: "template/source-map.json", hash: sourceMapHash },
       foundation: { migrationFile: manifest.foundation.migrationFile, schemaVersion: manifest.foundation.schemaVersion },
       notices: { file: "THIRD_PARTY_NOTICES.md", inventoryVersion: manifest.noticesInventoryVersion, hash: noticesHash },
       product: { id: config.identity.id, locale: config.identity.locale, eventNamespace: config.identity.eventNamespace },

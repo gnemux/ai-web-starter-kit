@@ -1751,9 +1751,7 @@
     "apps/web/config/product.config.ts",
     "product.config.json",
     "product-state.json",
-    "supabase/config.toml",
-    "template-product.json",
-    "template-version.json"
+    "supabase/config.toml"
   ],
   "toolchain": {
     "node": "22",

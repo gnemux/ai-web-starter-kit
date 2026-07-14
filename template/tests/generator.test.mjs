@@ -25,6 +25,15 @@ test("every concrete candidate artifact has a unique typed source and target", (
   assert.throws(() => assertArtifactInventory(files, [...manifest.artifacts, manifest.artifacts[0]]), /unique/);
 });
 
+test("product initialization can mutate only the four reviewed projections", () => {
+  assert.deepEqual([...manifest.productConfigAllowedChanges].sort(), [
+    "apps/web/config/product.config.ts",
+    "product-state.json",
+    "product.config.json",
+    "supabase/config.toml"
+  ]);
+});
+
 test("allow-dirty cannot create a candidate", () => {
   assert.throws(() => assertGenerationMode({ dryRun: false, allowDirty: true }), /only with --dry-run/);
   assert.doesNotThrow(() => assertGenerationMode({ dryRun: true, allowDirty: true }));

@@ -43,11 +43,13 @@ async function verifySourceMap(candidate, observed = undefined) {
   }
   const excluded = new Set();
   for (const entry of candidate.excludedSources) {
-    if (!entry.source || !entry.reason) throw new Error("Excluded source requires a path and review reason");
+    if (!entry.source || !entry.sourceHash || !entry.reason) throw new Error("Excluded source requires a path, hash and review reason");
     if (seenSources.has(entry.source) || excluded.has(entry.source)) throw new Error(`Source has multiple drift decisions: ${entry.source}`);
     excluded.add(entry.source);
     const info = await stat(path.join(root, entry.source));
     if (!info.isFile()) throw new Error(`Excluded source is not a file: ${entry.source}`);
+    const actual = createHash("sha256").update(await readFile(path.join(root, entry.source))).digest("hex");
+    if (actual !== entry.sourceHash) throw new Error(`Template exclusion review required for ${entry.source}: source changed from ${entry.sourceHash} to ${actual}`);
   }
   const actual = observed ?? await observedSourceFiles(candidate);
   const declared = [...seenSources, ...excluded].sort();

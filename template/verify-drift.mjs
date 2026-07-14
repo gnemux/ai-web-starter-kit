@@ -1,14 +1,28 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const mapping = JSON.parse(await readFile(path.join(root, "template/source-map.json"), "utf8"));
 
-async function verifySourceMap(candidate) {
-  if (candidate.schemaVersion !== 1 || !Array.isArray(candidate.entries) || candidate.entries.length === 0) {
+async function listFiles(relative) {
+  const files = [];
+  for (const entry of await readdir(path.join(root, relative), { withFileTypes: true })) {
+    const next = path.posix.join(relative, entry.name);
+    if (entry.isDirectory()) files.push(...await listFiles(next));
+    else if (entry.isFile()) files.push(next);
+  }
+  return files;
+}
+
+async function observedSourceFiles(candidate) {
+  return (await Promise.all(candidate.watchedRoots.map((relative) => listFiles(relative)))).flat().sort();
+}
+
+async function verifySourceMap(candidate, observed = undefined) {
+  if (candidate.schemaVersion !== 1 || !Array.isArray(candidate.watchedRoots) || candidate.watchedRoots.length === 0 || !Array.isArray(candidate.entries) || candidate.entries.length === 0 || !Array.isArray(candidate.excludedSources)) {
     throw new Error("Template source map is missing or invalid");
   }
   const seenSources = new Set();
@@ -27,7 +41,20 @@ async function verifySourceMap(candidate) {
       if (!info.isFile()) throw new Error(`Template projection is not a file: ${target}`);
     }
   }
-  return { sources: seenSources.size, targets: seenTargets.size };
+  const excluded = new Set();
+  for (const entry of candidate.excludedSources) {
+    if (!entry.source || !entry.reason) throw new Error("Excluded source requires a path and review reason");
+    if (seenSources.has(entry.source) || excluded.has(entry.source)) throw new Error(`Source has multiple drift decisions: ${entry.source}`);
+    excluded.add(entry.source);
+    const info = await stat(path.join(root, entry.source));
+    if (!info.isFile()) throw new Error(`Excluded source is not a file: ${entry.source}`);
+  }
+  const actual = observed ?? await observedSourceFiles(candidate);
+  const declared = [...seenSources, ...excluded].sort();
+  const unknown = actual.filter((file) => !declared.includes(file));
+  const missing = declared.filter((file) => !actual.includes(file));
+  if (unknown.length > 0 || missing.length > 0) throw new Error(`Template source inventory review required. Untracked: ${unknown.join(", ") || "none"}; missing: ${missing.join(", ") || "none"}`);
+  return { sources: seenSources.size, excluded: excluded.size, targets: seenTargets.size };
 }
 
 if (process.argv.includes("--negative-fixture")) {
@@ -38,7 +65,13 @@ if (process.argv.includes("--negative-fixture")) {
     if (!String(error).includes("Template drift review required")) throw error;
     console.log("Template drift negative fixture rejected a stale source hash");
   }
+  const actual = await observedSourceFiles(mapping);
+  try { await verifySourceMap(mapping, [...actual, `${mapping.watchedRoots[0]}/unreviewed-capability.ts`].sort()); throw new Error("Untracked source fixture unexpectedly passed"); }
+  catch (error) {
+    if (!String(error).includes("source inventory review required")) throw error;
+    console.log("Template drift negative fixture rejected an untracked capability source");
+  }
 } else {
   const result = await verifySourceMap(mapping);
-  console.log(`Template source drift gate verified ${result.sources} capability sources and ${result.targets} projections`);
+  console.log(`Template source drift gate verified ${result.sources} projected and ${result.excluded} explicitly excluded sources across ${result.targets} projections`);
 }

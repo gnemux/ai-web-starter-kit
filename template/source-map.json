@@ -1,6 +1,14 @@
 {
   "schemaVersion": 1,
   "reviewRule": "A source hash change requires an explicit review of every mapped template projection before the recorded hash is updated.",
+  "watchedRoots": [
+    "apps/web/lib/analytics",
+    "apps/web/lib/supabase",
+    "packages/core/src",
+    "packages/db/src",
+    "packages/platform/src",
+    "packages/ui/src"
+  ],
   "entries": [
     { "source": "packages/core/src/auth.ts", "sourceHash": "d3e228570c00273b08502f0ceab18e453e746ad0e2a494ed6db3d5e820404687", "targets": ["template/blueprint/packages/core/src/auth.ts"], "strategy": "contract-projection" },
     { "source": "packages/core/src/billing.ts", "sourceHash": "ae131b852b20dc7af9687fec69e0333f94d69d1722d4acaa03947193695bd37f", "targets": ["template/blueprint/packages/core/src/billing.ts"], "strategy": "contract-projection" },
@@ -16,5 +24,25 @@
     { "source": "apps/web/lib/supabase/server.ts", "sourceHash": "e101dcbc00dc06f72ebdf997d4f441bf5663526f574b44fd58c700c2a10395bf", "targets": ["template/blueprint/apps/web/modules/platform/supabase/server.ts"], "strategy": "neutral-platform-projection" },
     { "source": "apps/web/lib/analytics/client.ts", "sourceHash": "4a7f8e06f8948d12e8211c2c1d5f2ee1d380188ae5ba6197c87bb6fd76692e17", "targets": ["template/blueprint/apps/web/modules/platform/analytics/client.ts"], "strategy": "neutral-platform-projection" },
     { "source": "apps/web/lib/analytics/config.ts", "sourceHash": "d95ba7cc17bcad073ad6ee4f904fbe7f7f32faf3e548ae61da7e09e2774244d0", "targets": ["template/blueprint/apps/web/modules/platform/analytics/properties.ts"], "strategy": "neutral-platform-projection" }
+  ],
+  "excludedSources": [
+    { "source": "apps/web/lib/analytics/delivery.test.mjs", "reason": "research transport test; candidate uses bounded client-only analytics" },
+    { "source": "apps/web/lib/analytics/delivery.ts", "reason": "research server delivery adapter is not a neutral candidate dependency" },
+    { "source": "apps/web/lib/analytics/posthog-capture.test.mjs", "reason": "research PostHog server transport test" },
+    { "source": "apps/web/lib/analytics/posthog-capture.ts", "reason": "research PostHog server transport; candidate provider stays optional" },
+    { "source": "apps/web/lib/analytics/request-context.test.mjs", "reason": "research request-context privacy test" },
+    { "source": "apps/web/lib/analytics/request-context.ts", "reason": "research request adapter; candidate does not copy product request context" },
+    { "source": "apps/web/lib/analytics/server-product-routing.test.mjs", "reason": "research product routing fixture" },
+    { "source": "apps/web/lib/analytics/server-properties.test.mjs", "reason": "research server property test; neutral candidate has its own property tests" },
+    { "source": "apps/web/lib/analytics/server-properties.ts", "reason": "research server event adapter is outside the safe-disabled candidate" },
+    { "source": "apps/web/lib/analytics/server.ts", "reason": "research server transport is not enabled in the candidate" },
+    { "source": "apps/web/lib/supabase/client.ts", "reason": "research browser client is excluded until a neutral browser consumer exists" },
+    { "source": "apps/web/lib/supabase/database.types.ts", "reason": "research schema types contain product tables and cannot enter the candidate" },
+    { "source": "packages/core/src/api.ts", "reason": "mixed Demo API contract is excluded" },
+    { "source": "packages/core/src/data.ts", "reason": "mixed Demo data contract is excluded" },
+    { "source": "packages/platform/src/capability-context.ts", "reason": "research capability context includes product-stage semantics not copied into the candidate" },
+    { "source": "packages/platform/src/capability-contracts.test.mjs", "reason": "research contract tests contain product fixtures; candidate owns neutral tests" },
+    { "source": "packages/platform/src/share-token-gate.ts", "reason": "share-token contract remains pattern-only until a second consumer" },
+    { "source": "packages/platform/src/travel-consumer.compile.ts", "reason": "product compile fixture is excluded from the mother template" }
   ]
 }

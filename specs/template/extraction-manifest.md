@@ -7,8 +7,11 @@ untracked implementation source. `template/source-map.json` assigns one
 research capability source to each retained package/platform projection and
 records the reviewed source hash and projection strategy. `pnpm
 template:drift` fails whenever a source changes until the mapped projection is
-reviewed and the recorded hash is intentionally updated. Candidate-only shell,
-initialization, baseline and product-slot files remain blueprint-owned.
+reviewed and the recorded hash is intentionally updated. It also inventories
+all files under the watched shared-package, Supabase and Analytics roots; a new
+file must be mapped or explicitly excluded with a reason, so adding a capability
+cannot bypass the drift gate. Candidate-only shell, initialization, baseline
+and product-slot files remain blueprint-owned.
 
 ## Purpose
 

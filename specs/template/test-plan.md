@@ -126,15 +126,16 @@ the earlier 141-check candidate.
 
 | Check | Result |
 | --- | --- |
-| source drift positive and stale-hash negative fixture | pass (14 source capabilities / 14 projections) |
+| source drift and inventory gates | pass (14 projected + 18 excluded source files, six Transform/Fold inventories; stale hash, untracked source and changed inventory all fail) |
 | deterministic pristine A/B generation | pass (identical normalized tree hash) |
-| Smoke Product initialization boundary | pass (exactly four reviewed files differ) |
+| Second Product initialization boundary | pass (exactly four reviewed files differ; repeat/force/rollback behavior is covered) |
 | pristine candidate integrity/install/lint/typecheck/test/build | pass |
-| derived Smoke integrity/install/lint/typecheck/test/build | pass |
+| derived product integrity/install/lint/typecheck/test/build | pass |
 | product route/module/UI/cache/capability/Analytics checks | pass |
-| publishable key/SSR headers/CSP/financial retention/security checks | pass |
+| publishable key/SSR headers/CSP/financial retention/security checks | pass, including real Git tracked-`.env.local` rejection |
 | candidate-only empty database reset | pass twice from the single independent baseline |
-| foundation pgTAP suite | pass (142/142) |
+| foundation pgTAP suite | pass (149/149) |
+| local HTTP smoke | pass (`/`, `/login`, Provider-free disabled account/product states and security headers) |
 | cloud database, external candidate repository, or Vercel write | not_run / intentionally outside GNE-302 |
 | independent Terra review | pending at time of this repository record |
 | GNE-303 fresh visual/responsive/external verification | not_run |

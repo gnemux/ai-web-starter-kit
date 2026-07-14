@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { productConfig } from "@/config/product.config";
 import { normalizeInternalReturn } from "../navigation/internal-return";
 import { createOptionalServerClient } from "../supabase/server";
+import { invalidateOwnerFact } from "../performance/cache";
 import { buildEmailConfirmationUrl } from "./confirmation-url";
 
 export async function signIn(formData: FormData) {
@@ -45,6 +46,7 @@ export async function updateProfile(formData: FormData) {
   if (displayName.length > 120) redirect(`${productConfig.paths.account}?error=invalid_profile`);
   const { error: profileError } = await client.from("user_profiles").upsert({ id: data.user.id, display_name: displayName || null }, { onConflict: "id" });
   if (profileError) redirect(`${productConfig.paths.account}?error=profile_update_failed`);
+  invalidateOwnerFact("account_profile", data.user.id);
   revalidatePath(productConfig.paths.account);
   redirect(`${productConfig.paths.account}?message=profile_saved`);
 }

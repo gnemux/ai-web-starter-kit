@@ -1,5 +1,31 @@
 # Engineering Spec: Clean Template Extraction Boundary
 
+## 2026-07-14 GNE-302 Strengthening Contract
+
+The first candidate generation proved extraction but did not yet prove a
+durable multi-product operating model. Before GNE-302 returns to Done, the
+implementation must additionally provide:
+
+- a checked `template/source-map.json` mapping research capability sources to
+  curated neutral projections, with a CI drift gate that fails whenever a
+  source hash changes before projection review;
+- candidate-owned `product.config.json`, `product-state.json`, portable
+  validation/generation, `pnpm product:init`, and `pnpm product:verify`;
+- a thin `/product` route that composes a real `modules/product` workspace;
+- one capability registry shared by pages, tests and environment validation;
+- real neutral consumers for retained UI, owner cache, tag invalidation and
+  targeted path refresh;
+- non-overridable Analytics `product_id`, `app_environment`,
+  `template_version`, and `release_version` dimensions;
+- Supabase publishable-key preference, `getClaims()` protection,
+  cookie/cache-header forwarding, pgTAP CI and immutable Billing retention;
+- deployment CSP without `unsafe-eval` and existing header/return-path tests.
+
+Generic logical deletion remains a contract and helper, not a speculative
+universal table. Maps, uploads, search, a module marketplace, package registry,
+cross-repository upgrades, and single-consumer Outbox/Audit extraction remain
+trigger-based work after a real second consumer exists.
+
 ## Scope And Baseline
 
 This is the binding GNE-301 architecture for GNE-302 implementation and

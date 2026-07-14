@@ -24,4 +24,8 @@ if (vercel.framework !== "nextjs" || vercel.installCommand !== "cd ../.. && pnpm
 if ("regions" in vercel) throw new Error("Research-region assumptions are forbidden");
 const turbo = JSON.parse(await readFile(path.join(root, "turbo.json"), "utf8"));
 if (!turbo.tasks?.build?.outputs?.includes("!.next/cache/**")) throw new Error("Turbo must exclude the non-portable Next cache");
+const accountReader = await readFile(path.join(root, "apps/web/modules/platform/auth/current-account.ts"), "utf8");
+const accountWriter = await readFile(path.join(root, "apps/web/modules/platform/auth/actions.ts"), "utf8");
+if (!accountReader.includes('cacheOwnerFact("account_profile", data.user.id')) throw new Error("Owner-scoped account cache has no real read consumer");
+if (!accountWriter.includes('invalidateOwnerFact("account_profile", data.user.id)') || !accountWriter.includes("revalidatePath(productConfig.paths.account)")) throw new Error("Account writes must precisely invalidate the owner fact and account path");
 console.log("Release and supply-chain boundaries verified");

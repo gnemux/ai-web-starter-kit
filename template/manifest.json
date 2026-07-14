@@ -748,8 +748,8 @@
       }
     },
     {
-      "source": "template/blueprint/apps/web/modules/product/README.md",
-      "target": "apps/web/modules/product/README.md",
+      "source": "template/blueprint/apps/web/modules/product/product-workspace.tsx",
+      "target": "apps/web/modules/product/product-workspace.tsx",
       "classification": "keep",
       "owner": "product",
       "productEditable": true,
@@ -1343,6 +1343,26 @@
       }
     },
     {
+      "source": "template/blueprint/scripts/product-config.mjs",
+      "target": "scripts/product-config.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "template/blueprint/scripts/product-init.mjs",
+      "target": "scripts/product-init.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
       "source": "template/blueprint/scripts/verify-boundaries.mjs",
       "target": "scripts/verify-boundaries.mjs",
       "classification": "keep",
@@ -1375,6 +1395,16 @@
         "sourceCommit": "git:HEAD",
         "templateVersion": "0.2.0-candidate.1"
       }
+    },
+    {
+      "source": "template/blueprint/scripts/verify-product.mjs",
+      "target": "scripts/verify-product.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
     },
     {
       "source": "template/blueprint/scripts/verify-release.mjs",
@@ -1666,6 +1696,26 @@
     },
     {
       "source": "config:product",
+      "target": "product.config.json",
+      "classification": "transform",
+      "owner": "product",
+      "productEditable": true,
+      "action": "generate",
+      "verification": ["config-hash", "schema", "product-init"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "config:product+manifest",
+      "target": "product-state.json",
+      "classification": "transform",
+      "owner": "product",
+      "productEditable": true,
+      "action": "generate",
+      "verification": ["config-hash", "template-version", "product-init"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.1" }
+    },
+    {
+      "source": "config:product",
       "target": "template-product.json",
       "classification": "transform",
       "owner": "product",
@@ -1699,6 +1749,8 @@
   ],
   "productConfigAllowedChanges": [
     "apps/web/config/product.config.ts",
+    "product.config.json",
+    "product-state.json",
     "supabase/config.toml",
     "template-product.json",
     "template-version.json"

@@ -34,6 +34,14 @@ for (const file of await filesUnder(path.join(root, "apps/web"))) {
   const text = await readFile(file, "utf8");
   if (/^["']use client["'];/m.test(text) && /from\s+["'][^"']*(?:\/server|server-only)/.test(text)) fail(`Client module imports a server boundary: ${path.relative(root, file)}`);
 }
+const productRoute = await readFile(path.join(root, "apps/web/app/product/page.tsx"), "utf8");
+if (!productRoute.includes('from "@/modules/product/product-workspace"') || !productRoute.includes("<ProductWorkspace")) fail("Product route must compose the product module");
+if (productRoute.includes("<PageHeader") || productRoute.split("\n").length > 20) fail("Product route is no longer a thin Auth/routing composition layer");
+const appTexts = await Promise.all((await filesUnder(path.join(root, "apps/web"))).filter((file) => /\.(?:ts|tsx)$/.test(file)).map((file) => readFile(file, "utf8")));
+const allAppText = appTexts.join("\n");
+for (const primitive of ["Button", "FormField", "Textarea", "Select", "Checkbox", "Card", "Tabs", "Dialog", "Popover", "Toast", "StatePanel"]) {
+  if (!new RegExp(`\\b${primitive}\\b`).test(allAppText)) fail(`Shared UI primitive has no candidate consumer: ${primitive}`);
+}
 const sharedText = (await Promise.all((await filesUnder(path.join(root, "packages"))).filter((file) => /\.(?:ts|tsx)$/.test(file)).map((file) => readFile(file, "utf8")))).join("\n").toLowerCase();
 for (const term of ["defaultbillingplans", "defaultbillingprices", "xwlc", "demo_" + "items", "cat" + "care"]) if (sharedText.includes(term)) fail(`Shared package contains fixed product vocabulary: ${term}`);
 

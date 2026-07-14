@@ -1,5 +1,15 @@
 # GNE-301 Extraction Manifest And Coupling Inventory
 
+## Capability Source Projection And Drift
+
+`template/blueprint` is a curated neutral projection, not an independent
+untracked implementation source. `template/source-map.json` assigns one
+research capability source to each retained package/platform projection and
+records the reviewed source hash and projection strategy. `pnpm
+template:drift` fails whenever a source changes until the mapped projection is
+reviewed and the recorded hash is intentionally updated. Candidate-only shell,
+initialization, baseline and product-slot files remain blueprint-owned.
+
 ## Purpose
 
 This document is the human-reviewable source for the machine manifest that

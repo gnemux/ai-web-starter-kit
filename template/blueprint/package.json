@@ -8,13 +8,15 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
+    "product:init": "node scripts/product-init.mjs",
+    "product:verify": "node scripts/verify-product.mjs",
     "test:boundaries": "node scripts/verify-boundaries.mjs",
     "test:package-boundaries": "pnpm test:boundaries",
     "test:release": "node scripts/verify-release.mjs",
     "test:release-boundaries": "pnpm test:release",
     "test:security": "node scripts/verify-security.mjs",
-    "template:verify": "pnpm test:boundaries && pnpm test:release && pnpm test:security && pnpm --filter @xwlc/web test && node scripts/verify-candidate.mjs",
-    "test": "pnpm test:boundaries && pnpm test:release && pnpm test:security && turbo test"
+    "template:verify": "pnpm product:verify && pnpm test:boundaries && pnpm test:release && pnpm test:security && pnpm --filter @xwlc/web test && node scripts/verify-candidate.mjs",
+    "test": "pnpm product:verify && pnpm test:boundaries && pnpm test:release && pnpm test:security && turbo test"
   },
   "devDependencies": {
     "turbo": "2.9.18",

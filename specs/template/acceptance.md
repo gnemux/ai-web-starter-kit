@@ -71,6 +71,10 @@ GNE-302 may be considered complete only when:
 
 ## GNE-302 Local Implementation Result
 
+The table below records the first PR #96 candidate and is superseded for final
+GNE-302 closure by the Strengthened Completion Gate below. It remains useful
+historical evidence but does not by itself satisfy the reopened Issue.
+
 This is implementation evidence, not the independent GNE-303 release decision.
 
 | Requirement | Result | Evidence |
@@ -87,6 +91,26 @@ This is implementation evidence, not the independent GNE-303 release decision.
 
 The generated candidate remains a candidate artifact. This section does not
 claim multi-product proof, production readiness, or completion of GNE-303.
+
+## GNE-302 Strengthened Completion Gate
+
+GNE-302 may return to Done only when fresh evidence proves:
+
+- source-to-template drift detection passes and a stale source hash fails;
+- default output is neutral while `product:init` derives the Smoke fixture
+  without platform/package edits;
+- `/product` stays thin and `modules/product` owns product composition;
+- UI, local-state interaction, owner cache, tag invalidation, targeted path
+  refresh and capability modes all have real consumers;
+- external modes fail clearly when required environment is absent;
+- Analytics base dimensions cannot be overridden by callers;
+- publishable-key, SSR headers, `getClaims`, CSP and financial-retention checks
+  pass;
+- candidate CI includes disposable migration and pgTAP;
+- a fresh candidate completes frozen install, lint, typecheck, test and build;
+- two disposable local resets and pgTAP pass without a shared cloud database;
+- Terra review has no unresolved blocker;
+- execution stops before GNE-303 and leaves GNE-298 open.
 
 ## GNE-303 Verification Gate
 

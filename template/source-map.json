@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "reviewRule": "A source hash change requires an explicit review of every mapped template projection before the recorded hash is updated.",
+  "entries": [
+    { "source": "packages/core/src/auth.ts", "sourceHash": "d3e228570c00273b08502f0ceab18e453e746ad0e2a494ed6db3d5e820404687", "targets": ["template/blueprint/packages/core/src/auth.ts"], "strategy": "contract-projection" },
+    { "source": "packages/core/src/billing.ts", "sourceHash": "ae131b852b20dc7af9687fec69e0333f94d69d1722d4acaa03947193695bd37f", "targets": ["template/blueprint/packages/core/src/billing.ts"], "strategy": "contract-projection" },
+    { "source": "packages/core/src/ai.ts", "sourceHash": "94f7b4c9ad3e721b2a53c70208e366cb5e8b2d393f0777b264b3759b540209e9", "targets": ["template/blueprint/packages/core/src/ai.ts"], "strategy": "contract-projection" },
+    { "source": "packages/core/src/payment.ts", "sourceHash": "7f317fbcaac804aec6dde604cd688bee0d5fb4cda1661f59dfa6c3eb0b49ecfb", "targets": ["template/blueprint/packages/core/src/payment.ts"], "strategy": "contract-projection" },
+    { "source": "packages/core/src/providers.ts", "sourceHash": "2112f5af1738e2eb4d68e07d07b2d85f227c45bd9d28a6e5842052e95349d5a6", "targets": ["template/blueprint/packages/core/src/providers.ts"], "strategy": "contract-projection" },
+    { "source": "packages/core/src/index.ts", "sourceHash": "dbe8d87357e37d92f9364bd853046bc87159a5056b6ba9989cb74fcc7760018f", "targets": ["template/blueprint/packages/core/src/index.ts"], "strategy": "public-api-projection" },
+    { "source": "packages/platform/src/index.ts", "sourceHash": "f261f1b127258d21fcecce0aaaf93ee480e0e8ebf1acdc46a3c3a6f3b96aa397", "targets": ["template/blueprint/packages/platform/src/index.ts"], "strategy": "public-api-projection" },
+    { "source": "packages/db/src/index.ts", "sourceHash": "a6a13fbc431814c5e146ba6c25d9bf135068df401561c87f5123a00c44494bb7", "targets": ["template/blueprint/packages/db/src/index.ts"], "strategy": "contract-projection" },
+    { "source": "packages/ui/src/index.tsx", "sourceHash": "b18fa0bf0894eacbcaf79c492d4f25680fce1da6b871e4bcf3ccd17ecf6e81d8", "targets": ["template/blueprint/packages/ui/src/index.tsx"], "strategy": "neutral-ui-projection" },
+    { "source": "apps/web/lib/supabase/config.ts", "sourceHash": "37a09780dea30be7965f0a88e79b1a4d52a30ca3496fa82bd2b62431d61898d8", "targets": ["template/blueprint/apps/web/modules/platform/supabase/config.ts"], "strategy": "neutral-platform-projection" },
+    { "source": "apps/web/lib/supabase/proxy.ts", "sourceHash": "d2f9b8b6ae223fdf52fdc3fd54c2064a7009948857d1d9662e741f9bfd5e0710", "targets": ["template/blueprint/apps/web/modules/platform/supabase/proxy.ts"], "strategy": "neutral-platform-projection" },
+    { "source": "apps/web/lib/supabase/server.ts", "sourceHash": "e101dcbc00dc06f72ebdf997d4f441bf5663526f574b44fd58c700c2a10395bf", "targets": ["template/blueprint/apps/web/modules/platform/supabase/server.ts"], "strategy": "neutral-platform-projection" },
+    { "source": "apps/web/lib/analytics/client.ts", "sourceHash": "4a7f8e06f8948d12e8211c2c1d5f2ee1d380188ae5ba6197c87bb6fd76692e17", "targets": ["template/blueprint/apps/web/modules/platform/analytics/client.ts"], "strategy": "neutral-platform-projection" },
+    { "source": "apps/web/lib/analytics/config.ts", "sourceHash": "d95ba7cc17bcad073ad6ee4f904fbe7f7f32faf3e548ae61da7e09e2774244d0", "targets": ["template/blueprint/apps/web/modules/platform/analytics/properties.ts"], "strategy": "neutral-platform-projection" }
+  ]
+}

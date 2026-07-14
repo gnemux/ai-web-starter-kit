@@ -1,5 +1,20 @@
 # Test Plan: Clean Template Candidate
 
+## Reopened GNE-302 Strengthening Matrix
+
+| Risk | Required evidence |
+| --- | --- |
+| mother template silently lags research capability source | `pnpm template:drift` pass plus a negative stale-hash fixture |
+| new product must edit platform core | generate pristine candidate, run `product:init` with the Smoke fixture, verify only declared product outputs change |
+| route owns product implementation | boundary check requires `/product` to compose `modules/product` and remain thin |
+| UI/performance are code-only claims | real form/dialog/tabs/popover/toast consumers; account read uses owner cache and write invalidates tag/path |
+| provider mode lies | disabled/safe-adapter/external matrix and missing-environment failure |
+| one Analytics project mixes identities | reserved base-property test and caller override negatives |
+| SSR session leaks through cache | Proxy header forwarding, `getClaims`, force-dynamic account routes and security check |
+| user deletion erases financial history | restrictive owner FK and pgTAP negative |
+| SQL regression passes frontend-only CI | pinned Supabase CLI job runs reset and `supabase test db` |
+| Smoke identity contaminates pristine output | separate state/config hashes and deterministic A/B comparison |
+
 ## Status And Ownership
 
 GNE-301 defined this test matrix. GNE-302 now owns and has executed the source,

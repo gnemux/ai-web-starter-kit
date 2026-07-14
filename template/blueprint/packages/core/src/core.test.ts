@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertCatalog, BILLING_SUBSCRIPTION_STATUSES, buildUsageReservation, CREDIT_EVENT_TYPES, isAiCapability, safeInternalPath } from "./index";
+import { assertCatalog, BILLING_SUBSCRIPTION_STATUSES, buildUsageReservation, CREDIT_EVENT_TYPES, historicalReferenceLabel, isActiveRecord, isAiCapability, safeInternalPath } from "./index";
 
 test("safe internal paths reject browser redirect bypasses", () => {
   for (const value of ["https://evil.example", "//evil.example", "/\\evil.example", "/\u0000evil", "javascript:alert(1)"]) assert.equal(safeInternalPath(value, "/login"), "/login");
@@ -16,4 +16,10 @@ test("billing catalog stays product-configured and usage is idempotent", () => {
   assert.doesNotThrow(() => assertCatalog({ plans: [{ id: "starter", name: "Starter", rank: 1, featureKeys: ["export"] }], prices: [{ id: "starter_month", planId: "starter", currency: "usd", amountCents: 900, interval: "month" }] }));
   assert.equal(buildUsageReservation({ ownerId: "u1", featureKey: "export", units: 1, unit: "operation", idempotencyKey: "request:12345678", relatedCreditLedgerId: null, metadata: {} }).status, "reserved");
   assert.equal(isAiCapability("structured"), true);
+});
+
+test("archive helpers hide inactive records while preserving historical labels", () => {
+  assert.equal(isActiveRecord({ archivedAt: null }), true);
+  assert.equal(isActiveRecord({ archivedAt: "2026-07-14T00:00:00Z" }), false);
+  assert.equal(historicalReferenceLabel({ currentLabel: null, snapshotLabel: "Original name", wasArchived: true }), "Original name (deleted)");
 });

@@ -44,6 +44,19 @@ Expected result:
   `.env.local`, source absolute path, secret, CatCare, Demo, or MVP evidence is
   present.
 
+The default command produces the neutral pristine candidate. To derive a real
+single-product repository, prepare one reviewed configuration and run:
+
+```bash
+pnpm product:init -- --config /absolute/path/to/product.json
+pnpm product:verify
+```
+
+`product:init` updates only the declared product configuration/state, generated
+TypeScript configuration and neutral local Supabase identity. It does not edit
+platform/package code. Replacing an already-derived identity requires
+`--force`; normal product work belongs in `apps/web/modules/product`.
+
 ## 2. Verify Determinism
 
 ```bash

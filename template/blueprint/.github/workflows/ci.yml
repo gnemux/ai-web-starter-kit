@@ -22,3 +22,20 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Verify
         run: pnpm lint && pnpm typecheck && pnpm test && pnpm build
+
+  database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@3c2f5e2ae34c34e428e8e206e2c4d21fa2d20fbf
+        with:
+          version: 2.107.0
+      - name: Rebuild disposable database
+        run: supabase start && supabase db reset
+      - name: Run pgTAP security and retention tests
+        run: supabase test db
+      - name: Stop disposable database
+        if: always()
+        run: supabase stop --no-backup

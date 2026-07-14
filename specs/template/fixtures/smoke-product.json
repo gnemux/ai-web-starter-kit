@@ -5,7 +5,8 @@
     "mark": "SM",
     "tagline": "A disposable identity for independent template verification.",
     "locale": "en-US",
-    "eventNamespace": "smoke_product"
+    "eventNamespace": "smoke_product",
+    "releaseVersion": "0.1.0-smoke"
   },
   "paths": {
     "home": "/",

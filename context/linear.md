@@ -725,6 +725,15 @@ It classifies the current routes, imports, assets, packages, and all 18 source
 migrations without moving runtime code or creating a candidate. GNE-302 must
 consume this boundary and may not silently redefine it during implementation.
 
+GNE-302 was initially merged through PR #96, then restored to In Progress on
+2026-07-14 after product/architecture review found durable-template omissions.
+Its strengthened scope owns source-to-template drift detection, candidate-owned
+`product:init`, a real product-module consumer, capability registry consistency,
+real UI/cache/invalidation consumers, Supabase SSR/key hardening, immutable
+Billing-history retention, Analytics multi-product dimensions, and database
+CI. GNE-303 remains Backlog and may only independently verify the resulting
+artifact; it must not implement these known gaps.
+
 GNE-240 owns detailed package dependency rules for the GNE-229 parent. GNE-242
 uses the MVP3 target namespace directly: `@xwlc/core`, `@xwlc/ui`,
 `@xwlc/platform`, and `@xwlc/db`. The old `@starter/*` workspace namespace is no

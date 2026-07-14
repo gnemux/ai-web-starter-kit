@@ -11,4 +11,9 @@ export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) { r
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) { return <select {...props} />; }
 export function Checkbox(props: InputHTMLAttributes<HTMLInputElement>) { return <input {...props} type="checkbox" />; }
 export function Notice({ children }: { children: ReactNode }) { return <div className="notice" role="status">{children}</div>; }
-export function StatePanel({ kind, title, description }: { kind: "loading" | "empty" | "error" | "disabled"; title: string; description: string }) { return <Card><Badge>{kind}</Badge><h2>{title}</h2><p>{description}</p></Card>; }
+export function Tabs({ items, label }: { items: Array<{ label: string; href: string; current?: boolean }>; label: string }) { return <nav aria-label={label} className="tabs">{items.map((item) => <a aria-current={item.current ? "page" : undefined} href={item.href} key={item.href}>{item.label}</a>)}</nav>; }
+export function Dialog({ open = false, title, description, children }: { open?: boolean; title: string; description: string; children?: ReactNode }) { return <dialog aria-labelledby="foundation-dialog-title" open={open}><h2 id="foundation-dialog-title">{title}</h2><p>{description}</p>{children}</dialog>; }
+export function Popover({ summary, children }: { summary: string; children: ReactNode }) { return <details className="popover"><summary>{summary}</summary><div>{children}</div></details>; }
+export function Toast({ children }: { children: ReactNode }) { return <div aria-live="polite" className="toast" role="status">{children}</div>; }
+export function Skeleton({ label = "Loading content" }: { label?: string }) { return <div aria-label={label} className="skeleton" role="status"><span /><span /><span /></div>; }
+export function StatePanel({ kind, title, description }: { kind: "loading" | "empty" | "error" | "forbidden" | "disabled"; title: string; description: string }) { return <Card><Badge>{kind}</Badge><h2>{title}</h2><p>{description}</p>{kind === "loading" ? <Skeleton /> : null}</Card>; }

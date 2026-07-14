@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions, pg_catalog;
-select plan(141);
+select plan(142);
 
 select ok(c.relrowsecurity, format('%s has RLS enabled', expected.table_name))
 from unnest(array['user_profiles','billing_orders','billing_subscriptions','billing_entitlements','billing_credit_ledger','billing_usage_ledger','payment_events']) expected(table_name)
@@ -45,6 +45,8 @@ insert into public.billing_usage_ledger (id, owner_id, feature_key, units, unit,
   ('26000000-0000-0000-0000-000000000002','21000000-0000-0000-0000-000000000002','feature_a',1,'operation','committed','usage:owner-b');
 insert into public.payment_events (id, provider, event_id, event_type, idempotency_key) values
   ('27000000-0000-0000-0000-000000000001','sandbox','event-owner-a','checkout.completed','payment:owner-a');
+
+select throws_ok($$delete from auth.users where id = '21000000-0000-0000-0000-000000000001'$$, '23503', null, 'auth user deletion cannot erase immutable billing facts');
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '21000000-0000-0000-0000-000000000001', true);

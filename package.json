@@ -14,8 +14,9 @@
     "payment:creem:test-checkout": "node integrations/scripts/creem-test-checkout.mjs",
     "template:generate": "node template/generate.mjs",
     "template:compare": "node template/compare.mjs",
+    "template:drift": "node template/verify-drift.mjs",
     "template:verify": "node template/verify-candidate.mjs",
-    "test:template": "node --test template/tests/*.test.mjs",
+    "test:template": "pnpm template:drift && pnpm template:drift -- --negative-fixture && node --test template/tests/*.test.mjs",
     "test": "pnpm test:ai-safety && pnpm test:release-boundaries && pnpm test:package-boundaries && pnpm test:template && turbo test"
   },
   "devDependencies": {

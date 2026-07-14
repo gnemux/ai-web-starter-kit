@@ -14,6 +14,10 @@ if (!/create policy owner_update_user_profiles[\s\S]+using \(auth\.uid\(\) = id\
 if (/create policy[^;]+payment_events/i.test(sql)) throw new Error("Payment events must have no public policy");
 if (!sql.includes("set search_path = ''") || !sql.includes("revoke execute on function public.set_updated_at() from public, anon, authenticated")) throw new Error("Trigger function hardening missing");
 for (const required of ["idempotency_key", "related_credit_ledger_id", "source_type", "source_id", "metadata", "reserved", "committed", "released", "failed"]) if (!sql.includes(required)) throw new Error(`Foundation semantics missing: ${required}`);
+for (const table of ["billing_orders", "billing_subscriptions", "billing_entitlements", "billing_credit_ledger", "billing_usage_ledger"]) {
+  const tableSql = sql.slice(sql.indexOf(`create table public.${table}`), sql.indexOf(");", sql.indexOf(`create table public.${table}`)) + 2);
+  if (!/owner_id uuid not null references auth\.users\(id\) on delete restrict/.test(tableSql)) throw new Error(`Immutable billing facts must restrict auth-user deletion: ${table}`);
+}
 const billingContract = await readFile(path.join(root, "packages/core/src/billing.ts"), "utf8");
 for (const status of ["trialing", "active", "past_due", "canceled", "expired", "refunded"]) if (!billingContract.includes(`\"${status}\"`) || !sql.includes(`'${status}'`)) throw new Error(`Subscription status contract drift: ${status}`);
 for (const eventType of ["grant", "reserve", "consume", "release", "refund", "expire", "adjustment"]) if (!billingContract.includes(`\"${eventType}\"`) || !sql.includes(`'${eventType}'`)) throw new Error(`Credit event contract drift: ${eventType}`);
@@ -22,6 +26,9 @@ const ignores = await readFile(path.join(root, ".gitignore"), "utf8");
 for (const expected of ["node_modules/", ".next/", ".turbo/", ".vercel/", ".env.*"]) if (!ignores.includes(expected)) throw new Error(`Repository hygiene ignore missing: ${expected}`);
 const config = await readFile(path.join(root, "apps/web/next.config.ts"), "utf8");
 for (const header of ["frame-ancestors 'none'", "Referrer-Policy", "X-Content-Type-Options", "Permissions-Policy"]) if (!config.includes(header)) throw new Error(`Security header missing: ${header}`);
+if (!config.includes('process.env.NODE_ENV === "development"') || !config.includes(': "script-src \'self\' \'unsafe-inline\'"')) throw new Error("Production CSP must exclude unsafe-eval");
 const proxy = await readFile(path.join(root, "apps/web/modules/platform/supabase/proxy.ts"), "utf8");
-for (const cookieContract of ["request.cookies.getAll()", "response.cookies.set(name, value, options)", "client.auth.getUser()"] ) if (!proxy.includes(cookieContract)) throw new Error(`Session cookie refresh contract missing: ${cookieContract}`);
+for (const cookieContract of ["request.cookies.getAll()", "response.cookies.set(name, value, options)", "Object.entries(headers)", "client.auth.getClaims()"] ) if (!proxy.includes(cookieContract)) throw new Error(`Session cookie refresh contract missing: ${cookieContract}`);
+const supabaseConfig = await readFile(path.join(root, "apps/web/modules/platform/supabase/config.ts"), "utf8");
+if (!supabaseConfig.includes("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") || !supabaseConfig.includes("NEXT_PUBLIC_SUPABASE_ANON_KEY")) throw new Error("Publishable-key preference and legacy fallback must both be explicit");
 console.log("Security and foundation SQL boundaries verified");

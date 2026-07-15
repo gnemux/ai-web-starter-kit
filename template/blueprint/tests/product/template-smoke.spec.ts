@@ -6,6 +6,27 @@ test("anonymous product entry preserves its safe return path", async ({ page }) 
   await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
 });
 
+test("an invalid persisted local session recovers as anonymous", async ({ context, page }) => {
+  const staleSession = {
+    access_token: "expired.local.session",
+    refresh_token: "missing-local-refresh-token",
+    token_type: "bearer",
+    expires_in: 3600,
+    expires_at: 1,
+    user: { id: "00000000-0000-4000-8000-000000000000", aud: "authenticated", role: "authenticated", email: "stale@example.test" }
+  };
+  await context.addCookies([{
+    name: "sb-127-auth-token",
+    value: `base64-${Buffer.from(JSON.stringify(staleSession)).toString("base64url")}`,
+    domain: "127.0.0.1",
+    path: "/"
+  }]);
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Start with the platform work already solved." })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+  expect((await context.cookies()).some(({ name }) => name.startsWith("sb-127-auth-token"))).toBe(false);
+});
+
 test("local account, profile, locale and shared UI remain usable", async ({ page }) => {
   const email = `template-smoke-${Date.now()}-${test.info().project.name}@example.test`;
   const password = "Template-Smoke-2026!";

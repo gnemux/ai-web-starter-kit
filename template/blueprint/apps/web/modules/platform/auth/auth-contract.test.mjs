@@ -53,6 +53,15 @@ test("confirmation exchange keeps cookies and forbids caching", async () => {
   assert.ok(route.includes("exchangeCodeForSession"));
 });
 
+test("invalid persisted sessions are cleared without hiding provider outages", async () => {
+  const proxy = await readFile(new URL("../supabase/proxy.ts", import.meta.url), "utf8");
+  assert.match(proxy, /clearAuthCookiesAtScopes/);
+  for (const code of ["bad_jwt", "user_not_found", "session_not_found", "session_expired", "refresh_token_not_found", "refresh_token_already_used"]) assert.ok(proxy.includes(`"${code}"`));
+  assert.match(proxy, /isInvalidStoredSession\(error\)/);
+  assert.doesNotMatch(proxy, /request_timeout/);
+  assert.match(proxy, /"Cache-Control", "private, no-store, max-age=0"/);
+});
+
 test("locale-sensitive form copy is controlled across in-place refreshes", async () => {
   const workspace = await readFile(new URL("../../product/product-workspace.tsx", import.meta.url), "utf8");
   assert.match(workspace, /value=\{messages\.previewWorkflowValue\}/);

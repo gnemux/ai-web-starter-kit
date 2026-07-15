@@ -3,7 +3,7 @@ import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, rename, rm, stat, w
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import Ajv2020 from "ajv/dist/2020.js";
-import { generatedProductModule, generatedSupabaseConfig, productState, validateProductConfig as validatePortableProductConfig } from "./blueprint/scripts/product-config.mjs";
+import { generatedProductModule, generatedSupabaseConfig, productState, productWorkspaceSegment, validateProductConfig as validatePortableProductConfig } from "./blueprint/scripts/product-config.mjs";
 
 const textDecoder = new TextDecoder("utf-8", { fatal: true });
 const buildArtifactNames = new Set(["node_modules", ".next", ".turbo", ".vercel", ".temp", ".branches", "coverage", "dist"]);
@@ -268,7 +268,8 @@ export async function generateCandidate({ sourceRoot, outputRoot, configFile, dr
   const templateRoot = path.join(sourceRoot, "template");
   const blueprintRoot = path.join(templateRoot, "blueprint");
   const manifest = validateManifest(await readJson(path.join(templateRoot, "manifest.json")), await readJson(path.join(templateRoot, "manifest.schema.json")));
-  const config = validateProductConfig(await readJson(configFile ?? path.join(templateRoot, "default-product.json")));
+  const defaultConfig = validateProductConfig(await readJson(path.join(templateRoot, "default-product.json")));
+  const config = validateProductConfig(configFile ? await readJson(configFile) : defaultConfig);
   const actualFiles = await listFiles(blueprintRoot);
   const copyArtifacts = assertArtifactInventory(actualFiles, manifest.artifacts);
   const source = gitMetadata(sourceRoot);
@@ -285,6 +286,9 @@ export async function generateCandidate({ sourceRoot, outputRoot, configFile, dr
   const temporary = await mkdtemp(path.join(path.dirname(absoluteOutput), ".candidate-partial-"));
   try {
     await copyBlueprint(blueprintRoot, temporary, copyArtifacts);
+    const blueprintRoute = path.join(temporary, "apps/web/app/(product)", productWorkspaceSegment(defaultConfig.paths.product));
+    const configuredRoute = path.join(temporary, "apps/web/app/(product)", productWorkspaceSegment(config.paths.product));
+    if (blueprintRoute !== configuredRoute) await rename(blueprintRoute, configuredRoute);
     await writeFile(path.join(temporary, "apps/web/config/product.config.ts"), generatedProductModule(config, manifest.candidateVersion));
     await writeFile(path.join(temporary, "supabase/config.toml"), generatedSupabaseConfig(config));
     await writeFile(path.join(temporary, "product.config.json"), `${JSON.stringify(config, null, 2)}\n`);

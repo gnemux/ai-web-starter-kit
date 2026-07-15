@@ -190,3 +190,31 @@ schema version; no speculative runtime schema-version table is required.
 - GNE-303 can follow one cold-start path and produce pass/fail/not_run evidence;
 - a new product can replace identity and product behavior without importing or
   copying CatCare DTOs, pages, services, assets, migrations, or event unions.
+
+## GNE-315 Final Product-Hardening Contract
+
+The generated repository must be a usable starting point for a real
+multi-page single product, not only a configurable one-page placeholder. A
+product owns one configurable workspace root such as `/product` or `/trips`
+and may add nested product pages below that root. Platform routes such as Home,
+Login, Account, Auth callback, Billing and Usage remain protected.
+
+Foundation browser evidence is product-independent. Auth, profile persistence,
+locale, cache invalidation, safe return paths, Provider safe-disabled states and
+shared account interactions remain under a protected foundation test suite.
+Product tests are replaceable and may be empty before the first product flow is
+implemented. A product is never required to retain sample controls merely to
+make a shared-component inventory check pass.
+
+The neutral workspace shows an honest empty starting state and capability
+status. It does not simulate saved work, fixed completion progress or a
+successful business command. Dialog and Toast remain only where the protected
+account shell uses them for real confirmation and persisted-profile feedback.
+The shared UI package keeps a small tested neutral icon set and components with
+names that match their semantics; it does not add speculative data, map, chart,
+upload or full icon-library components.
+
+GNE-315 changes the mother-template source and generated candidate only. It
+must not change CatCare or Demo runtime behavior. A temporary multi-page product
+derivation is acceptance evidence and is not retained as mother-template
+product code.

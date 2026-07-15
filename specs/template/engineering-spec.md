@@ -195,7 +195,8 @@ xwlc-web-starter-template/
 │   └── migrations/<timestamp>_foundation_baseline.sql
 ├── specs/_template/
 ├── context/ integrations/ .github/ .codex/ scripts/
-├── playwright.config.ts tests/product/    # reusable desktop/mobile user smoke
+├── playwright.config.ts tests/foundation/ # protected desktop/mobile platform smoke
+├── tests/product/                         # replaceable product journeys
 ├── AGENTS.md README.md .env.example
 ├── LICENSE THIRD_PARTY_NOTICES.md
 ├── template-version.json
@@ -521,6 +522,52 @@ without their separate gates.
 7. Generate into an isolated clean directory and run targeted checks.
 8. Regression-test CatCare/Demo in the research repository.
 9. Stop after GNE-302 acceptance; GNE-303 performs independent smoke.
+
+## GNE-315 Product Extension And Test Ownership
+
+The generated App Router has two ownership zones:
+
+```text
+apps/web/app/
+├── page.tsx, login/, account/, auth/, error/loading/not-found  # protected platform routes
+└── (product)/<workspace-root>/**                               # editable product routes
+```
+
+`paths.product` is one safe top-level workspace root. It cannot collide with
+`/`, `/login`, `/account`, `/auth`, `/api` or framework-reserved segments.
+Navigation may target protected platform routes or the configured workspace
+root and its descendants. `product:init` atomically moves the starter product
+route when the workspace root changes; it refuses overwrite/conflict and rolls
+back config plus route changes on failure.
+
+Every product `page.tsx` must be a server composition layer that imports a
+public product module. Product routes must not contain client state, direct
+Supabase/provider SDK access, service-role vocabulary, or product-independent
+platform implementation. The boundary gate scans every product page, rejects
+reserved route collisions and keeps platform-to-product imports forbidden.
+
+Browser ownership is also explicit:
+
+```text
+tests/foundation/**  # protected Auth/account/locale/cache/security/UI evidence
+tests/product/**     # editable real-product journeys; empty is valid initially
+```
+
+CI always builds production output and runs the foundation browser suite with
+`next start`. It then runs the product suite with an explicit pass-when-empty
+contract. Unit tests, not a sample product page, own the complete shared-UI
+inventory. The default product workspace may consume a useful subset but can be
+replaced without weakening foundation CI.
+
+`@xwlc/ui` uses semantic component names (`NavTabs`, `Disclosure`) and a small
+neutral SVG icon set consumed by shared components. Dialog and Toast are
+consumed by real Account confirmation and persisted-profile feedback. Unused
+layout/form/demo exports and simulated progress are excluded.
+
+The manifest upgrades its candidate and generator versions, declares the
+product route root editable, protects foundation tests, and records the same
+source commit/provenance model. No database schema or research-product runtime
+change is part of this hardening.
 
 ## Architecture Acceptance
 

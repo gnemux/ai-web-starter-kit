@@ -24,7 +24,7 @@ const notices = await readFile(path.join(root, "THIRD_PARTY_NOTICES.md"), "utf8"
 for (const [name, version] of directExternal) if (!notices.includes(`| ${name} | ${version} |`)) throw new Error(`Third-party notice missing for ${name}@${version}`);
 const workflow = await readFile(path.join(root, ".github/workflows/ci.yml"), "utf8");
 for (const use of workflow.matchAll(/uses:\s*([^\s]+)/g)) if (!/@[0-9a-f]{40}$/.test(use[1])) throw new Error(`Workflow action is not SHA pinned: ${use[1]}`);
-if (workflow.includes("cache: pnpm")) throw new Error("setup-node must not request pnpm cache before pnpm is activated");
+if (/cache:\s*["']?pnpm["']?/.test(workflow)) throw new Error("setup-node must not request pnpm cache before pnpm is activated");
 const buildGate = workflow.indexOf("run: pnpm lint && pnpm typecheck && pnpm test && pnpm build");
 const integrityGate = workflow.indexOf("- name: Verify candidate integrity\n        run: pnpm template:verify");
 if (buildGate < 0 || integrityGate < buildGate) throw new Error("CI must verify candidate integrity after the build");
@@ -41,4 +41,5 @@ if (!accountReader.includes('cacheOwnerFact("account_profile", data.user.id')) t
 if (!accountWriter.includes('invalidateOwnerFact("account_profile", data.user.id)') || !accountWriter.includes("revalidatePath(productConfig.paths.account)")) throw new Error("Account writes must precisely invalidate the owner fact and account path");
 const rootPackage = JSON.parse(await readFile(path.join(root, "package.json"), "utf8"));
 if (!rootPackage.scripts?.lint?.includes("scripts/lint-source.mjs")) throw new Error("Lint must include an independent source-quality gate, not only typecheck");
+if (!rootPackage.scripts?.["test:browser"]?.includes("pnpm build") || !rootPackage.scripts?.["test:browser"]?.includes("test:browser:foundation") || !rootPackage.scripts?.["test:browser:product"]?.includes("pass-with-no-tests")) throw new Error("Browser CI must build first, preserve foundation regression and allow an initially empty product suite");
 console.log("Release and supply-chain boundaries verified");

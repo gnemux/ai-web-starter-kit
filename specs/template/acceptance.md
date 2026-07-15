@@ -170,6 +170,22 @@ secret/license issue is **No-Go**.
 | shared cloud DB/provider secrets | not_run / intentionally none | isolated local 5532x stack only |
 | external candidate GitHub/Vercel | not_run / target approval required | does not block local Conditional Go |
 
+### Post-review Candidate.3 Result
+
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| authentication modes and failure recovery | pass | separate sign-in/sign-up/reset/update-password paths, localized invalid-credential feedback, PKCE confirmation callback, safe internal return tests |
+| real local account sign-out/sign-in | pass | `gne303-review@example.test` authenticated again through the browser and returned to `/product` |
+| locale-sensitive controlled UI | pass | English/Chinese switch on the same URL and updates the workflow textarea rather than retaining stale `defaultValue` copy |
+| shared contracts and accessibility | pass | shared variants/loading, localized Dialog/Toast dismissal and conditional FormField ARIA descriptions have package and app contract coverage |
+| clean candidate quality gate | pass | candidate `.3`: frozen install, lint, typecheck, 29 package/app tests, production build and post-build integrity verification |
+| GitHub, Vercel, shared cloud resources | not_run / unchanged | user acceptance gate remains active; no external write occurred |
+
+This record resolves the immediate three-party findings that would otherwise
+be inherited by every future product. It does not close GNE-303 or GNE-298;
+the final local server, isolated database, and test account remain available
+for the user's page acceptance.
+
 ## Capability Classification At Parent Completion
 
 | Class | Meaning |

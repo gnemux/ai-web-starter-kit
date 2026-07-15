@@ -1398,6 +1398,27 @@ GNE-303 verified-candidate checkpoint on 2026-07-14:
   persisted profile update, English/Chinese switching, shared UI lifecycle and
   390/1440 responsive checks. External GitHub/Vercel remains `not_run`.
 
+GNE-303 post-review hardening checkpoint on 2026-07-15:
+
+- The three immediate cross-product gaps are closed locally: Auth now separates
+  sign-in, sign-up, password reset, and protected password update; Core owns the
+  single same-origin return validator and shared capability vocabulary; shared
+  UI owns the variants, loading, dismissal, and ARIA behavior consumed by the
+  neutral app.
+- The reported local login failure was reproduced as invalid credentials rather
+  than a database or session failure. The page now returns a specific localized
+  recovery message. The retained local acceptance account was then signed out
+  and signed back in successfully through the browser.
+- A new candidate `0.2.0-candidate.3` from `89170f9` passes frozen install,
+  lint, typecheck, 29 package/app tests, production build, and post-build
+  integrity verification. English/Chinese same-URL switching also updates
+  controlled form copy, closing the stale-language defect found during browser
+  review.
+- The final local candidate remains served on port 3000 against the isolated
+  5532x Supabase stack for user acceptance. GNE-303 and GNE-298 remain In
+  Progress; GitHub, Vercel, shared cloud resources, and candidate directories
+  remain untouched.
+
 1. Complete only `GNE-303`: generate neutral and Smoke candidates, run clean
    install/build/test and two isolated local database resets, then perform
    browser and independent reviewer acceptance.

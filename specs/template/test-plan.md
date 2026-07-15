@@ -167,6 +167,29 @@ Analytics has no static `posthog-js` import.
   390/1440 responsive overflow checks pass;
 - external repository/Vercel remains `not_run` until a target-specific approval.
 
+### GNE-303 Post-review Hardening Record (2026-07-15)
+
+- candidate `0.2.0-candidate.3` was generated from local source commit
+  `89170f9f92d9275188f2212630bcfc5f7f3143f1` into a new independent directory;
+- frozen install, five-package lint/typecheck, 29 package/app tests, production
+  build, security/release/boundary checks, and post-build three-layer integrity
+  verification pass (`protected=115`, `product=5`);
+- Auth has distinct sign-in, sign-up, reset-password, and protected
+  update-password modes; reset callbacks use the local PKCE confirmation path,
+  invalid credentials produce an actionable localized message, and safe return
+  validation has one shared Core implementation;
+- a disposable local account was signed out and signed back in through the real
+  browser; the protected profile was present after authentication;
+- English and Chinese switch on the same `/product` URL, including the
+  controlled textarea value that previously retained stale locale copy;
+- capability mode/state vocabulary is shared by Core and Platform, and the
+  visible registry is localized rather than exposing implementation enum copy;
+- shared Button/Badge/Card/FormField/Dialog/Toast contracts now own variants,
+  loading/dismissal and ARIA behavior used by the neutral app;
+- the isolated local Supabase stack and final local web server remain available
+  for user acceptance. Shared cloud resources and external deployment remain
+  untouched.
+
 ### Clean Install And Build
 
 Follow `quickstart.md` from a new directory with no source `node_modules`,

@@ -734,6 +734,17 @@ interaction consumption, lazy Analytics loading, and a protected-foundation +
 editable-product + generated-config integrity model. These refinements may
 change only template/spec sources; CatCare/Demo runtime remains out of scope.
 
+GNE-303 post-review hardening on 2026-07-15 keeps the same scope and stop rule.
+Candidate `0.2.0-candidate.3` adds distinct Auth recovery modes and actionable
+localized failures, one Core safe-return implementation, shared Core/Platform
+capability vocabulary, and shared UI variants/dismissal/ARIA contracts consumed
+by the neutral app. Frozen install, lint, typecheck, 29 package/app tests,
+production build, three-layer verification, real local account re-login, and
+same-URL English/Chinese controlled-form switching pass. The final local server,
+isolated Supabase stack, and test account are retained for user acceptance.
+GNE-303/GNE-298 stay In Progress; no GitHub, Vercel, or shared-cloud operation
+is authorized by this checkpoint.
+
 GNE-240 owns detailed package dependency rules for the GNE-229 parent. GNE-242
 uses the MVP3 target namespace directly: `@xwlc/core`, `@xwlc/ui`,
 `@xwlc/platform`, and `@xwlc/db`. The old `@starter/*` workspace namespace is no

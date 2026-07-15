@@ -22,6 +22,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Verify
         run: pnpm lint && pnpm typecheck && pnpm test && pnpm build
+      - name: Verify candidate integrity
+        run: pnpm template:verify
 
   database:
     runs-on: ubuntu-latest

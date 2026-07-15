@@ -6,6 +6,7 @@ import { normalizeInternalReturn } from "../navigation/internal-return.ts";
 
 test("auth surface separates sign in, sign up, reset and profile update", async () => {
   const actions = await readFile(new URL("./actions.ts", import.meta.url), "utf8");
+  const submit = await readFile(new URL("./auth-submit-button.tsx", import.meta.url), "utf8");
   const login = await readFile(new URL("../../../app/login/page.tsx", import.meta.url), "utf8");
   assert.match(actions, /export async function signUp/);
   assert.match(actions, /export async function requestPasswordReset/);
@@ -15,6 +16,8 @@ test("auth surface separates sign in, sign up, reset and profile update", async 
   assert.match(actions, /export async function updateProfile/);
   assert.match(login, /mode === "signup" \? "new-password" : "current-password"/);
   assert.match(login, /confirmPassword/);
+  assert.match(submit, /useFormStatus/);
+  assert.match(submit, /loadingLabel=\{pendingLabel\}/);
   for (const relative of ["../../../app/account/page.tsx", "../../../app/account/billing/page.tsx", "../../../app/account/usage/page.tsx"]) {
     assert.match(await readFile(new URL(relative, import.meta.url), "utf8"), /redirect\(/);
   }

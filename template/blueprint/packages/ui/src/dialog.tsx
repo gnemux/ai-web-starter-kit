@@ -12,7 +12,7 @@ export function Dialog({ open, onOpenChange, title, description, closeLabel, chi
     if (open && !dialog.open) { returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; dialog.showModal(); }
     if (!open && dialog.open) dialog.close();
   }, [open]);
-  return <dialog aria-describedby={descriptionId} aria-labelledby={titleId} onCancel={(event) => { event.preventDefault(); onOpenChange(false); }} onClose={() => { onOpenChange(false); returnFocus.current?.focus(); }} ref={ref}>
+  return <dialog aria-describedby={descriptionId} aria-labelledby={titleId} className="ui-dialog" onCancel={(event) => { event.preventDefault(); onOpenChange(false); }} onClose={() => { onOpenChange(false); returnFocus.current?.focus(); }} ref={ref}>
     <button aria-label={closeLabel} className="dialog-close" onClick={() => onOpenChange(false)} type="button">×</button><h2 id={titleId}>{title}</h2><p id={descriptionId}>{description}</p>{children}
   </dialog>;
 }

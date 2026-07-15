@@ -21,21 +21,22 @@ export function FormField({ id, label, hint, error, children }: { id?: string; l
     : children;
   return <label className="field" htmlFor={id}><span>{label}</span>{control}{hint && <small id={id ? `${id}-hint` : undefined}>{hint}</small>}{error && <small className="field-error" id={id ? `${id}-error` : undefined} role="alert">{error}</small>}</label>;
 }
-export function Input(props: InputHTMLAttributes<HTMLInputElement>) { return <input {...props} />; }
-export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) { return <textarea {...props} />; }
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) { return <select {...props} />; }
-export function Checkbox(props: InputHTMLAttributes<HTMLInputElement>) { return <input {...props} type="checkbox" />; }
+const controlClass = (base: string, className?: string) => [base, className].filter(Boolean).join(" ");
+export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) { return <input {...props} className={controlClass("ui-input", className)} />; }
+export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) { return <textarea {...props} className={controlClass("ui-textarea", className)} />; }
+export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) { return <select {...props} className={controlClass("ui-select", className)} />; }
+export function Checkbox({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) { return <input {...props} className={controlClass("ui-checkbox", className)} type="checkbox" />; }
 export function Notice({ children, variant = "info" }: { children: ReactNode; variant?: "info" | "success" | "warning" | "error" }) { return <div className={`notice notice-${variant}`} role={variant === "error" ? "alert" : "status"}>{children}</div>; }
 export function NavTabs({ children, label }: { children: ReactNode; label: string }) { return <nav aria-label={label} className="tabs">{children}</nav>; }
 export const Tabs = NavTabs;
 export function Popover({ summary, children }: { summary: string; children: ReactNode }) { return <details className="popover"><summary>{summary}</summary><div>{children}</div></details>; }
-export function Skeleton({ label = "Loading content" }: { label?: string }) { return <div aria-label={label} className="skeleton" role="status"><span /><span /><span /></div>; }
-export function StatePanel({ kind, kindLabel, title, description }: { kind: "loading" | "empty" | "error" | "forbidden" | "disabled"; kindLabel?: string; title: string; description: string }) { return <Card><Badge>{kindLabel ?? kind}</Badge><h2>{title}</h2><p>{description}</p>{kind === "loading" ? <Skeleton /> : null}</Card>; }
+export function Skeleton({ label }: { label: string }) { return <div aria-label={label} className="skeleton" role="status"><span /><span /><span /></div>; }
+export function StatePanel({ kind, kindLabel, title, description }: { kind: "loading" | "empty" | "error" | "forbidden" | "disabled"; kindLabel?: string; title: string; description: string }) { return <Card><Badge>{kindLabel ?? kind}</Badge><h2>{title}</h2><p>{description}</p>{kind === "loading" ? <Skeleton label={kindLabel ?? title} /> : null}</Card>; }
 export const Panel = Card;
 export function SectionHeader({ title, description, action }: { title: string; description?: ReactNode; action?: ReactNode }) { return <header className="section-header"><div><h2>{title}</h2>{description ? <p>{description}</p> : null}</div>{action ? <div>{action}</div> : null}</header>; }
-export function ProgressBar({ value, label = "Progress" }: { value: number; label?: string }) { const bounded = Math.max(0, Math.min(100, value)); return <div aria-label={label} aria-valuemax={100} aria-valuemin={0} aria-valuenow={bounded} className="progress" role="progressbar"><span style={{ width: `${bounded}%` }} /></div>; }
+export function ProgressBar({ value, label }: { value: number; label: string }) { const bounded = Math.max(0, Math.min(100, value)); return <div aria-label={label} aria-valuemax={100} aria-valuemin={0} aria-valuenow={bounded} className="progress" role="progressbar"><span style={{ width: `${bounded}%` }} /></div>; }
 export function EmptyState(props: { title: string; description: string }) { return <StatePanel kind="empty" {...props} />; }
-export function LoadingState({ title = "Loading", description = "Content is loading." }: { title?: string; description?: string }) { return <StatePanel kind="loading" title={title} description={description} />; }
+export function LoadingState({ title, description }: { title: string; description: string }) { return <StatePanel kind="loading" title={title} description={description} />; }
 export function ErrorState(props: { title: string; description: string }) { return <StatePanel kind="error" {...props} />; }
 export function LongContent({ label, children }: { label: string; children: ReactNode }) { return <Card className="long-content"><p className="eyebrow">{label}</p><div>{children}</div></Card>; }
 export function Container({ children, className = "" }: { children: ReactNode; className?: string }) { return <div className={`ui-container ${className}`}>{children}</div>; }

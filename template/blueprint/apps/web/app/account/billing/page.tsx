@@ -15,9 +15,9 @@ export default async function BillingPage() {
   const content = capability.state === "disabled"
     ? { kind: "disabled" as const, kindLabel: messages.stateDisabled, title: messages.paymentDisabled, description: messages.paymentDisabledDescription }
     : capability.state === "not_configured"
-      ? { kind: "error" as const, kindLabel: messages.stateError, title: messages.paymentIncomplete, description: `External mode requires: ${capability.requiredEnvironment.join(", ")}.` }
+      ? { kind: "error" as const, kindLabel: messages.stateError, title: messages.paymentIncomplete, description: `${messages.externalConfigurationRequires} ${capability.requiredEnvironment.join(", ")}.` }
       : capability.state === "not_implemented"
         ? { kind: "disabled" as const, kindLabel: messages.stateDisabled, title: messages.paymentNotImplemented, description: messages.paymentDisabledDescription }
-        : { kind: "empty" as const, kindLabel: messages.stateEmpty, title: messages.paymentSandboxReady, description: `${sandbox?.status}; external side effects: ${String(sandbox?.externalSideEffect)}. Product pricing and trusted server facts remain product-owned.` };
+        : { kind: "empty" as const, kindLabel: messages.stateEmpty, title: messages.paymentSandboxReady, description: sandbox ? messages.paymentSandboxReadyDescription : messages.paymentDisabledDescription };
   return <div className="page"><PageHeader title={messages.billing} description={messages.billingDescription} /><StatePanel {...content} /></div>;
 }

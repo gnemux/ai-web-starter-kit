@@ -194,6 +194,7 @@ xwlc-web-starter-template/
 │   └── migrations/<timestamp>_foundation_baseline.sql
 ├── specs/_template/
 ├── context/ integrations/ .github/ .codex/ scripts/
+├── playwright.config.ts tests/product/    # reusable desktop/mobile user smoke
 ├── AGENTS.md README.md .env.example
 ├── LICENSE THIRD_PARTY_NOTICES.md
 ├── template-version.json
@@ -247,6 +248,26 @@ modules/product -> package internal path
 browser code -> server-only adapter or service key
 candidate -> source absolute path, source worktree, source node_modules, or source cache
 ```
+
+## Cold-start And Browser Acceptance Contract
+
+The generated repository owns one idempotent environment initializer. It writes
+only ignored `apps/web/.env.local`, uses exclusive creation, and never replaces
+an existing developer file. Its safe-disabled mode copies the public example;
+its `--supabase-local` mode reads only the disposable local API URL and
+Publishable Key from the Supabase CLI. A service-role key is never copied into
+the web environment.
+
+The committed Playwright smoke is part of the reusable engineering foundation,
+not temporary product code. It starts the candidate web app, verifies anonymous
+return-path safety, creates disposable local users, exercises profile
+persistence, same-URL locale changes, and shared Dialog/Toast/Form behavior at
+desktop and mobile viewports. CI rebuilds the disposable database before this
+smoke; it never links to the research project's shared cloud database.
+
+Shared form and dialog styling must use package-owned scoped classes. Generic
+element selectors in application global CSS are not accepted as evidence that
+`@xwlc/ui` is independently reusable.
 
 ## Generator And Manifest Contract
 

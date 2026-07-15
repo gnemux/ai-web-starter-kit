@@ -15,9 +15,9 @@ export default async function UsagePage() {
   const content = capability.state === "disabled"
     ? { kind: "disabled" as const, kindLabel: messages.stateDisabled, title: messages.aiDisabled, description: messages.aiDisabledDescription }
     : capability.state === "not_configured"
-      ? { kind: "error" as const, kindLabel: messages.stateError, title: messages.aiIncomplete, description: `External mode requires: ${capability.requiredEnvironment.join(", ")}.` }
+      ? { kind: "error" as const, kindLabel: messages.stateError, title: messages.aiIncomplete, description: `${messages.externalConfigurationRequires} ${capability.requiredEnvironment.join(", ")}.` }
       : capability.state === "not_implemented"
         ? { kind: "disabled" as const, kindLabel: messages.stateDisabled, title: messages.aiNotImplemented, description: messages.aiDisabledDescription }
-        : { kind: "empty" as const, kindLabel: messages.stateEmpty, title: messages.aiMockReady, description: `${mock?.text} Billable: ${String(mock?.billable)}. Product prompts, budgets and usage writes remain server-owned.` };
+        : { kind: "empty" as const, kindLabel: messages.stateEmpty, title: messages.aiMockReady, description: mock ? messages.aiMockReadyDescription : messages.aiDisabledDescription };
   return <div className="page"><PageHeader title={messages.usage} description={messages.usageDescription} /><StatePanel {...content} /></div>;
 }

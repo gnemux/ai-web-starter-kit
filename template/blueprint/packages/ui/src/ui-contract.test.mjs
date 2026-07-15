@@ -25,4 +25,9 @@ test("dialog and toast require localized dismissal contracts", async () => {
 test("button variants and form descriptions are owned by the shared package", async () => {
   const ui = await source("./index.tsx");
   for (const contract of ["ButtonVariant", "ButtonSize", "loadingLabel", "button-spinner", "aria-describedby"]) assert.ok(ui.includes(contract));
+  for (const contract of ["ui-input", "ui-textarea", "ui-select", "ui-checkbox"]) assert.ok(ui.includes(contract));
+  for (const forbidden of ["Loading content", "Content is loading.", 'label = "Progress"']) assert.doesNotMatch(ui, new RegExp(forbidden.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  const css = await source("./styles.css");
+  assert.doesNotMatch(css, /(?:^|\n)input, textarea, select/);
+  assert.doesNotMatch(css, /(?:^|\n)dialog \{/);
 });

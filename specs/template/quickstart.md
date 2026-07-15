@@ -100,11 +100,20 @@ must not use `link:` paths or absolute paths pointing at `ai-web-starter-kit`.
 ## 4. Configure Local Safe Modes
 
 ```bash
-cp .env.example .env.local
+# Choose exactly one path on a fresh checkout.
+# Safe-disabled provider pages:
+pnpm env:init
+
+# Or real disposable local Auth/profile acceptance:
+supabase start
+pnpm env:init -- --supabase-local
 ```
 
-The file must match the actual generated `.env.example`. Product identity is
-owned by `product.config.json`, not duplicated in environment variables:
+Both commands create ignored `apps/web/.env.local` and refuse to overwrite an
+existing file. Do not create a root `.env.local`: the Next application runs
+from `apps/web`. The local option reads only the disposable CLI Project URL and
+Publishable Key; it never writes a service-role key. Product identity is owned
+by `product.config.json`, not duplicated in environment variables:
 
 ```text
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -122,6 +131,14 @@ needed. The candidate does not require a service-role key for local page use.
 No PostHog key is needed while Analytics is disabled. Payment `sandbox` and AI
 `mock` use deterministic no-side-effect adapters; external Payment/AI remain
 `not_implemented` until a reviewed adapter exists, regardless of secret values.
+
+After the database and public app environment are ready, run the reusable
+desktop and mobile browser smoke:
+
+```bash
+pnpm exec playwright install chromium
+pnpm test:browser
+```
 
 Before starting Supabase, inspect the generated local tooling inputs:
 

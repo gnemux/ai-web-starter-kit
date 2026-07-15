@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { Button, FormField, Input, Notice, PageHeader, Tabs } from "@xwlc/ui";
+import { FormField, Input, Notice, PageHeader, Tabs } from "@xwlc/ui";
 import { productConfig } from "@/config/product.config";
 import { requestPasswordReset, signIn, signUp } from "@/modules/platform/auth/actions";
 import { normalizeInternalReturn } from "@/modules/platform/navigation/internal-return";
 import { getCurrentAccount } from "@/modules/platform/auth/current-account";
 import { getLocalizedProduct } from "@/modules/platform/i18n/locale";
+import { AuthSubmitButton } from "@/modules/platform/auth/auth-submit-button";
 
 type LoginMode = "signin" | "signup" | "reset";
 
@@ -43,14 +44,14 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     {message ? <Notice variant="success">{message}</Notice> : null}
     {mode === "reset" ? <form action={requestPasswordReset} className="card form" aria-disabled={!account.configured}>
       <FormField id="reset-email" label={messages.email}><Input name="email" type="email" autoComplete="email" required disabled={!account.configured} /></FormField>
-      <Button disabled={!account.configured} type="submit">{messages.resetPassword}</Button>
+      <AuthSubmitButton disabled={!account.configured} label={messages.resetPassword} pendingLabel={messages.sendingReset} />
       <Link className="text-link" href={modeHref("signin")}>{messages.backToSignIn}</Link>
     </form> : <form action={mode === "signup" ? signUp : signIn} className="card form" aria-disabled={!account.configured}>
       <input type="hidden" name="next" value={next} />
       <FormField id="email" label={messages.email}><Input name="email" type="email" autoComplete="email" required disabled={!account.configured} /></FormField>
       <FormField id="password" label={messages.password} hint={messages.passwordHint}><Input name="password" type="password" autoComplete={mode === "signup" ? "new-password" : "current-password"} required minLength={8} disabled={!account.configured} /></FormField>
       {mode === "signup" ? <FormField id="confirm-password" label={messages.confirmPassword}><Input name="confirmPassword" type="password" autoComplete="new-password" required minLength={8} disabled={!account.configured} /></FormField> : null}
-      <Button disabled={!account.configured} type="submit">{mode === "signup" ? messages.createAccount : messages.signIn}</Button>
+      <AuthSubmitButton disabled={!account.configured} label={mode === "signup" ? messages.createAccount : messages.signIn} pendingLabel={mode === "signup" ? messages.creatingAccount : messages.signingIn} />
       {mode === "signin" ? <Link className="text-link" href={modeHref("reset")}>{messages.forgotPassword}</Link> : null}
     </form>}
   </div>;

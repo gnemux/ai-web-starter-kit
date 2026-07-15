@@ -33,9 +33,9 @@
 .form { display: grid; gap: 20px; margin-top: 32px; }
 .field { display: grid; gap: 8px; font-weight: 650; }
 .field-error { color: var(--ui-color-error); }
-input, textarea, select { width: 100%; min-height: 46px; padding: 10px 13px; border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); border-radius: var(--ui-radius-sm); background: white; font: inherit; }
+.ui-input, .ui-textarea, .ui-select { width: 100%; min-height: 46px; padding: 10px 13px; border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); border-radius: var(--ui-radius-sm); background: white; font: inherit; }
 .checkbox-row { display: inline-flex; align-items: flex-start; gap: 10px; font-weight: 500; }
-.checkbox-row input[type="checkbox"] { width: auto; min-height: auto; margin-top: .3em; }
+.checkbox-row .ui-checkbox { width: auto; min-height: auto; margin-top: .3em; }
 .notice { margin-top: 20px; padding: 14px 16px; border-radius: 14px; border: 1px solid transparent; }
 .notice-info { background: var(--accent-soft); }
 .notice-success { color: var(--ui-color-success); background: color-mix(in srgb, var(--ui-color-success) 10%, white); border-color: color-mix(in srgb, var(--ui-color-success) 32%, transparent); }
@@ -52,8 +52,8 @@ input, textarea, select { width: 100%; min-height: 46px; padding: 10px 13px; bor
 .popover summary { cursor: pointer; font-weight: 700; }
 .toast { position: fixed; z-index: 20; right: var(--ui-space-6); bottom: var(--ui-space-6); display: flex; align-items: center; gap: var(--ui-space-4); max-width: min(420px, calc(100vw - 48px)); padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 14px; background: var(--accent-soft); box-shadow: var(--ui-shadow-panel); }
 .toast button, .dialog-close { border: 0; background: transparent; font: inherit; cursor: pointer; }
-dialog { max-width: 520px; border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); border-radius: 20px; padding: 24px; }
-dialog::backdrop { background: color-mix(in srgb, var(--ink) 45%, transparent); }
+.ui-dialog { max-width: 520px; border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); border-radius: 20px; padding: 24px; }
+.ui-dialog::backdrop { background: color-mix(in srgb, var(--ink) 45%, transparent); }
 .dialog-close { float: right; font-size: 1.5rem; }
 .skeleton { display: grid; gap: 9px; margin-top: 18px; }
 .skeleton span { display: block; height: 12px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 10%, transparent); }

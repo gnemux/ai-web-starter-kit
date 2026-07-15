@@ -14,6 +14,7 @@ The candidate redistributes source references and lockfile metadata for the depe
 | autoprefixer | 10.5.0 | https://github.com/postcss/autoprefixer | MIT | build-time package reference only |
 | postcss | 8.5.15 | https://github.com/postcss/postcss | MIT | build-time package reference only |
 | tsx | 4.21.0 | https://github.com/privatenumber/tsx | MIT | test-time package reference only |
+| @playwright/test | 1.61.1 | https://github.com/microsoft/playwright | Apache-2.0 | browser-test package reference only |
 | @types/node | 22.19.21 | https://github.com/DefinitelyTyped/DefinitelyTyped | MIT | type-only package reference |
 | @types/react | 19.2.17 | https://github.com/DefinitelyTyped/DefinitelyTyped | MIT | type-only package reference |
 | @types/react-dom | 19.2.3 | https://github.com/DefinitelyTyped/DefinitelyTyped | MIT | type-only package reference |

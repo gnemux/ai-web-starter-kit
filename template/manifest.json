@@ -4,7 +4,7 @@
   "manifestVersion": "1.0.0",
   "generatorVersion": "1.0.0",
   "noticesInventoryVersion": "1.0.0",
-  "candidateVersion": "0.2.0-candidate.3",
+  "candidateVersion": "0.2.0-candidate.4",
   "sourcePackageVersion": "0.1.1",
   "source": {
     "repository": "https://github.com/gnemux/ai-web-starter-kit.git",
@@ -30,7 +30,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -47,7 +47,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -64,7 +64,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -81,7 +81,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -98,7 +98,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -115,7 +115,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -132,7 +132,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -149,7 +149,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -166,7 +166,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -183,7 +183,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -200,7 +200,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -217,7 +217,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -234,7 +234,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -251,7 +251,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -268,7 +268,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -285,7 +285,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -302,7 +302,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -319,7 +319,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -336,7 +336,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -353,7 +353,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -370,7 +370,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -387,7 +387,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -404,7 +404,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -421,7 +421,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -438,7 +438,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -455,7 +455,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -472,7 +472,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -489,7 +489,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -506,7 +506,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -523,7 +523,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -540,7 +540,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -551,7 +551,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/modules/platform/payment/sandbox.ts",
@@ -561,7 +561,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/modules/platform/safe-adapters.test.mjs",
@@ -571,7 +571,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/modules/platform/auth/auth-contract.test.mjs",
@@ -587,7 +587,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -604,8 +604,18 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
+    },
+    {
+      "source": "template/blueprint/apps/web/modules/platform/auth/auth-submit-button.tsx",
+      "target": "apps/web/modules/platform/auth/auth-submit-button.tsx",
+      "classification": "keep",
+      "owner": "platform-app",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/modules/platform/auth/confirmation-url.ts",
@@ -621,7 +631,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -638,7 +648,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -655,7 +665,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -672,7 +682,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -689,7 +699,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -706,7 +716,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -723,7 +733,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -740,7 +750,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -757,7 +767,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -774,7 +784,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -791,7 +801,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -808,7 +818,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -825,7 +835,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -842,7 +852,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -859,7 +869,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -876,7 +886,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -893,7 +903,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -910,7 +920,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -927,7 +937,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -944,7 +954,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -961,7 +971,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -978,7 +988,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -995,7 +1005,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1012,7 +1022,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1029,7 +1039,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1046,7 +1056,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1063,7 +1073,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1080,7 +1090,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1097,7 +1107,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1114,7 +1124,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1131,7 +1141,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1148,7 +1158,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1165,7 +1175,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1182,7 +1192,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1199,7 +1209,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1216,7 +1226,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1227,7 +1237,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/packages/db/tsconfig.json",
@@ -1243,7 +1253,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1260,7 +1270,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1277,7 +1287,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1288,7 +1298,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/packages/platform/tsconfig.json",
@@ -1304,7 +1314,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1321,7 +1331,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1338,7 +1348,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1349,7 +1359,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/packages/ui/tsconfig.json",
@@ -1365,7 +1375,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1382,7 +1392,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1399,8 +1409,18 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
+    },
+    {
+      "source": "template/blueprint/playwright.config.ts",
+      "target": "playwright.config.ts",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "browser-test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/scripts/product-config.mjs",
@@ -1410,7 +1430,27 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
+    },
+    {
+      "source": "template/blueprint/scripts/env-init.mjs",
+      "target": "scripts/env-init.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
+    },
+    {
+      "source": "template/blueprint/scripts/env-init.test.mjs",
+      "target": "scripts/env-init.test.mjs",
+      "classification": "keep",
+      "owner": "template-platform",
+      "productEditable": false,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/scripts/lint-source.mjs",
@@ -1420,7 +1460,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "negative-fixture"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/scripts/product-init.mjs",
@@ -1430,7 +1470,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/scripts/product-init-lib.mjs",
@@ -1440,7 +1480,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/scripts/verify-boundaries.mjs",
@@ -1456,7 +1496,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1473,7 +1513,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1484,7 +1524,7 @@
       "productEditable": false,
       "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/scripts/verify-release.mjs",
@@ -1500,7 +1540,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1517,7 +1557,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1534,7 +1574,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1551,7 +1591,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1568,7 +1608,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1585,7 +1625,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1602,7 +1642,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1619,7 +1659,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1636,7 +1676,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1653,7 +1693,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1670,7 +1710,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1687,7 +1727,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1695,63 +1735,73 @@
       "target": "apps/web/app/account/profile-form.tsx",
       "classification": "keep", "owner": "platform-app", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/components/language-switcher.tsx",
       "target": "apps/web/components/language-switcher.tsx",
       "classification": "keep", "owner": "platform-app", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/modules/platform/i18n/locale.ts",
       "target": "apps/web/modules/platform/i18n/locale.ts",
       "classification": "keep", "owner": "platform-app", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/modules/platform/i18n/messages.ts",
       "target": "apps/web/modules/platform/i18n/messages.ts",
       "classification": "keep", "owner": "platform-app", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/modules/platform/profile-flow.test.mjs",
       "target": "apps/web/modules/platform/profile-flow.test.mjs",
       "classification": "keep", "owner": "platform-app", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/apps/web/modules/platform/analytics/dynamic-client.test.mjs",
       "target": "apps/web/modules/platform/analytics/dynamic-client.test.mjs",
       "classification": "keep", "owner": "platform-app", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/packages/ui/src/styles.css",
       "target": "packages/ui/src/styles.css",
       "classification": "keep", "owner": "package-ui", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/packages/ui/src/toast.tsx",
       "target": "packages/ui/src/toast.tsx",
       "classification": "keep", "owner": "package-ui", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/packages/ui/src/ui-contract.test.mjs",
       "target": "packages/ui/src/ui-contract.test.mjs",
       "classification": "keep", "owner": "package-ui", "productEditable": false, "action": "copy",
       "verification": ["inventory", "checksum", "pollution-scan", "test"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
+    },
+    {
+      "source": "template/blueprint/tests/product/template-smoke.spec.ts",
+      "target": "tests/product/template-smoke.spec.ts",
+      "classification": "keep",
+      "owner": "product",
+      "productEditable": true,
+      "action": "copy",
+      "verification": ["inventory", "checksum", "pollution-scan", "browser-test"],
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "template/blueprint/tsconfig.base.json",
@@ -1767,7 +1817,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1784,7 +1834,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1801,7 +1851,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1818,7 +1868,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1834,7 +1884,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1845,7 +1895,7 @@
       "productEditable": true,
       "action": "generate",
       "verification": ["config-hash", "schema", "product-init"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "config:product+manifest",
@@ -1855,7 +1905,7 @@
       "productEditable": true,
       "action": "generate",
       "verification": ["config-hash", "template-version", "product-init"],
-      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.3" }
+      "provenance": { "sourceCommit": "git:HEAD", "templateVersion": "0.2.0-candidate.4" }
     },
     {
       "source": "config:product",
@@ -1870,7 +1920,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     },
     {
@@ -1886,7 +1936,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.3"
+        "templateVersion": "0.2.0-candidate.4"
       }
     }
   ],
@@ -1917,25 +1967,25 @@
     {
       "name": "@xwlc/core",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.2.0-candidate.3",
+      "candidateVersion": "0.2.0-candidate.4",
       "decision": "transform"
     },
     {
       "name": "@xwlc/ui",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.2.0-candidate.3",
+      "candidateVersion": "0.2.0-candidate.4",
       "decision": "transform"
     },
     {
       "name": "@xwlc/platform",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.2.0-candidate.3",
+      "candidateVersion": "0.2.0-candidate.4",
       "decision": "transform"
     },
     {
       "name": "@xwlc/db",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.2.0-candidate.3",
+      "candidateVersion": "0.2.0-candidate.4",
       "decision": "transform"
     }
   ]

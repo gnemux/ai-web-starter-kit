@@ -10,5 +10,6 @@ test("profile update is an in-place server mutation with precise cache invalidat
   const updateBody = action.slice(action.indexOf("export async function updateProfile"), action.indexOf("export async function signOut"));
   assert.doesNotMatch(updateBody, /redirect\(/);
   assert.match(form, /useActionState\(updateProfile/);
+  assert.doesNotMatch(form, /display-name-error.*aria-describedby/);
   assert.doesNotMatch(form, /window\.location|location\.reload/);
 });

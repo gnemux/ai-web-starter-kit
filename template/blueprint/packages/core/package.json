@@ -1,6 +1,6 @@
 {
   "name": "@xwlc/core",
-  "version": "0.2.0-candidate.2",
+  "version": "0.2.0-candidate.3",
   "private": true,
   "type": "module",
   "exports": { ".": "./src/index.ts" },

@@ -1,13 +1,26 @@
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import { cloneElement, isValidElement, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 export { Dialog } from "./dialog";
 export { Toast } from "./toast";
 
 export function BrandMark({ mark, name }: { mark: string; name: string }) { return <span className="brand"><span className="brand-mark" aria-hidden>{mark}</span><span>{name}</span></span>; }
-export function Button({ type = "button", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) { return <button {...props} type={type} className={`button ${props.className ?? ""}`} />; }
-export function Badge({ children }: { children: ReactNode }) { return <span className="badge">{children}</span>; }
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) { return <section className={`card ${className}`}>{children}</section>; }
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonSize = "small" | "medium" | "large";
+export function Button({ type = "button", variant = "primary", size = "medium", loading = false, loadingLabel, leadingIcon, className = "", children, disabled, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; size?: ButtonSize; loading?: boolean; loadingLabel?: string; leadingIcon?: ReactNode }) {
+  return <button {...props} aria-busy={loading || undefined} type={type} disabled={disabled || loading} className={`button button-${variant} button-${size} ${className}`}>
+    {loading ? <span aria-hidden className="button-spinner" /> : leadingIcon ? <span aria-hidden className="button-icon">{leadingIcon}</span> : null}
+    <span>{loading && loadingLabel ? loadingLabel : children}</span>
+  </button>;
+}
+export function Badge({ children, variant = "neutral" }: { children: ReactNode; variant?: "neutral" | "info" | "success" | "warning" | "error" }) { return <span className={`badge badge-${variant}`}>{children}</span>; }
+export function Card({ children, className = "", variant = "elevated" }: { children: ReactNode; className?: string; variant?: "elevated" | "outlined" | "subtle" }) { return <section className={`card card-${variant} ${className}`}>{children}</section>; }
 export function PageHeader({ eyebrow, title, description }: { eyebrow?: string; title: string; description?: string }) { return <header className="page-header">{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h1>{title}</h1>{description && <p>{description}</p>}</header>; }
-export function FormField({ id, label, hint, error, children }: { id?: string; label: string; hint?: string; error?: string; children: ReactNode }) { return <label className="field" htmlFor={id}><span>{label}</span>{children}{hint && <small id={id ? `${id}-hint` : undefined}>{hint}</small>}{error && <small className="field-error" id={id ? `${id}-error` : undefined} role="alert">{error}</small>}</label>; }
+export function FormField({ id, label, hint, error, children }: { id?: string; label: string; hint?: string; error?: string; children: ReactNode }) {
+  const describedBy = id ? [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(" ") : "";
+  const control = id && isValidElement<{ id?: string; "aria-describedby"?: string }>(children)
+    ? cloneElement(children, { id: children.props.id ?? id, "aria-describedby": [children.props["aria-describedby"], describedBy].filter(Boolean).join(" ") || undefined })
+    : children;
+  return <label className="field" htmlFor={id}><span>{label}</span>{control}{hint && <small id={id ? `${id}-hint` : undefined}>{hint}</small>}{error && <small className="field-error" id={id ? `${id}-error` : undefined} role="alert">{error}</small>}</label>;
+}
 export function Input(props: InputHTMLAttributes<HTMLInputElement>) { return <input {...props} />; }
 export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) { return <textarea {...props} />; }
 export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) { return <select {...props} />; }

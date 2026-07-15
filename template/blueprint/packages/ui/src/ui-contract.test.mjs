@@ -10,9 +10,19 @@ test("shared UI owns semantic tokens and reusable component styles", async () =>
   for (const contract of [".button", ".field-error", ".notice-success", ".dialog-close", ".toast"]) assert.ok(css.includes(contract));
 });
 
-test("dialog and toast provide explicit dismissal contracts", async () => {
-  assert.match(await source("./dialog.tsx"), /Close dialog/);
+test("dialog and toast require localized dismissal contracts", async () => {
+  const dialog = await source("./dialog.tsx");
+  assert.match(dialog, /closeLabel: string/);
+  assert.doesNotMatch(dialog, /Close dialog/);
   const toast = await source("./toast.tsx");
   assert.match(toast, /setTimeout/);
-  assert.match(toast, /Dismiss notification/);
+  assert.match(toast, /dismissLabel: string/);
+  assert.match(toast, /onMouseEnter/);
+  assert.match(toast, /onFocus/);
+  assert.doesNotMatch(toast, /Dismiss notification/);
+});
+
+test("button variants and form descriptions are owned by the shared package", async () => {
+  const ui = await source("./index.tsx");
+  for (const contract of ["ButtonVariant", "ButtonSize", "loadingLabel", "button-spinner", "aria-describedby"]) assert.ok(ui.includes(contract));
 });

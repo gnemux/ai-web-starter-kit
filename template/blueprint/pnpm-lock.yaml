@@ -89,6 +89,10 @@ importers:
         version: 5.9.3
 
   packages/platform:
+    dependencies:
+      '@xwlc/core':
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       typescript:
         specifier: 5.9.3

@@ -1,4 +1,5 @@
-export type CapabilityState = "enabled" | "disabled" | "not_configured" | "not_implemented" | "error";
+import type { CapabilityMode, CapabilityReason, CapabilityState } from "@xwlc/core";
+export type { CapabilityMode, CapabilityReason, CapabilityState } from "@xwlc/core";
 export type AnalyticsMode = "disabled" | "external";
 export type PaymentMode = "disabled" | "sandbox" | "external";
 export type AiMode = "disabled" | "mock" | "external";
@@ -8,8 +9,11 @@ export type CapabilityRegistryEntry = {
   mode: CapabilityModes[keyof CapabilityModes];
   state: CapabilityState;
   requiredEnvironment: readonly string[];
-  reason: "disabled" | "safe_adapter" | "configured" | "missing_environment" | "adapter_missing";
+  reason: CapabilityReason;
 };
+
+const capabilityModes = ["disabled", "sandbox", "mock", "external"] as const satisfies readonly CapabilityMode[];
+export function isCapabilityMode(value: string): value is CapabilityMode { return capabilityModes.includes(value as CapabilityMode); }
 
 const requiredEnvironment = {
   analytics: ["NEXT_PUBLIC_POSTHOG_KEY"],

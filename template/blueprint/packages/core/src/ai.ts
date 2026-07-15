@@ -1,5 +1,5 @@
-import type { BillingEntitlement } from "./billing";
-import { assertIdempotencyKey, hasEntitlement } from "./billing";
+import type { BillingEntitlement } from "./billing.ts";
+import { assertIdempotencyKey, hasEntitlement } from "./billing.ts";
 
 export type AiCapability = "text" | "structured" | "embedding";
 export type AiServiceReason = "disabled" | "not_configured" | "not_entitled" | "budget_exceeded" | "provider_error";

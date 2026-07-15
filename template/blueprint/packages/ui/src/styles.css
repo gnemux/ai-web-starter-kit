@@ -22,10 +22,13 @@
 .page-header p { max-width: 680px; font-size: 1.08rem; color: color-mix(in srgb, var(--ui-color-ink) 68%, transparent); }
 .eyebrow { text-transform: uppercase; letter-spacing: .13em; font-size: .76rem; font-weight: 750; }
 .badge { display: inline-flex; border-radius: 999px; padding: 7px 11px; background: var(--accent-soft); font-size: .78rem; font-weight: 700; }
+.badge-info { color: var(--accent); }.badge-success { color: var(--ui-color-success); background: color-mix(in srgb, var(--ui-color-success) 12%, white); }.badge-warning { color: var(--ui-color-warning); background: color-mix(in srgb, var(--ui-color-warning) 12%, white); }.badge-error { color: var(--ui-color-error); background: color-mix(in srgb, var(--ui-color-error) 12%, white); }
 .card { border: 1px solid var(--ui-color-border); border-radius: var(--ui-radius-lg); padding: clamp(24px, 4vw, 40px); background: color-mix(in srgb, var(--ui-color-panel) 84%, var(--surface)); box-shadow: var(--ui-shadow-panel); }
+.card-outlined { box-shadow: none; background: var(--ui-color-panel); }.card-subtle { border-color: transparent; box-shadow: none; background: color-mix(in srgb, var(--accent-soft) 55%, white); }
 .card h2 { margin: 16px 0 8px; font-size: 1.55rem; }
-.button { display: inline-flex; justify-content: center; align-items: center; min-height: 46px; padding: 0 20px; border: 1px solid var(--accent); border-radius: 999px; color: white; background: var(--accent); font: inherit; font-weight: 700; cursor: pointer; }
-.button.secondary { color: var(--ink); background: transparent; border-color: color-mix(in srgb, var(--ink) 25%, transparent); }
+.button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 46px; padding: 0 20px; border: 1px solid var(--accent); border-radius: 999px; color: white; background: var(--accent); font: inherit; font-weight: 700; cursor: pointer; }
+.button-secondary, .button.secondary { color: var(--ink); background: transparent; border-color: color-mix(in srgb, var(--ink) 25%, transparent); }.button-ghost { color: var(--accent); background: transparent; border-color: transparent; }.button-danger { color: white; background: var(--ui-color-error); border-color: var(--ui-color-error); }
+.button-small { min-height: 36px; padding-inline: 14px; font-size: .9rem; }.button-large { min-height: 54px; padding-inline: 26px; }.button-icon { display: inline-flex; }.button-spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 999px; animation: ui-spin .7s linear infinite; }
 .button:disabled { cursor: not-allowed; opacity: .55; }
 .form { display: grid; gap: 20px; margin-top: 32px; }
 .field { display: grid; gap: 8px; font-weight: 650; }
@@ -58,4 +61,5 @@ dialog::backdrop { background: color-mix(in srgb, var(--ink) 45%, transparent); 
 .ui-container { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }.ui-stack { display: grid; gap: var(--ui-space-4); }.ui-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ui-space-6); }
 :focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, white); outline-offset: 3px; }
 @media (max-width: 760px) { .ui-grid { grid-template-columns: 1fr; } }
+@keyframes ui-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }

@@ -17,6 +17,8 @@ for (const file of await filesUnder(path.join(root, "packages"))) {
   if (!/\.(?:ts|tsx|mjs)$/.test(file)) continue;
   const text = await readFile(file, "utf8");
   if (/from\s+["'](?:@\/|\.\.\/\.\.\/apps|next\/|@supabase\/|posthog-js)/.test(text)) fail(`Package imports an application/runtime SDK: ${path.relative(root, file)}`);
+  if (/from\s+["']@xwlc\/(?:core|ui|platform|db)\//.test(text)) fail(`Package imports another package's internal path: ${path.relative(root, file)}`);
+  if (file.includes("packages/core/") && /from\s+["']@xwlc\//.test(text)) fail(`Core package imports a higher package: ${path.relative(root, file)}`);
 }
 for (const file of await filesUnder(path.join(root, "apps/web/modules/platform"))) {
   if (!/\.(?:ts|tsx)$/.test(file)) continue;
@@ -49,11 +51,14 @@ if (/function Tabs[\s\S]*?<a\b/.test(ui) || !productWorkspace.includes('import L
 if (!/function Button\(\{ type = "button"/.test(ui)) fail("Shared Button must default to non-submitting behavior");
 for (const contract of ["useId", "showModal()", "onCancel", "onOpenChange(false)", "returnFocus.current?.focus()"] ) if (!dialog.includes(contract)) fail(`Accessible modal contract missing: ${contract}`);
 for (const adapter of ["modules/platform/payment/sandbox.ts", "modules/platform/ai/mock.ts"]) if (!(await filesUnder(path.join(root, "apps/web"))).some((file) => file.endsWith(adapter))) fail(`Safe adapter missing: ${adapter}`);
-const sharedText = (await Promise.all((await filesUnder(path.join(root, "packages"))).filter((file) => /\.(?:ts|tsx)$/.test(file)).map((file) => readFile(file, "utf8")))).join("\n").toLowerCase();
+const sharedText = (await Promise.all((await filesUnder(path.join(root, "packages"))).filter((file) => /\.(?:ts|tsx)$/.test(file)).map((file) => readFile(file, "utf8"))))
+  .map((text) => text.replace(/from\s+["']@xwlc\/(?:core|ui|platform|db)["']/g, "from <public-package>"))
+  .join("\n").toLowerCase();
 for (const term of ["defaultbillingplans", "defaultbillingprices", "xwlc", "demo_" + "items", "cat" + "care"]) if (sharedText.includes(term)) fail(`Shared package contains fixed product vocabulary: ${term}`);
 
 const relativeImportFixture = `import { thing } from "../product/private"`;
 if (!/from\s+["'](?:@\/modules\/product(?:\/|["'])|(?:\.\.\/)+(?:product)(?:\/|["']))/.test(relativeImportFixture)) fail("Boundary fixture failed to detect relative platform-to-product import");
 if (!/from\s+["']@xwlc\/(?:core|ui|platform|db)\//.test(`import x from "@xwlc/core/internal"`)) fail("Boundary fixture failed to detect package internals");
+if (!/from\s+["']@xwlc\//.test(`import x from "@xwlc/platform"`)) fail("Boundary fixture failed to protect the Core dependency direction");
 if (!/from\s+["'][^"']*(?:\/server|server-only)/.test(`import x from "../supabase/server"`)) fail("Boundary fixture failed to detect client-to-server import");
 console.log("Package and application boundaries verified");

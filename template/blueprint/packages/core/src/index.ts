@@ -1,8 +1,8 @@
-export * from "./ai";
-export * from "./auth";
-export * from "./billing";
-export * from "./payment";
-export * from "./providers";
+export * from "./ai.ts";
+export * from "./auth.ts";
+export * from "./billing.ts";
+export * from "./payment.ts";
+export * from "./providers.ts";
 
 export type ArchivableRecord = { archivedAt: string | null };
 export type HistoricalReference<T> = { current: T | null; snapshotLabel: string | null; wasArchived: boolean };

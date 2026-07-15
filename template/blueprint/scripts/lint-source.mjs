@@ -2,9 +2,11 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "..");
+const ignoredDirectories = new Set(["node_modules", ".next", ".turbo", ".vercel", "coverage", "dist"]);
 async function filesUnder(directory) {
   const files = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) continue;
     const target = path.join(directory, entry.name);
     if (entry.isDirectory()) files.push(...await filesUnder(target));
     else if (/\.(?:ts|tsx|mjs)$/.test(entry.name)) files.push(target);

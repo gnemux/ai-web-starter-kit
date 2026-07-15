@@ -4,20 +4,26 @@ import Link from "next/link";
 import { Button, Card, Checkbox, Dialog, FormField, PageHeader, Popover, ProgressBar, SectionHeader, Select, StatePanel, Tabs, Textarea, Toast } from "@xwlc/ui";
 import type { CapabilityRegistryEntry } from "@xwlc/platform";
 import { productConfig } from "@/config/product.config";
+import type { platformMessages } from "@/modules/platform/i18n/messages";
 
-export function ProductWorkspace({ capabilities }: { capabilities: CapabilityRegistryEntry[] }) {
-  const [saved, setSaved] = useState(false);
+type Messages = (typeof platformMessages)[keyof typeof platformMessages];
+
+export function ProductWorkspace({ capabilities, messages, copy }: { capabilities: CapabilityRegistryEntry[]; messages: Messages; copy: (typeof productConfig.localized)[keyof typeof productConfig.localized] }) {
+  const [completed, setCompleted] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const capabilityLabels = { analytics: messages.capabilityAnalytics, payment: messages.capabilityPayment, ai: messages.capabilityAi } as const;
+  const modeLabels = { disabled: messages.modeDisabled, sandbox: messages.modeSandbox, mock: messages.modeMock, external: messages.modeExternal } as const;
+  const stateLabels = { enabled: messages.stateEnabled, disabled: messages.stateDisabledCapability, not_configured: messages.stateNotConfigured, not_implemented: messages.stateNotImplemented, error: messages.stateCapabilityError } as const;
   return <div className="page">
-    <PageHeader eyebrow="Product-owned module" title={`${productConfig.identity.name} workspace`} description="Product copy, use cases, DTOs, events and adapters start in this module. Routes remain a thin authenticated composition boundary." />
-    <Tabs label="Workspace sections"><Link aria-current="page" href={productConfig.paths.product}>Overview</Link><Link href={productConfig.paths.account}>Account</Link></Tabs>
-    <SectionHeader title="Product foundation" description="Compose the first real workflow without changing platform internals." /><ProgressBar label="Template readiness" value={75} />
+    <PageHeader eyebrow={messages.productBoundary} title={copy.navigation[0]?.label ?? productConfig.identity.name} description={messages.productDescription} />
+    <Tabs label={messages.primaryNavigation}><Link aria-current="page" href={productConfig.paths.product}>{messages.workspaceOverview}</Link><Link href={productConfig.paths.account}>{messages.workspaceAccount}</Link></Tabs>
+    <SectionHeader title={messages.workspaceTitle} description={messages.workspaceDescription} />
     <div className="workspace-grid">
-      <StatePanel kind="empty" title="Ready for a real customer journey" description="Replace this neutral workspace with the first complete product workflow without editing platform or package internals." />
-      <Card><h2>Capability registry</h2><ul>{capabilities.map((entry) => <li key={entry.id}><strong>{entry.id}</strong>: {entry.mode} · {entry.state}</li>)}</ul><Popover summary="Why these states are explicit"><p>Disabled capabilities stay off, safe adapters are testable, and external modes report missing configuration instead of pretending to work.</p></Popover></Card>
-      <Card><h2>Composable product form</h2><form className="form" onSubmit={(event) => { event.preventDefault(); setSaved(true); }}><FormField label="First workflow"><Textarea name="workflow" defaultValue="Describe the first complete customer journey." /></FormField><FormField label="Initial state"><Select name="state" defaultValue="draft"><option value="draft">Draft</option><option value="ready">Ready for review</option></Select></FormField><FormField label="Review rule"><span className="checkbox-row"><Checkbox name="review" defaultChecked /> Require human review before external side effects</span></FormField><Button type="submit">Save local draft</Button><Button className="secondary" onClick={() => setConfirming(true)} type="button">Review action pattern</Button></form></Card>
+      <StatePanel kind="empty" kindLabel={messages.stateEmpty} title={messages.readyTitle} description={messages.readyDescription} />
+      <Card variant="outlined"><h2>{messages.capabilityRegistry}</h2><ul>{capabilities.map((entry) => <li key={entry.id}><strong>{capabilityLabels[entry.id]}</strong>: {modeLabels[entry.mode]} · {stateLabels[entry.state]}</li>)}</ul><Popover summary={messages.capabilityHelp}><p>{messages.capabilityHelpText}</p></Popover></Card>
+      <Card><h2>{messages.interactionTitle}</h2><p>{messages.interactionDescription}</p><ProgressBar label={messages.previewProgress} value={100} /><div className="form"><FormField label={messages.previewWorkflow}><Textarea value={messages.previewWorkflowValue} readOnly /></FormField><FormField label={messages.previewState}><Select defaultValue="draft"><option value="draft">{messages.previewDraft}</option><option value="ready">{messages.previewReady}</option></Select></FormField><label className="checkbox-row"><Checkbox defaultChecked />{messages.previewReview}</label><Button onClick={() => setConfirming(true)} type="button">{messages.reviewInteraction}</Button></div></Card>
     </div>
-    <Toast>{saved ? "Local draft saved without a full-page refresh." : "Product identity and platform capability state are composed without product logic entering the route."}</Toast>
-    <Dialog open={confirming} onOpenChange={setConfirming} title="Product action confirmation" description="A real product owns the command and server-side authorization; the shared UI owns accessible presentation."><Button onClick={() => setConfirming(false)}>Close</Button></Dialog>
+    <Toast dismissLabel={messages.dismissNotification} open={completed} onDismiss={() => setCompleted(false)}>{messages.interactionConfirmed}</Toast>
+    <Dialog closeLabel={messages.closeDialog} open={confirming} onOpenChange={setConfirming} title={messages.dialogTitle} description={messages.dialogDescription}><Button onClick={() => { setConfirming(false); setCompleted(true); }}>{messages.close}</Button></Dialog>
   </div>;
 }

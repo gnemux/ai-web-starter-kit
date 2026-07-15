@@ -142,6 +142,54 @@ the earlier 141-check candidate.
 
 ## GNE-303 Independent Candidate Tests
 
+GNE-303 also closes three-party P1 findings with automated and browser evidence:
+locale config/dictionaries are complete for `en-US` and `zh-CN`; changing the
+locale and saving a profile use router/server revalidation without
+`window.location` or `location.reload`; protected files fail checksum drift;
+new files outside declared product roots fail closed; shared UI semantic tokens,
+Dialog, Toast, FormField and state variants have contract tests; and disabled
+Analytics has no static `posthog-js` import.
+
+### GNE-303 Execution Record (2026-07-15)
+
+- source regression: AI/release/package boundaries, template drift and negative
+  fixtures, 14 generator tests, 82 research web tests, and production build pass;
+- neutral and Smoke candidates: frozen install, lint, typecheck, boundary,
+  release, supply-chain, security, 23 package/app contract tests, build and
+  post-build three-layer verification pass independently;
+- a real product-workspace mutation passes candidate integrity while a platform
+  mutation fails the protected foundation hash, closing the independent-review
+  P1 finding;
+- isolated database: baseline applied from empty twice and all 149 tests pass on
+  both runs; no linked/shared project command was used;
+- browser: local sign-up, product protection, profile persistence, precise
+  same-URL update, sign-out/back-in, two locales, shared UI lifecycle, and
+  390/1440 responsive overflow checks pass;
+- external repository/Vercel remains `not_run` until a target-specific approval.
+
+### GNE-303 Post-review Hardening Record (2026-07-15)
+
+- candidate `0.2.0-candidate.3` was generated from local source commit
+  `89170f9f92d9275188f2212630bcfc5f7f3143f1` into a new independent directory;
+- frozen install, five-package lint/typecheck, 29 package/app tests, production
+  build, security/release/boundary checks, and post-build three-layer integrity
+  verification pass (`protected=115`, `product=5`);
+- Auth has distinct sign-in, sign-up, reset-password, and protected
+  update-password modes; reset callbacks use the local PKCE confirmation path,
+  invalid credentials produce an actionable localized message, and safe return
+  validation has one shared Core implementation;
+- a disposable local account was signed out and signed back in through the real
+  browser; the protected profile was present after authentication;
+- English and Chinese switch on the same `/product` URL, including the
+  controlled textarea value that previously retained stale locale copy;
+- capability mode/state vocabulary is shared by Core and Platform, and the
+  visible registry is localized rather than exposing implementation enum copy;
+- shared Button/Badge/Card/FormField/Dialog/Toast contracts now own variants,
+  loading/dismissal and ARIA behavior used by the neutral app;
+- the isolated local Supabase stack and final local web server remain available
+  for user acceptance. Shared cloud resources and external deployment remain
+  untouched.
+
 ### Clean Install And Build
 
 Follow `quickstart.md` from a new directory with no source `node_modules`,

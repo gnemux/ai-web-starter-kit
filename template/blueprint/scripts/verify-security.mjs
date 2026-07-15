@@ -26,16 +26,18 @@ for (const eventType of ["grant", "reserve", "consume", "release", "refund", "ex
 if (!billingContract.includes("providerSubscriptionId: string | null") || !/provider_subscription_id text[,\n]/.test(sql)) throw new Error("Subscription provider id nullability contract drift");
 if (!billingContract.includes("priceId: string;") || !/price_id text not null/.test(sql)) throw new Error("Subscription price id nullability contract drift");
 const ignores = await readFile(path.join(root, ".gitignore"), "utf8");
-for (const expected of ["node_modules/", ".next/", ".turbo/", ".vercel/", ".env.*"]) if (!ignores.includes(expected)) throw new Error(`Repository hygiene ignore missing: ${expected}`);
+for (const expected of ["node_modules/", ".next/", ".turbo/", ".vercel/", "test-results/", "playwright-report/", ".env.*"]) if (!ignores.includes(expected)) throw new Error(`Repository hygiene ignore missing: ${expected}`);
 if (existsSync(path.join(root, ".git"))) {
   const tracked = execFileSync("git", ["ls-files"], { cwd: root, encoding: "utf8" }).split("\n").filter(Boolean);
-  for (const file of tracked) if (/(?:^|\/)\.env(?:\..+)?$/.test(file) && !file.endsWith(".env.example") || /(?:^|\/)(?:\.vercel|node_modules|\.next|\.turbo)(?:\/|$)/.test(file)) throw new Error(`Private or generated path must not be tracked: ${file}`);
+  for (const file of tracked) if (/(?:^|\/)\.env(?:\..+)?$/.test(file) && !file.endsWith(".env.example") || /(?:^|\/)(?:\.vercel|node_modules|\.next|\.turbo|test-results|playwright-report)(?:\/|$)/.test(file)) throw new Error(`Private or generated path must not be tracked: ${file}`);
 }
 const config = await readFile(path.join(root, "apps/web/next.config.ts"), "utf8");
 for (const header of ["frame-ancestors 'none'", "Referrer-Policy", "X-Content-Type-Options", "Permissions-Policy"]) if (!config.includes(header)) throw new Error(`Security header missing: ${header}`);
 if (!config.includes('process.env.NODE_ENV === "development"') || !config.includes(': "script-src \'self\' \'unsafe-inline\'"')) throw new Error("Production CSP must exclude unsafe-eval");
 const proxy = await readFile(path.join(root, "apps/web/modules/platform/supabase/proxy.ts"), "utf8");
 for (const cookieContract of ["request.cookies.getAll()", "response.cookies.set(name, value, options)", "Object.entries(headers)", "client.auth.getClaims()"] ) if (!proxy.includes(cookieContract)) throw new Error(`Session cookie refresh contract missing: ${cookieContract}`);
+const middleware = await readFile(path.join(root, "apps/web/middleware.ts"), "utf8");
+if (!middleware.includes("export async function middleware") || !middleware.includes("updateSession(request)") || !middleware.includes('runtime: "nodejs"')) throw new Error("Locked Next.js 15 Node session middleware entry is missing");
 const supabaseConfig = await readFile(path.join(root, "apps/web/modules/platform/supabase/config.ts"), "utf8");
 if (!supabaseConfig.includes("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") || !supabaseConfig.includes("NEXT_PUBLIC_SUPABASE_ANON_KEY")) throw new Error("Publishable-key preference and legacy fallback must both be explicit");
 const analyticsProperties = await readFile(path.join(root, "apps/web/modules/platform/analytics/properties.ts"), "utf8");

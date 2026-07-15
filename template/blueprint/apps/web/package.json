@@ -1,6 +1,6 @@
 {
   "name": "@xwlc/web",
-  "version": "0.2.0-candidate.1",
+  "version": "0.2.0-candidate.4",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "next build",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test modules/platform/navigation/internal-return.test.mjs modules/platform/performance/cache-key.test.mjs modules/platform/auth/auth-contract.test.mjs modules/platform/safe-adapters.test.mjs config/product-config.test.mjs"
+    "test": "node --experimental-strip-types --test modules/platform/navigation/internal-return.test.mjs modules/platform/performance/cache-key.test.mjs modules/platform/auth/auth-contract.test.mjs modules/platform/analytics/dynamic-client.test.mjs modules/platform/profile-flow.test.mjs modules/platform/safe-adapters.test.mjs config/product-config.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.0",

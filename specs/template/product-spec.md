@@ -22,6 +22,16 @@ repository; it is not cleaned in place. GNE-302 may implement only the boundary
 approved here, and GNE-303 must validate the generated artifact outside the
 source workspace.
 
+For the user-approved GNE-303 completion contract, validation is user-visible:
+the neutral candidate must support isolated local sign-up/sign-in, in-place
+profile persistence with precise owner-cache invalidation, global English /
+Chinese switching, and real consumption of shared UI interaction primitives.
+These are neutral foundation proofs, not a placeholder product workflow.
+The same proof must be rerunnable by a new product repository through one
+non-overwriting environment initializer and a committed desktop/mobile browser
+smoke; acceptance must not depend on chat-only instructions or a reviewer
+manually reconstructing the flow.
+
 The candidate is a **single-product starter**, not a multi-product deployment.
 Each real product is generated into its own repository, owns one
 `apps/web/modules/product` implementation, and deploys independently.

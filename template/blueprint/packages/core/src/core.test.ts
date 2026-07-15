@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertCatalog, BILLING_SUBSCRIPTION_STATUSES, buildUsageReservation, CREDIT_EVENT_TYPES, historicalReferenceLabel, isActiveRecord, isAiCapability, safeInternalPath } from "./index";
+import { assertCatalog, BILLING_SUBSCRIPTION_STATUSES, buildUsageReservation, capabilityAvailable, CREDIT_EVENT_TYPES, historicalReferenceLabel, isActiveRecord, isAiCapability, safeInternalPath } from "./index.ts";
 
 test("safe internal paths reject browser redirect bypasses", () => {
   for (const value of ["https://evil.example", "//evil.example", "/\\evil.example", "/\u0000evil", "javascript:alert(1)"]) assert.equal(safeInternalPath(value, "/login"), "/login");
   assert.equal(safeInternalPath("/product?from=login#top"), "/product?from=login#top");
+});
+
+test("capability availability uses the shared state vocabulary", () => {
+  assert.equal(capabilityAvailable({ mode: "sandbox", state: "enabled", reason: "safe_adapter" }), true);
+  assert.equal(capabilityAvailable({ mode: "external", state: "not_configured", reason: "missing_environment" }), false);
 });
 
 test("billing and credit status contracts match the foundation schema vocabulary", () => {

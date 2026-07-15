@@ -46,6 +46,36 @@
     { "label": "Billing", "href": "/account/billing" },
     { "label": "Usage", "href": "/account/usage" }
   ],
+  "localized": {
+    "en-US": {
+      "tagline": "A disposable identity for independent template verification.",
+      "home": {
+        "eyebrow": "Independent verification",
+        "title": "Prove the template without product history.",
+        "description": "This disposable identity verifies that configuration changes do not require platform edits.",
+        "primaryAction": "Open product",
+        "secondaryAction": "View account"
+      },
+      "login": { "title": "Sign in to Smoke Product", "description": "Use only disposable local verification accounts." },
+      "account": { "title": "Smoke account", "description": "Verify the neutral account and profile boundary." },
+      "navigation": [{ "label": "Product" }, { "label": "Account" }],
+      "footerLinks": [{ "label": "Billing" }, { "label": "Usage" }]
+    },
+    "zh-CN": {
+      "tagline": "用于独立母版验收的一次性产品身份。",
+      "home": {
+        "eyebrow": "独立验收",
+        "title": "在没有历史产品代码的情况下验证母版。",
+        "description": "这个一次性身份用于证明更换产品配置不需要修改平台核心。",
+        "primaryAction": "进入产品",
+        "secondaryAction": "查看账户"
+      },
+      "login": { "title": "登录 Smoke Product", "description": "只使用一次性本地验收账户。" },
+      "account": { "title": "Smoke 账户", "description": "验证中性账户和资料边界。" },
+      "navigation": [{ "label": "产品" }, { "label": "账户" }],
+      "footerLinks": [{ "label": "计费" }, { "label": "用量" }]
+    }
+  },
   "theme": {
     "accent": "#5143a5",
     "accentSoft": "#e8e5fb",

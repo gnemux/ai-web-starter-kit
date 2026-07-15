@@ -39,7 +39,7 @@ function assertLinks(value, label) {
 }
 
 export function validateProductConfig(config) {
-  assertKeys(config, ["identity", "paths", "home", "login", "account", "capabilities", "navigation", "footerLinks", "theme"], "product config");
+  assertKeys(config, ["identity", "paths", "home", "login", "account", "capabilities", "navigation", "footerLinks", "localized", "theme"], "product config");
   assertKeys(config.identity, ["id", "name", "mark", "tagline", "locale", "eventNamespace", "releaseVersion"], "identity");
   if (!slugPattern.test(config.identity.id) || config.identity.id.length > 48) throw new TypeError("identity.id must be a bounded kebab-case slug");
   assertText(config.identity.name, "identity.name", 64);
@@ -72,6 +72,23 @@ export function validateProductConfig(config) {
   for (const [key, modes] of Object.entries(allowed)) if (!modes.includes(config.capabilities[key])) throw new TypeError(`capabilities.${key} must be one of ${modes.join(" | ")}`);
   assertLinks(config.navigation, "navigation");
   assertLinks(config.footerLinks, "footerLinks");
+  assertKeys(config.localized, ["en-US", "zh-CN"], "localized");
+  for (const locale of ["en-US", "zh-CN"]) {
+    const copy = config.localized[locale];
+    assertKeys(copy, ["tagline", "home", "login", "account", "navigation", "footerLinks"], `localized.${locale}`);
+    assertText(copy.tagline, `localized.${locale}.tagline`, 160);
+    assertKeys(copy.home, ["eyebrow", "title", "description", "primaryAction", "secondaryAction"], `localized.${locale}.home`);
+    for (const key of ["eyebrow", "title", "description", "primaryAction", "secondaryAction"]) assertText(copy.home[key], `localized.${locale}.home.${key}`);
+    for (const block of ["login", "account"]) {
+      assertKeys(copy[block], ["title", "description"], `localized.${locale}.${block}`);
+      assertText(copy[block].title, `localized.${locale}.${block}.title`, 120);
+      assertText(copy[block].description, `localized.${locale}.${block}.description`);
+    }
+    assertLinks(copy.navigation.map((item, index) => ({ label: item.label, href: config.navigation[index]?.href })), `localized.${locale}.navigation`);
+    assertLinks(copy.footerLinks.map((item, index) => ({ label: item.label, href: config.footerLinks[index]?.href })), `localized.${locale}.footerLinks`);
+    if (copy.navigation.length !== config.navigation.length || copy.footerLinks.length !== config.footerLinks.length) throw new TypeError(`localized.${locale} link labels must match the configured link counts`);
+  }
+  if (!Object.hasOwn(config.localized, config.identity.locale)) throw new TypeError("identity.locale must have localized copy");
   assertKeys(config.theme, ["accent", "accentSoft", "surface", "ink"], "theme");
   for (const [key, value] of Object.entries(config.theme)) if (!hexPattern.test(value)) throw new TypeError(`theme.${key} must be a six-digit hex color`);
   return config;

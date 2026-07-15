@@ -1381,12 +1381,73 @@ GNE-302 clean-template implementation checkpoint on 2026-07-14:
 
 ## Next Steps
 
-1. Complete only `GNE-302`: rerun final clean generation and source/candidate
-   checks, obtain independent Terra review, publish the research change through
-   the normal PR gate, and sync its evidence.
-2. Keep `GNE-298` In Progress and do not activate `GNE-303` in the same
-   execution. Independent artifact/repository/deployment verification begins
-   only in a new root task after `GNE-302` passes its stop gate.
+GNE-303 verified-candidate checkpoint on 2026-07-14:
+
+- GNE-302 completed through PR #97. GNE-303 is the sole active child under
+  GNE-298; GNE-298 remains In Progress.
+- GNE-303 owns independent candidate verification plus the user-approved P1
+  refinements from architecture/product/UI review: visible Auth/profile/cache/
+  locale proof, shared UI consumption, lazy Analytics, and three-layer candidate
+  integrity. CatCare/Demo runtime is unchanged.
+- Work is isolated on `codex/gne-303-template-acceptance`. External candidate
+  GitHub/Vercel creation remains target-gated; shared cloud Supabase is excluded.
+- Corrected neutral and Smoke candidates both pass frozen install, five-package
+  lint/typecheck/tests, production build and three-layer verification. The
+  neutral candidate rebuilt from empty twice with 149/149 DB tests each time.
+  Local browser acceptance passed disposable Auth, protected routing, in-place
+  persisted profile update, English/Chinese switching, shared UI lifecycle and
+  390/1440 responsive checks. External GitHub/Vercel remains `not_run`.
+
+GNE-303 post-review hardening checkpoint on 2026-07-15:
+
+- The three immediate cross-product gaps are closed locally: Auth now separates
+  sign-in, sign-up, password reset, and protected password update; Core owns the
+  single same-origin return validator and shared capability vocabulary; shared
+  UI owns the variants, loading, dismissal, and ARIA behavior consumed by the
+  neutral app.
+- The reported local login failure was reproduced as invalid credentials rather
+  than a database or session failure. The page now returns a specific localized
+  recovery message. The retained local acceptance account was then signed out
+  and signed back in successfully through the browser.
+- A new candidate `0.2.0-candidate.3` from `89170f9` passes frozen install,
+  lint, typecheck, 29 package/app tests, production build, and post-build
+  integrity verification. English/Chinese same-URL switching also updates
+  controlled form copy, closing the stale-language defect found during browser
+  review.
+- The final local candidate remains served on port 3000 against the isolated
+  5532x Supabase stack for user acceptance. GNE-303 and GNE-298 remain In
+  Progress; GitHub, Vercel, shared cloud resources, and candidate directories
+  remain untouched.
+
+GNE-303 final local user-acceptance checkpoint on 2026-07-15:
+
+- Final candidate `0.2.0-candidate.4` is generated from local source commit
+  `0113fc6` at `gne-303-neutral-ready-v4-acceptance`; it is served on port 3000
+  against the retained isolated 5532x Supabase stack.
+- Cold environment initialization, 149/149 final database checks, 30 package/
+  app contracts, environment safety, lint/typecheck, warning-free production
+  build, post-build lint and three-layer verification pass. Browser regression
+  is 6/6 across desktop Chrome and Pixel 5.
+- Real page review covers registration, invalid-cookie recovery, product entry,
+  same-URL Chinese/English switching, profile save/refresh persistence,
+  sign-out and sign-in. The retained account is
+  `gne303-review@example.test`; its password is local test data communicated in
+  the final handoff, not a repository secret.
+- Verification exposed and fixed three reusable engineering defects: the cold
+  env instructions previously conflicted with non-overwrite behavior; generated
+  browser/build residue broke later lint/integrity checks; and a Next.js 16
+  `proxy.ts` convention had been used in a Next.js 15 candidate. The final
+  candidate uses executable Node `middleware.ts` and clears invalid persisted
+  sessions safely.
+- CatCare/Demo runtime remains unchanged. Research tests/build pass. GNE-303 and
+  GNE-298 stay In Progress; no push, PR, merge, Vercel, shared cloud database,
+  Issue closure, candidate deletion or next-Issue activation occurred.
+
+1. Complete only `GNE-303`: generate neutral and Smoke candidates, run clean
+   install/build/test and two isolated local database resets, then perform
+   browser and independent reviewer acceptance.
+2. Keep `GNE-298` In Progress until the user accepts the final evidence. Do not
+   activate another child or parent automatically.
 3. Keep `v0.2.0` as the sealed MVP2 baseline and use
    `specs/reference-product/v0.3.0-decision.md` as the MVP3 decision record.
 4. Treat the current cloud Supabase/PostHog resources as

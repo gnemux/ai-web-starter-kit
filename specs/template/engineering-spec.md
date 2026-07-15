@@ -1,5 +1,18 @@
 # Engineering Spec: Clean Template Extraction Boundary
 
+## 2026-07-14 GNE-303 Verified-Candidate Refinement Contract
+
+GNE-303 may correct review-proven P1 template gaps while it independently
+verifies the candidate. The signed candidate uses three layers: protected
+foundation files remain checksum-verified, product extension roots may evolve
+without copying platform internals, and generated product/config/provenance
+files remain schema- and manifest-controlled. Shared component styling belongs
+to `@xwlc/ui`; the app owns only shell and route composition. PostHog loads
+dynamically only for a valid external configuration. Auth/profile writes use
+the candidate's isolated local Supabase and invalidate the exact owner fact;
+language switching uses a bounded locale cookie plus router refresh rather than
+a full browser reload.
+
 ## 2026-07-14 GNE-302 Strengthening Contract
 
 The first candidate generation proved extraction but did not yet prove a
@@ -117,7 +130,8 @@ Confirmed coupling that GNE-302 must remove before generation:
   prices, quotas, product feature keys and validation/demo copy; `@xwlc/ui`
   hard-codes an XWLC `BrandMark`. The candidate must move the catalog/brand to
   product configuration rather than treating current package output as neutral.
-- the current app build also depends on `proxy.ts`,
+- the current research app build also depends on `proxy.ts`; the generated
+  candidate locked to Next.js 15 must project this entry to `middleware.ts`,
   `instrumentation-client.ts`, app package/config files, and the Supabase
   config/seed/tooling files; omitting them from an allowlist would make cold
   generation incomplete.
@@ -181,6 +195,7 @@ xwlc-web-starter-template/
 │   └── migrations/<timestamp>_foundation_baseline.sql
 ├── specs/_template/
 ├── context/ integrations/ .github/ .codex/ scripts/
+├── playwright.config.ts tests/product/    # reusable desktop/mobile user smoke
 ├── AGENTS.md README.md .env.example
 ├── LICENSE THIRD_PARTY_NOTICES.md
 ├── template-version.json
@@ -235,6 +250,32 @@ browser code -> server-only adapter or service key
 candidate -> source absolute path, source worktree, source node_modules, or source cache
 ```
 
+## Cold-start And Browser Acceptance Contract
+
+The locked Next.js 15 candidate uses the `middleware.ts` file convention and
+explicit Node runtime for Supabase SSR session refresh. A `proxy.ts` entry is a
+Next.js 16 convention and is not accepted merely because its imported module
+typechecks; the production build and invalid-session browser smoke must prove
+that the request entry is executable.
+
+The generated repository owns one idempotent environment initializer. It writes
+only ignored `apps/web/.env.local`, uses exclusive creation, and never replaces
+an existing developer file. Its safe-disabled mode copies the public example;
+its `--supabase-local` mode reads only the disposable local API URL and
+Publishable Key from the Supabase CLI. A service-role key is never copied into
+the web environment.
+
+The committed Playwright smoke is part of the reusable engineering foundation,
+not temporary product code. It starts the candidate web app, verifies anonymous
+return-path safety, creates disposable local users, exercises profile
+persistence, same-URL locale changes, and shared Dialog/Toast/Form behavior at
+desktop and mobile viewports. CI rebuilds the disposable database before this
+smoke; it never links to the research project's shared cloud database.
+
+Shared form and dialog styling must use package-owned scoped classes. Generic
+element selectors in application global CSS are not accepted as evidence that
+`@xwlc/ui` is independently reusable.
+
 ## Generator And Manifest Contract
 
 GNE-302 implements an allowlist-driven generator; it must not copy the
@@ -285,7 +326,7 @@ identical source/config runs compare equal.
 
 Every candidate runtime/toolchain input is explicit: root package/workspace/
 Turbo/lock files; app `package.json`, TypeScript, Next, Tailwind and PostCSS
-configuration; `proxy.ts`; `instrumentation-client.ts`; root `vercel.json`;
+configuration; candidate `middleware.ts`; `instrumentation-client.ts`; root `vercel.json`;
 Supabase config, seed, ignore file, README and baseline; CI, scripts, env example,
 docs and orchestration files. The manifest fails on a new unclassified input.
 

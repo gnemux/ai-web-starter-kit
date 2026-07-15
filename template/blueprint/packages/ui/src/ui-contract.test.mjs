@@ -26,7 +26,7 @@ test("button variants, form descriptions and semantic disclosure are owned by th
   const ui = await source("./index.tsx");
   for (const contract of ["ButtonVariant", "ButtonSize", "loadingLabel", "button-spinner", "aria-describedby"]) assert.ok(ui.includes(contract));
   for (const contract of ["ui-input", "NavTabs", "Disclosure", "ChevronDownIcon"]) assert.ok(ui.includes(contract));
-  for (const obsolete of ["export const Tabs", "function Popover", "ProgressBar", "Textarea", "Checkbox", "ui-container"]) assert.ok(!ui.includes(obsolete));
+  for (const obsolete of ["export const Tabs", "function Popover", "export const Panel", "ProgressBar", "Textarea", "Checkbox", "ui-container"]) assert.ok(!ui.includes(obsolete));
   for (const forbidden of ["Loading content", "Content is loading.", 'label = "Progress"']) assert.doesNotMatch(ui, new RegExp(forbidden.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   const css = await source("./styles.css");
   assert.doesNotMatch(css, /(?:^|\n)input, textarea, select/);

@@ -33,5 +33,4 @@ export function NavTabs({ children, label }: { children: ReactNode; label: strin
 export function Disclosure({ summary, children }: { summary: string; children: ReactNode }) { return <details className="disclosure"><summary><span>{summary}</span><ChevronDownIcon /></summary><div>{children}</div></details>; }
 export function Skeleton({ label }: { label: string }) { return <div aria-label={label} className="skeleton" role="status"><span /><span /><span /></div>; }
 export function StatePanel({ kind, kindLabel, title, description }: { kind: "loading" | "empty" | "error" | "forbidden" | "disabled"; kindLabel?: string; title: string; description: string }) { return <Card><Badge>{kindLabel ?? kind}</Badge><h2>{title}</h2><p>{description}</p>{kind === "loading" ? <Skeleton label={kindLabel ?? title} /> : null}</Card>; }
-export const Panel = Card;
 export function SectionHeader({ title, description, action }: { title: string; description?: ReactNode; action?: ReactNode }) { return <header className="section-header"><div><h2>{title}</h2>{description ? <p>{description}</p> : null}</div>{action ? <div>{action}</div> : null}</header>; }

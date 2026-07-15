@@ -52,10 +52,14 @@ pnpm product:init -- --config /absolute/path/to/product.json
 pnpm product:verify
 ```
 
-`product:init` updates only the declared product configuration/state, generated
-TypeScript configuration and neutral local Supabase identity. It does not edit
-platform/package code. Replacing an already-derived identity requires
-`--force`; normal product work belongs in `apps/web/modules/product`.
+`product:init` updates the declared product configuration/state, generated
+TypeScript configuration and neutral local Supabase identity. If the configured
+workspace root changes, it atomically moves the editable
+`apps/web/app/(product)/<workspace-root>` subtree and rolls it back with the
+config files on failure. It refuses platform-reserved or existing destination
+routes and does not edit platform/package code. Replacing an already-derived
+identity requires `--force`; normal product behavior belongs in
+`apps/web/modules/product` and thin nested pages below the product route root.
 
 ## 2. Verify Determinism
 
@@ -132,8 +136,8 @@ No PostHog key is needed while Analytics is disabled. Payment `sandbox` and AI
 `mock` use deterministic no-side-effect adapters; external Payment/AI remain
 `not_implemented` until a reviewed adapter exists, regardless of secret values.
 
-After the database and public app environment are ready, run the reusable
-desktop and mobile browser smoke:
+After the database and public app environment are ready, run the protected
+foundation and optional product suites against a production build:
 
 ```bash
 pnpm exec playwright install chromium
@@ -160,7 +164,7 @@ supabase start
 supabase db --help
 supabase db reset
 supabase db reset
-supabase test db
+pnpm test:database
 ```
 
 Both resets must apply the single candidate baseline and produce the same schema
@@ -191,7 +195,7 @@ Review at least:
 - `/` signed out and signed in;
 - `/login` sign-in/sign-up/error and safe `next` behavior;
 - `/account`, `/account/billing`, `/account/usage`;
-- `/product` placeholder and signed-out redirect;
+- the configured product workspace root and its signed-out redirect;
 - 404, loading, empty, error, and disabled Provider states;
 - one mobile viewport and the accepted MVP3 desktop widths.
 

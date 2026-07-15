@@ -36,6 +36,7 @@ test("generated config stays narrow while declared product roots remain editable
   ]);
   const layers = assertCandidateLayers([
     ...manifest.artifacts.map((entry) => entry.target),
+    "apps/web/app/(product)/product/activity/page.tsx",
     "apps/web/modules/product/customer-journey.ts",
     "apps/web/public/product/brand.svg",
     "specs/product/product-spec.md",
@@ -44,10 +45,16 @@ test("generated config stays narrow while declared product roots remain editable
   ], manifest);
   assert.ok(layers.productFiles.includes("apps/web/modules/product/customer-journey.ts"));
   assert.ok(layers.productFiles.includes("apps/web/modules/product/product-workspace.tsx"));
+  assert.ok(layers.productFiles.includes("apps/web/app/(product)/product/activity/page.tsx"));
+  assert.equal(isProductEditablePath("tests/foundation/template-smoke.spec.ts", manifest), false);
+  assert.equal(isProductEditablePath("tests/product/product-flow.test.mjs", manifest), true);
   assert.equal(isProductEditablePath("apps/web/modules/platform/auth/actions.ts", manifest), false);
   assert.ok(layers.protectedFiles.includes(manifest.foundation.migrationFile));
+  assert.ok(layers.protectedFiles.includes("supabase/tests/foundation_test.sql"));
   assert.throws(() => assertCandidateLayers([...manifest.artifacts.map((entry) => entry.target), "packages/core/src/product-hack.ts"], manifest), /undeclared files outside product roots/);
   assert.throws(() => assertCandidateLayers(manifest.artifacts.map((entry) => entry.target).filter((file) => file !== manifest.foundation.migrationFile), manifest), /Missing protected files/);
+  assert.throws(() => assertCandidateLayers(manifest.artifacts.map((entry) => entry.target).filter((file) => file !== "tests/foundation/template-smoke.spec.ts"), manifest), /Missing protected files/);
+  assert.doesNotThrow(() => assertCandidateLayers(manifest.artifacts.map((entry) => entry.target).filter((file) => file !== "tests/product/README.md"), manifest));
 });
 
 test("product extension edits do not change the protected foundation hash", async () => {
@@ -77,8 +84,10 @@ test("product identity and internal paths are bounded", () => {
   assert.throws(() => validateProductConfig({ ...product, identity: { ...product.identity, id: "Bad ID" } }), /Invalid product config/);
   assert.throws(() => validateProductConfig({ ...product, home: { ...product.home, primaryHref: "//evil.example" } }), /Invalid product config/);
   assert.throws(() => validateProductConfig({ ...product, paths: { ...product.paths, product: "/\\\\evil.example" } }), /Invalid product config/);
-  assert.throws(() => validateProductConfig({ ...product, paths: { ...product.paths, product: "/travel" } }), /structural/);
-  assert.throws(() => validateProductConfig({ ...product, navigation: [{ label: "Missing", href: "/missing" }] }), /generated route/);
+  const workspace = { ...product, paths: { ...product.paths, product: "/workspace" }, home: { ...product.home, primaryHref: "/workspace" }, navigation: [{ label: "Overview", href: "/workspace" }, { label: "Activity", href: "/workspace/activity" }] };
+  assert.equal(validateProductConfig(workspace), workspace);
+  assert.throws(() => validateProductConfig({ ...product, paths: { ...product.paths, product: "/account" } }), /non-reserved/);
+  assert.throws(() => validateProductConfig({ ...product, navigation: [{ label: "Missing", href: "/missing" }] }), /configured product workspace/);
 });
 
 test("manifest schema rejects undeclared fields and empty inventories", () => {
@@ -169,13 +178,15 @@ test("hash overrides retain provenance for an approved generated declaration", a
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 
-test("product initialization is repeatable, force-gated and rolls back all four outputs", async () => {
+test("product initialization is repeatable, force-gated and rolls back config plus the product route", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "product-init-"));
-  const version = "0.2.0-candidate.4";
+  const version = "0.2.0-candidate.10";
   const targets = ["product.config.json", "apps/web/config/product.config.ts", "supabase/config.toml", "product-state.json"];
   try {
     await mkdir(path.join(root, "apps/web/config"), { recursive: true });
+    await mkdir(path.join(root, "apps/web/app/(product)/product"), { recursive: true });
     await mkdir(path.join(root, "supabase"), { recursive: true });
+    await writeFile(path.join(root, "apps/web/app/(product)/product/page.tsx"), 'import { ProductWorkspace } from "@/modules/product/product-workspace";\nexport default function Page(){ return <ProductWorkspace />; }\n');
     await writeFile(path.join(root, "template-version.json"), JSON.stringify({ candidateVersion: version }));
     await writeFile(path.join(root, "product.config.json"), `${JSON.stringify(product, null, 2)}\n`);
     await writeFile(path.join(root, "apps/web/config/product.config.ts"), generatedProductModule(product, version));
@@ -183,14 +194,27 @@ test("product initialization is repeatable, force-gated and rolls back all four 
     await writeFile(path.join(root, "product-state.json"), `${JSON.stringify(productState(product, version), null, 2)}\n`);
     await initializeProduct({ root, input: path.join(root, "product.config.json") });
     await initializeProduct({ root, input: path.join(root, "product.config.json") });
-    const replacement = { ...product, identity: { ...product.identity, id: "second-product", name: "Second Product", eventNamespace: "second_product" } };
+    const replacement = {
+      ...product,
+      identity: { ...product.identity, id: "second-product", name: "Second Product", eventNamespace: "second_product" },
+      paths: { ...product.paths, product: "/workspace" },
+      home: { ...product.home, primaryHref: "/workspace" },
+      navigation: [{ label: "Workspace", href: "/workspace" }, { label: "Activity", href: "/workspace/activity" }],
+      localized: {
+        "en-US": { ...product.localized["en-US"], navigation: [{ label: "Workspace" }, { label: "Activity" }] },
+        "zh-CN": { ...product.localized["zh-CN"], navigation: [{ label: "工作区" }, { label: "动态" }] }
+      }
+    };
     const replacementFile = path.join(root, "replacement.json");
     await writeFile(replacementFile, JSON.stringify(replacement));
     await assert.rejects(() => initializeProduct({ root, input: replacementFile }), /--force/);
     const before = new Map(await Promise.all(targets.map(async (file) => [file, await readFile(path.join(root, file), "utf8")])));
     await assert.rejects(() => initializeProduct({ root, input: replacementFile, force: true, failAfterRename: 2 }), /Injected/);
     for (const file of targets) assert.equal(await readFile(path.join(root, file), "utf8"), before.get(file));
+    assert.equal(await readFile(path.join(root, "apps/web/app/(product)/product/page.tsx"), "utf8"), 'import { ProductWorkspace } from "@/modules/product/product-workspace";\nexport default function Page(){ return <ProductWorkspace />; }\n');
     await initializeProduct({ root, input: replacementFile, force: true });
     assert.equal(JSON.parse(await readFile(path.join(root, "product-state.json"), "utf8")).identity.id, "second-product");
+    assert.match(await readFile(path.join(root, "apps/web/app/(product)/workspace/page.tsx"), "utf8"), /ProductWorkspace/);
+    await assert.rejects(() => readFile(path.join(root, "apps/web/app/(product)/product/page.tsx"), "utf8"), /ENOENT/);
   } finally { await rm(root, { recursive: true, force: true }); }
 });

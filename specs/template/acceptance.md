@@ -223,3 +223,35 @@ After GNE-303 local, independent and approved external evidence is complete,
 stop for user acceptance. Do not automatically close GNE-298, activate another
 Issue, touch the shared cloud database, or create an external repository /
 Vercel project without the target-specific approval recorded for this run.
+
+## GNE-315 Final Hardening Gate
+
+GNE-315 is accepted only when all of the following are fresh:
+
+- a pristine candidate and a derived product with a non-default workspace root
+  both pass product and candidate integrity verification;
+- the derived product adds at least two nested App Router pages under its
+  workspace root without changing packages or platform modules;
+- reserved route collision, thick/direct-provider product route, product-to-
+  package-internal import and protected foundation mutation fixtures fail;
+- protected foundation browser tests remain present and run in production
+  server mode even when `tests/product` is empty;
+- Auth, account profile persistence, locale refresh, safe return, disabled
+  capability pages, 404 and Account Dialog/Toast behavior pass desktop, narrow
+  mobile and wide mobile checks;
+- the neutral product workspace contains no simulated saved business result or
+  fixed readiness percentage;
+- shared UI names match semantics, the small icon set is accessible, and every
+  retained export has a protected consumer or explicit package test contract;
+- clean install, lint, typecheck, unit/integration, production build, post-build
+  integrity, disposable database reset/pgTAP and pollution scans pass;
+- CatCare/Demo source runtime tests/build remain green with no changed runtime
+  file;
+- an independent read-only reviewer returns architecture, product and UI scores
+  with no unresolved P0/P1.
+
+Vercel/CD remains `not_run / partner-owned` by the user's explicit scope. This
+does not block GNE-315 code acceptance, but no cloud-deployment claim may be
+made. GNE-315 may move to Done after its branch/PR/merge and template-repository
+sync are verified; GNE-298 remains In Progress until the user reviews the final
+three-role result.

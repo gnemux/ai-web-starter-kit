@@ -87,7 +87,11 @@ repository from that candidate. When independently maintained repositories
 need shared package updates, select and verify an explicit distribution or sync
 channel before claiming multi-repository package delivery.
 
-GNE-298 implements that candidate through `GNE-301 -> GNE-302 -> GNE-303`.
+GNE-298 implements that candidate through
+`GNE-301 -> GNE-302 -> GNE-303 -> GNE-315`. The final hardening child keeps
+platform routes and foundation tests protected while giving each generated
+product a declared App Router subtree and product-test subtree that it can
+replace without invalidating candidate provenance.
 The candidate keeps `packages/*` as a local workspace snapshot stamped with the
 source commit, template version, dependency and asset-license provenance. Its
 foundation database uses an independent CLI-generated timestamp migration and

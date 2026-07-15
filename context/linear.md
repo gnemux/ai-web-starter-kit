@@ -707,12 +707,13 @@ GNE-234 VERIFY
 GNE-298 TEMPLATE
 ├── GNE-301 TEMPLATE-01 [ARCH] 提取边界、三仓职责与生成清单
 ├── GNE-302 TEMPLATE-02 [BUILD/UI] 独立母版候选、中性产品壳与必要 UI
-└── GNE-303 TEMPLATE-03 [VERIFY/QA] Smoke Product、空库重建与独立部署验收
+├── GNE-303 TEMPLATE-03 [VERIFY/QA] Smoke Product、空库重建与独立部署验收
+└── GNE-315 TEMPLATE-04 [HARDENING/QA] 产品扩展边界、底座测试隔离与最终加固
 ```
 
 `GNE-298` is blocked by `GNE-234` and is the only TEMPLATE parent in the MVP3
 sequence. Its children remain `No milestone`, carry no labels, and execute in
-the fixed order `GNE-301 -> GNE-302 -> GNE-303`; automatic orchestration must
+the fixed order `GNE-301 -> GNE-302 -> GNE-303 -> GNE-315`; automatic orchestration must
 stop after the selected child. The current research repository may use its
 normal verified branch/PR flow, while creating or writing a new candidate or
 Smoke GitHub repository and configuring a Vercel test project require explicit

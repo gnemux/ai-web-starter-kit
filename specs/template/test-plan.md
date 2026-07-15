@@ -12,7 +12,7 @@
 | one Analytics project mixes identities | reserved base-property test and caller override negatives |
 | SSR session leaks through cache | Proxy header forwarding, `getClaims`, force-dynamic account routes and security check |
 | user deletion erases financial history | restrictive owner FK and pgTAP negative |
-| SQL regression passes frontend-only CI | pinned Supabase CLI job runs reset and `supabase test db` |
+| SQL regression silently runs zero tests | pinned Supabase CLI job resets the database, then `pnpm test:database` requires exactly 149/149 pgTAP assertions |
 | Smoke identity contaminates pristine output | separate state/config hashes and deterministic A/B comparison |
 
 ## Status And Ownership
@@ -285,6 +285,24 @@ touches shared package APIs, Auth/RLS, migration derivation, supply chain, and a
 broad future refactor. The reviewer is read-only and returns consolidated
 findings. The original writer fixes them, then reruns only affected checks plus
 the final required repository check.
+
+## GNE-315 Verification Matrix
+
+| Risk | Positive evidence | Negative evidence |
+| --- | --- | --- |
+| product route extensibility | derive `/workspace`, add `/workspace/overview` and `/workspace/activity`, build and verify | reject `/account`, `/auth`, direct provider imports and client/thick route pages |
+| candidate integrity | route/product module/spec/test changes remain editable while protected hash stays stable | package/platform/foundation-test mutation fails |
+| test ownership | `tests/foundation` always runs with `next start`; product tests run when present | empty/deleted product suite cannot remove foundation evidence |
+| product config | default and changed workspace roots initialize atomically and navigation may use descendants | external/protocol-relative/reserved/cross-workspace paths fail |
+| UI semantics | NavTabs, Disclosure, Account Dialog/Toast and neutral icons have unit/browser evidence | obsolete Tabs/Popover aliases, fixed 100% progress and unused demo controls absent |
+| responsive/accessibility | desktop plus narrow/wide phone; keyboard open/close/focus return; locale persists across reload | horizontal overflow, clipped focus, stale-language copy fail |
+| production behavior | build then `next start`; first response/navigation/profile/locale paths recorded | `next dev` compilation timing is not accepted as performance evidence |
+| source regression | research CatCare/Demo tests and production build pass; runtime diff empty | any changed CatCare/Demo route/service/schema fails scope |
+| data/security | disposable reset and pgTAP pass; pollution/secret scans pass | shared cloud DB, environment identity or real secret use forbidden |
+
+The final three-role review starts only after these checks settle. The reviewer
+is read-only. Findings return to the single Sol writer, and only affected checks
+plus the final repository gate are repeated after fixes.
 
 ## Failure Conditions
 

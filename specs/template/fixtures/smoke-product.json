@@ -12,7 +12,7 @@
     "home": "/",
     "login": "/login",
     "account": "/account",
-    "product": "/product",
+    "product": "/workspace",
     "billing": "/account/billing",
     "usage": "/account/usage"
   },
@@ -21,7 +21,7 @@
     "title": "Prove the template without product history.",
     "description": "This disposable identity verifies that configuration changes do not require platform edits.",
     "primaryAction": "Open product",
-    "primaryHref": "/product",
+    "primaryHref": "/workspace",
     "secondaryAction": "View account",
     "secondaryHref": "/account"
   },
@@ -39,7 +39,9 @@
     "ai": "disabled"
   },
   "navigation": [
-    { "label": "Product", "href": "/product" },
+    { "label": "Workspace", "href": "/workspace" },
+    { "label": "Overview", "href": "/workspace/overview" },
+    { "label": "Activity", "href": "/workspace/activity" },
     { "label": "Account", "href": "/account" }
   ],
   "footerLinks": [
@@ -58,7 +60,7 @@
       },
       "login": { "title": "Sign in to Smoke Product", "description": "Use only disposable local verification accounts." },
       "account": { "title": "Smoke account", "description": "Verify the neutral account and profile boundary." },
-      "navigation": [{ "label": "Product" }, { "label": "Account" }],
+      "navigation": [{ "label": "Workspace" }, { "label": "Overview" }, { "label": "Activity" }, { "label": "Account" }],
       "footerLinks": [{ "label": "Billing" }, { "label": "Usage" }]
     },
     "zh-CN": {
@@ -72,7 +74,7 @@
       },
       "login": { "title": "登录 Smoke Product", "description": "只使用一次性本地验收账户。" },
       "account": { "title": "Smoke 账户", "description": "验证中性账户和资料边界。" },
-      "navigation": [{ "label": "产品" }, { "label": "账户" }],
+      "navigation": [{ "label": "工作区" }, { "label": "概览" }, { "label": "动态" }, { "label": "账户" }],
       "footerLinks": [{ "label": "计费" }, { "label": "用量" }]
     }
   },

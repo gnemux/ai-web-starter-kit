@@ -180,7 +180,7 @@ test("hash overrides retain provenance for an approved generated declaration", a
 
 test("product initialization is repeatable, force-gated and rolls back config plus the product route", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "product-init-"));
-  const version = "0.2.0-candidate.8";
+  const version = "0.2.0-candidate.9";
   const targets = ["product.config.json", "apps/web/config/product.config.ts", "supabase/config.toml", "product-state.json"];
   try {
     await mkdir(path.join(root, "apps/web/config"), { recursive: true });

@@ -1,6 +1,6 @@
 {
   "name": "@xwlc/web",
-  "version": "0.2.0-candidate.8",
+  "version": "0.2.0-candidate.9",
   "private": true,
   "type": "module",
   "scripts": {

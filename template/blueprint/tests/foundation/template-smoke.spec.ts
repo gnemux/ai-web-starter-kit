@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
-const productPath = JSON.parse(readFileSync(new URL("../../product.config.json", import.meta.url), "utf8")).paths.product as string;
+const productPath = JSON.parse(readFileSync("product.config.json", "utf8")).paths.product as string;
 const productPathPattern = new RegExp(`${productPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
 const encodedProductPath = encodeURIComponent(productPath);
 

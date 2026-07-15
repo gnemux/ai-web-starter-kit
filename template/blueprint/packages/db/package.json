@@ -1,6 +1,6 @@
 {
   "name": "@xwlc/db",
-  "version": "0.2.0-candidate.5",
+  "version": "0.2.0-candidate.6",
   "private": true,
   "type": "module",
   "exports": { ".": "./src/index.ts" },

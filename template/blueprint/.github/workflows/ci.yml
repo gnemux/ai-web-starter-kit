@@ -36,7 +36,7 @@ jobs:
       - name: Rebuild disposable database
         run: supabase start && supabase db reset
       - name: Run pgTAP security and retention tests
-        run: supabase test db
+        run: node scripts/test-foundation-db.mjs
       - name: Stop disposable database
         if: always()
         run: supabase stop --no-backup

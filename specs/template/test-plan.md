@@ -12,7 +12,7 @@
 | one Analytics project mixes identities | reserved base-property test and caller override negatives |
 | SSR session leaks through cache | Proxy header forwarding, `getClaims`, force-dynamic account routes and security check |
 | user deletion erases financial history | restrictive owner FK and pgTAP negative |
-| SQL regression passes frontend-only CI | pinned Supabase CLI job runs reset and `supabase test db` |
+| SQL regression silently runs zero tests | pinned Supabase CLI job resets the database, then `pnpm test:database` requires exactly 149/149 pgTAP assertions |
 | Smoke identity contaminates pristine output | separate state/config hashes and deterministic A/B comparison |
 
 ## Status And Ownership

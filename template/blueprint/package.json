@@ -1,6 +1,6 @@
 {
   "name": "generated-product",
-  "version": "0.2.0-candidate.7",
+  "version": "0.2.0-candidate.8",
   "private": true,
   "packageManager": "pnpm@9.15.0",
   "scripts": {
@@ -18,6 +18,7 @@
     "test:release-boundaries": "pnpm test:release",
     "test:security": "node scripts/verify-security.mjs",
     "test:environment": "node --test scripts/env-init.test.mjs",
+    "test:database": "node scripts/test-foundation-db.mjs",
     "test:browser:foundation": "playwright test tests/foundation",
     "test:browser:product": "playwright test tests/product --pass-with-no-tests",
     "test:browser": "pnpm build && pnpm template:verify && pnpm test:browser:foundation && pnpm test:browser:product",

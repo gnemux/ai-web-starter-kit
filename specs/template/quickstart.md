@@ -164,7 +164,7 @@ supabase start
 supabase db --help
 supabase db reset
 supabase db reset
-supabase test db
+pnpm test:database
 ```
 
 Both resets must apply the single candidate baseline and produce the same schema

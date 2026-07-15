@@ -1,6 +1,6 @@
 {
   "name": "@xwlc/ui",
-  "version": "0.2.0-candidate.7",
+  "version": "0.2.0-candidate.8",
   "private": true,
   "type": "module",
   "exports": { ".": "./src/index.tsx", "./styles.css": "./src/styles.css" },

@@ -4,7 +4,7 @@
   "manifestVersion": "1.1.0",
   "generatorVersion": "1.1.0",
   "noticesInventoryVersion": "1.0.0",
-  "candidateVersion": "0.2.0-candidate.7",
+  "candidateVersion": "0.2.0-candidate.8",
   "sourcePackageVersion": "0.1.1",
   "source": {
     "repository": "https://github.com/gnemux/ai-web-starter-kit.git",
@@ -30,7 +30,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -47,7 +47,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -64,7 +64,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -81,7 +81,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -98,7 +98,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -115,7 +115,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -132,7 +132,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -149,7 +149,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -166,7 +166,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -183,7 +183,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -200,7 +200,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -217,7 +217,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -234,7 +234,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -251,7 +251,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -268,7 +268,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -285,7 +285,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -302,7 +302,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -319,7 +319,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -336,7 +336,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -353,7 +353,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -370,7 +370,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -387,7 +387,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -404,7 +404,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -421,7 +421,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -438,7 +438,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -455,7 +455,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -472,7 +472,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -489,7 +489,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -506,7 +506,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -523,7 +523,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -540,7 +540,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -557,7 +557,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -574,7 +574,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -591,7 +591,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -608,7 +608,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -625,7 +625,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -642,7 +642,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -659,7 +659,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -676,7 +676,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -693,7 +693,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -710,7 +710,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -727,7 +727,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -744,7 +744,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -761,7 +761,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -778,7 +778,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -795,7 +795,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -812,7 +812,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -829,7 +829,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -846,7 +846,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -863,7 +863,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -880,7 +880,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -897,7 +897,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -914,7 +914,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -931,7 +931,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -948,7 +948,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -965,7 +965,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -982,7 +982,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -999,7 +999,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1016,7 +1016,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1033,7 +1033,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1050,7 +1050,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1067,7 +1067,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1084,7 +1084,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1101,7 +1101,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1118,7 +1118,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1135,7 +1135,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1152,7 +1152,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1169,7 +1169,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1186,7 +1186,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1203,7 +1203,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1220,7 +1220,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1237,7 +1237,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1254,7 +1254,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1271,7 +1271,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1288,7 +1288,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1305,7 +1305,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1322,7 +1322,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1339,7 +1339,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1356,7 +1356,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1373,7 +1373,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1390,7 +1390,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1407,7 +1407,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1424,7 +1424,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1441,7 +1441,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1458,7 +1458,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1475,7 +1475,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1492,7 +1492,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1509,7 +1509,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1526,7 +1526,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1543,7 +1543,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1560,7 +1560,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1577,7 +1577,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1594,7 +1594,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1611,7 +1611,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1628,7 +1628,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1645,7 +1645,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1662,7 +1662,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1679,7 +1679,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1696,7 +1696,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1713,7 +1713,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1730,7 +1730,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1747,7 +1747,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1764,7 +1764,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1781,7 +1781,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1798,7 +1798,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1815,7 +1815,24 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
+      }
+    },
+    {
+      "source": "template/blueprint/scripts/test-foundation-db.mjs",
+      "target": "scripts/test-foundation-db.mjs",
+      "classification": "keep",
+      "owner": "engineering",
+      "productEditable": false,
+      "action": "copy",
+      "verification": [
+        "inventory",
+        "checksum",
+        "pollution-scan"
+      ],
+      "provenance": {
+        "sourceCommit": "git:HEAD",
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1832,7 +1849,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1849,7 +1866,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1866,7 +1883,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1883,7 +1900,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1900,7 +1917,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1917,7 +1934,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1934,7 +1951,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1951,7 +1968,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1968,7 +1985,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -1985,7 +2002,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2002,7 +2019,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2019,7 +2036,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2036,7 +2053,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2053,7 +2070,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2070,7 +2087,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2087,7 +2104,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2104,7 +2121,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2120,7 +2137,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2136,7 +2153,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2152,7 +2169,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2169,7 +2186,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2186,7 +2203,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2203,7 +2220,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2220,7 +2237,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     },
     {
@@ -2237,7 +2254,7 @@
       ],
       "provenance": {
         "sourceCommit": "git:HEAD",
-        "templateVersion": "0.2.0-candidate.7"
+        "templateVersion": "0.2.0-candidate.8"
       }
     }
   ],
@@ -2269,25 +2286,25 @@
     {
       "name": "@xwlc/core",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.2.0-candidate.7",
+      "candidateVersion": "0.2.0-candidate.8",
       "decision": "transform"
     },
     {
       "name": "@xwlc/ui",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.2.0-candidate.7",
+      "candidateVersion": "0.2.0-candidate.8",
       "decision": "transform"
     },
     {
       "name": "@xwlc/platform",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.2.0-candidate.7",
+      "candidateVersion": "0.2.0-candidate.8",
       "decision": "transform"
     },
     {
       "name": "@xwlc/db",
       "sourceVersion": "0.1.1",
-      "candidateVersion": "0.2.0-candidate.7",
+      "candidateVersion": "0.2.0-candidate.8",
       "decision": "transform"
     }
   ]

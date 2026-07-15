@@ -7,7 +7,7 @@ This repository is a generated, single-product starting point. It contains one d
 1. Use Node 22 and pnpm 9.15.0.
 2. Run `pnpm install --frozen-lockfile`.
 3. Choose one environment path on a fresh checkout. For provider-safe disabled pages, run `pnpm env:init`. For real local Auth/profile acceptance, run `supabase start` and then `pnpm env:init -- --supabase-local`. Both commands create the ignored `apps/web/.env.local`; neither overwrites an existing file. Do not copy the example to the repository root because Next runs from `apps/web`.
-4. Run `supabase db reset`, `supabase test db`, `pnpm test`, `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
+4. Run `supabase db reset`, `pnpm test:database`, `pnpm test`, `pnpm lint`, `pnpm typecheck`, and `pnpm build`.
 5. Run `pnpm --filter @xwlc/web dev` and review `/`, `/login`, `/account`, `/account/billing`, `/account/usage`, and the configured `paths.product`.
 6. For the reusable production-mode browser regression, install its pinned Chromium once with `pnpm exec playwright install chromium`, keep local Supabase running, and run `pnpm test:browser`. The protected foundation suite always runs; product tests under `tests/product` are optional until a real product journey exists.
 

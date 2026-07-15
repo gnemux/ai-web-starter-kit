@@ -11,8 +11,8 @@ test("local account, profile, locale and shared UI remain usable", async ({ page
   const password = "Template-Smoke-2026!";
   await page.goto("/login?mode=signup&next=%2Fproduct");
   await page.getByLabel("Email", { exact: true }).fill(email);
-  await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByLabel("Confirm password", { exact: true }).fill(password);
+  await page.locator("#password").fill(password);
+  await page.locator("#confirm-password").fill(password);
   await page.getByRole("button", { name: "Create account" }).click();
   await expect(page).toHaveURL(/\/product$/);
 

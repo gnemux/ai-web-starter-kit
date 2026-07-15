@@ -4,7 +4,7 @@ import path from "node:path";
 import { generatedProductModule, generatedSupabaseConfig, productState } from "./product-config.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
-const ignored = new Set([".git", "node_modules", ".next", ".turbo", ".vercel", ".temp", ".branches", "coverage", "dist"]);
+const ignored = new Set([".git", "node_modules", ".next", ".turbo", ".vercel", ".temp", ".branches", "coverage", "dist", "test-results", "playwright-report"]);
 const pristineNextEnv = "/// <reference types=\"next\" />\n/// <reference types=\"next/image-types/global\" />\n";
 const generatedNextEnv = `${pristineNextEnv}/// <reference path=\"./.next/types/routes.d.ts\" />\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.\n`;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");

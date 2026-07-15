@@ -26,10 +26,10 @@ for (const eventType of ["grant", "reserve", "consume", "release", "refund", "ex
 if (!billingContract.includes("providerSubscriptionId: string | null") || !/provider_subscription_id text[,\n]/.test(sql)) throw new Error("Subscription provider id nullability contract drift");
 if (!billingContract.includes("priceId: string;") || !/price_id text not null/.test(sql)) throw new Error("Subscription price id nullability contract drift");
 const ignores = await readFile(path.join(root, ".gitignore"), "utf8");
-for (const expected of ["node_modules/", ".next/", ".turbo/", ".vercel/", ".env.*"]) if (!ignores.includes(expected)) throw new Error(`Repository hygiene ignore missing: ${expected}`);
+for (const expected of ["node_modules/", ".next/", ".turbo/", ".vercel/", "test-results/", "playwright-report/", ".env.*"]) if (!ignores.includes(expected)) throw new Error(`Repository hygiene ignore missing: ${expected}`);
 if (existsSync(path.join(root, ".git"))) {
   const tracked = execFileSync("git", ["ls-files"], { cwd: root, encoding: "utf8" }).split("\n").filter(Boolean);
-  for (const file of tracked) if (/(?:^|\/)\.env(?:\..+)?$/.test(file) && !file.endsWith(".env.example") || /(?:^|\/)(?:\.vercel|node_modules|\.next|\.turbo)(?:\/|$)/.test(file)) throw new Error(`Private or generated path must not be tracked: ${file}`);
+  for (const file of tracked) if (/(?:^|\/)\.env(?:\..+)?$/.test(file) && !file.endsWith(".env.example") || /(?:^|\/)(?:\.vercel|node_modules|\.next|\.turbo|test-results|playwright-report)(?:\/|$)/.test(file)) throw new Error(`Private or generated path must not be tracked: ${file}`);
 }
 const config = await readFile(path.join(root, "apps/web/next.config.ts"), "utf8");
 for (const header of ["frame-ancestors 'none'", "Referrer-Policy", "X-Content-Type-Options", "Permissions-Policy"]) if (!config.includes(header)) throw new Error(`Security header missing: ${header}`);

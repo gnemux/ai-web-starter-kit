@@ -3,6 +3,8 @@ node_modules/
 .turbo/
 .vercel/
 .supabase/
+test-results/
+playwright-report/
 coverage/
 dist/
 *.tsbuildinfo

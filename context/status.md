@@ -1419,6 +1419,30 @@ GNE-303 post-review hardening checkpoint on 2026-07-15:
   Progress; GitHub, Vercel, shared cloud resources, and candidate directories
   remain untouched.
 
+GNE-303 final local user-acceptance checkpoint on 2026-07-15:
+
+- Final candidate `0.2.0-candidate.4` is generated from local source commit
+  `0113fc6` at `gne-303-neutral-ready-v4-acceptance`; it is served on port 3000
+  against the retained isolated 5532x Supabase stack.
+- Cold environment initialization, 149/149 final database checks, 30 package/
+  app contracts, environment safety, lint/typecheck, warning-free production
+  build, post-build lint and three-layer verification pass. Browser regression
+  is 6/6 across desktop Chrome and Pixel 5.
+- Real page review covers registration, invalid-cookie recovery, product entry,
+  same-URL Chinese/English switching, profile save/refresh persistence,
+  sign-out and sign-in. The retained account is
+  `gne303-review@example.test`; its password is local test data communicated in
+  the final handoff, not a repository secret.
+- Verification exposed and fixed three reusable engineering defects: the cold
+  env instructions previously conflicted with non-overwrite behavior; generated
+  browser/build residue broke later lint/integrity checks; and a Next.js 16
+  `proxy.ts` convention had been used in a Next.js 15 candidate. The final
+  candidate uses executable Node `middleware.ts` and clears invalid persisted
+  sessions safely.
+- CatCare/Demo runtime remains unchanged. Research tests/build pass. GNE-303 and
+  GNE-298 stay In Progress; no push, PR, merge, Vercel, shared cloud database,
+  Issue closure, candidate deletion or next-Issue activation occurred.
+
 1. Complete only `GNE-303`: generate neutral and Smoke candidates, run clean
    install/build/test and two isolated local database resets, then perform
    browser and independent reviewer acceptance.

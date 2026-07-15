@@ -186,6 +186,23 @@ be inherited by every future product. It does not close GNE-303 or GNE-298;
 the final local server, isolated database, and test account remain available
 for the user's page acceptance.
 
+### Final Candidate.4 User-Acceptance Result
+
+| Gate | Result | Evidence |
+| --- | --- | --- |
+| provenance and three-layer boundary | pass | fresh `0.2.0-candidate.4` from local commit `0113fc6`; protected=119, product=6; candidate integrity passes after browser/build residue |
+| cold start | pass | frozen install; one-command local public env creation under `apps/web`; second invocation preserves the existing file; no root env or service-role key |
+| framework/session compatibility | pass | locked Next.js 15 uses executable Node `middleware.ts`; invalid stored session is cleared to anonymous while retryable/provider failures are not classified as stale session |
+| reusable browser regression | pass | Playwright 1.61.1 desktop Chrome and Pixel 5: 6/6 for safe return, invalid-session recovery, signup, product entry, locale/UI interaction and profile persistence |
+| package/app quality | pass | lint and typecheck; 30 package/app contracts plus environment test; production build; lint again after build; post-build three-layer verification |
+| database reproducibility | pass | earlier two-reset proof plus final candidate reset; each 149/149 pgTAP/RLS/grant checks, isolated 5532x local stack only |
+| real page acceptance setup | pass | `gne303-review@example.test` registered, profile saved and persisted after refresh, sign-out/sign-in returned to `/product`; English/Chinese same-URL copy verified |
+| research product regression | pass | no CatCare/Demo runtime file changed; research 82 web tests and 32-route production build remain green |
+| external operations | not_run / intentionally gated | no push, PR, merge, Vercel, shared cloud DB or production-provider write; user acceptance remains the stop gate |
+
+The final candidate is locally suitable for user acceptance. This is not a
+production publication decision and does not close GNE-303 or GNE-298.
+
 ## Capability Classification At Parent Completion
 
 | Class | Meaning |

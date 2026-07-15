@@ -40,7 +40,7 @@ confirm that the manifest decision, target, and verification are unambiguous:
 8. `packages/core/src/data.ts` — Exclude the mixed Demo file; represent only the approved neutral ownership/profile concepts in independent candidate projections;
 9. `packages/platform/src/travel-consumer.compile.ts` — Exclude fixture from candidate;
 10. `packages/platform/src/index.ts` — Transform into a reviewed neutral public-API projection; exclude the research capability-context/share-token files and independently retain only their approved provider-free decisions;
-11. `apps/web/proxy.ts` — Transform and include as an app runtime input;
+11. research `apps/web/proxy.ts` — Transform to candidate `apps/web/middleware.ts` for the locked Next.js 15 runtime and include as an app runtime input;
 12. `supabase/config.toml` — Transform to neutral local identity/Auth URLs;
 13. `supabase/seed.sql` — Transform to empty/deterministic neutral seed;
 14. `20260618070613_create_data_template.sql` — Fold profile/function, exclude Demo;

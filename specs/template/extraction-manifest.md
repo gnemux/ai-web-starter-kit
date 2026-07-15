@@ -43,7 +43,7 @@ owner, product-editability, action, and verification rule.
 | `packages/platform` | Transform | same / shared-package | No | snapshot neutral runtime contracts; exclude/product-neutralize fixtures below | root import, no runtime/product dependency or product fixture |
 | `packages/db` | Keep | same / shared-package | No | snapshot | root import and schema evidence types |
 | `apps/web/app`, `components`, `lib` | Transform | routes + `modules/platform` + `modules/product` | Split by owner | explicit mappings below | import graph and pollution scan |
-| `apps/web/proxy.ts`, `instrumentation-client.ts` | Transform | candidate app root / platform-app | No | retain neutral request/session and Analytics bootstrap only | build, safe route and disabled-Analytics checks |
+| research `apps/web/proxy.ts`, `instrumentation-client.ts` | Transform | candidate `middleware.ts` / platform-app | No | retain neutral request/session and Analytics bootstrap only; use the framework entry convention matching locked Next.js 15 | build, executable middleware, safe route and disabled-Analytics checks |
 | `apps/web/package.json`, `next-env.d.ts`, `next.config.ts`, `postcss.config.mjs`, `tailwind.config.ts`, `tsconfig.json` | Keep/Transform | candidate app toolchain | No | include all build inputs; remove product-only scripts and resolve dependency versions through the committed lockfile | frozen install, lint, typecheck, test, build |
 | `apps/web/public/catcare` | Exclude | research-reference | N/A | copy nothing | zero path/hash/name match |
 | `supabase/migrations` | Transform/Exclude | one independent candidate migration | No | derive final state; never copy history | empty reset twice and ledger check |

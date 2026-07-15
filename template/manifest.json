@@ -873,8 +873,8 @@
       }
     },
     {
-      "source": "template/blueprint/apps/web/proxy.ts",
-      "target": "apps/web/proxy.ts",
+      "source": "template/blueprint/apps/web/middleware.ts",
+      "target": "apps/web/middleware.ts",
       "classification": "keep",
       "owner": "platform-app",
       "productEditable": false,

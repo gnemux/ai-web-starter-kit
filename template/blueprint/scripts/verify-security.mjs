@@ -36,6 +36,8 @@ for (const header of ["frame-ancestors 'none'", "Referrer-Policy", "X-Content-Ty
 if (!config.includes('process.env.NODE_ENV === "development"') || !config.includes(': "script-src \'self\' \'unsafe-inline\'"')) throw new Error("Production CSP must exclude unsafe-eval");
 const proxy = await readFile(path.join(root, "apps/web/modules/platform/supabase/proxy.ts"), "utf8");
 for (const cookieContract of ["request.cookies.getAll()", "response.cookies.set(name, value, options)", "Object.entries(headers)", "client.auth.getClaims()"] ) if (!proxy.includes(cookieContract)) throw new Error(`Session cookie refresh contract missing: ${cookieContract}`);
+const middleware = await readFile(path.join(root, "apps/web/middleware.ts"), "utf8");
+if (!middleware.includes("export async function middleware") || !middleware.includes("updateSession(request)")) throw new Error("Locked Next.js 15 session middleware entry is missing");
 const supabaseConfig = await readFile(path.join(root, "apps/web/modules/platform/supabase/config.ts"), "utf8");
 if (!supabaseConfig.includes("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY") || !supabaseConfig.includes("NEXT_PUBLIC_SUPABASE_ANON_KEY")) throw new Error("Publishable-key preference and legacy fallback must both be explicit");
 const analyticsProperties = await readFile(path.join(root, "apps/web/modules/platform/analytics/properties.ts"), "utf8");

@@ -55,8 +55,12 @@ test("confirmation exchange keeps cookies and forbids caching", async () => {
 
 test("invalid persisted sessions are cleared without hiding provider outages", async () => {
   const proxy = await readFile(new URL("../supabase/proxy.ts", import.meta.url), "utf8");
+  const middleware = await readFile(new URL("../../../middleware.ts", import.meta.url), "utf8");
+  assert.match(middleware, /export async function middleware/);
+  assert.match(middleware, /updateSession\(request\)/);
+  assert.doesNotMatch(middleware, /export async function proxy/);
   assert.match(proxy, /clearAuthCookiesAtScopes/);
-  for (const code of ["bad_jwt", "user_not_found", "session_not_found", "session_expired", "refresh_token_not_found", "refresh_token_already_used"]) assert.ok(proxy.includes(`"${code}"`));
+  for (const code of ["bad_jwt", "validation_failed", "user_not_found", "session_not_found", "session_expired", "refresh_token_not_found", "refresh_token_already_used"]) assert.ok(proxy.includes(`"${code}"`));
   assert.match(proxy, /isInvalidStoredSession\(error\)/);
   assert.doesNotMatch(proxy, /request_timeout/);
   assert.match(proxy, /"Cache-Control", "private, no-store, max-age=0"/);

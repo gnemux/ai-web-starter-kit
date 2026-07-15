@@ -4,6 +4,7 @@ import { hasSupabaseConfig, supabasePublicConfig } from "./config";
 
 const invalidStoredSessionCodes = new Set([
   "bad_jwt",
+  "validation_failed",
   "user_not_found",
   "session_not_found",
   "session_expired",
@@ -12,8 +13,9 @@ const invalidStoredSessionCodes = new Set([
 ]);
 
 function isInvalidStoredSession(error: unknown) {
-  return typeof error === "object" && error !== null && "code" in error
-    && typeof error.code === "string" && invalidStoredSessionCodes.has(error.code);
+  if (typeof error !== "object" || error === null) return false;
+  if ("code" in error && typeof error.code === "string" && invalidStoredSessionCodes.has(error.code)) return true;
+  return "__isAuthError" in error && error.__isAuthError === true && "status" in error && error.status === 400;
 }
 
 export async function updateSession(request: NextRequest) {

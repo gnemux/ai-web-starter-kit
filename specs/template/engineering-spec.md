@@ -130,7 +130,8 @@ Confirmed coupling that GNE-302 must remove before generation:
   prices, quotas, product feature keys and validation/demo copy; `@xwlc/ui`
   hard-codes an XWLC `BrandMark`. The candidate must move the catalog/brand to
   product configuration rather than treating current package output as neutral.
-- the current app build also depends on `proxy.ts`,
+- the current research app build also depends on `proxy.ts`; the generated
+  candidate locked to Next.js 15 must project this entry to `middleware.ts`,
   `instrumentation-client.ts`, app package/config files, and the Supabase
   config/seed/tooling files; omitting them from an allowlist would make cold
   generation incomplete.
@@ -319,7 +320,7 @@ identical source/config runs compare equal.
 
 Every candidate runtime/toolchain input is explicit: root package/workspace/
 Turbo/lock files; app `package.json`, TypeScript, Next, Tailwind and PostCSS
-configuration; `proxy.ts`; `instrumentation-client.ts`; root `vercel.json`;
+configuration; candidate `middleware.ts`; `instrumentation-client.ts`; root `vercel.json`;
 Supabase config, seed, ignore file, README and baseline; CI, scripts, env example,
 docs and orchestration files. The manifest fails on a new unclassified input.
 

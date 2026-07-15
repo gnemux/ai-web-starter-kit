@@ -58,6 +58,7 @@ test("invalid persisted sessions are cleared without hiding provider outages", a
   const middleware = await readFile(new URL("../../../middleware.ts", import.meta.url), "utf8");
   assert.match(middleware, /export async function middleware/);
   assert.match(middleware, /updateSession\(request\)/);
+  assert.match(middleware, /runtime: "nodejs"/);
   assert.doesNotMatch(middleware, /export async function proxy/);
   assert.match(proxy, /clearAuthCookiesAtScopes/);
   for (const code of ["bad_jwt", "validation_failed", "user_not_found", "session_not_found", "session_expired", "refresh_token_not_found", "refresh_token_already_used"]) assert.ok(proxy.includes(`"${code}"`));

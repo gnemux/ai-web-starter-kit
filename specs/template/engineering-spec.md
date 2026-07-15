@@ -252,6 +252,12 @@ candidate -> source absolute path, source worktree, source node_modules, or sour
 
 ## Cold-start And Browser Acceptance Contract
 
+The locked Next.js 15 candidate uses the `middleware.ts` file convention and
+explicit Node runtime for Supabase SSR session refresh. A `proxy.ts` entry is a
+Next.js 16 convention and is not accepted merely because its imported module
+typechecks; the production build and invalid-session browser smoke must prove
+that the request entry is executable.
+
 The generated repository owns one idempotent environment initializer. It writes
 only ignored `apps/web/.env.local`, uses exclusive creation, and never replaces
 an existing developer file. Its safe-disabled mode copies the public example;

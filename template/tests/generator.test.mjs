@@ -50,6 +50,7 @@ test("generated config stays narrow while declared product roots remain editable
   assert.equal(isProductEditablePath("tests/product/product-flow.test.mjs", manifest), true);
   assert.equal(isProductEditablePath("apps/web/modules/platform/auth/actions.ts", manifest), false);
   assert.ok(layers.protectedFiles.includes(manifest.foundation.migrationFile));
+  assert.ok(layers.protectedFiles.includes("supabase/tests/foundation_test.sql"));
   assert.throws(() => assertCandidateLayers([...manifest.artifacts.map((entry) => entry.target), "packages/core/src/product-hack.ts"], manifest), /undeclared files outside product roots/);
   assert.throws(() => assertCandidateLayers(manifest.artifacts.map((entry) => entry.target).filter((file) => file !== manifest.foundation.migrationFile), manifest), /Missing protected files/);
   assert.throws(() => assertCandidateLayers(manifest.artifacts.map((entry) => entry.target).filter((file) => file !== "tests/foundation/template-smoke.spec.ts"), manifest), /Missing protected files/);
@@ -179,7 +180,7 @@ test("hash overrides retain provenance for an approved generated declaration", a
 
 test("product initialization is repeatable, force-gated and rolls back config plus the product route", async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), "product-init-"));
-  const version = "0.2.0-candidate.6";
+  const version = "0.2.0-candidate.7";
   const targets = ["product.config.json", "apps/web/config/product.config.ts", "supabase/config.toml", "product-state.json"];
   try {
     await mkdir(path.join(root, "apps/web/config"), { recursive: true });

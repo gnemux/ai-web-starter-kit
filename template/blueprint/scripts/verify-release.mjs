@@ -23,6 +23,8 @@ for (const snapshot of templateManifest.packageSnapshots) {
 const notices = await readFile(path.join(root, "THIRD_PARTY_NOTICES.md"), "utf8");
 for (const [name, version] of directExternal) if (!notices.includes(`| ${name} | ${version} |`)) throw new Error(`Third-party notice missing for ${name}@${version}`);
 const workflow = await readFile(path.join(root, ".github/workflows/ci.yml"), "utf8");
+await readFile(path.join(root, "supabase/tests/foundation_test.sql"), "utf8");
+if (!workflow.includes("supabase test db")) throw new Error("CI must execute the discoverable foundation pgTAP suite");
 for (const use of workflow.matchAll(/uses:\s*([^\s]+)/g)) if (!/@[0-9a-f]{40}$/.test(use[1])) throw new Error(`Workflow action is not SHA pinned: ${use[1]}`);
 if (/cache:\s*["']?pnpm["']?/.test(workflow)) throw new Error("setup-node must not request pnpm cache before pnpm is activated");
 const buildGate = workflow.indexOf("run: pnpm lint && pnpm typecheck && pnpm test && pnpm build");

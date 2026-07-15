@@ -1,14 +1,15 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
-const productPath = JSON.parse(readFileSync("product.config.json", "utf8")).paths.product as string;
+const configuredProduct = JSON.parse(readFileSync("product.config.json", "utf8"));
+const productPath = configuredProduct.paths.product as string;
 const productPathPattern = new RegExp(`${productPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`);
 const encodedProductPath = encodeURIComponent(productPath);
 
 test("anonymous product entry preserves its safe return path", async ({ page }) => {
   await page.goto(productPath);
   await expect(page).toHaveURL(new RegExp(`/login\\?next=${encodedProductPath}$`));
-  await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: configuredProduct.login.title })).toBeVisible();
 });
 
 test("an invalid persisted local session recovers as anonymous", async ({ context, page }) => {
@@ -27,7 +28,7 @@ test("an invalid persisted local session recovers as anonymous", async ({ contex
     path: "/"
   }]);
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Start with the platform work already solved." })).toBeVisible();
+  await expect(page.getByRole("heading", { name: configuredProduct.home.title })).toBeVisible();
   await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
   expect((await context.cookies()).some(({ name }) => name.startsWith("sb-127-auth-token"))).toBe(false);
 });

@@ -586,3 +586,26 @@
 - A clean local migration rebuild, dedicated lifecycle SQL test, existing
   CatCare security SQL tests, 82 web tests, typecheck, package boundaries, and
   production build must pass before remote migration or merge is considered.
+
+## GNE-318 Account Recovery Acceptance
+
+- The CatCare sign-in view exposes a keyboard-accessible password-reset mode
+  that preserves only a safe `/catcare` or `/account` return path.
+- A syntactically valid request receives neutral success copy without revealing
+  whether the address exists. Invalid input, rate limiting, and provider failure
+  use bounded recovery states and never expose raw provider errors.
+- The reset email callback is built from a validated HTTP(S) app origin and the
+  fixed `/auth/confirm` route. Production evidence requires the exact callback
+  route in the target Supabase redirect allowlist and an email template that
+  honors the provided redirect target.
+- A valid recovery callback creates the Supabase session and opens the protected
+  `/account/password` page. Anonymous access or a forged URL parameter alone
+  cannot update a password.
+- The password form validates matching passwords of at least eight characters,
+  verifies the authenticated Supabase user, calls `updateUser`, and provides a
+  stable success state plus a safe return action.
+- Expired, invalid, and already-used links fail safely and offer a new reset
+  request. Email, password, token, OTP, reset URL, and provider payload values do
+  not enter Analytics, logs, Linear, committed fixtures, or screenshots.
+- Auth helper tests, affected web tests, package boundaries, typecheck, lint,
+  production build, and desktop/mobile browser checks pass before publication.

@@ -546,6 +546,17 @@ export const dictionaries = {
       providerNote: "邮箱密码用于当前环境的猫咪照护产品账户。",
       rememberMe: "记住我",
       forgotPassword: "忘记密码？",
+      backToSignIn: "返回登录",
+      resetDescription:
+        "输入主人账户邮箱。若账户存在，我们会发送一封安全的密码重置邮件。",
+      resetFailed: "暂时无法发送重置邮件，请稍后重试。",
+      resetPassword: "发送重置邮件",
+      resetRequested:
+        "如果该邮箱对应一个账户，密码重置邮件已经发送，请检查收件箱。",
+      resetConfirmationFailed:
+        "密码重置链接已失效或已使用，请重新申请一封重置邮件。",
+      resetTitle: "重置账户密码",
+      sendingReset: "发送中...",
       confirmationFailed: "确认链接无法验证。如账号已完成确认，请直接登录。",
       productPoints: [
         {
@@ -686,6 +697,22 @@ export const dictionaries = {
         save: "保存资料",
         saving: "保存中...",
         updated: "资料已更新。"
+      },
+      password: {
+        title: "设置新密码",
+        eyebrow: "账户安全",
+        description:
+          "为当前已验证的账户会话设置新密码。密码更新后可继续返回原来的 CatCare 页面。",
+        password: "新密码",
+        confirmPassword: "确认新密码",
+        hint: "至少 8 个字符。",
+        save: "更新密码",
+        saving: "更新中...",
+        updated: "密码已更新。",
+        returnToProduct: "返回 CatCare",
+        invalid: "请使用至少 8 个字符，并确认两次输入一致。",
+        mismatch: "两次输入的密码不一致。",
+        failed: "密码更新失败，请重新申请一封密码重置邮件。"
       },
       billing: {
         eyebrow: "账单与权益",
@@ -1539,6 +1566,17 @@ export const dictionaries = {
       providerNote: "Email and password sign in to the current cat-care product environment.",
       rememberMe: "Remember me",
       forgotPassword: "Forgot password?",
+      backToSignIn: "Back to sign in",
+      resetDescription:
+        "Enter the owner account email. If the account exists, we will send a secure password reset email.",
+      resetFailed: "The reset email could not be sent. Try again later.",
+      resetPassword: "Send reset email",
+      resetRequested:
+        "If an account matches that email, a password reset message is on its way.",
+      resetConfirmationFailed:
+        "This password reset link has expired or was already used. Request a new reset email.",
+      resetTitle: "Reset your password",
+      sendingReset: "Sending...",
       confirmationFailed:
         "The confirmation link could not be verified. If the account is already confirmed, sign in directly.",
       productPoints: [
@@ -1680,6 +1718,22 @@ export const dictionaries = {
         save: "Save profile",
         saving: "Saving...",
         updated: "Profile updated."
+      },
+      password: {
+        title: "Set a new password",
+        eyebrow: "Account security",
+        description:
+          "Set a new password for the currently verified account session, then return to the CatCare page you came from.",
+        password: "New password",
+        confirmPassword: "Confirm new password",
+        hint: "Use at least 8 characters.",
+        save: "Update password",
+        saving: "Updating...",
+        updated: "Password updated.",
+        returnToProduct: "Return to CatCare",
+        invalid: "Use at least 8 characters and make sure both entries match.",
+        mismatch: "The two passwords do not match.",
+        failed: "The password could not be updated. Request a fresh reset email."
       },
       billing: {
         eyebrow: "Billing and access",

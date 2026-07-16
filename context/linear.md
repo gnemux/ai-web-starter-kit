@@ -21,7 +21,7 @@ MVP2 扩展底座
 
 MVP3 Reference Product：双底座架构与 Package 消费验证
 ├── ID: f85fc4d2-304b-406b-94aa-12f303b0acbc
-└── Parent issues: GNE-228, GNE-229, GNE-230, GNE-231, GNE-232, GNE-233, GNE-234, GNE-298
+└── Parent issues: GNE-228, GNE-229, GNE-230, GNE-231, GNE-232, GNE-233, GNE-234, GNE-298, GNE-317
 
 MVP4 国内外双模式底座
 ├── ID: 5eed1508-a480-44d1-aa39-efebe17dd4f9
@@ -97,7 +97,8 @@ MVP3 Reference Product：双底座架构与 Package 消费验证
 ├── GNE-232 MVP3-05 ACCESS [SECURITY] 私密分享、匿名访问与提交边界
 ├── GNE-233 MVP3-06 CAPABILITY [AI/BILLING/OUTBOX/AUDIT] 平台能力接入真实业务
 ├── GNE-234 MVP3-07 VERIFY [QA] 交叉验证、升级演练与 v0.3.0 结论
-└── GNE-298 MVP3-08 TEMPLATE [ARCH/PRODUCT] 纯净基础母版候选
+├── GNE-298 MVP3-08 TEMPLATE [ARCH/PRODUCT] 纯净基础母版候选
+└── GNE-317 MVP3-09 PRODUCT HARDENING [PRODUCT/ARCH] CatCare 商用体验收口
 
 Future / Backlog 横向能力
 └── GNE-75 FUTURE GROWTH-00 [GROWTH] 通用增长营销与反馈闭环
@@ -709,6 +710,11 @@ GNE-298 TEMPLATE
 ├── GNE-302 TEMPLATE-02 [BUILD/UI] 独立母版候选、中性产品壳与必要 UI
 ├── GNE-303 TEMPLATE-03 [VERIFY/QA] Smoke Product、空库重建与独立部署验收
 └── GNE-315 TEMPLATE-04 [HARDENING/QA] 产品扩展边界、底座测试隔离与最终加固
+
+GNE-317 PRODUCT HARDENING
+├── GNE-318 HARDENING-01 [AUTH/SECURITY] 忘记密码与账户恢复
+├── GNE-319 HARDENING-02 [MEDIA/SECURITY] 图片性能与私密照护凭证
+└── GNE-320 HARDENING-03 [NOTIFICATION/UX] 真实站内通知与铃铛
 ```
 
 `GNE-298` is blocked by `GNE-234` and is the only TEMPLATE parent in the MVP3
@@ -718,6 +724,12 @@ stop after the selected child. The current research repository may use its
 normal verified branch/PR flow, while creating or writing a new candidate or
 Smoke GitHub repository and configuring a Vercel test project require explicit
 approval for that execution.
+
+`GNE-317` is blocked by completed `GNE-298` and is the current active parent.
+Its children have no milestone or labels and execute in the fixed order
+`GNE-318 -> GNE-319 -> GNE-320`. `GNE-318` is the only active child. The parent
+owns only the three confirmed CatCare commercial-usability gaps; it does not
+reopen template extraction or create a generic media/notification platform.
 
 GNE-301 is the documentation-only architecture gate. Its binding repository
 outputs are `specs/template/product-spec.md`, `engineering-spec.md`,
@@ -1015,6 +1027,7 @@ GNE-232 MVP3-05 ACCESS [SECURITY] 私密分享、匿名访问与提交边界
 GNE-233 MVP3-06 CAPABILITY [AI/BILLING/OUTBOX/AUDIT] 平台能力接入真实业务
 GNE-234 MVP3-07 VERIFY [QA] 交叉验证、升级演练与 v0.3.0 结论
 GNE-298 MVP3-08 TEMPLATE [ARCH/PRODUCT] 纯净基础母版候选
+GNE-317 MVP3-09 PRODUCT HARDENING [PRODUCT/ARCH] CatCare 商用体验收口
 
 Retired legacy route, not current MVP3 execution:
 The old Product Validation Kit parent and CP task line was replaced by

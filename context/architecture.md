@@ -45,18 +45,23 @@ Start with one implementation, but keep the app code provider-agnostic where it 
 ## MVP3 Reference Product Architecture
 
 MVP3 started from `GNE-228 / MVP3-01 PLAN` and validated the Reference
-Product route through `GNE-229` to `GNE-234`, then added `GNE-298 TEMPLATE` to
-generate and verify a separate clean template candidate. It is no longer driven
+Product route through `GNE-229` to `GNE-234`, added `GNE-298 TEMPLATE` to
+generate and verify a separate clean template candidate, and now uses
+`GNE-317 PRODUCT HARDENING` to close three confirmed CatCare usability gaps.
+It is no longer driven
 by the old Product Validation Kit CP chain; that route has been retired from
 current planning and should not be treated as a fallback MVP3/MVP4-MVP6 path. Its job is
 to prove that a separate product consumer can use the XWLC platform foundation
 through public packages without copying Starter Kit source. MVP3 proves this
 inside the monorepo; GNE-274 defines how to generate a separate clean template
 candidate without deleting the evidence product. `GNE-298` is a post-VERIFY
-parent and must not start before `GNE-234` is Done.
+parent and must not start before `GNE-234` is Done. `GNE-317` follows accepted
+`GNE-298` output and must not copy CatCare Auth, media, or notification business
+logic into the clean template repository.
 
 The execution order is intentionally linear for 小团队 delivery: PLAN ->
-PLATFORM -> DELIVERY -> PRODUCT -> ACCESS -> CAPABILITY -> VERIFY -> TEMPLATE.
+PLATFORM -> DELIVERY -> PRODUCT -> ACCESS -> CAPABILITY -> VERIFY -> TEMPLATE
+-> PRODUCT HARDENING.
 Child-task lines stay inside the parent issue descriptions until each parent is approved
 for execution. `GNE-234 VERIFY` owns the 30-minute Reviewer Runbook that checks
 page flow, Supabase data/RLS, Vercel deployment/env, PostHog events, GitHub CI,
@@ -92,6 +97,12 @@ GNE-298 implements that candidate through
 platform routes and foundation tests protected while giving each generated
 product a declared App Router subtree and product-test subtree that it can
 replace without invalidating candidate provenance.
+
+GNE-317 executes `GNE-318 -> GNE-319 -> GNE-320`: account recovery, CatCare
+media/evidence, then owner notifications. Account recovery reuses the existing
+provider-neutral Auth/session boundary; CatCare share-token authorization and
+notification semantics remain app-local. Product-agnostic promotion from media
+or notifications requires a second real consumer and is not automatic.
 The candidate keeps `packages/*` as a local workspace snapshot stamped with the
 source commit, template version, dependency and asset-license provenance. Its
 foundation database uses an independent CLI-generated timestamp migration and

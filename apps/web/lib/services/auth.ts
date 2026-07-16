@@ -24,6 +24,15 @@ import {
   type AppSupabaseClient
 } from "../supabase/server";
 import type { Database } from "../supabase/database.types";
+import {
+  buildPasswordRecoveryCallbackUrl,
+  normalizePasswordResetRequest,
+  normalizePasswordUpdate,
+  requestPasswordResetWithAuth,
+  updatePasswordWithAuth,
+  type PasswordResetRequestPayload,
+  type PasswordUpdatePayload
+} from "./password-recovery";
 
 type ProfileRow = Database["public"]["Tables"]["user_profiles"]["Row"];
 type AuthVerificationError = Awaited<
@@ -258,6 +267,68 @@ export async function signUpWithPasswordFromFormData(
     redirectTo: "/login",
     message: "Check your email to confirm this account before signing in."
   });
+}
+
+export async function requestPasswordResetFromFormData(
+  formData: FormData
+): Promise<ServiceResult<PasswordResetRequestPayload>> {
+  const inputResult = normalizePasswordResetRequest(
+    formData.get("email"),
+    formData.get("next")
+  );
+
+  if (!inputResult.ok) {
+    return inputResult;
+  }
+
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  const appUrlResult = getAppUrl();
+
+  if (!appUrlResult.ok) {
+    return appUrlResult;
+  }
+
+  const callbackResult = buildPasswordRecoveryCallbackUrl(
+    appUrlResult.data,
+    inputResult.data.nextPath
+  );
+
+  if (!callbackResult.ok) {
+    return callbackResult;
+  }
+
+  return requestPasswordResetWithAuth(
+    clientResult.data.auth,
+    inputResult.data.email,
+    callbackResult.data
+  );
+}
+
+export async function updateCurrentUserPasswordFromFormData(
+  formData: FormData
+): Promise<ServiceResult<PasswordUpdatePayload>> {
+  const inputResult = normalizePasswordUpdate(
+    formData.get("password"),
+    formData.get("confirmPassword"),
+    formData.get("next")
+  );
+
+  if (!inputResult.ok) {
+    return inputResult;
+  }
+
+  const clientResult = await createSupabaseServerClient();
+
+  if (!clientResult.ok) {
+    return clientResult;
+  }
+
+  return updatePasswordWithAuth(clientResult.data.auth, inputResult.data);
 }
 
 export async function signOutCurrentUser(): Promise<

@@ -65,7 +65,14 @@ export default async function DemoLoginPage({
               accessDashboard: copy.demo.login.accessDashboard,
               providerNote: copy.demo.login.providerNote,
               startWithEmail: copy.demo.login.startWithEmail,
-              welcomeBack: copy.demo.login.welcomeBack
+              welcomeBack: copy.demo.login.welcomeBack,
+              backToSignIn: copy.login.backToSignIn,
+              resetDescription: copy.login.resetDescription,
+              resetFailed: copy.login.resetFailed,
+              resetPassword: copy.login.resetPassword,
+              resetRequested: copy.login.resetRequested,
+              resetTitle: copy.login.resetTitle,
+              sendingReset: copy.login.sendingReset
             }}
             modePath="/demo/login"
             nextPath={nextPath}

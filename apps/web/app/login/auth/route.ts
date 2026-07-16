@@ -1,9 +1,10 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
-import type { AuthActionPayload, AuthMode, ServiceResult } from "@xwlc/core";
+import type { AuthActionPayload, ServiceResult } from "@xwlc/core";
 
 import {
+  requestPasswordResetFromFormData,
   signInWithPasswordFromFormData,
   signUpWithPasswordFromFormData
 } from "@/lib/services/auth";
@@ -12,7 +13,18 @@ import type { AuthFormState } from "../actions";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
-  const mode = String(formData.get("mode") ?? "signin") as AuthMode;
+  const requestedMode = String(formData.get("mode") ?? "signin");
+  const mode = requestedMode === "signup" ? "signup" : "signin";
+
+  if (requestedMode === "reset") {
+    const state: AuthFormState = {
+      mode: "reset",
+      result: await requestPasswordResetFromFormData(formData)
+    };
+
+    return NextResponse.json(state);
+  }
+
   const result: ServiceResult<AuthActionPayload> =
     mode === "signup"
       ? await signUpWithPasswordFromFormData(formData)

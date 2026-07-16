@@ -30,7 +30,7 @@ export async function continuePasswordRecoveryAction(
     String(formData.get("next") ?? ""),
     "/catcare"
   );
-  const passwordPath = `/account/password?next=${encodeURIComponent(nextPath)}`;
+  const passwordPath = `/auth/recovery/password?next=${encodeURIComponent(nextPath)}`;
   const result = await exchangeAuthConfirmationForSession({
     code: null,
     nextPath: passwordPath,

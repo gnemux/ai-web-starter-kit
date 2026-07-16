@@ -566,7 +566,11 @@ export const dictionaries = {
         continue: "继续重置密码",
         verifying: "验证中...",
         invalid: "该密码重置链接不完整、已失效或已使用。",
-        requestNew: "重新申请重置邮件"
+        requestNew: "重新申请重置邮件",
+        passwordBadge: "账户恢复",
+        passwordTitle: "设置新密码",
+        passwordDescription:
+          "邮箱链接已经验证。请为该账户设置一个不同于原密码的新密码。"
       },
       confirmationFailed: "确认链接无法验证。如账号已完成确认，请直接登录。",
       productPoints: [
@@ -723,6 +727,7 @@ export const dictionaries = {
         returnToProduct: "返回 CatCare",
         invalid: "请使用至少 8 个字符，并确认两次输入一致。",
         mismatch: "两次输入的密码不一致。",
+        sameAsCurrent: "新密码不能与当前密码相同。",
         failed: "密码更新失败，请重新申请一封密码重置邮件。"
       },
       billing: {
@@ -1597,7 +1602,11 @@ export const dictionaries = {
         continue: "Continue password reset",
         verifying: "Verifying...",
         invalid: "This password reset link is incomplete, expired, or already used.",
-        requestNew: "Request a new reset email"
+        requestNew: "Request a new reset email",
+        passwordBadge: "Account recovery",
+        passwordTitle: "Set a new password",
+        passwordDescription:
+          "The email link is verified. Choose a new password that differs from the current password."
       },
       confirmationFailed:
         "The confirmation link could not be verified. If the account is already confirmed, sign in directly.",
@@ -1755,6 +1764,7 @@ export const dictionaries = {
         returnToProduct: "Return to CatCare",
         invalid: "Use at least 8 characters and make sure both entries match.",
         mismatch: "The two passwords do not match.",
+        sameAsCurrent: "The new password must differ from the current password.",
         failed: "The password could not be updated. Request a fresh reset email."
       },
       billing: {

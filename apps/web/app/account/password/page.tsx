@@ -1,5 +1,6 @@
 import { Panel, SectionHeader } from "@xwlc/ui";
 
+import { PasswordForm } from "@/components/password-form";
 import { normalizeInternalReturnTo } from "@/lib/services/internal-return";
 
 import {
@@ -7,8 +8,6 @@ import {
   AccountPageHeader,
   getAccountPageContext
 } from "../account-shell";
-import { PasswordForm } from "./password-form";
-
 type PasswordPageSearchParams = {
   next?: string;
 };

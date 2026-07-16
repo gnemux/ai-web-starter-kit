@@ -7,9 +7,9 @@ import { Button } from "@xwlc/ui";
 import {
   updatePasswordAction,
   type PasswordUpdateState
-} from "./actions";
+} from "@/lib/actions/password";
 
-type PasswordLabels = {
+export type PasswordFormLabels = {
   confirmPassword: string;
   failed: string;
   hint: string;
@@ -17,6 +17,7 @@ type PasswordLabels = {
   mismatch: string;
   password: string;
   returnToProduct: string;
+  sameAsCurrent: string;
   save: string;
   saving: string;
   updated: string;
@@ -26,7 +27,7 @@ export function PasswordForm({
   labels,
   nextPath
 }: {
-  labels: PasswordLabels;
+  labels: PasswordFormLabels;
   nextPath: string;
 }) {
   const [state, formAction, isPending] = useActionState<
@@ -35,11 +36,14 @@ export function PasswordForm({
   >(updatePasswordAction, null);
   const [passwordValue, setPasswordValue] = useState("");
   const [confirmationValue, setConfirmationValue] = useState("");
+  const [submittedPassword, setSubmittedPassword] = useState("");
+  const passwordFieldError =
+    state && !state.ok ? state.error.fields?.password : undefined;
   const passwordError = Boolean(
-    state &&
-      !state.ok &&
-      state.error.fields?.password &&
-      passwordValue.length < 8
+    passwordFieldError === "too_short"
+      ? passwordValue.length < 8
+      : passwordFieldError === "same_as_current" &&
+          passwordValue === submittedPassword
   );
   const confirmationError = Boolean(
     state &&
@@ -49,7 +53,11 @@ export function PasswordForm({
   );
 
   return (
-    <form action={formAction} className="mt-5 space-y-4">
+    <form
+      action={formAction}
+      className="mt-5 space-y-4"
+      onSubmit={() => setSubmittedPassword(passwordValue)}
+    >
       <input name="next" type="hidden" value={nextPath} />
 
       <div>
@@ -77,7 +85,9 @@ export function PasswordForm({
         </p>
         {passwordError ? (
           <p className="mt-2 text-sm text-rose-700" id="new-password-error">
-            {labels.invalid}
+            {passwordFieldError === "same_as_current"
+              ? labels.sameAsCurrent
+              : labels.invalid}
           </p>
         ) : null}
       </div>

@@ -1509,3 +1509,33 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
   Final result: no P0, P1, or P2; code is eligible for PR. Target Supabase email
   delivery, redirect allowlist, valid link, expired/used link, and deployed
   password update remain required before GNE-318 can be marked Done.
+
+## 2026-07-16 GNE-318 recovery-link correction
+
+- The first deployed real-email attempt exposed a provider-boundary defect: the
+  default Supabase Recovery Email Template consumed its one-time
+  `ConfirmationURL` on GET, then redirected with a PKCE code that the email
+  browser could not exchange because it did not own the original verifier.
+  Supabase Auth logs showed successful mail delivery and one `/verify` redirect
+  but no subsequent PKCE token exchange. No user email, token, reset URL, or
+  provider payload was recorded in repository evidence.
+- The corrected contract sends recovery email to the fixed first-party
+  `/auth/recovery` interstitial. The hosted template carries `TokenHash` and
+  fixed `type=recovery` in the URL fragment. A GET renders only the confirmation
+  page; the fragment is cleared immediately, never stored in web storage, and
+  only an explicit same-origin Server Action POST can call `verifyOtp` and create
+  the protected password-update session.
+- PostHog initialization is skipped entirely on `/auth/recovery`; independent
+  review rejected partial capture-mode disabling because SDK initialization and
+  feature-flag requests may still read the current URL. Invalid, expired, and used links
+  return bounded copy and a fresh reset-request action. No migration, schema,
+  second Supabase project, email-provider switch, or clean-template repository
+  change is part of this correction.
+- Local evidence after repair: web typecheck and all 93 web tests pass. Browser
+  verification proved the fragment is cleared before interaction, an external
+  `next` becomes `/catcare`, forged token verification fails safely without
+  restoring the fragment, and the 390px page has no horizontal overflow.
+- GNE-318 remains In Progress. Required remaining gates are full repository
+  verification, independent Auth review, PR/Merge, Vercel deployment, hosted
+  Recovery Email Template update on the current single test project, and a new
+  real-email valid/used-link smoke. Do not enter GNE-319.

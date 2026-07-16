@@ -197,9 +197,10 @@ No new provider env vars are introduced by GNE-231.
 ```text
 /login?mode=reset&next=<safe CatCare/account path>
 -> server-side reset request
--> Supabase resetPasswordForEmail(email, redirectTo=/auth/confirm?...)
--> Supabase allowlisted email callback
--> /auth/confirm exchanges code or verifies recovery token hash
+-> Supabase resetPasswordForEmail(email, redirectTo=/auth/recovery?...)
+-> Recovery Email Template builds /auth/recovery#token_hash=...&type=recovery
+-> GET renders a first-party interstitial without verifying the credential
+-> explicit user POST verifies the recovery token hash
 -> authenticated /account/password page
 -> server-side getUser verification
 -> Supabase updateUser({ password })
@@ -208,10 +209,22 @@ No new provider env vars are introduced by GNE-231.
 
 The existing Supabase SSR cookie adapter remains the only session mechanism.
 Reset callback construction accepts only a valid HTTP(S) application origin and
-an app-local `/catcare` or `/account` return. The callback itself always points
-to the protected password page; arbitrary caller-provided destinations cannot
-replace it. The password page is protected by middleware and verifies the user
-again before `updateUser`.
+an app-local `/catcare` or `/account` return. The callback always points to the
+fixed recovery interstitial; arbitrary caller-provided destinations cannot
+replace it. The interstitial reads `token_hash` and fixed `type=recovery` from a
+URL fragment, clears the fragment, never persists the credential, and sends it
+only in an explicit same-origin POST. The password page is protected by
+middleware and verifies the user again before `updateUser`.
+
+The recovery route skips PostHog initialization entirely. Disabling individual
+capture modes is insufficient because SDK initialization and feature-flag
+requests may still read the current URL. No GET request verifies or forwards the one-time
+credential, so email security scanners cannot consume it by prefetching the
+link. Invalid, expired, and already-used tokens return bounded UI states and a
+fresh reset-request action. The hosted Recovery Email Template is an operational
+dependency and must use `{{ .RedirectTo }}#token_hash={{ .TokenHash
+}}&type=recovery`; the repository records the template contract but never a
+real token.
 
 Reset requests use neutral success copy to avoid account enumeration. Provider
 errors are mapped to bounded UI categories and never expose raw provider
@@ -221,6 +234,8 @@ change is required.
 
 Verification must cover input validation, safe-return normalization, callback
 origin rejection, signed-out protection, valid recovery/session update,
-expired/invalid recovery handling, responsive UI, typecheck, lint, tests, and
-build. The target Supabase project's exact `/auth/confirm` URL must be in the
-Auth redirect allowlist before real email delivery is release evidence.
+scanner-safe GET behavior, explicit POST verification, expired/invalid recovery
+handling, responsive UI, typecheck, lint, tests, and build. The target Supabase
+project's exact `/auth/recovery` URL must be in the Auth redirect allowlist and
+its Recovery Email Template must match the documented contract before real
+email delivery is release evidence.

@@ -77,15 +77,35 @@ Before using a Vercel deployment as release evidence, confirm these Supabase set
    - Production Redirect URLs:
      - `https://ai-web-starter-kit-web.vercel.app/auth/confirm`
      - `https://ai-web-starter-kit-web.vercel.app/auth/confirm/**`
+     - `https://ai-web-starter-kit-web.vercel.app/auth/recovery`
+     - `https://ai-web-starter-kit-web.vercel.app/auth/recovery/**`
    - Local Redirect URLs are optional and only for local testing. Add exact ports that are actually used, for example:
      - `http://localhost:3000/auth/confirm`
      - `http://localhost:3000/auth/confirm/**`
      - `http://localhost:3003/auth/confirm`
      - `http://localhost:3003/auth/confirm/**`
+     - `http://localhost:3003/auth/recovery`
+     - `http://localhost:3003/auth/recovery/**`
    - Supabase wildcard matching is useful for paths and preview domains, but do not rely on a single unbounded localhost-port rule. Add explicit local ports used by reviewers, or keep `NEXT_PUBLIC_APP_URL` stable during local Auth tests.
 3. Email confirmation:
    - Confirm the Supabase email template uses the configured redirect target flow. If a template hardcodes `SiteURL`, production email confirmation can still point to the wrong host even when app code passes `emailRedirectTo`.
    - Do not treat an unverified email login as valid release evidence; this app blocks unconfirmed email users at the service boundary.
+   - Password recovery is intentionally different from signup confirmation. The
+     hosted Recovery Email Template must use a first-party interstitial link:
+
+     ```html
+     <h2>重置 CatCare 账户密码</h2>
+     <p>我们收到了密码重置请求。请点击下方按钮继续。</p>
+     <p><a href="{{ .RedirectTo }}#token_hash={{ .TokenHash }}&type=recovery">继续重置密码</a></p>
+     <p>如果这不是你的操作，可以忽略本邮件。</p>
+     ```
+
+     `resetPasswordForEmail` supplies `.RedirectTo` as the allowlisted
+     `/auth/recovery?next=<safe>` URL. The fragment keeps the token hash out of
+     HTTP access logs; `/auth/recovery` skips browser Analytics initialization and clears the
+     fragment before rendering the explicit verification action. Do not replace
+     this with `.ConfirmationURL`: that URL consumes the one-time token on GET
+     and can be invalidated by email security scanners.
 4. Server-side Supabase secrets:
    - Vercel must have `SUPABASE_SECRET_KEY` or the legacy `SUPABASE_SERVICE_ROLE_KEY` configured as server-only for trusted Billing/Payment writes.
    - Never add those keys as `NEXT_PUBLIC_` variables.

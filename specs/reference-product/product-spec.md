@@ -149,9 +149,11 @@ drop-off.
 
 CatCare must provide a complete password-recovery path from the existing login
 surface. A signed-out owner can request a reset email without revealing whether
-the address is registered. A valid recovery link establishes the Supabase
-recovery session and opens a protected new-password form; a URL parameter alone
-must never authorize a password change.
+the address is registered. A valid recovery email first opens a first-party
+confirmation page without consuming the one-time credential. Only an explicit
+user click establishes the Supabase recovery session and opens a protected
+new-password form; a URL parameter or an email scanner GET alone must never
+authorize a password change.
 
 The reset-request view keeps the original safe CatCare/account return path.
 Expired, invalid, already-used, rate-limited, and provider-failed requests show
@@ -159,6 +161,10 @@ recoverable product-language states and a path to request a new email. A normal
 authenticated owner may change their own password because Supabase already
 authorizes that account session; anonymous or URL-only requests cannot.
 
-This work does not add SMS recovery, MFA, social login, administrator password
-changes, a custom email provider, or a database migration. It must not log or
-emit email addresses, passwords, OTPs, recovery codes, or reset URLs.
+The recovery credential stays in the browser URL fragment until the
+confirmation page moves it into an explicit POST and immediately clears the
+fragment. The Analytics SDK is not initialized on that sensitive page. This
+work does not add SMS recovery, MFA, social login,
+administrator password changes, a custom email provider, or a database
+migration. It must not log or emit email addresses, passwords, OTPs, recovery
+codes, token hashes, or reset URLs.

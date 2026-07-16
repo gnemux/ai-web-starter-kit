@@ -557,6 +557,17 @@ export const dictionaries = {
         "密码重置链接已失效或已使用，请重新申请一封重置邮件。",
       resetTitle: "重置账户密码",
       sendingReset: "发送中...",
+      recovery: {
+        badge: "安全验证",
+        title: "继续重置密码",
+        description:
+          "为了避免邮箱安全扫描器提前使用一次性链接，请确认是你本人发起了本次操作。",
+        ready: "链接已准备好。点击后将验证本次请求并进入新密码页面。",
+        continue: "继续重置密码",
+        verifying: "验证中...",
+        invalid: "该密码重置链接不完整、已失效或已使用。",
+        requestNew: "重新申请重置邮件"
+      },
       confirmationFailed: "确认链接无法验证。如账号已完成确认，请直接登录。",
       productPoints: [
         {
@@ -1577,6 +1588,17 @@ export const dictionaries = {
         "This password reset link has expired or was already used. Request a new reset email.",
       resetTitle: "Reset your password",
       sendingReset: "Sending...",
+      recovery: {
+        badge: "Secure verification",
+        title: "Continue password reset",
+        description:
+          "To prevent email security scanners from using a one-time link, confirm that you requested this action.",
+        ready: "The link is ready. Continue to verify it and choose a new password.",
+        continue: "Continue password reset",
+        verifying: "Verifying...",
+        invalid: "This password reset link is incomplete, expired, or already used.",
+        requestNew: "Request a new reset email"
+      },
       confirmationFailed:
         "The confirmation link could not be verified. If the account is already confirmed, sign in directly.",
       productPoints: [

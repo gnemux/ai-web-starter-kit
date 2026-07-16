@@ -8,8 +8,11 @@ import {
 const posthogKey =
   readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_KEY) ??
   readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN);
+const isSensitiveRecoveryPage =
+  typeof window !== "undefined" &&
+  window.location.pathname === "/auth/recovery";
 
-if (posthogKey) {
+if (posthogKey && !isSensitiveRecoveryPage) {
   posthog.init(posthogKey, {
     api_host:
       readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_HOST) ??

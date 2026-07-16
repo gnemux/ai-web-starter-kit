@@ -110,16 +110,29 @@ export function buildPasswordRecoveryCallbackUrl(
   }
 
   const safeNextPath = normalizeInternalReturnTo(nextPath, "/catcare");
-  const passwordPath = new URL("/account/password", origin.origin);
-  passwordPath.searchParams.set("next", safeNextPath);
-
-  const callback = new URL("/auth/confirm", origin.origin);
-  callback.searchParams.set(
-    "next",
-    `${passwordPath.pathname}${passwordPath.search}`
-  );
+  const callback = new URL("/auth/recovery", origin.origin);
+  callback.searchParams.set("next", safeNextPath);
 
   return recoveryOk(callback.toString());
+}
+
+export function normalizeRecoveryTokenHash(
+  value: FormDataEntryValue | null
+): ServiceResult<string> {
+  const tokenHash = typeof value === "string" ? value : "";
+
+  if (
+    tokenHash.length < 32 ||
+    tokenHash.length > 512 ||
+    !/^[A-Za-z0-9._~-]+$/.test(tokenHash)
+  ) {
+    return recoveryError(
+      "validation_error",
+      "Request a fresh password reset email and try again."
+    );
+  }
+
+  return recoveryOk(tokenHash);
 }
 
 export async function requestPasswordResetWithAuth(

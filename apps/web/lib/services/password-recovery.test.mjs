@@ -4,6 +4,7 @@ import test from "node:test";
 
 import {
   buildPasswordRecoveryCallbackUrl,
+  normalizeRecoveryTokenHash,
   normalizePasswordResetRequest,
   normalizePasswordUpdate,
   requestPasswordResetWithAuth,
@@ -50,7 +51,7 @@ test("password update requires a matching eight-character password", () => {
   }
 });
 
-test("recovery callback has a validated origin and a fixed protected destination", () => {
+test("recovery callback has a validated origin and a fixed scanner-safe interstitial", () => {
   const result = buildPasswordRecoveryCallbackUrl(
     "https://product.example/base",
     "/catcare/plans/plan-1/results?tab=recap"
@@ -60,10 +61,10 @@ test("recovery callback has a validated origin and a fixed protected destination
 
   const callback = new URL(result.data);
   assert.equal(callback.origin, "https://product.example");
-  assert.equal(callback.pathname, "/auth/confirm");
+  assert.equal(callback.pathname, "/auth/recovery");
   assert.equal(
     callback.searchParams.get("next"),
-    "/account/password?next=%2Fcatcare%2Fplans%2Fplan-1%2Fresults%3Ftab%3Drecap"
+    "/catcare/plans/plan-1/results?tab=recap"
   );
 
   for (const origin of [
@@ -72,6 +73,20 @@ test("recovery callback has a validated origin and a fixed protected destination
     "not-a-url"
   ]) {
     assert.equal(buildPasswordRecoveryCallbackUrl(origin, "/catcare").ok, false);
+  }
+});
+
+test("recovery token hash accepts only bounded URL-safe provider values", () => {
+  const valid = normalizeRecoveryTokenHash("a".repeat(64));
+  assert.equal(valid.ok, true);
+
+  for (const value of [
+    null,
+    "short",
+    "a".repeat(513),
+    `${"a".repeat(40)}&next=https://evil.example`
+  ]) {
+    assert.equal(normalizeRecoveryTokenHash(value).ok, false);
   }
 });
 
@@ -199,6 +214,38 @@ test("password fields keep accessible errors until each rule is satisfied", asyn
   assert.match(form, /confirmationValue !== passwordValue/);
   assert.match(form, /aria-invalid=\{passwordError\}/);
   assert.match(form, /aria-invalid=\{confirmationError\}/);
+});
+
+test("recovery interstitial keeps GET inert and verifies only from an explicit POST", async () => {
+  const page = await readFile(
+    new URL("../../app/auth/recovery/page.tsx", import.meta.url),
+    "utf8"
+  );
+  const client = await readFile(
+    new URL("../../app/auth/recovery/recovery-confirmation.tsx", import.meta.url),
+    "utf8"
+  );
+  const action = await readFile(
+    new URL("../../app/auth/recovery/actions.ts", import.meta.url),
+    "utf8"
+  );
+  const instrumentation = await readFile(
+    new URL("../../instrumentation-client.ts", import.meta.url),
+    "utf8"
+  );
+
+  assert.doesNotMatch(page, /verifyOtp|exchangeAuthConfirmationForSession/);
+  assert.match(client, /window\.location\.hash/);
+  assert.match(client, /window\.history\.replaceState/);
+  assert.doesNotMatch(client, /sessionStorage|localStorage|console\./);
+  assert.match(client, /<form action=\{formAction\}/);
+  assert.match(client, /name="tokenHash" type="hidden"/);
+  assert.match(action, /type: "recovery"/);
+  assert.match(action, /exchangeAuthConfirmationForSession/);
+  assert.match(action, /\/account\/password\?next=/);
+  assert.match(instrumentation, /pathname === "\/auth\/recovery"/);
+  assert.match(instrumentation, /posthogKey && !isSensitiveRecoveryPage/);
+  assert.doesNotMatch(instrumentation, /posthog\.init[\s\S]*isSensitiveRecoveryPage/);
 });
 
 function createAuthMock(overrides = {}) {

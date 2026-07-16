@@ -152,14 +152,18 @@ surface. A signed-out owner can request a reset email without revealing whether
 the address is registered. A valid recovery email first opens a first-party
 confirmation page without consuming the one-time credential. Only an explicit
 user click establishes the Supabase recovery session and opens a protected
-new-password form; a URL parameter or an email scanner GET alone must never
-authorize a password change.
+new-password form in a neutral pre-login Auth shell; a URL parameter or an email
+scanner GET alone must never authorize a password change. The recovery form is
+not presented as a signed-in CatCare account page, while the normal account
+settings route remains available to an already signed-in owner.
 
 The reset-request view keeps the original safe CatCare/account return path.
 Expired, invalid, already-used, rate-limited, and provider-failed requests show
 recoverable product-language states and a path to request a new email. A normal
 authenticated owner may change their own password because Supabase already
 authorizes that account session; anonymous or URL-only requests cannot.
+Choosing the existing password produces a specific localized field message and
+does not falsely tell the owner that the recovery link failed.
 
 The recovery credential stays in the browser URL fragment until the
 confirmation page moves it into an explicit POST and immediately clears the

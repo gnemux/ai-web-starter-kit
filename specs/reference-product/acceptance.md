@@ -602,12 +602,16 @@
   consume the credential. The page clears the fragment, does not persist the
   credential, and does not initialize the Analytics SDK.
 - Only the explicit same-origin POST verifies the token hash, creates the
-  Supabase session, and opens the protected `/account/password` page. Anonymous
-  access, a forged URL parameter, or an email scanner GET alone cannot update a
-  password.
+  Supabase session, and opens the protected `/auth/recovery/password` page in a
+  minimal pre-login Auth shell. The normal signed-in password settings remain
+  at `/account/password`; the recovery flow must not render the CatCare account
+  navigation. Anonymous access, a forged URL parameter, or an email scanner GET
+  alone cannot update a password.
 - The password form validates matching passwords of at least eight characters,
   verifies the authenticated Supabase user, calls `updateUser`, and provides a
-  stable success state plus a safe return action.
+  stable success state plus a safe return action. A provider `same_password`
+  response maps to a localized field message and is not reported as an expired
+  recovery link or raw provider error.
 - Expired, invalid, and already-used links fail safely and offer a new reset
   request. Email, password, token, token hash, OTP, reset URL, and provider
   payload values do not enter Analytics, logs, Linear, committed fixtures, or

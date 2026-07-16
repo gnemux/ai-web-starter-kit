@@ -10,7 +10,7 @@ const posthogKey =
   readOptionalPublicEnv(process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN);
 const isSensitiveRecoveryPage =
   typeof window !== "undefined" &&
-  window.location.pathname === "/auth/recovery";
+  window.location.pathname.startsWith("/auth/recovery");
 
 if (posthogKey && !isSensitiveRecoveryPage) {
   posthog.init(posthogKey, {

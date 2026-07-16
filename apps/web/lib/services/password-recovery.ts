@@ -203,6 +203,14 @@ function recoveryError(
 function mapPasswordRecoveryProviderError(
   error: PasswordRecoveryProviderError
 ): ServiceResult<never> {
+  if (error?.code === "same_password") {
+    return recoveryError(
+      "validation_error",
+      "Choose a password different from the current password.",
+      { password: "same_as_current" }
+    );
+  }
+
   if (error?.status === 429 || error?.code === "over_email_send_rate_limit") {
     return recoveryError(
       "system_error",

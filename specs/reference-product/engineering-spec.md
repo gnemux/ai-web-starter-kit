@@ -201,7 +201,7 @@ No new provider env vars are introduced by GNE-231.
 -> Recovery Email Template builds /auth/recovery#token_hash=...&type=recovery
 -> GET renders a first-party interstitial without verifying the credential
 -> explicit user POST verifies the recovery token hash
--> authenticated /account/password page
+-> authenticated /auth/recovery/password page in a minimal Auth shell
 -> server-side getUser verification
 -> Supabase updateUser({ password })
 -> success state with safe return action
@@ -213,8 +213,11 @@ an app-local `/catcare` or `/account` return. The callback always points to the
 fixed recovery interstitial; arbitrary caller-provided destinations cannot
 replace it. The interstitial reads `token_hash` and fixed `type=recovery` from a
 URL fragment, clears the fragment, never persists the credential, and sends it
-only in an explicit same-origin POST. The password page is protected by
-middleware and verifies the user again before `updateUser`.
+only in an explicit same-origin POST. The recovery password page verifies the
+user again before `updateUser` but intentionally avoids the signed-in CatCare
+account shell. The separate `/account/password` route remains available for a
+normal authenticated password change, while both routes consume one shared
+form and one server-only Auth service.
 
 The recovery route skips PostHog initialization entirely. Disabling individual
 capture modes is insufficient because SDK initialization and feature-flag
@@ -228,14 +231,16 @@ real token.
 
 Reset requests use neutral success copy to avoid account enumeration. Provider
 errors are mapped to bounded UI categories and never expose raw provider
-payloads. Password and email values remain inside the Auth provider call and
-are not sent to Analytics, logs, Linear, or screenshots. No schema or migration
-change is required.
+payloads; `same_password` is a localized field validation state rather than a
+false expired-link message. Password and email values remain inside the Auth
+provider call and are not sent to Analytics, logs, Linear, or screenshots. No
+schema or migration change is required.
 
 Verification must cover input validation, safe-return normalization, callback
 origin rejection, signed-out protection, valid recovery/session update,
 scanner-safe GET behavior, explicit POST verification, expired/invalid recovery
-handling, responsive UI, typecheck, lint, tests, and build. The target Supabase
+handling, recovery-shell separation, same-password mapping, responsive UI,
+typecheck, lint, tests, and build. The target Supabase
 project's exact `/auth/recovery` URL must be in the Auth redirect allowlist and
 its Recovery Email Template must match the documented contract before real
 email delivery is release evidence.

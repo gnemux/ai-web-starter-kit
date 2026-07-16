@@ -102,10 +102,11 @@ Before using a Vercel deployment as release evidence, confirm these Supabase set
 
      `resetPasswordForEmail` supplies `.RedirectTo` as the allowlisted
      `/auth/recovery?next=<safe>` URL. The fragment keeps the token hash out of
-     HTTP access logs; `/auth/recovery` skips browser Analytics initialization and clears the
-     fragment before rendering the explicit verification action. Do not replace
-     this with `.ConfirmationURL`: that URL consumes the one-time token on GET
-     and can be invalidated by email security scanners.
+     HTTP access logs; the `/auth/recovery` route subtree skips browser
+     Analytics initialization and clears the fragment before rendering the
+     explicit verification action. Do not replace this with `.ConfirmationURL`:
+     that URL consumes the one-time token on GET and can be invalidated by email
+     security scanners.
 4. Server-side Supabase secrets:
    - Vercel must have `SUPABASE_SECRET_KEY` or the legacy `SUPABASE_SERVICE_ROLE_KEY` configured as server-only for trusted Billing/Payment writes.
    - Never add those keys as `NEXT_PUBLIC_` variables.

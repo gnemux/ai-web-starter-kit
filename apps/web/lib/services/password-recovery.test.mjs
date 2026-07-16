@@ -178,13 +178,37 @@ test("password update verifies the user and changes only the current session acc
   assert.deepEqual(updates, [{ password: "correct-horse" }]);
 });
 
+test("password update maps a reused password to a safe field error", async () => {
+  const result = await updatePasswordWithAuth(
+    createAuthMock({
+      async updateUser() {
+        return {
+          error: {
+            code: "same_password",
+            message: "New password should be different from the old password.",
+            status: 422
+          }
+        };
+      }
+    }),
+    { nextPath: "/catcare", password: "correct-horse" }
+  );
+
+  assert.equal(result.ok, false);
+  if (!result.ok) {
+    assert.equal(result.error.code, "validation_error");
+    assert.equal(result.error.fields?.password, "same_as_current");
+    assert.doesNotMatch(result.error.message, /old password|provider/i);
+  }
+});
+
 test("Auth service keeps reset and update calls behind the server boundary", async () => {
   const source = await readFile(
     new URL("./password-recovery.ts", import.meta.url),
     "utf8"
   );
   const form = await readFile(
-    new URL("../../app/account/password/password-form.tsx", import.meta.url),
+    new URL("../../components/password-form.tsx", import.meta.url),
     "utf8"
   );
 
@@ -206,7 +230,7 @@ test("reset mode asks for email and omits the sign-in password field", async () 
 
 test("password fields keep accessible errors until each rule is satisfied", async () => {
   const form = await readFile(
-    new URL("../../app/account/password/password-form.tsx", import.meta.url),
+    new URL("../../components/password-form.tsx", import.meta.url),
     "utf8"
   );
 
@@ -242,10 +266,27 @@ test("recovery interstitial keeps GET inert and verifies only from an explicit P
   assert.match(client, /name="tokenHash" type="hidden"/);
   assert.match(action, /type: "recovery"/);
   assert.match(action, /exchangeAuthConfirmationForSession/);
-  assert.match(action, /\/account\/password\?next=/);
-  assert.match(instrumentation, /pathname === "\/auth\/recovery"/);
+  assert.match(action, /\/auth\/recovery\/password\?next=/);
+  assert.match(instrumentation, /pathname\.startsWith\("\/auth\/recovery"\)/);
   assert.match(instrumentation, /posthogKey && !isSensitiveRecoveryPage/);
   assert.doesNotMatch(instrumentation, /posthog\.init[\s\S]*isSensitiveRecoveryPage/);
+});
+
+test("recovery password entry uses a minimal Auth shell and shared password form", async () => {
+  const recoveryPage = await readFile(
+    new URL("../../app/auth/recovery/password/page.tsx", import.meta.url),
+    "utf8"
+  );
+  const accountPage = await readFile(
+    new URL("../../app/account/password/page.tsx", import.meta.url),
+    "utf8"
+  );
+
+  assert.match(recoveryPage, /getCurrentUserClaims/);
+  assert.match(recoveryPage, /CatCareProductFrame/);
+  assert.match(recoveryPage, /@\/components\/password-form/);
+  assert.doesNotMatch(recoveryPage, /AccountAppShell|CatCareAppShell/);
+  assert.match(accountPage, /@\/components\/password-form/);
 });
 
 function createAuthMock(overrides = {}) {

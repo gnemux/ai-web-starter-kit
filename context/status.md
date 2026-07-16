@@ -1539,3 +1539,25 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
   verification, independent Auth review, PR/Merge, Vercel deployment, hosted
   Recovery Email Template update on the current single test project, and a new
   real-email valid/used-link smoke. Do not enter GNE-319.
+
+## 2026-07-16 GNE-318 recovery password UX correction
+
+- A fresh Resend/Supabase recovery email completed the real provider flow and
+  the user successfully updated the account password. Supabase Auth logs showed
+  that the earlier generic failure was actually provider code `same_password`,
+  not an invalid session or consumed link.
+- The recovery flow now opens the protected
+  `/auth/recovery/password?next=<safe>` route in a minimal pre-login Auth shell.
+  It no longer presents the recovery form inside the signed-in CatCare account
+  navigation. The normal `/account/password` settings route remains separate,
+  while both routes reuse one neutral password form and one server-only service.
+- The sensitive-path Analytics exclusion covers the full `/auth/recovery`
+  subtree. Provider `same_password` maps to a localized password-field message
+  without exposing raw provider text or falsely instructing the user to request
+  another email.
+- Full local lint, typecheck, 95 web tests, package/release/AI-safety boundaries,
+  template drift gates, production build, and diff check pass. Anonymous direct
+  access and malicious return-path browser checks also pass.
+- Independent Terra Auth review found no P0, P1, P2, or P3 defect and approved
+  the change for PR. GNE-318 stays In Progress until PR/Merge, deployment, and
+  final browser acceptance complete. Do not enter GNE-319.

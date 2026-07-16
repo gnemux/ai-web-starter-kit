@@ -11,7 +11,7 @@ import {
   trackEvent
 } from "@/lib/analytics/client";
 
-import type { AuthFormState } from "./actions";
+import type { AuthFormMode, AuthFormState } from "./actions";
 
 type AuthFormLabels = {
   accessDashboard: string;
@@ -30,6 +30,13 @@ type AuthFormLabels = {
   welcomeBack: string;
   rememberMe?: string;
   forgotPassword?: string;
+  backToSignIn: string;
+  resetDescription: string;
+  resetFailed: string;
+  resetPassword: string;
+  resetRequested: string;
+  resetTitle: string;
+  sendingReset: string;
 };
 
 type OAuthLabels = {
@@ -60,26 +67,28 @@ export function AuthForm({
 }: {
   defaultNextPath?: string;
   errorLabels: AuthFormErrorLabels;
-  initialMode: AuthMode;
+  initialMode: AuthFormMode;
   labels: AuthFormLabels;
   modePath?: string;
   nextPath: string;
   oauthLabels?: OAuthLabels;
 }) {
   const router = useRouter();
-  const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [submittedMode, setSubmittedMode] = useState<AuthMode>(initialMode);
+  const [mode, setMode] = useState<AuthFormMode>(initialMode);
+  const [submittedMode, setSubmittedMode] =
+    useState<AuthFormMode>(initialMode);
   const [hasSubmittedCurrentMode, setHasSubmittedCurrentMode] = useState(false);
   const handledStateRef = useRef<AuthFormState>(null);
   const [state, setState] = useState<AuthFormState>(null);
   const [isPending, setIsPending] = useState(false);
   const isSignUp = mode === "signup";
+  const isReset = mode === "reset";
   const visibleState =
     hasSubmittedCurrentMode &&
     !isPending &&
     state?.mode === mode &&
     state.mode === submittedMode
-      ? state.result
+      ? state
       : null;
 
   useEffect(() => {
@@ -88,6 +97,10 @@ export function AuthForm({
     }
 
     handledStateRef.current = state;
+    if (state.mode === "reset") {
+      return;
+    }
+
     const result = state.result;
 
     if (!result.ok) {
@@ -139,18 +152,20 @@ export function AuthForm({
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
-        const submitted = String(formData.get("mode") ?? "signin") as AuthMode;
+        const submitted = normalizeAuthFormMode(formData.get("mode"));
         setSubmittedMode(submitted);
         setHasSubmittedCurrentMode(true);
         setIsPending(true);
-        trackEvent(
-          submitted === "signup" ? "signup_started" : "login_started",
-          {
-            auth_provider: "supabase",
-            auth_method: "password",
-            next_path: nextPath
-          }
-        );
+        if (submitted !== "reset") {
+          trackEvent(
+            submitted === "signup" ? "signup_started" : "login_started",
+            {
+              auth_provider: "supabase",
+              auth_method: "password",
+              next_path: nextPath
+            }
+          );
+        }
 
         try {
           const response = await fetch("/login/auth", {
@@ -178,7 +193,7 @@ export function AuthForm({
       <input name="mode" type="hidden" value={mode} />
       <input name="next" type="hidden" value={nextPath} />
 
-      <div className="grid min-w-0 grid-cols-2 border-b border-slate-200">
+      {!isReset ? <div className="grid min-w-0 grid-cols-2 border-b border-slate-200">
         <button
           className={`min-w-0 border-b-2 px-2 py-4 text-base font-semibold leading-6 transition sm:text-lg ${
             !isSignUp
@@ -201,9 +216,18 @@ export function AuthForm({
         >
           {labels.createAccount}
         </button>
-      </div>
+      </div> : (
+        <div className="rounded-xl border border-teal-100 bg-teal-50/60 p-4">
+          <h1 className="text-xl font-semibold text-slate-950">
+            {labels.resetTitle}
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-slate-700">
+            {labels.resetDescription}
+          </p>
+        </div>
+      )}
 
-      {oauthLabels ? <OAuthOptions labels={oauthLabels} /> : null}
+      {oauthLabels && !isReset ? <OAuthOptions labels={oauthLabels} /> : null}
 
       <div>
         <label className="text-sm font-medium text-slate-700" htmlFor="email">
@@ -218,12 +242,12 @@ export function AuthForm({
           required
           type="email"
         />
-        {!visibleState?.ok && visibleState?.error.fields?.email ? (
+        {visibleState && !visibleState.result.ok && visibleState.result.error.fields?.email ? (
           <p className="mt-2 text-sm text-rose-700">{errorLabels.email}</p>
         ) : null}
       </div>
 
-      <div>
+      {!isReset ? <div>
         <label className="text-sm font-medium text-slate-700" htmlFor="password">
           {labels.password}
         </label>
@@ -236,26 +260,35 @@ export function AuthForm({
           required
           type="password"
         />
-        {!visibleState?.ok && visibleState?.error.fields?.password ? (
+        {visibleState?.mode !== "reset" &&
+        visibleState &&
+        !visibleState.result.ok &&
+        visibleState.result.error.fields?.password ? (
           <p className="mt-2 text-sm text-rose-700">
             {errorLabels.password}
           </p>
         ) : null}
-      </div>
+      </div> : null}
 
-      {visibleState && !visibleState.ok && !visibleState.error.fields ? (
+      {visibleState &&
+      !visibleState.result.ok &&
+      !visibleState.result.error.fields ? (
         <div className="rounded-md border border-rose-200 bg-rose-50 p-3">
           <p className="text-sm font-medium text-rose-900">
-            {getGeneralErrorLabel(
-              visibleState.error.code,
-              mode,
-              errorLabels
-            )}
+            {isReset
+              ? labels.resetFailed
+              : getGeneralErrorLabel(
+                  visibleState.result.error.code,
+                  mode as AuthMode,
+                  errorLabels
+                )}
           </p>
         </div>
       ) : null}
 
-      {visibleState?.ok && visibleState.data.status === "confirmation_pending" ? (
+      {visibleState?.mode !== "reset" &&
+      visibleState?.result.ok &&
+      visibleState.result.data.status === "confirmation_pending" ? (
         <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
           <p className="text-sm font-medium text-emerald-900">
             {labels.confirmationPending}
@@ -263,7 +296,15 @@ export function AuthForm({
         </div>
       ) : null}
 
-      {labels.rememberMe || labels.forgotPassword ? (
+      {visibleState?.mode === "reset" && visibleState.result.ok ? (
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3">
+          <p className="text-sm font-medium text-emerald-900">
+            {labels.resetRequested}
+          </p>
+        </div>
+      ) : null}
+
+      {!isReset && (labels.rememberMe || labels.forgotPassword) ? (
         <div className="flex items-center justify-between gap-3 text-sm">
           {labels.rememberMe ? (
             <label className="inline-flex items-center gap-2 font-medium text-slate-600">
@@ -277,22 +318,48 @@ export function AuthForm({
           ) : (
             <span />
           )}
-          {labels.forgotPassword ? (
-            <span className="font-medium text-teal-700">
+          {labels.forgotPassword && mode === "signin" ? (
+            <button
+              className="font-medium text-teal-700 hover:text-teal-900"
+              onClick={() => switchMode("reset")}
+              type="button"
+            >
               {labels.forgotPassword}
-            </span>
+            </button>
           ) : null}
         </div>
       ) : null}
 
-      <Button className="min-h-16 w-full rounded-xl bg-teal-700 text-lg hover:bg-teal-800" type="submit">
-        {isPending ? labels.working : isSignUp ? labels.createAccount : labels.signIn}
+      <Button
+        className="min-h-16 w-full rounded-xl bg-teal-700 text-lg hover:bg-teal-800"
+        disabled={isPending}
+        type="submit"
+      >
+        {isPending
+          ? isReset
+            ? labels.sendingReset
+            : labels.working
+          : isReset
+            ? labels.resetPassword
+            : isSignUp
+              ? labels.createAccount
+              : labels.signIn}
       </Button>
+
+      {isReset ? (
+        <button
+          className="w-full text-sm font-medium text-teal-700 hover:text-teal-900"
+          onClick={() => switchMode("signin")}
+          type="button"
+        >
+          {labels.backToSignIn}
+        </button>
+      ) : null}
 
     </form>
   );
 
-  function switchMode(nextMode: AuthMode) {
+  function switchMode(nextMode: AuthFormMode) {
     if (nextMode === mode) {
       return;
     }
@@ -332,15 +399,15 @@ function OAuthOptions({ labels }: { labels: OAuthLabels }) {
 }
 
 function buildModeUrl(
-  mode: AuthMode,
+  mode: AuthFormMode,
   nextPath: string,
   modePath: string,
   defaultNextPath: string
 ) {
   const params = new URLSearchParams();
 
-  if (mode === "signup") {
-    params.set("mode", "signup");
+  if (mode !== "signin") {
+    params.set("mode", mode);
   }
 
   if (nextPath !== defaultNextPath) {
@@ -350,6 +417,12 @@ function buildModeUrl(
   const query = params.toString();
 
   return query ? `${modePath}?${query}` : modePath;
+}
+
+function normalizeAuthFormMode(value: FormDataEntryValue | null): AuthFormMode {
+  const mode = String(value ?? "signin");
+
+  return mode === "signup" || mode === "reset" ? mode : "signin";
 }
 
 function getGeneralErrorLabel(

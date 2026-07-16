@@ -1,4 +1,3 @@
-import type { AuthMode } from "@xwlc/core";
 import { Button } from "@xwlc/ui";
 
 import { CatCareBrand } from "@/components/catcare-brand";
@@ -16,6 +15,7 @@ import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 
 import { AuthForm } from "./auth-form";
+import type { AuthFormMode } from "./actions";
 
 type LoginSearchParams = {
   mode?: string;
@@ -31,7 +31,10 @@ export default async function LoginPage({
   const locale = await getRequestLocale();
   const copy = getDictionary(locale);
   const params = await searchParams;
-  const initialMode: AuthMode = params.mode === "signup" ? "signup" : "signin";
+  const initialMode: AuthFormMode =
+    params.mode === "signup" || params.mode === "reset"
+      ? params.mode
+      : "signin";
   const nextPath = normalizeNext(params.next);
   const productPointIcons = [
     <CatCareProfileIcon className="h-6 w-6" key="cat-profile" />,
@@ -54,7 +57,9 @@ export default async function LoginPage({
             {params.error === "confirmation_failed" ? (
               <div className="mb-5 rounded-md border border-rose-200 bg-rose-50 p-3">
                 <p className="text-sm font-medium text-rose-900">
-                  {copy.login.confirmationFailed}
+                  {initialMode === "reset"
+                    ? copy.login.resetConfirmationFailed
+                    : copy.login.confirmationFailed}
                 </p>
               </div>
             ) : null}
@@ -69,7 +74,14 @@ export default async function LoginPage({
                 startWithEmail: copy.login.startWithEmail,
                 welcomeBack: copy.login.welcomeBack,
                 rememberMe: copy.login.rememberMe,
-                forgotPassword: copy.login.forgotPassword
+                forgotPassword: copy.login.forgotPassword,
+                backToSignIn: copy.login.backToSignIn,
+                resetDescription: copy.login.resetDescription,
+                resetFailed: copy.login.resetFailed,
+                resetPassword: copy.login.resetPassword,
+                resetRequested: copy.login.resetRequested,
+                resetTitle: copy.login.resetTitle,
+                sendingReset: copy.login.sendingReset
               }}
               nextPath={nextPath}
               oauthLabels={copy.login.oauth}

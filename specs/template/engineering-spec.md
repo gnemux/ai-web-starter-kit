@@ -309,6 +309,13 @@ an error. Output must be created in an empty directory, written through a
 temporary directory, verified, and atomically promoted. A failed run removes or
 marks the incomplete temporary output and never looks complete.
 
+GNE-318 changes the research application's Auth service inventory to backport
+password recovery into CatCare. The clean candidate already has an independently
+verified neutral reset/update flow under `modules/platform/auth`, so the
+research-only `password-recovery.ts` helper and CatCare account page are not new
+template projections. The inventory hash is reviewed and updated without
+changing the blueprint or the published clean-template repository.
+
 `template-version.json` must record at least:
 
 - template version and reproducible source timestamp;

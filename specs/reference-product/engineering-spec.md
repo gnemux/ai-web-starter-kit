@@ -191,3 +191,36 @@ No new provider env vars are introduced by GNE-231.
 
 - Whether product-specific plan tiers will mirror `/account/billing` or use a dedicated product billing page after GNE-233.
 - Whether ACCESS stores sitter draft progress in a dedicated table or derives it from token-scoped final submissions.
+
+## GNE-318 Account Recovery Architecture
+
+```text
+/login?mode=reset&next=<safe CatCare/account path>
+-> server-side reset request
+-> Supabase resetPasswordForEmail(email, redirectTo=/auth/confirm?...)
+-> Supabase allowlisted email callback
+-> /auth/confirm exchanges code or verifies recovery token hash
+-> authenticated /account/password page
+-> server-side getUser verification
+-> Supabase updateUser({ password })
+-> success state with safe return action
+```
+
+The existing Supabase SSR cookie adapter remains the only session mechanism.
+Reset callback construction accepts only a valid HTTP(S) application origin and
+an app-local `/catcare` or `/account` return. The callback itself always points
+to the protected password page; arbitrary caller-provided destinations cannot
+replace it. The password page is protected by middleware and verifies the user
+again before `updateUser`.
+
+Reset requests use neutral success copy to avoid account enumeration. Provider
+errors are mapped to bounded UI categories and never expose raw provider
+payloads. Password and email values remain inside the Auth provider call and
+are not sent to Analytics, logs, Linear, or screenshots. No schema or migration
+change is required.
+
+Verification must cover input validation, safe-return normalization, callback
+origin rejection, signed-out protection, valid recovery/session update,
+expired/invalid recovery handling, responsive UI, typecheck, lint, tests, and
+build. The target Supabase project's exact `/auth/confirm` URL must be in the
+Auth redirect allowlist before real email delivery is release evidence.

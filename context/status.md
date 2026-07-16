@@ -1477,3 +1477,35 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
 - Production deployments from `main` may still be subject to Vercel Hobby commit-author checks after merging contributor-authored commits, especially if a collaborator PR is merged with `Squash and merge`.
 - GitHub branch protection may remain unenforced on the current free personal private repository, so the documented branch and PR workflow is still a required team convention.
 - Payment sandbox result URLs are intentionally navigation-only; reviewers must not treat them as proof of paid entitlement or credit grant.
+
+## 2026-07-16 GNE-317 / GNE-318 checkpoint
+
+- The user accepted the final GNE-298 template evidence and authorized the
+  next bounded MVP3 hardening stage. Linear GNE-298 is Done.
+- Linear now contains one parent plus exactly three children:
+  `GNE-317`, with ordered `GNE-318 -> GNE-319 -> GNE-320` for account recovery,
+  CatCare media/evidence, and owner notifications. GNE-317 and GNE-318 are the
+  only active parent/child; later children remain blocked and Backlog.
+- GNE-318 runs on `codex/gne-318-password-recovery` from source/remote commit
+  `0433c4d`. Sol owns the Auth/spec/test write lock and Terra Reviewer owns the
+  required independent Auth review.
+- The accepted implementation boundary reuses the existing Supabase SSR and
+  confirmation route, adds reset request and protected password update states,
+  and makes no schema, migration, clean-template repository, provider, or
+  production configuration change.
+- GitHub publication, merge-triggered deployment, and real email delivery are
+  not yet claimed. GNE-318 must stop before GNE-319.
+- GNE-318 local implementation now has a server-only reset request, fixed Auth
+  callback, protected password-update route, safe internal return handling,
+  neutral anti-enumeration copy, responsive bilingual UI, and accessible
+  field-level recovery states. No schema, migration, or provider configuration
+  changed.
+- Local evidence includes the complete repository test gate, lint, typecheck,
+  production build, dedicated provider-mock recovery tests, and a real browser
+  check at desktop plus 390px mobile width. The browser proved that external
+  return URLs fall back to `/catcare`, reset mode has email but no old-password
+  input, and signed-out password routes return to login.
+- Independent Terra Auth review completed after its P2 findings were repaired.
+  Final result: no P0, P1, or P2; code is eligible for PR. Target Supabase email
+  delivery, redirect allowlist, valid link, expired/used link, and deployed
+  password update remain required before GNE-318 can be marked Done.

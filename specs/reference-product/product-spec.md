@@ -144,3 +144,21 @@ drop-off.
 - Retention: owner returns to review plan state.
 - Conversion: GNE-233 later maps product billing/payment actions from the visible capability slots.
 - Quality: package-boundary checks keep cat-care objects out of `packages/*`.
+
+## GNE-318 Account Recovery
+
+CatCare must provide a complete password-recovery path from the existing login
+surface. A signed-out owner can request a reset email without revealing whether
+the address is registered. A valid recovery link establishes the Supabase
+recovery session and opens a protected new-password form; a URL parameter alone
+must never authorize a password change.
+
+The reset-request view keeps the original safe CatCare/account return path.
+Expired, invalid, already-used, rate-limited, and provider-failed requests show
+recoverable product-language states and a path to request a new email. A normal
+authenticated owner may change their own password because Supabase already
+authorizes that account session; anonymous or URL-only requests cannot.
+
+This work does not add SMS recovery, MFA, social login, administrator password
+changes, a custom email provider, or a database migration. It must not log or
+emit email addresses, passwords, OTPs, recovery codes, or reset URLs.

@@ -258,6 +258,7 @@ export const dictionaries = {
           actionError: "操作没有完成，请重试。",
           submissionTitle: "收到新的照护结果",
           exceptionTitle: "收到照护异常提醒",
+          exceptionBadge: "异常",
           targetUnavailable: "关联结果已不可用，这条通知仍保留供你核对。"
         },
         metrics: {
@@ -1310,6 +1311,7 @@ export const dictionaries = {
           actionError: "The action did not complete. Please try again.",
           submissionTitle: "New care result received",
           exceptionTitle: "Care exception received",
+          exceptionBadge: "Exception",
           targetUnavailable:
             "The linked result is no longer available. This notification remains for reference."
         },

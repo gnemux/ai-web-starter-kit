@@ -44,3 +44,19 @@ test("notification list uses delivery time instead of read-state update time", a
   assert.match(serviceSource, /\.order\("last_notified_at"/);
   assert.doesNotMatch(serviceSource, /\.order\("updated_at"/);
 });
+
+test("care exceptions remain visually distinct from ordinary submissions", async () => {
+  const source = await readFile(
+    new URL("./notification-center-client.tsx", catcareDirectory),
+    "utf8"
+  );
+
+  assert.match(source, /notification\.eventType === "care_exception"/);
+  assert.match(source, /border-l-amber-500/);
+  assert.match(source, /bg-amber-100\/60/);
+  assert.match(source, /ring-amber-100/);
+  assert.match(source, /isUnread[\s\S]*bg-slate-300/);
+  assert.match(source, /labels\.exceptionBadge/);
+  assert.equal(source.match(/hover:bg-teal-50\/70/g)?.length, 2);
+  assert.equal(source.match(/hover:bg-amber-100\/70/g)?.length, 1);
+});

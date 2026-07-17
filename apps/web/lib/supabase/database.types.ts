@@ -1051,6 +1051,7 @@ export type Database = {
           source_ref: string | null;
           sort_order: number;
           required: boolean;
+          photo_required: boolean;
           enabled: boolean;
           created_at: string;
           updated_at: string;
@@ -1076,6 +1077,7 @@ export type Database = {
           source_ref?: string | null;
           sort_order?: number;
           required?: boolean;
+          photo_required?: boolean;
           enabled?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -1101,9 +1103,58 @@ export type Database = {
           source_ref?: string | null;
           sort_order?: number;
           required?: boolean;
+          photo_required?: boolean;
           enabled?: boolean;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [];
+      };
+      care_submission_attachments: {
+        Row: {
+          id: string;
+          owner_id: string;
+          plan_id: string;
+          submission_id: string;
+          task_id: string | null;
+          position: number;
+          object_path: string;
+          content_type: "image/webp";
+          byte_size: number;
+          width: number;
+          height: number;
+          content_sha256: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          owner_id: string;
+          plan_id: string;
+          submission_id: string;
+          task_id?: string | null;
+          position: number;
+          object_path: string;
+          content_type?: "image/webp";
+          byte_size: number;
+          width: number;
+          height: number;
+          content_sha256: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          owner_id?: string;
+          plan_id?: string;
+          submission_id?: string;
+          task_id?: string | null;
+          position?: number;
+          object_path?: string;
+          content_type?: "image/webp";
+          byte_size?: number;
+          width?: number;
+          height?: number;
+          content_sha256?: string;
+          created_at?: string;
         };
         Relationships: [];
       };

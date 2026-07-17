@@ -6,7 +6,10 @@ Storage integration will support product file uploads, generated assets, exports
 
 ## Status
 
-Reserved for future MVP2/MVP3 execution. No real storage provider is configured for product file workflows today.
+The generic provider slot remains reserved, but CatCare now has two explicit
+product-local Supabase Storage workflows: private owner cat photos and private
+care-submission evidence. This does not claim a generic Storage adapter or a
+template-wide media platform.
 
 The provider boundary and stage split are defined in `integrations/provider-matrix.md`.
 
@@ -40,3 +43,8 @@ STORAGE_SECRET_ACCESS_KEY=
 - Signed URL creation must stay server-side.
 - Product code should call a local storage service/provider adapter instead of importing a provider SDK in pages or components.
 - Vercel Production and Preview entries must be configured separately. Redeploy after changing Storage env keys before verifying upload or signed URL behavior.
+- CatCare care evidence uses a private `care-evidence` bucket with no direct
+  browser policy. Share-token uploads and owner downloads pass through
+  server-side product authorization; no public or signed object URL is exposed.
+- Supabase Free image transformation is not assumed. The application decodes
+  and re-encodes uploaded images with Sharp to remove metadata and bound size.

@@ -566,6 +566,30 @@ function ResultEntryCard({ entry }: { entry: PlanResultEntry }) {
               {entry.note}
             </p>
           ) : null}
+          {entry.attachments.length > 0 ? (
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {entry.attachments.map((attachment, index) => (
+                <figure className="overflow-hidden rounded-xl border border-[#e2e6ee] bg-[#fbfdfc]" key={attachment.id}>
+                  <a href={attachment.previewUrl} target="_blank" rel="noreferrer">
+                    <img
+                      alt={`${entry.title} 的照护照片 ${index + 1}`}
+                      className="aspect-square w-full object-cover"
+                      height={attachment.height}
+                      loading="lazy"
+                      src={attachment.previewUrl}
+                      width={attachment.width}
+                    />
+                  </a>
+                  <a
+                    className="flex min-h-10 items-center justify-center px-3 text-xs font-semibold text-[#07847f]"
+                    href={attachment.downloadUrl}
+                  >
+                    下载安全处理版
+                  </a>
+                </figure>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
     </article>

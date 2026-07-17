@@ -36,73 +36,73 @@ export const catIllustrationOptions = [
     id: "british-shorthair",
     label: "银灰短毛",
     labelEn: "Grey shorthair",
-    src: "/catcare/cats/cat-british-shorthair.png"
+    src: "/catcare/cats/cat-british-shorthair.webp"
   },
   {
     id: "orange-tabby",
     label: "橘色虎斑",
     labelEn: "Orange tabby",
-    src: "/catcare/cats/cat-orange-tabby.png"
+    src: "/catcare/cats/cat-orange-tabby.webp"
   },
   {
     id: "ragdoll",
     label: "长毛布偶",
     labelEn: "Ragdoll longhair",
-    src: "/catcare/cats/cat-ragdoll.png"
+    src: "/catcare/cats/cat-ragdoll.webp"
   },
   {
     id: "black-shorthair",
     label: "黑色短毛",
     labelEn: "Black shorthair",
-    src: "/catcare/cats/cat-black-shorthair.png"
+    src: "/catcare/cats/cat-black-shorthair.webp"
   },
   {
     id: "siamese",
     label: "重点色暹罗",
     labelEn: "Siamese point",
-    src: "/catcare/cats/cat-siamese.png"
+    src: "/catcare/cats/cat-siamese.webp"
   },
   {
     id: "cream-longhair",
     label: "奶油长毛",
     labelEn: "Cream longhair",
-    src: "/catcare/cats/cat-cream-longhair.png"
+    src: "/catcare/cats/cat-cream-longhair.webp"
   },
   {
     id: "bengal",
     label: "豹纹短毛",
     labelEn: "Bengal spotted",
-    src: "/catcare/cats/cat-bengal.png"
+    src: "/catcare/cats/cat-bengal.webp"
   },
   {
     id: "russian-blue",
     label: "蓝灰短毛",
     labelEn: "Russian blue",
-    src: "/catcare/cats/cat-russian-blue.png"
+    src: "/catcare/cats/cat-russian-blue.webp"
   },
   {
     id: "maine-coon",
     label: "蓬松缅因",
     labelEn: "Maine coon",
-    src: "/catcare/cats/cat-maine-coon.png"
+    src: "/catcare/cats/cat-maine-coon.webp"
   },
   {
     id: "persian",
     label: "扁脸长毛",
     labelEn: "Persian longhair",
-    src: "/catcare/cats/cat-persian.png"
+    src: "/catcare/cats/cat-persian.webp"
   },
   {
     id: "sphynx",
     label: "无毛猫",
     labelEn: "Sphynx",
-    src: "/catcare/cats/cat-sphynx.png"
+    src: "/catcare/cats/cat-sphynx.webp"
   },
   {
     id: "calico",
     label: "三花家猫",
     labelEn: "Calico",
-    src: "/catcare/cats/cat-calico.png"
+    src: "/catcare/cats/cat-calico.webp"
   }
 ] as const satisfies readonly CatIllustrationOption[];
 
@@ -190,7 +190,15 @@ export function getCatIllustrationOption(
 }
 
 export function isCatIllustrationSrc(value: string) {
-  return catIllustrationOptions.some((option) => option.src === value);
+  return normalizeCatIllustrationSrc(value) !== null;
+}
+
+export function normalizeCatIllustrationSrc(value: string) {
+  const option = catIllustrationOptions.find(
+    (item) => item.src === value || item.src.replace(/\.webp$/, ".png") === value
+  );
+
+  return option?.src ?? null;
 }
 
 export function getLifeStageFromBirthDate(birthDate: string | null): CatLifeStage {

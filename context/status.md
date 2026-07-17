@@ -1482,9 +1482,9 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
 
 - The user accepted the final GNE-298 template evidence and authorized the
   next bounded MVP3 hardening stage. Linear GNE-298 is Done.
-- Linear now contains one parent plus exactly three children:
-  `GNE-317`, with ordered `GNE-318 -> GNE-319 -> GNE-320` for account recovery,
-  CatCare media/evidence, and owner notifications. GNE-317 and GNE-318 are the
+- Linear now contains one parent plus exactly four children:
+  `GNE-317`, with ordered `GNE-318 -> GNE-319 -> GNE-320 -> GNE-321` for account recovery,
+  CatCare media/evidence, owner notifications, and Google/Apple sign-in. GNE-317 and GNE-318 are the
   only active parent/child; later children remain blocked and Backlog.
 - GNE-318 runs on `codex/gne-318-password-recovery` from source/remote commit
   `0433c4d`. Sol owns the Auth/spec/test write lock and Terra Reviewer owns the
@@ -1561,3 +1561,31 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
 - Independent Terra Auth review found no P0, P1, P2, or P3 defect and approved
   the change for PR. GNE-318 stays In Progress until PR/Merge, deployment, and
   final browser acceptance complete. Do not enter GNE-319.
+
+## 2026-07-16 GNE-319 private media checkpoint
+
+- `GNE-318` is Done and `GNE-319` is the only In Progress child under
+  `GNE-317`. The live sequence is
+  `GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`; do not enter GNE-320
+  automatically.
+- Local implementation adds server-normalized cat photos, compressed runtime
+  WebP assets, owner-configurable task photo requirements, separate anonymous
+  evidence uploads, private metadata/RLS, and authenticated owner
+  preview/download. CatCare-specific token, task, bucket, and evidence behavior
+  stays outside the clean template and shared packages.
+- A clean local migration rebuild passed through
+  `20260716093000_gne_319_private_care_media`. Local synthetic browser/API
+  acceptance passed required-photo validation, exception-first submission,
+  retry deduplication, three-photo maximum, revoked-token rejection,
+  anonymous/cross-owner denial, owner preview/download, and EXIF/GPS removal.
+- Terra review found and the implementation corrected legacy built-in PNG path
+  compatibility, a client-reported photo-count trust gap, concurrent attachment
+  conflict handling, and one redundant index. The first submission now sends
+  real files through the server action; concurrent same-image requests return
+  one new plus one existing attachment, concurrent distinct images take
+  separate positions, and a fourth image returns 400. Web tests are 99/99;
+  full lint, typecheck, build, package/release/AI safety, and template drift
+  gates pass after the fix.
+- The shared cloud Supabase migration, PR/Merge, Vercel deployment, and final
+  deployed smoke are still `not_run`. They require the normal database approval
+  and publication gates before GNE-319 can be Done.

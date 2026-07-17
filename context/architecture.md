@@ -47,7 +47,7 @@ Start with one implementation, but keep the app code provider-agnostic where it 
 MVP3 started from `GNE-228 / MVP3-01 PLAN` and validated the Reference
 Product route through `GNE-229` to `GNE-234`, added `GNE-298 TEMPLATE` to
 generate and verify a separate clean template candidate, and now uses
-`GNE-317 PRODUCT HARDENING` to close three confirmed CatCare usability gaps.
+`GNE-317 PRODUCT HARDENING` to close four confirmed CatCare usability gaps.
 It is no longer driven
 by the old Product Validation Kit CP chain; that route has been retired from
 current planning and should not be treated as a fallback MVP3/MVP4-MVP6 path. Its job is
@@ -98,8 +98,8 @@ platform routes and foundation tests protected while giving each generated
 product a declared App Router subtree and product-test subtree that it can
 replace without invalidating candidate provenance.
 
-GNE-317 executes `GNE-318 -> GNE-319 -> GNE-320`: account recovery, CatCare
-media/evidence, then owner notifications. Account recovery reuses the existing
+GNE-317 executes `GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`: account recovery,
+CatCare media/evidence, owner notifications, then Google/Apple sign-in. Account recovery reuses the existing
 provider-neutral Auth/session boundary; CatCare share-token authorization and
 notification semantics remain app-local. Product-agnostic promotion from media
 or notifications requires a second real consumer and is not automatic.

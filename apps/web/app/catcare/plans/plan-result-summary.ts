@@ -11,6 +11,7 @@ import {
 import { getAnonymousCarePlanServiceDates } from "@/lib/catcare/product-service/anonymous-submission-policy";
 
 export type PlanResultEntry = {
+  attachments: CatCareSubmission["attachments"];
   category: CatCareTask["category"] | null;
   id: string;
   categoryLabel: string;
@@ -247,6 +248,7 @@ function submissionToEntry(
     submission.status === "exception";
 
   return {
+    attachments: submission.attachments,
     category: task?.category ?? null,
     id: submission.id,
     categoryLabel: task ? getCategoryLabel(task.category) : "整体反馈",

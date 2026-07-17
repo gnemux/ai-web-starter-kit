@@ -27,9 +27,11 @@ import { resolveCarePlanShareToken } from "./share-tokens";
 
 export type AnonymousCareTaskSubmissionView = {
   abnormal: boolean;
+  attachmentCount: number;
   note: string | null;
   serviceDate: string | null;
   status: Database["public"]["Tables"]["care_submissions"]["Row"]["status"];
+  submissionId: string;
   submittedAt: string;
 };
 
@@ -37,6 +39,7 @@ export type AnonymousCareTaskView = {
   category: Database["public"]["Tables"]["care_tasks"]["Row"]["category"];
   frequency: string | null;
   instructions: string | null;
+  photoRequired: boolean;
   required: boolean;
   submissionsBySlot: Record<string, AnonymousCareTaskSubmissionView>;
   submissionRef: string;
@@ -78,7 +81,7 @@ export async function getAnonymousCarePlanView(
     return clientResult;
   }
 
-  const [planResult, tasksResult, submissionsResult] = await Promise.all([
+  const [planResult, tasksResult, submissionsResult, attachmentsResult] = await Promise.all([
     clientResult.data
       .from("care_plans")
       .select(
@@ -90,17 +93,22 @@ export async function getAnonymousCarePlanView(
     clientResult.data
       .from("care_tasks")
       .select(
-        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
+        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, photo_required, enabled, created_at, updated_at"
       )
       .eq("plan_id", tokenResult.data.resourceId)
       .order("sort_order", { ascending: true }),
     clientResult.data
       .from("care_submissions")
-      .select("task_id, status, note, abnormal, idempotency_key, created_at")
+      .select("id, task_id, status, note, abnormal, idempotency_key, created_at")
       .eq("owner_id", tokenResult.data.ownerId)
       .eq("plan_id", tokenResult.data.resourceId)
       .like("idempotency_key", "anonymous:%")
-      .order("created_at", { ascending: false })
+      .order("created_at", { ascending: false }),
+    clientResult.data
+      .from("care_submission_attachments")
+      .select("submission_id")
+      .eq("owner_id", tokenResult.data.ownerId)
+      .eq("plan_id", tokenResult.data.resourceId)
   ]);
 
   if (planResult.error) {
@@ -113,6 +121,10 @@ export async function getAnonymousCarePlanView(
 
   if (submissionsResult.error) {
     return mapSupabaseError(submissionsResult.error);
+  }
+
+  if (attachmentsResult.error) {
+    return mapSupabaseError(attachmentsResult.error);
   }
 
   if (planResult.data.status !== "published") {
@@ -153,6 +165,14 @@ export async function getAnonymousCarePlanView(
     string,
     AnonymousCareTaskSubmissionView
   >();
+  const attachmentCountBySubmissionId = new Map<string, number>();
+
+  for (const attachment of attachmentsResult.data ?? []) {
+    attachmentCountBySubmissionId.set(
+      attachment.submission_id,
+      (attachmentCountBySubmissionId.get(attachment.submission_id) ?? 0) + 1
+    );
+  }
 
   for (const submission of submissionsResult.data ?? []) {
     if (!submission.task_id) {
@@ -169,9 +189,11 @@ export async function getAnonymousCarePlanView(
 
     const view = {
       abnormal: submission.abnormal,
+      attachmentCount: attachmentCountBySubmissionId.get(submission.id) ?? 0,
       note: submission.note,
       serviceDate: slot.serviceDate,
       status: submission.status,
+      submissionId: submission.id,
       submittedAt: submission.created_at
     };
 
@@ -197,6 +219,7 @@ export async function getAnonymousCarePlanView(
       category: task.category,
       frequency: task.frequency,
       instructions: task.instructions,
+      photoRequired: task.photoRequired,
       required: task.required,
       submissionsBySlot: Object.fromEntries(
         getAnonymousCarePlanServiceDates(plan.startOn, plan.endOn).flatMap(

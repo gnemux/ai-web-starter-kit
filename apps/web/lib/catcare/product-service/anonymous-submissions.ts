@@ -4,6 +4,11 @@ import { randomUUID } from "node:crypto";
 
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
+import {
+  careEvidenceInputMaxBytes,
+  careEvidenceMaxCount,
+  validatePrivateImageFile
+} from "../../media/private-image";
 import { createSupabaseAdminClient, type AppSupabaseClient } from "../../supabase/server";
 import type { Database } from "../../supabase/database.types";
 import {
@@ -50,8 +55,23 @@ export async function submitAnonymousCareSubmissionFromFormData(
   const serviceDate = String(formData.get("serviceDate") ?? "").trim();
   const submissionRef = String(formData.get("submissionRef") ?? "").trim();
   const visitTime = String(formData.get("visitTime") ?? "").trim();
+  const evidenceFiles = formData.getAll("photos");
   const statusResult = parseAnonymousSubmissionStatus(formData.get("status"));
   const noteResult = parseAnonymousSubmissionNote(formData.get("note"));
+
+  if (evidenceFiles.length > careEvidenceMaxCount) {
+    return serviceError("validation_error", "每项照护结果最多上传 3 张照片。", {
+      photo: "limit_reached"
+    });
+  }
+
+  for (const file of evidenceFiles) {
+    const fileResult = validatePrivateImageFile(file, careEvidenceInputMaxBytes);
+
+    if (!fileResult.ok) {
+      return fileResult;
+    }
+  }
 
   if (!isAnonymousCareServiceDate(serviceDate)) {
     return serviceError("validation_error", "请选择要提交的照护日期。", {
@@ -114,7 +134,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
     clientResult.data
       .from("care_tasks")
       .select(
-        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
+        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, photo_required, enabled, created_at, updated_at"
       )
       .eq("plan_id", tokenResult.data.resourceId)
       .order("sort_order", { ascending: true })
@@ -198,6 +218,16 @@ export async function submitAnonymousCareSubmissionFromFormData(
   if (!getAnonymousTaskVisitTimes(task).includes(visitTime)) {
     return serviceError("validation_error", "请选择计划内的到访任务。", {
       visitTime: "invalid"
+    });
+  }
+
+  if (
+    task.photoRequired &&
+    status !== "exception" &&
+    evidenceFiles.length < 1
+  ) {
+    return serviceError("validation_error", "主人要求这项任务附带照片，请先选择照片。", {
+      photo: "required"
     });
   }
 
@@ -293,10 +323,12 @@ export async function submitAnonymousCareSubmissionFromFormData(
       return serviceOk({
         abnormal: updateResult.data.abnormal,
         alreadySubmitted: true,
+        attachmentCount: existingResult.data.attachmentCount,
         message: "已更新，主人会看到这项任务的最新反馈",
         note: updateResult.data.note,
         serviceDate,
         status: updateResult.data.status,
+        submissionId: updateResult.data.id,
         submittedAt: updateResult.data.created_at,
         submissionRef
       });
@@ -438,10 +470,12 @@ export async function submitAnonymousCareSubmissionFromFormData(
   return serviceOk({
     abnormal: insertResult.data.abnormal,
     alreadySubmitted: false,
+    attachmentCount: 0,
     message: "已提交，主人会在照护结果里看到这条反馈",
     note: insertResult.data.note,
     serviceDate,
     status: insertResult.data.status,
+    submissionId: insertResult.data.id,
     submittedAt: insertResult.data.created_at,
     submissionRef
   });
@@ -561,6 +595,7 @@ async function getAnonymousSubmissionBySlot(
     submission?.idempotency_key
       ? {
           abnormal: submission.abnormal,
+          attachmentCount: 0,
           idempotencyKey: submission.idempotency_key,
           note: submission.note,
           submissionId: submission.id,

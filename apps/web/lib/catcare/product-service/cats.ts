@@ -103,6 +103,9 @@ export async function createCatCareCatFromFormData(
     .single();
 
   if (error) {
+    if (photoResult.data) {
+      await clientResult.data.storage.from("cat-photos").remove([photoResult.data]);
+    }
     return mapSupabaseError(error);
   }
 
@@ -192,6 +195,23 @@ export async function updateCatCareCatFromFormData(
     return ownerResult;
   }
 
+  const existingPhotoResult = await clientResult.data
+    .from("cats")
+    .select("photo_url")
+    .eq("owner_id", ownerResult.data)
+    .eq("id", id)
+    .is("deleted_at", null)
+    .single();
+
+  if (existingPhotoResult.error) {
+    return mapSupabaseError(existingPhotoResult.error);
+  }
+
+  const previousPhotoPath = getCatPhotoStoragePath(
+    existingPhotoResult.data.photo_url,
+    ownerResult.data
+  );
+
   const photoResult = await uploadCatPhotoIfPresent(
     clientResult.data,
     ownerResult.data,
@@ -229,7 +249,21 @@ export async function updateCatCareCatFromFormData(
     .single();
 
   if (error) {
+    if (photoResult.data) {
+      await clientResult.data.storage.from("cat-photos").remove([photoResult.data]);
+    }
     return mapSupabaseError(error);
+  }
+
+  const retainedPreviousPhoto =
+    !photoResult.data && inputResult.data.photoUrl === getCatPhotoProxyUrl(id);
+
+  if (
+    previousPhotoPath &&
+    !retainedPreviousPhoto &&
+    previousPhotoPath !== photoResult.data
+  ) {
+    await clientResult.data.storage.from("cat-photos").remove([previousPhotoPath]);
   }
 
   const cat = mapCat(data);

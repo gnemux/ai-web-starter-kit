@@ -310,6 +310,11 @@ function TaskLine({ entry }: { entry: PlanScheduleEntry }) {
           <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getCategoryStyle(entry.task.category)}`}>
             {getCategoryLabel(entry.task.category)}
           </span>
+          {entry.task.photoRequired ? (
+            <span className="rounded-full bg-[#e6f7f2] px-2.5 py-1 text-xs font-semibold text-[#07847f]">
+              需照片
+            </span>
+          ) : null}
           <p
             className={`min-w-0 text-sm font-semibold leading-6 ${
               entry.task.required ? "text-[#101a32]" : "text-[#526177]"

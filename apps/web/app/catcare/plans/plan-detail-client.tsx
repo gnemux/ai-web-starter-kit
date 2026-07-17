@@ -681,9 +681,16 @@ function TaskCard({
           </p>
         ) : null}
       </div>
-      <span className="self-start rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
-        {task.required ? "必做" : "可选"}
-      </span>
+      <div className="flex flex-wrap justify-end gap-2 self-start">
+        <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
+          {task.required ? "必做" : "可选"}
+        </span>
+        {task.photoRequired ? (
+          <span className="rounded-full bg-[#e6f7f2] px-3 py-1 text-xs font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
+            需照片
+          </span>
+        ) : null}
+      </div>
     </article>
   );
 }

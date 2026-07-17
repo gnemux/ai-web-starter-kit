@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { AnonymousCareTaskSubmissionView } from "@/lib/catcare/product-service";
 
@@ -20,6 +20,7 @@ type AnonymousTask = {
   frequency: string | null;
   instructions: string | null;
   locked: boolean;
+  photoRequired: boolean;
   required: boolean;
   serviceDate: string;
   submission: AnonymousCareTaskSubmissionView | null;
@@ -27,6 +28,12 @@ type AnonymousTask = {
   sortOrder: number;
   title: string;
   visitTime: string;
+};
+
+type SelectedEvidence = {
+  file: File;
+  id: string;
+  previewUrl: string;
 };
 
 type AnonymousVisitSection = {
@@ -248,11 +255,127 @@ function TaskStep({
   >(task.submission?.status ?? "completed");
   const [note, setNote] = useState(task.submission?.note ?? "");
   const [submission, setSubmission] = useState(task.submission);
+  const [attachmentCount, setAttachmentCount] = useState(
+    task.submission?.attachmentCount ?? 0
+  );
+  const [evidenceFiles, setEvidenceFiles] = useState<SelectedEvidence[]>([]);
+  const evidenceFilesRef = useRef<SelectedEvidence[]>([]);
   const [message, setMessage] = useState<string | null>(
     task.submission ? "这项任务已提交" : null
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    evidenceFilesRef.current = evidenceFiles;
+  }, [evidenceFiles]);
+
+  useEffect(() => () => {
+    evidenceFilesRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+  }, []);
+
+  function onEvidenceChange(files: FileList | null) {
+    if (!files) {
+      return;
+    }
+
+    const available = Math.max(3 - attachmentCount - evidenceFiles.length, 0);
+    const nextFiles = Array.from(files).slice(0, available);
+    const invalid = nextFiles.find(
+      (file) =>
+        !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
+        file.size > 4 * 1024 * 1024
+    );
+
+    if (invalid) {
+      setError("仅支持单张不超过 4 MB 的 JPG、PNG 或 WebP 照片。");
+      return;
+    }
+
+    setError(null);
+    setEvidenceFiles((current) => [
+      ...current,
+      ...nextFiles.map((file) => ({
+        file,
+        id: `${file.name}:${file.size}:${file.lastModified}:${crypto.randomUUID()}`,
+        previewUrl: URL.createObjectURL(file)
+      }))
+    ]);
+  }
+
+  function removeEvidence(id: string) {
+    setEvidenceFiles((current) => {
+      const removed = current.find((item) => item.id === id);
+
+      if (removed) {
+        URL.revokeObjectURL(removed.previewUrl);
+      }
+
+      return current.filter((item) => item.id !== id);
+    });
+  }
+
+  async function uploadEvidence(submissionId: string) {
+    const uploadedIds = new Set<string>();
+    let nextCount = attachmentCount;
+    let uploadError: string | null = null;
+
+    for (const item of evidenceFiles) {
+      const body = new FormData();
+      body.set("photo", item.file);
+      body.set("token", token);
+      const response = await fetch(
+        `/api/catcare/share/submissions/${submissionId}/attachments`,
+        { body, method: "POST" }
+      );
+      const payload = (await response.json().catch(() => null)) as
+        | { alreadyUploaded?: boolean; error?: string }
+        | null;
+
+      if (!response.ok) {
+        uploadError = payload?.error ?? "照片上传失败，请稍后重试。";
+        continue;
+      }
+
+      uploadedIds.add(item.id);
+      nextCount += payload?.alreadyUploaded ? 0 : 1;
+    }
+
+    setEvidenceFiles((current) =>
+      current.filter((item) => {
+        if (!uploadedIds.has(item.id)) {
+          return true;
+        }
+
+        URL.revokeObjectURL(item.previewUrl);
+        return false;
+      })
+    );
+    setAttachmentCount(Math.min(nextCount, 3));
+
+    return { attachmentCount: Math.min(nextCount, 3), error: uploadError };
+  }
+
+  async function onEvidenceRetry() {
+    if (!submission || evidenceFiles.length === 0) {
+      return;
+    }
+
+    setPending(true);
+    setError(null);
+    const result = await uploadEvidence(submission.submissionId);
+    setPending(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    setSubmission((current) =>
+      current ? { ...current, attachmentCount: result.attachmentCount } : current
+    );
+    setMessage("照片已安全上传，主人可以在照护结果中查看和下载");
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -265,26 +388,50 @@ function TaskStep({
     formData.set("token", token);
     formData.set("submissionRef", task.submissionRef);
     formData.set("visitTime", task.visitTime);
+    for (const item of evidenceFiles) {
+      formData.append("photos", item.file);
+    }
 
     const result = await submitAnonymousCareTaskAction(formData);
 
-    setPending(false);
-
     if (!result.ok) {
+      setPending(false);
       setError(result.error.message);
       return;
     }
 
+    const nextAttachmentCount = result.data.attachmentCount;
+    const mediaError = result.data.mediaUploadError;
+
+    if (!mediaError) {
+      setEvidenceFiles((current) => {
+        current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+        return [];
+      });
+    }
+
+    setPending(false);
     setSubmission({
       abnormal: result.data.abnormal,
+      attachmentCount: nextAttachmentCount,
       note: result.data.note,
       serviceDate: result.data.serviceDate,
       status: result.data.status,
+      submissionId: result.data.submissionId,
       submittedAt: result.data.submittedAt
     });
     setStatus(result.data.status);
     setNote(result.data.note ?? "");
-    setMessage(result.data.message);
+    setMessage(
+      mediaError
+        ? "照护结果已提交，但部分照片上传失败，请在下方重试"
+        : status === "exception" && nextAttachmentCount === 0
+          ? "异常已优先提交，请在安全方便时补充照片"
+          : nextAttachmentCount > 0
+            ? `${result.data.message}，${nextAttachmentCount} 张照片已安全上传`
+            : result.data.message
+    );
+    setError(mediaError);
     onSubmitted();
   }
 
@@ -311,6 +458,11 @@ function TaskStep({
             <span className="inline-flex min-h-7 items-center rounded-full bg-white px-2.5 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
               {task.required ? "必做" : "可选"}
             </span>
+            {task.photoRequired ? (
+              <span className="inline-flex min-h-7 items-center rounded-full bg-[#e6f7f2] px-2.5 text-xs font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
+                需照片
+              </span>
+            ) : null}
             <CatOwnerBadge name={formatOwnerLabel(title.owner)} />
           </div>
           <h4 className="mt-2 break-words text-lg font-semibold leading-7 text-[#101a32]">
@@ -340,6 +492,9 @@ function TaskStep({
             <p className="mt-2 text-xs font-semibold text-[#75839a]">
               {message ?? "已提交给主人查看"}
             </p>
+            <p className="mt-2 text-xs font-semibold text-[#526177]">
+              私密照片：{attachmentCount}/3 张
+            </p>
           </div>
         ) : null}
         {!submission ? (
@@ -350,10 +505,15 @@ function TaskStep({
           ) : (
             <TaskSubmissionForm
               error={error}
+              evidenceFiles={evidenceFiles}
+              attachmentCount={attachmentCount}
               note={note}
+              onEvidenceChange={onEvidenceChange}
+              onEvidenceRemove={removeEvidence}
               onNoteChange={setNote}
               onSubmit={onSubmit}
               pending={pending}
+              photoRequired={task.photoRequired}
               serviceDate={task.serviceDate}
               status={status}
               submissionRef={task.submissionRef}
@@ -363,30 +523,64 @@ function TaskStep({
             />
           )
         ) : null}
+        {submission && attachmentCount < 3 ? (
+          <div className="mt-4 grid gap-3 border-t border-[#e2e6ee] pt-4">
+            <EvidencePicker
+              attachmentCount={attachmentCount}
+              files={evidenceFiles}
+              onChange={onEvidenceChange}
+              onRemove={removeEvidence}
+              photoRequired={task.photoRequired}
+            />
+            {error ? (
+              <p className="rounded-xl bg-[#fff4f2] px-3 py-2 text-sm font-semibold leading-6 text-[#b7352c]" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <button
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#07847f] bg-white px-4 text-sm font-semibold text-[#07847f] disabled:cursor-not-allowed disabled:border-[#d9e0ea] disabled:text-[#98a4b5]"
+              disabled={pending || evidenceFiles.length === 0}
+              onClick={onEvidenceRetry}
+              type="button"
+            >
+              {pending ? "上传中…" : "补充上传所选照片"}
+            </button>
+          </div>
+        ) : null}
       </div>
     </li>
   );
 }
 
 function TaskSubmissionForm({
+  attachmentCount,
   error,
+  evidenceFiles,
   note,
+  onEvidenceChange,
+  onEvidenceRemove,
   onNoteChange,
   onStatusChange,
   onSubmit,
   pending,
+  photoRequired,
   serviceDate,
   status,
   submissionRef,
   token,
   visitTime
 }: {
+  attachmentCount: number;
   error: string | null;
+  evidenceFiles: SelectedEvidence[];
   note: string;
+  onEvidenceChange: (files: FileList | null) => void;
+  onEvidenceRemove: (id: string) => void;
   onNoteChange: (value: string) => void;
   onStatusChange: (value: "completed" | "note" | "exception") => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   pending: boolean;
+  photoRequired: boolean;
   serviceDate: string;
   status: "completed" | "note" | "exception";
   submissionRef: string;
@@ -457,6 +651,13 @@ function TaskSubmissionForm({
           value={note}
         />
       </label>
+      <EvidencePicker
+        attachmentCount={attachmentCount}
+        files={evidenceFiles}
+        onChange={onEvidenceChange}
+        onRemove={onEvidenceRemove}
+        photoRequired={photoRequired}
+      />
       {error ? (
         <p
           className="rounded-xl bg-[#fff4f2] px-3 py-2 text-sm font-semibold leading-6 text-[#b7352c]"
@@ -473,6 +674,69 @@ function TaskSubmissionForm({
         {pending ? "提交中…" : "提交这项结果"}
       </button>
     </form>
+  );
+}
+
+function EvidencePicker({
+  attachmentCount,
+  files,
+  onChange,
+  onRemove,
+  photoRequired
+}: {
+  attachmentCount: number;
+  files: SelectedEvidence[];
+  onChange: (files: FileList | null) => void;
+  onRemove: (id: string) => void;
+  photoRequired: boolean;
+}) {
+  const remaining = Math.max(3 - attachmentCount - files.length, 0);
+
+  return (
+    <div className="grid gap-3 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-3">
+      <div>
+        <p className="text-sm font-semibold text-[#101a32]">
+          照护照片{photoRequired ? "（主人要求）" : "（可选）"}
+        </p>
+        <p className="mt-1 text-xs font-semibold leading-5 text-[#75839a]">
+          最多 3 张，单张不超过 4 MB；上传后会压缩并清除定位信息，仅主人登录后可查看。
+        </p>
+      </div>
+      {files.length > 0 ? (
+        <div className="grid grid-cols-3 gap-2">
+          {files.map((item) => (
+            <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-[#d9e0ea]" key={item.id}>
+              <img alt="待上传照护照片预览" className="aspect-square w-full object-cover" src={item.previewUrl} />
+              <button
+                aria-label={`移除照片 ${item.file.name}`}
+                className="absolute right-1 top-1 grid h-8 w-8 place-items-center rounded-full bg-black/70 text-sm font-bold text-white"
+                onClick={() => onRemove(item.id)}
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {remaining > 0 ? (
+        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#7ebdb8] bg-white px-4 text-sm font-semibold text-[#07847f]">
+          选择照片（还可选 {remaining} 张）
+          <input
+            accept="image/jpeg,image/png,image/webp"
+            className="sr-only"
+            multiple
+            onChange={(event) => {
+              onChange(event.currentTarget.files);
+              event.currentTarget.value = "";
+            }}
+            type="file"
+          />
+        </label>
+      ) : (
+        <p className="text-xs font-semibold text-[#526177]">已达到 3 张上限。</p>
+      )}
+    </div>
   );
 }
 

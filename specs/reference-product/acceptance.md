@@ -618,3 +618,33 @@
   screenshots.
 - Auth helper tests, affected web tests, package boundaries, typecheck, lint,
   production build, and desktop/mobile browser checks pass before publication.
+
+## GNE-319 Private Media Acceptance
+
+- A plan owner can mark a task as requiring a photo and the requirement remains
+  visible in the editor, published plan/schedule, and sitter task.
+- A normal required-photo completion without a selected image is rejected with
+  a recoverable field message. The server validates real selected files rather
+  than trusting a numeric count from the client. An exception with a note is committed first even
+  without a photo and offers a later media retry.
+- The sitter can preview/remove up to three local images. Uploads are separate
+  from the text mutation, identical retry is idempotent, the fourth image is
+  rejected, and revoked/tampered/out-of-scope tokens cannot upload.
+- Server normalization accepts only bounded JPG/PNG/WebP input, auto-orients,
+  limits dimensions, emits a WebP no larger than 2 MB, and strips EXIF/GPS/XMP.
+- `care-evidence` is private and has no direct anon/authenticated Storage policy.
+  Anonymous access to the owner proxy returns 401, cross-owner metadata reads
+  return no rows, and only the owning authenticated account sees thumbnails and
+  download links.
+- Cat-profile uploads use the same server normalization and clean up replaced
+  or failed objects. Runtime CatCare assets referenced by pages use compressed
+  WebP files rather than the previous multi-megabyte PNG payloads. Existing
+  profiles that stored built-in PNG illustration paths resolve to the matching
+  WebP asset instead of being treated as private Storage objects.
+- Concurrent same-image uploads converge to one attachment and both requests
+  succeed idempotently; concurrent distinct images take different positions,
+  and a fourth image is rejected.
+- Clean local `supabase db reset`, schema/grant/policy inspection, image tests,
+  web tests, typecheck, package boundaries, production build, and browser/API
+  smoke must pass. Shared cloud migration and deployed smoke remain `not_run`
+  until the repository owner explicitly approves the database gate.

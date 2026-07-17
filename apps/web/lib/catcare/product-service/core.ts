@@ -23,6 +23,11 @@ import { getCurrentUserClaims } from "../../services/auth";
 import { getSupabasePublicConfig } from "../../supabase/config";
 import type { Database } from "../../supabase/database.types";
 import {
+  catPhotoInputMaxBytes,
+  normalizePrivateImage,
+  validatePrivateImageFile
+} from "../../media/private-image";
+import {
   trackCatCareAnalyticsEvent,
   type CatCareAnalyticsEvent,
   type CatCareAnalyticsProperties
@@ -31,6 +36,7 @@ import {
   getLifeStageFromBirthDate,
   isCatBreedId,
   isCatIllustrationSrc,
+  normalizeCatIllustrationSrc,
   type CatGender,
   type CatLifeStage
 } from "../cat-profile-options";
@@ -466,7 +472,7 @@ export async function loadCatCarePlans(
       : client
           .from("care_tasks")
           .select(
-            "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
+            "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, photo_required, enabled, created_at, updated_at"
           )
           .in("plan_id", planIds)
           .order("sort_order", { ascending: true });
@@ -518,7 +524,7 @@ export async function loadCatCarePlans(
     ? new Map<string, CatCareSubmission[]>()
     : groupByPlan(
         ((submissionsResult?.data ?? []) as CareSubmissionRow[]).map(
-          mapSubmission
+          (submission) => mapSubmission(submission)
         )
       );
   const participantsByPlan = groupByPlan(
@@ -689,24 +695,26 @@ export async function uploadCatPhotoIfPresent(
     return serviceOk(null);
   }
 
-  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-    return serviceError("validation_error", "Upload a JPG, PNG, or WebP photo.", {
-      photo: "invalid"
-    });
+  const fileResult = validatePrivateImageFile(file, catPhotoInputMaxBytes);
+
+  if (!fileResult.ok) {
+    return fileResult;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    return serviceError("validation_error", "Upload a photo smaller than 5 MB.", {
-      photo: "too_large"
-    });
+  const normalizedResult = await normalizePrivateImage(fileResult.data, {
+    maxDimension: 1200
+  });
+
+  if (!normalizedResult.ok) {
+    return normalizedResult;
   }
 
-  const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-  const path = `${ownerId}/${crypto.randomUUID()}.${extension}`;
+  const path = `${ownerId}/${crypto.randomUUID()}.webp`;
   const { error } = await supabase.storage
     .from("cat-photos")
-    .upload(path, file, {
-      contentType: file.type,
+    .upload(path, normalizedResult.data.body, {
+      cacheControl: "31536000",
+      contentType: normalizedResult.data.contentType,
       upsert: false
     });
 
@@ -1890,6 +1898,10 @@ export function mapDbBoundaryError(
 }
 
 export function mapCat(row: CatRow): CatCareCat {
+  const illustrationSrc = row.photo_url
+    ? normalizeCatIllustrationSrc(row.photo_url)
+    : null;
+
   return {
     id: row.id,
     ownerId: row.owner_id,
@@ -1899,10 +1911,7 @@ export function mapCat(row: CatRow): CatCareCat {
     lifeStage: row.life_stage,
     breed: row.breed,
     weightKg: row.weight_kg,
-    photoUrl:
-      row.photo_url && !isCatIllustrationSrc(row.photo_url)
-        ? getCatPhotoProxyUrl(row.id)
-        : row.photo_url,
+    photoUrl: illustrationSrc ?? (row.photo_url ? getCatPhotoProxyUrl(row.id) : null),
     safetyNotes: row.safety_notes,
     notes: row.notes,
     createdAt: row.created_at,
@@ -2114,11 +2123,15 @@ export function mapTask(row: CareTaskRow): CatCareTask {
     instructions: row.instructions,
     sortOrder: row.sort_order,
     required: row.required,
+    photoRequired: row.photo_required,
     source: row.source
   };
 }
 
-export function mapSubmission(row: CareSubmissionRow): CatCareSubmission {
+export function mapSubmission(
+  row: CareSubmissionRow,
+  attachments: CatCareSubmission["attachments"] = []
+): CatCareSubmission {
   return {
     id: row.id,
     ownerId: row.owner_id,
@@ -2129,7 +2142,8 @@ export function mapSubmission(row: CareSubmissionRow): CatCareSubmission {
     abnormal: row.abnormal,
     note: row.note,
     idempotencyKey: row.idempotency_key,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    attachments
   };
 }
 

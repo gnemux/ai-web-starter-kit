@@ -27,7 +27,7 @@ import {
 } from "./catcare-billing-plan-comparison";
 import { CatCareBillingRecords } from "./catcare-billing-records";
 
-const aiBillingRobotCatSrc = "/catcare/illustrations/ai-billing-robot-cat.png";
+const aiBillingRobotCatSrc = "/catcare/illustrations/ai-billing-robot-cat.webp";
 
 export function CatCareBillingOverview({
   activityResult,

@@ -9,6 +9,7 @@ import { fanOutSafeCapabilityContext } from "../../capabilities/capability-conte
 import { createSupabaseServerClient, type AppSupabaseClient } from "../../supabase/server";
 import type { Json } from "../../supabase/database.types";
 import { recordCatCareAuditEvent } from "./audit";
+import { mapEvidenceAttachment } from "./care-evidence";
 
 import {
   CARE_EVENT_SELECT,
@@ -236,7 +237,7 @@ export async function createCatCarePlanFromFormData(
       }))
     )
     .select(
-      "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
+      "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, photo_required, enabled, created_at, updated_at"
     );
 
   if (taskError) {
@@ -396,7 +397,7 @@ export async function updateCatCarePlanTasksFromFormData(
   const existingResult = await clientResult.data
     .from("care_tasks")
     .select(
-      "id, category, title, instructions, time_hint, frequency, sort_order, source, source_ref, required, enabled"
+      "id, category, title, instructions, time_hint, frequency, sort_order, source, source_ref, required, photo_required, enabled"
     )
     .eq("plan_id", planId)
     .in("id", taskIds);
@@ -439,6 +440,7 @@ export async function updateCatCarePlanTasksFromFormData(
       id: taskId,
       instructions,
       plan_id: planId,
+      photo_required: formData.get(`task.${taskId}.photoRequired`) === "on",
       required: formData.get(`task.${taskId}.required`) === "on",
       sort_order: existingTask?.sort_order ?? 0,
       source: existingTask?.source ?? "owner",
@@ -450,6 +452,7 @@ export async function updateCatCarePlanTasksFromFormData(
     if (
       update.enabled !== existingTask?.enabled ||
       update.instructions !== (existingTask?.instructions ?? null) ||
+      update.photo_required !== existingTask?.photo_required ||
       update.required !== existingTask?.required ||
       update.time_hint !== (existingTask?.time_hint ?? null) ||
       update.title !== existingTask?.title
@@ -464,6 +467,7 @@ export async function updateCatCarePlanTasksFromFormData(
       id: update.id,
       instructions: update.instructions,
       planId,
+      photoRequired: update.photo_required,
       required: update.required,
       sortOrder: update.sort_order,
       source: update.source,
@@ -525,6 +529,7 @@ export async function updateCatCarePlanTasksFromFormData(
       frequency: "daily",
       instructions: newTaskInstructions,
       plan_id: planId,
+      photo_required: formData.get(`${fieldPrefix}.photoRequired`) === "on",
       required: formData.get(`${fieldPrefix}.required`) === "on",
       sort_order: existingTasks.size + index,
       source: "owner",
@@ -581,7 +586,7 @@ export async function updateCatCarePlanTasksFromFormData(
     clientResult.data
       .from("care_tasks")
       .select(
-        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
+        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, photo_required, enabled, created_at, updated_at"
       )
       .eq("plan_id", planId)
       .order("sort_order", { ascending: true }),
@@ -1200,7 +1205,7 @@ export async function getCatCarePlanDetail(
   const tasksQuery = clientResult.data
     .from("care_tasks")
     .select(
-      "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, enabled, created_at, updated_at"
+      "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, photo_required, enabled, created_at, updated_at"
     )
     .eq("plan_id", planId)
     .order("sort_order", { ascending: true });
@@ -1220,10 +1225,19 @@ export async function getCatCarePlanDetail(
     .select(CARE_PLAN_CAT_SELECT)
     .eq("plan_id", planId)
     .order("sort_order", { ascending: true });
-  const [tasksResult, submissionsResult, participantsResult] = await Promise.all([
+  const attachmentsQuery = !includeSubmissions
+    ? null
+    : clientResult.data
+        .from("care_submission_attachments")
+        .select("id, submission_id, byte_size, content_type, width, height, created_at, position")
+        .eq("owner_id", ownerResult.data)
+        .eq("plan_id", planId)
+        .order("position", { ascending: true });
+  const [tasksResult, submissionsResult, participantsResult, attachmentsResult] = await Promise.all([
     tasksQuery,
     submissionsQuery,
-    participantsQuery
+    participantsQuery,
+    attachmentsQuery
   ]);
 
   if (tasksResult.error) {
@@ -1238,10 +1252,31 @@ export async function getCatCarePlanDetail(
     return mapSupabaseError(participantsResult.error);
   }
 
+  if (attachmentsResult?.error) {
+    return mapSupabaseError(attachmentsResult.error);
+  }
+
+  const attachmentsBySubmissionId = new Map<
+    string,
+    ReturnType<typeof mapEvidenceAttachment>[]
+  >();
+
+  for (const attachment of attachmentsResult?.data ?? []) {
+    attachmentsBySubmissionId.set(attachment.submission_id, [
+      ...(attachmentsBySubmissionId.get(attachment.submission_id) ?? []),
+      mapEvidenceAttachment(attachment)
+    ]);
+  }
+
   const plan = {
     ...mapPlan(planResult.data),
     participants: (participantsResult.data ?? []).map(mapPlanParticipant),
-    submissions: (submissionsResult?.data ?? []).map(mapSubmission),
+    submissions: (submissionsResult?.data ?? []).map((submission) =>
+      mapSubmission(
+        submission,
+        attachmentsBySubmissionId.get(submission.id) ?? []
+      )
+    ),
     tasks: (tasksResult.data ?? []).map(mapTask)
   };
 

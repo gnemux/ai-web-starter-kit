@@ -2,6 +2,10 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import type { WorkspaceNavKey } from "@/components/workspace-nav";
+import {
+  getOwnerNotificationCenter,
+  type OwnerNotificationCenter
+} from "@/lib/catcare/product-service";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
@@ -15,9 +19,10 @@ import { CatCareShellClient } from "./catcare-shell-client";
 export async function getCatCarePageContext(nextPath = "/catcare") {
   const locale = await getRequestLocale();
   const copy = getDictionary(locale);
-  const [accountResult, billingResult] = await Promise.all([
+  const [accountResult, billingResult, notificationResult] = await Promise.all([
     getCurrentAccount(),
-    getCurrentBillingEntitlements()
+    getCurrentBillingEntitlements(),
+    getOwnerNotificationCenter()
   ]);
 
   if (!accountResult.ok) {
@@ -40,6 +45,9 @@ export async function getCatCarePageContext(nextPath = "/catcare") {
       : copy.catcare.owner.dashboard.creditUnavailable,
     copy,
     locale,
+    notificationCenter: notificationResult.ok
+      ? notificationResult.data
+      : emptyNotificationCenter("error"),
     userLabel
   };
 }
@@ -55,7 +63,7 @@ export async function getCatCareContentContext() {
 
 type CatCarePageContext = Pick<
   Awaited<ReturnType<typeof getCatCarePageContext>>,
-  "account" | "copy" | "locale" | "userLabel"
+  "account" | "copy" | "locale" | "notificationCenter" | "userLabel"
 > & {
   billingPlanLabel?: string;
   creditLabel?: string;
@@ -81,10 +89,17 @@ export function CatCareAppShell({
       creditLabel={context.creditLabel}
       email={context.account.user.email}
       locale={context.locale}
+      notificationCenter={context.notificationCenter}
       topBar={topBar}
       userLabel={context.userLabel}
     >
       {children}
     </CatCareShellClient>
   );
+}
+
+export function emptyNotificationCenter(
+  status: OwnerNotificationCenter["status"] = "ready"
+): OwnerNotificationCenter {
+  return { notifications: [], status, unreadCount: 0 };
 }

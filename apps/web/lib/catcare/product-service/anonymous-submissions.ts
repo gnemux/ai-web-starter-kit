@@ -28,6 +28,7 @@ import {
   trackCatCareProductEvent
 } from "./core";
 import { recordCatCareOutboxEvent } from "./outbox";
+import { recordOwnerSubmissionNotification } from "./notifications";
 import type { AnonymousCareTaskSubmissionView } from "./anonymous-view";
 import {
   createAnonymousTaskSubmissionRef,
@@ -308,6 +309,21 @@ export async function submitAnonymousCareSubmissionFromFormData(
       if (!outboxResult.ok) {
         return serviceError("system_error", "The submission was saved, but its delivery record could not be written. Retry safely with the same submission reference.");
       }
+      const notificationResult = await recordSubmissionNotification({
+        abnormal: updateResult.data.abnormal,
+        markUnread: true,
+        ownerId: tokenResult.data.ownerId,
+        planId: tokenResult.data.resourceId,
+        serviceDate,
+        status: updateResult.data.status,
+        submissionId: updateResult.data.id,
+        taskId: task.id,
+        taskTitle: task.title,
+        visitTime
+      });
+      if (!notificationResult.ok) {
+        return serviceError("system_error", "The submission was saved, but its owner notification could not be written. Retry safely with the same submission reference.");
+      }
       await trackCatCareProductEvent(
         "anonymous_token",
         "catcare_submission_created",
@@ -348,6 +364,17 @@ export async function submitAnonymousCareSubmissionFromFormData(
         idempotencyKey: existingSubmission.idempotencyKey, ownerId: tokenResult.data.ownerId,
         serviceDate, status: existingSubmission.status, submissionId: existingSubmission.submissionId,
         taskTitle: task.title, visitTime
+      }),
+      writeNotification: () => recordSubmissionNotification({
+        abnormal: existingSubmission.abnormal,
+        ownerId: tokenResult.data.ownerId,
+        planId: tokenResult.data.resourceId,
+        serviceDate,
+        status: existingSubmission.status,
+        submissionId: existingSubmission.submissionId,
+        taskId: task.id,
+        taskTitle: task.title,
+        visitTime
       })
     });
     if (!retryEffects.ok) return serviceError("system_error", "The submission is saved, but its Audit or delivery record is still unavailable. Retry with the same submission reference.");
@@ -402,6 +429,17 @@ export async function submitAnonymousCareSubmissionFromFormData(
           abnormal: duplicate.abnormal, correlationId, idempotencyKey: duplicate.idempotencyKey,
           ownerId: tokenResult.data.ownerId, serviceDate, status: duplicate.status,
           submissionId: duplicate.submissionId, taskTitle: task.title, visitTime
+        }),
+        writeNotification: () => recordSubmissionNotification({
+          abnormal: duplicate.abnormal,
+          ownerId: tokenResult.data.ownerId,
+          planId: tokenResult.data.resourceId,
+          serviceDate,
+          status: duplicate.status,
+          submissionId: duplicate.submissionId,
+          taskId: task.id,
+          taskTitle: task.title,
+          visitTime
         })
       });
       if (!effects.ok) return serviceError("system_error", "The concurrent submission is saved, but its Audit or delivery record is unavailable. Retry with the same submission reference.");
@@ -454,6 +492,20 @@ export async function submitAnonymousCareSubmissionFromFormData(
   });
   if (!outboxResult.ok) {
     return serviceError("system_error", "The submission was saved, but its delivery record could not be written. Retry safely with the same submission reference.");
+  }
+  const notificationResult = await recordSubmissionNotification({
+    abnormal: insertResult.data.abnormal,
+    ownerId: tokenResult.data.ownerId,
+    planId: tokenResult.data.resourceId,
+    serviceDate,
+    status: insertResult.data.status,
+    submissionId: insertResult.data.id,
+    taskId: task.id,
+    taskTitle: task.title,
+    visitTime
+  });
+  if (!notificationResult.ok) {
+    return serviceError("system_error", "The submission was saved, but its owner notification could not be written. Retry safely with the same submission reference.");
   }
   await trackCatCareProductEvent(
     "anonymous_token",
@@ -517,6 +569,21 @@ function recordSubmissionOutbox({
       visit_time: visitTime
     }
   });
+}
+
+function recordSubmissionNotification(input: {
+  abnormal: boolean;
+  markUnread?: boolean;
+  ownerId: string;
+  planId: string;
+  serviceDate: string;
+  status: Database["public"]["Tables"]["care_submissions"]["Row"]["status"];
+  submissionId: string;
+  taskId: string;
+  taskTitle: string;
+  visitTime: string;
+}) {
+  return recordOwnerSubmissionNotification(input);
 }
 
 

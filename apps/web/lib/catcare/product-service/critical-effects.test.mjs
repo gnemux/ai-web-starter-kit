@@ -7,6 +7,7 @@ test("failed Audit prevents success and a same-reference retry completes Audit a
   let outboxWrites = 0;
   const effects = () => ensureCriticalSubmissionEffects({
     writeAudit: async () => ({ ok: ++auditAttempts > 1 }),
+    writeNotification: async () => ({ ok: true }),
     writeOutbox: async () => { outboxWrites += 1; return { ok: true }; }
   });
   assert.deepEqual(await effects(), { ok: false });
@@ -20,6 +21,7 @@ test("failed Outbox keeps the submission incomplete until retry", async () => {
   let outboxAttempts = 0;
   const effects = () => ensureCriticalSubmissionEffects({
     writeAudit: async () => ({ ok: true }),
+    writeNotification: async () => ({ ok: true }),
     writeOutbox: async () => ({ ok: ++outboxAttempts > 1 })
   });
   assert.deepEqual(await effects(), { ok: false });
@@ -31,9 +33,22 @@ test("23505 loser can repair winner effects before reporting duplicate success",
   let outboxPresent = false;
   const loserRepair = await ensureCriticalSubmissionEffects({
     writeAudit: async () => { auditPresent = true; return { ok: true }; },
+    writeNotification: async () => ({ ok: true }),
     writeOutbox: async () => { outboxPresent = true; return { ok: true }; }
   });
   assert.deepEqual(loserRepair, { ok: true });
   assert.equal(auditPresent, true);
   assert.equal(outboxPresent, true);
+});
+
+test("failed owner notification keeps the submission incomplete until retry", async () => {
+  let notificationAttempts = 0;
+  const effects = () => ensureCriticalSubmissionEffects({
+    writeAudit: async () => ({ ok: true }),
+    writeNotification: async () => ({ ok: ++notificationAttempts > 1 }),
+    writeOutbox: async () => ({ ok: true })
+  });
+
+  assert.deepEqual(await effects(), { ok: false });
+  assert.deepEqual(await effects(), { ok: true });
 });

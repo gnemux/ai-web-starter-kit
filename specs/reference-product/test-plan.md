@@ -706,3 +706,30 @@
   through its remaining lifecycle.
 - Run CatCare owner RLS, anonymous access, share-token, share-link, storage,
   unit, typecheck, package-boundary, and production-build regressions.
+
+## GNE-320 Owner Notification Checks
+
+- Run a clean local `supabase db reset` and confirm the GNE-320 migration sorts
+  after every GNE-319 migration.
+- Run `supabase/tests/catcare_notification_rls.sql` with `ON_ERROR_STOP=1` and
+  require rollback-backed evidence that owner A sees/marks only their row,
+  cannot change notification content, insert, or delete, while `anon` cannot
+  read or update the table.
+- Inspect grants, policies, RLS enablement, foreign-key indexes, the
+  owner/latest-notified index, and the partial unread/latest-notified index.
+- Prove normal and exception submissions produce the correct bounded insert;
+  retries and concurrent duplicate paths converge on one idempotency key, and a
+  failed notification effect is repaired before success is reported. Prove a
+  meaningful update becomes unread and returns to the top of a list larger than
+  the display limit, while a pure retry does not change its notification time.
+- Prove the bell has no hard-coded count, hides the badge at zero, displays real
+  unread state, supports one/all read, persists after refresh, and contains
+  empty, loading/disabled, error, long-title, stale-target, mobile, keyboard and
+  Escape/outside-close states.
+- Prove notification Analytics includes only safe action/result/kind fields and
+  excludes note, media, token, email and raw payload values.
+- Run web tests, typecheck, lint, package/template boundaries, production build,
+  `git diff --check`, and an independent database/Authz review.
+- Shared Supabase migration, authenticated deployed browser verification and
+  Vercel evidence remain `not_run` until the normal merge/migration approval
+  gates are satisfied.

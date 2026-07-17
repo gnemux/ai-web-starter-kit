@@ -728,7 +728,7 @@ approval for that execution.
 
 `GNE-317` is blocked by completed `GNE-298` and is the current active parent.
 Its children have no milestone or labels and execute in the fixed order
-`GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`. `GNE-319` is the only active child. The parent
+`GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`. `GNE-320` is the only active child. The parent
 owns only the four confirmed CatCare commercial-usability gaps; it does not
 reopen template extraction or create a generic media/notification platform.
 

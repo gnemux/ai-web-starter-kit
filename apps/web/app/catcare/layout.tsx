@@ -18,6 +18,7 @@ export default async function CatCareLayout({
       creditLabel={context.creditLabel}
       email={context.account.user.email}
       locale={context.locale}
+      notificationCenter={context.notificationCenter}
       userLabel={context.userLabel}
     >
       {children}

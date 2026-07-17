@@ -229,10 +229,17 @@ export function CatCareNotificationCenter({
             <div className="max-h-[min(32rem,65vh)] overflow-y-auto">
               {notifications.map((notification) => {
                 const isUnread = !notification.readAt;
+                const isException = notification.eventType === "care_exception";
                 return (
                   <button
-                    className={`block w-full border-b border-slate-100 px-4 py-4 text-left transition last:border-0 hover:bg-teal-50/70 disabled:cursor-wait ${
-                      isUnread ? "bg-[#f3fbf8]" : "bg-white"
+                    className={`block w-full border-b border-slate-100 px-4 py-4 text-left transition last:border-b-0 disabled:cursor-wait ${
+                      isException
+                        ? `border-l-4 border-l-amber-500 hover:bg-amber-100/70 ${
+                            isUnread ? "bg-amber-100/60" : "bg-amber-50/60"
+                          }`
+                        : isUnread
+                          ? "bg-[#f3fbf8] hover:bg-teal-50/70"
+                          : "bg-white hover:bg-teal-50/70"
                     }`}
                     disabled={pending}
                     key={notification.id}
@@ -243,13 +250,23 @@ export function CatCareNotificationCenter({
                       <span
                         aria-hidden="true"
                         className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
-                          isUnread ? "bg-teal-600" : "bg-slate-200"
+                          isException
+                            ? isUnread
+                              ? "bg-amber-600 ring-4 ring-amber-100"
+                              : "bg-slate-300"
+                            : isUnread
+                              ? "bg-teal-600"
+                              : "bg-slate-200"
                         }`}
                       />
                       <span className="min-w-0 flex-1">
                         <span className="flex items-start justify-between gap-3">
-                          <span className="font-semibold text-slate-950">
-                            {notification.eventType === "care_exception"
+                          <span
+                            className={`font-semibold ${
+                              isException ? "text-amber-950" : "text-slate-950"
+                            }`}
+                          >
+                            {isException
                               ? labels.exceptionTitle
                               : labels.submissionTitle}
                           </span>
@@ -257,6 +274,11 @@ export function CatCareNotificationCenter({
                             {formatNotificationTime(notification.notifiedAt, locale)}
                           </span>
                         </span>
+                        {isException ? (
+                          <span className="mt-2 inline-flex rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-800">
+                            {labels.exceptionBadge}
+                          </span>
+                        ) : null}
                         <span className="mt-1 block break-words text-sm font-medium text-slate-700">
                           {notification.taskTitle}
                         </span>

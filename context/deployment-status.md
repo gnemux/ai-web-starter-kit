@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | automatic main deployment for `9538b09` succeeded; the GNE-273 evidence sync retains the resolved GNE-266 Analytics result |
+| Latest production status | automatic main deployment for `8a46d16` succeeded; GNE-320 notification revision acceptance passed |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | `9538b09226b63e4ff444f1ea642f1d54be8defb1` |
+| Latest production commit | `8a46d16dc9f5f4601ab22d40727752c1a8cc0352` |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | No MVP3 deployment or Analytics blocker. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
-| Next owner action | Publish and review the GNE-274 product-expansion decision, then close only GNE-274. Keep GNE-234 open and do not activate another Issue. |
+| Current blocked items | No GNE-320 deployment, migration, notification, or Analytics blocker. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
+| Next owner action | Review and close only GNE-320. Do not activate GNE-321 automatically. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -38,6 +38,45 @@ GNE-182 provider selector and server-only key names are documented in `context/e
 - `blocked`: cannot be verified until an owner action, permission, provider setup, or missing fact is resolved.
 - `not_run`: intentionally not run yet.
 - `unknown`: existing state is not known and no verification was attempted.
+
+## 2026-07-17 14:55 CST - GNE-320 deployed notification revision acceptance
+
+### Deployment Metadata
+
+| Field | Value |
+| --- | --- |
+| Linear issue | `GNE-320` |
+| Environment | Vercel automatic `main` target with the single shared reference/staging/test Supabase project |
+| Deployment type | automatic `main` deployment plus approved staging migration and deployed smoke |
+| Trigger | PR #109 merge commit |
+| Branch | `main` |
+| Commit | `8a46d16dc9f5f4601ab22d40727752c1a8cc0352` |
+| Vercel URL | `https://ai-web-starter-kit-web.vercel.app` |
+| Actor | Codex / Sol under explicit user approval |
+| Verifier | Codex / Sol with prior independent code review |
+| Provider values | same-as-current-single-service |
+| Notes | No provider configuration changed. No real user data, raw share token, secret, live payment, or live AI operation was used. |
+
+### Smoke Test Result
+
+| Check | Status | Evidence | Next action |
+| --- | --- | --- | --- |
+| GitHub CI | pass | Run `29560464698` completed successfully for merge commit `8a46d16`. | None |
+| Vercel deployment | pass | GitHub Vercel status reported `Deployment has completed` for the merge commit. | None |
+| Supabase migration | pass | Remote history matches through `20260717150000`; both revision columns and the restricted security-invoker RPC are present. | None |
+| Meaningful sitter update | pass | A synthetic exception-note edit advanced submission and notification revision 1 -> 2, reopened one unread notification, and updated its ordering without creating a third notification. | None |
+| Notification read persistence | pass | Opening the updated notification cleared unread state; refresh preserved zero unread. | None |
+| Identical retry | pass | A second save with identical status/note kept both revisions at 2, notification count at 2, unread at 0, and `last_notified_at` unchanged. | None |
+| Notification UI | pass | Desktop/mobile anchoring, bounded scrolling, exception hierarchy, and current information density are acceptable. | Consider grouping/filtering only after materially larger inbox volume. |
+| Synthetic cleanup | pass | Latest private link revoked; synthetic plan closed; two submissions and two notifications retained as logical history. | None |
+
+### Rollback Plan
+
+- Rollback is not required: the deployed behavior, schema verification, security
+  checks, and real synthetic flow passed.
+- If a later regression is found, stop notification writes, inspect the stable
+  revision/idempotency facts, and use a new forward migration. Do not edit the
+  remote schema or migration history manually.
 
 ## Deployment Entry Template
 

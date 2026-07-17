@@ -226,3 +226,27 @@ most 14 days. Each cat contributes at most four eligible events. The generated
 task includes the source event date so the owner can make an informed decision
 to keep, disable, or remove it before publishing. This filter never deletes or
 rewrites the event timeline.
+
+## GNE-320 Owner Notifications
+
+The CatCare bell is a real owner inbox, not a decorative badge. It displays the
+current unread count from owner-scoped notification rows and appears across the
+CatCare and product-account shells. A sitter submission creates one notification
+for the owner; an exception is visually distinguished from a normal result.
+Opening a notification marks it read and returns the owner to the matching plan
+results. Mark-all-read persists across refreshes. With no rows, the bell has no
+badge and the panel explains when notifications will appear.
+
+Notification copy contains only the task title, service date, visit time,
+bounded status category, and latest notification time. A meaningful sitter
+update reopens and moves the existing notification to the top without creating
+a duplicate row. It never copies the sitter note,
+photos, raw share token, token hash, owner email, Outbox payload, or internal
+provider response. If the related plan is later unavailable, the notification
+stays readable but presents a safe unavailable state instead of constructing an
+untrusted or cross-owner link.
+
+This is an in-app notification capability only. It does not promise email, SMS,
+mobile push, realtime chat, marketing broadcasts, a complete preference center,
+or downstream Outbox delivery. CatCare notification facts and semantics remain
+product-local until a second real product proves a neutral contract.

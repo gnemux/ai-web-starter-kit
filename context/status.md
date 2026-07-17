@@ -1637,3 +1637,39 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
   preprocessing remains local on `codex/gne-319-acceptance-repairs`; its
   publication and deployed smoke remain `not_run` until the user approves the
   local 3003 result. GNE-319 remains In Progress and GNE-320 has not started.
+
+## 2026-07-17 GNE-320 owner notification checkpoint
+
+- `GNE-319` is Done and `GNE-320` is the only In Progress child under
+  `GNE-317`; `GNE-321` remains Backlog and blocked. Work is isolated on
+  `codex/gne-320-notifications`.
+- The owner notification center now derives bounded, owner-scoped inbox facts
+  from the trusted anonymous-submission boundary. Audit and Outbox remain
+  separate required effects; notification upsert uses a stable submission key,
+  repairs lost effects on retry, and reopens an existing notification only when
+  the sitter meaningfully updates the submission. Independent review caught an
+  over-limit visibility defect before publication: meaningful updates now
+  advance an independent `last_notified_at` used by list/display indexes, while
+  pure retries do not reorder and read actions change only `updated_at`.
+- The new `owner_notifications` table has explicit authenticated SELECT and
+  `read_at`-only UPDATE grants, owner RLS for both SELECT and UPDATE, service-role
+  write ownership, FK indexes, a partial unread index, and no anon access. A
+  clean local database reset and the dedicated cross-owner/grant SQL fixture
+  pass through migration `20260717123000_gne_320_owner_notifications`.
+- Real local browser acceptance passed empty, unread, single-read, mark-all,
+  stale-target, valid-target, Chinese/English, CatCare/account entry, Escape,
+  and 390px mobile cases. Review found and fixed a mobile anchoring defect: the
+  panel now stays within the viewport with 16px side margins instead of clipping
+  66px off the left edge. Synthetic local Auth/product/notification data was
+  removed by a final database reset.
+- Full lint, root test, 127 web tests, typecheck, 35-page production build,
+  template drift/negative fixtures, and diff checks pass. GNE-320 remains open
+  pending independent Terra review, PR/Merge, explicit approval for the shared
+  staging migration, deployed smoke, and final Linear closure. GNE-321 has not
+  started.
+- The CatCare notification table, events, routes, and analytics names were
+  explicitly excluded from the clean-template projection. GNE-317 final
+  acceptance now also owns a separate CatCare-local split review for
+  `plans.ts`, `visit-accordion-client.tsx`, and `plan-detail-client.tsx`; it
+  must not be hidden inside GNE-320 or moved into shared packages without a
+  second product consumer.

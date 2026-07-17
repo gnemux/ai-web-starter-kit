@@ -683,3 +683,28 @@
 - If the first image is committed but its response is lost, reselecting and
   retrying the same image restores the authoritative database count instead of
   displaying zero or double-counting it.
+
+## GNE-320 Owner Notification Acceptance
+
+- The CatCare/account bell reads a real owner-scoped unread count and contains
+  no fixed badge value. Zero unread hides the badge and the empty panel explains
+  when a notification is created.
+- A normal sitter submission and an exception create one appropriately labeled
+  notification. Same-reference retries and submission updates do not create
+  duplicate inbox rows. A meaningful update reopens and moves the row to the
+  visible top; a pure retry does not reorder it.
+- Opening a notification marks it read and returns only to the persisted
+  owner-scoped plan-results route. Mark-all-read persists across refreshes.
+- Missing/deleted targets render a safe unavailable message; anonymous,
+  cross-owner and tampered notification ids cannot read or update a row.
+- Authenticated clients may select notification rows and update only `read_at`.
+  They cannot insert, delete, change owner/content/target fields, or read another
+  owner's rows. `anon` has no notification table access.
+- Notification facts contain no sitter note, media path, share token/hash,
+  owner email, provider secret or raw Outbox payload. Outbox remains a transport
+  ledger and is not rendered as the owner inbox.
+- Desktop/mobile, Chinese/English, keyboard, Escape, outside-click, long text,
+  empty/error/disabled states and safe Analytics properties pass.
+- Clean local migration rebuild, dedicated RLS rollback test, web tests,
+  typecheck, lint, production build, package/template boundary checks and an
+  independent security review pass before publication or shared migration.

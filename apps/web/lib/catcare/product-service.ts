@@ -95,6 +95,14 @@ export type { AnonymousCareSubmissionMutation } from "./product-service/anonymou
 
 export { getCatCareAuditActivities } from "./product-service/audit";
 export type { CatCareAuditActivity } from "./product-service/audit";
+export {
+  getOwnerNotificationCenter,
+  markAllOwnerNotificationsRead,
+  markOwnerNotificationRead,
+  recordOwnerSubmissionNotification
+} from "./product-service/notifications";
+export type { OwnerNotificationCenter } from "./product-service/notifications";
+export type { OwnerNotificationView } from "./product-service/notification-policy";
 export { submitAnonymousCareSubmissionFromFormData } from "./product-service/anonymous-submissions";
 export { getAnonymousCarePlanView } from "./product-service/anonymous-view";
 export {

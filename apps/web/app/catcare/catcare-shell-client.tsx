@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { AccountMenu } from "@/components/account-menu";
-import { BellIcon } from "@/components/app-icons";
 import { CatCareBrand } from "@/components/catcare-brand";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import {
@@ -13,7 +12,10 @@ import {
   type WorkspaceNavKey
 } from "@/components/workspace-nav";
 import { trackCatCareEvent } from "@/lib/analytics/client";
+import type { OwnerNotificationCenter } from "@/lib/catcare/product-service";
 import type { Dictionary, Locale } from "@/lib/i18n";
+
+import { CatCareNotificationCenter } from "./notification-center-client";
 
 export function CatCareShellClient({
   activeNav,
@@ -24,6 +26,7 @@ export function CatCareShellClient({
   creditLabel,
   email,
   locale,
+  notificationCenter,
   topBar,
   userLabel
 }: {
@@ -35,6 +38,7 @@ export function CatCareShellClient({
   creditLabel?: string;
   email: string;
   locale: Locale;
+  notificationCenter: OwnerNotificationCenter;
   topBar?: ReactNode;
   userLabel: string;
 }) {
@@ -166,12 +170,11 @@ export function CatCareShellClient({
                 <div className="hidden md:block">
                   <LanguageSwitcher labels={copy.common} locale={locale} />
                 </div>
-                <span className="relative hidden h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 sm:flex">
-                  <BellIcon className="h-6 w-6" />
-                  <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                    3
-                  </span>
-                </span>
+                <CatCareNotificationCenter
+                  center={notificationCenter}
+                  labels={copy.catcare.owner.notifications}
+                  locale={locale}
+                />
                 <AccountMenu
                   avatarUrl={avatarUrl}
                   email={email}

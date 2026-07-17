@@ -29,6 +29,9 @@ them, and which audit requirements must be implemented later by CAP-02.
 | Forwarded valid link | Bearer can access only the one scoped plan minimum surface | GNE-257 valid token QA; GNE-259 app-layer scope evidence | `common_contract_verified` |
 | Direct anonymous DB read | Cannot read private CatCare tables or `share_tokens` directly | `supabase/tests/catcare_access_boundary.sql` | `common_pattern_not_extracted` |
 | Direct anonymous DB write | Cannot write `share_tokens` or `care_submissions` directly | `supabase/tests/catcare_access_boundary.sql` | `common_pattern_not_extracted` |
+| Owner A reads or marks Owner B notification | Zero rows; owner RLS applies to both SELECT and UPDATE | `supabase/tests/catcare_notification_rls.sql` | `product_local`: CatCare notification facts are not a shared inbox contract |
+| Authenticated owner changes notification content or creates/deletes inbox rows | Permission denied; authenticated receives SELECT and column-level `UPDATE(read_at)` only | `supabase/tests/catcare_notification_rls.sql` | `product_local` |
+| Anonymous reads or updates owner notifications | Permission denied before row access | `supabase/tests/catcare_notification_rls.sql` | `product_local` |
 | Direct anonymous submit action with wrong task/date/visit | Rejected by server validation; hidden form fields are not trusted | `submitAnonymousCareSubmissionFromFormData`; `anonymous-submission-policy.test.mjs` | `common_contract_verified` for whitelist/date/visit checks |
 | Raw token leakage in analytics/logs/docs/evidence | Raw token must not be sent or recorded | `specs/reference-product/gne-278-product-flow.md`; GNE-257/GNE-258/GNE-290 evidence notes; `rg` review for ACCESS evidence | `common_pattern_not_extracted` |
 

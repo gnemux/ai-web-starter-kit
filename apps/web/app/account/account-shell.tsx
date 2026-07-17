@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 
 import type { WorkspaceNavKey } from "@/components/workspace-nav";
+import { getOwnerNotificationCenter } from "@/lib/catcare/product-service";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
 import { getCurrentAccount } from "@/lib/services/auth";
@@ -10,14 +11,18 @@ import {
   getCurrentBillingEntitlements
 } from "@/lib/services/billing";
 
-import { CatCareAppShell } from "../catcare/catcare-shell";
+import {
+  CatCareAppShell,
+  emptyNotificationCenter
+} from "../catcare/catcare-shell";
 
 export async function getAccountPageContext(nextPath = "/account") {
   const locale = await getRequestLocale();
   const copy = getDictionary(locale);
-  const [accountResult, billingResult] = await Promise.all([
+  const [accountResult, billingResult, notificationResult] = await Promise.all([
     getCurrentAccount(),
-    getCurrentBillingEntitlements()
+    getCurrentBillingEntitlements(),
+    getOwnerNotificationCenter()
   ]);
 
   if (!accountResult.ok) {
@@ -38,6 +43,9 @@ export async function getAccountPageContext(nextPath = "/account") {
       : copy.catcare.owner.dashboard.creditUnavailable,
     displayName,
     locale,
+    notificationCenter: notificationResult.ok
+      ? notificationResult.data
+      : emptyNotificationCenter("error"),
     userLabel
   };
 }

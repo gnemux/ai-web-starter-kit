@@ -17,7 +17,10 @@ const posthogKey =
 type CatCareClientEvent =
   | "catcare_page_viewed"
   | "catcare_navigation_clicked"
-  | "catcare_results_opened";
+  | "catcare_results_opened"
+  | "catcare_notification_center_opened"
+  | "catcare_notification_opened"
+  | "catcare_notifications_marked_read";
 
 export function trackEvent(
   event: AuthAnalyticsEvent,
@@ -104,6 +107,9 @@ function sanitizeCatCareProperties(
       : {}),
     ...(typeof properties.surface === "string" ? { surface: properties.surface } : {}),
     ...(typeof properties.status === "string" ? { status: properties.status } : {}),
+    ...(typeof properties.notification_kind === "string"
+      ? { notification_kind: properties.notification_kind }
+      : {}),
     ...(typeof properties.is_detail === "boolean"
       ? { is_detail: properties.is_detail }
       : {})

@@ -135,6 +135,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      owner_notifications: {
+        Row: {
+          created_at: string;
+          event_type: "care_submission" | "care_exception";
+          id: string;
+          idempotency_key: string;
+          last_notified_at: string;
+          owner_id: string;
+          plan_id: string | null;
+          read_at: string | null;
+          service_date: string;
+          submission_id: string | null;
+          submission_status: "completed" | "note" | "exception";
+          task_id: string | null;
+          task_title: string;
+          updated_at: string;
+          visit_time: string;
+        };
+        Insert: {
+          created_at?: string;
+          event_type: "care_submission" | "care_exception";
+          id?: string;
+          idempotency_key: string;
+          last_notified_at?: string;
+          owner_id: string;
+          plan_id?: string | null;
+          read_at?: string | null;
+          service_date: string;
+          submission_id?: string | null;
+          submission_status: "completed" | "note" | "exception";
+          task_id?: string | null;
+          task_title: string;
+          updated_at?: string;
+          visit_time: string;
+        };
+        Update: {
+          created_at?: string;
+          event_type?: "care_submission" | "care_exception";
+          id?: string;
+          idempotency_key?: string;
+          last_notified_at?: string;
+          owner_id?: string;
+          plan_id?: string | null;
+          read_at?: string | null;
+          service_date?: string;
+          submission_id?: string | null;
+          submission_status?: "completed" | "note" | "exception";
+          task_id?: string | null;
+          task_title?: string;
+          updated_at?: string;
+          visit_time?: string;
+        };
+        Relationships: [];
+      };
       billing_credit_ledger: {
         Row: {
           id: string;

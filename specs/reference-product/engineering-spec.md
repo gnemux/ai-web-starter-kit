@@ -328,3 +328,40 @@ Plan event relevance is a product-local pure policy evaluated against
 within 14 days for watch severity. Normal events remain excluded, future events
 are not pulled backward, and the existing per-cat maximum of four is applied
 after the time filter. Event-derived task instructions include the source date.
+
+## GNE-320 Owner Notification Architecture
+
+`public.owner_notifications` is the owner inbox source of truth. It is separate
+from `outbox_events`: Outbox records transport/retry work, while a notification
+row records what the signed-in owner may read. Each row stores only a bounded
+event type, owner, optional plan/task/submission relations, task-title snapshot,
+service date, visit time, submission status, read timestamp, latest-notified
+timestamp, and a unique idempotency key derived from the submission id. It
+stores no notes, media URL,
+share credential, email, or raw Outbox payload.
+
+The table enables RLS and explicitly grants `authenticated` only `SELECT` plus
+column-level `UPDATE(read_at)`. Owner `SELECT` and `UPDATE` policies use
+`(select auth.uid()) = owner_id`, and update has both `USING` and `WITH CHECK`.
+`anon` has no table privilege; service-role insertion stays server-only. A
+composite owner/latest-notified index supports the bounded list, a partial
+owner/unread/latest-notified index supports the count and visible unread order,
+and all nullable foreign keys are indexed. `updated_at` is not an inbox-order
+field because marking a row read also advances it. Plan/task/
+submission deletion uses `SET NULL` so a historical notification can degrade
+without producing a stale foreign link.
+
+The trusted anonymous-submission boundary writes Audit, Outbox, and owner
+notification as three distinct idempotent effects after the business submission
+is durable. A same-reference retry repairs any missing effect; the notification
+upsert converges on `owner-notification:submission:<submission_id>` instead of
+creating duplicates. Updating a sitter result refreshes the bounded notification
+facts, reopens the row, and advances only `last_notified_at`; a pure retry does
+not reorder an already handled row. The update never imports the note.
+
+The server shell reads a bounded latest list and unread count in parallel. The
+client notification component owns disclosure, Escape/outside-close behavior,
+long-content containment, optimistic local read state, and safe Analytics event
+categories. Server Actions re-resolve the authenticated owner before marking a
+row read and return only a persisted product-local results path. No notification
+database or UI code moves into `packages/*` or the clean template in this Issue.

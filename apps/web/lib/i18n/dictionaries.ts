@@ -245,6 +245,21 @@ export const dictionaries = {
         packageGateDescription:
           "账户和数据服务可用；照护业务对象保留在产品侧，方便后续扩展成独立猫咪照护产品。",
         serviceErrorTitle: "照护产品暂不可用",
+        notifications: {
+          title: "照护通知",
+          open: "打开照护通知",
+          unreadSuffix: "条未读",
+          allRead: "已全部读完",
+          markAllRead: "全部标为已读",
+          processing: "处理中…",
+          emptyTitle: "暂时没有新通知",
+          emptyDescription: "照看者提交照护结果或异常后，会在这里提醒你。",
+          loadError: "通知暂时无法加载，请稍后重试。",
+          actionError: "操作没有完成，请重试。",
+          submissionTitle: "收到新的照护结果",
+          exceptionTitle: "收到照护异常提醒",
+          targetUnavailable: "关联结果已不可用，这条通知仍保留供你核对。"
+        },
         metrics: {
           cats: "猫咪档案",
           onboarding: "新手进度",
@@ -1281,6 +1296,23 @@ export const dictionaries = {
         packageGateDescription:
           "Account and data services are available; care objects stay product-owned so the product can grow independently.",
         serviceErrorTitle: "Care product unavailable",
+        notifications: {
+          title: "Care notifications",
+          open: "Open care notifications",
+          unreadSuffix: "unread",
+          allRead: "You're all caught up",
+          markAllRead: "Mark all as read",
+          processing: "Working…",
+          emptyTitle: "No new notifications",
+          emptyDescription:
+            "Updates appear here after a sitter submits a care result or exception.",
+          loadError: "Notifications are temporarily unavailable. Try again later.",
+          actionError: "The action did not complete. Please try again.",
+          submissionTitle: "New care result received",
+          exceptionTitle: "Care exception received",
+          targetUnavailable:
+            "The linked result is no longer available. This notification remains for reference."
+        },
         metrics: {
           cats: "Cat profiles",
           onboarding: "Onboarding",

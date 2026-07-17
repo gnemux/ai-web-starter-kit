@@ -9,8 +9,8 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
 - PR #104 is merged and migration
   `20260716093000_gne_319_private_care_media` is applied to the single shared
   Supabase test project.
-- The user-reported follow-up is implemented locally on branch
-  `codex/gne-319-acceptance-repairs`: an ended plan is grouped into history by
+- The user-reported follow-up is merged through PR #105 at merge commit
+  `fc3ecbb`: an ended plan is grouped into history by
   the Asia/Shanghai date without mutating its stored lifecycle state; generated
   plans use bounded event influence windows; and a selected phone photo up to
   15 MB is precompressed in the browser before the existing private-media
@@ -21,11 +21,12 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   unnecessary full plan-detail revalidation, and the visible security activity
   reflects the completed operation immediately. The token lifecycle, persisted
   Audit, and bounded Analytics delivery remain server-controlled.
-- Local verification passes 121 web tests, TypeScript typecheck, production
-  build, `git diff --check`, and an unauthenticated HTTP protection smoke on
-  port 3003. No schema change, database write, commit, push, PR, or deployment
-  is part of this follow-up yet. GNE-319 remains In Progress pending user page
-  acceptance.
+- Local verification passes the complete root `pnpm test` suite, including 121
+  web tests and the clean-template drift/exclusion gates, plus TypeScript
+  typecheck, production build, `git diff --check`, and an unauthenticated HTTP
+  protection smoke on port 3003. The first PR CI run correctly required a
+  reviewed CatCare exclusion-hash update; the second run passed without moving
+  CatCare schema types or the product RPC into the clean template.
 - Draft-only save and save-and-publish now submit the live task editor form
   through the same atomic Postgres RPC. Both operations lock the owner draft;
   task edits and plan metadata commit or roll back together, and publishing
@@ -39,6 +40,15 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   owner-only safety-processed download action; the existing authenticated
   proxy remains the only owner media read path. Local verification now passes
   121 web tests, TypeScript typecheck, production build, and `git diff --check`.
+- The explicitly approved staging workflow run `29552878986` applied migration
+  `20260717093000_gne_319_atomic_plan_publish` from merged `main` to the single
+  shared Supabase test project. Local and remote histories match through that
+  version. A read-only catalog query confirms the RPC is security-invoker with
+  an empty search path, denies `PUBLIC` and `anon`, and grants only
+  `authenticated`. Vercel reports the PR #105 merge deployment successful, and
+  an online smoke confirms `/catcare` still redirects an unauthenticated user
+  to `/login?next=%2Fcatcare`. GNE-319 remains In Progress pending the owner's
+  authenticated online regression; GNE-320 has not started.
 
 ## Completed
 

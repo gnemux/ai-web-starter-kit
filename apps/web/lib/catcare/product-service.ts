@@ -73,7 +73,7 @@ export {
   deleteCatCarePlan,
   getCatCarePlanDetail,
   getCatCarePlanItemOptions,
-  publishCatCarePlan,
+  saveAndPublishCatCarePlanFromFormData,
   saveCatCarePlanAiRecap,
   updateCatCarePlanTasksFromFormData
 } from "./product-service/plans";

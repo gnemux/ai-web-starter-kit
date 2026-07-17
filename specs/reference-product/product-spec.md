@@ -185,16 +185,22 @@ report is different: it must be
 saved immediately with its required note even when the camera, image upload, or
 network is unavailable, and the sitter is prompted to add photos afterward.
 
-The sitter can select, locally preview, remove, and retry up to three JPG, PNG,
-or WebP images per submitted task. Each input is limited to 4 MB. Text status is
-committed first and each photo uploads independently, so one failed image does
-not lose the care result or repeat the Audit/Outbox side effects. The page shows
-only the attachment count after upload; it does not expose stored object URLs
-or allow an anonymous visitor to read back private evidence.
+The sitter can select, locally preview at full size in an in-page dialog,
+remove, and retry up to three JPG, PNG, or WebP images per submitted task. A
+selected phone original may be up to 15 MB.
+The browser reduces it to a network-safe WebP no larger than 3 MB before the
+upload route, while the server independently validates and normalizes it again.
+Text status is committed first and each photo uploads independently, so one
+failed image does not lose the care result or repeat the Audit/Outbox side
+effects. The page shows only the attachment count after upload; it does not
+expose stored object URLs or allow an anonymous visitor to read back private
+evidence.
 
 The owner sees lazy-loaded evidence thumbnails beside the matching real
-submission and can open or download the safety-processed copy only while
-authenticated as that owner. There is no public bucket URL. Stored evidence is
+submission. Clicking a thumbnail opens an in-page large preview with close,
+previous/next, keyboard navigation, and an explicit download action; the
+safety-processed copy remains available only while authenticated as that
+owner. There is no public bucket URL. Stored evidence is
 retained with the submission and immutable plan history; failed application
 writes clean up their just-uploaded object, while a future governed data-purge
 workflow owns physical deletion of retained history.
@@ -206,3 +212,17 @@ conversion preserves existing cat profiles that stored the former built-in PNG
 illustration paths by resolving them to their new WebP equivalents. This
 issue does not add video, arbitrary documents, public galleries, image editing,
 face recognition, or a generic cross-product media platform.
+
+The 2026-07-17 owner acceptance pass also separates lifecycle state from page
+time. A plan whose end date is before the current Shanghai date belongs in the
+history list even when its durable state remains `published` so a still-valid
+share link can accept a late submission. It is labeled `已结束·可补交`, and the
+history card leads to results without silently writing `reviewed` or `closed`.
+
+Daily events are historical facts, not permanent care rules. New plan
+generation uses the plan start date as its reference: health, medicine, or
+urgent events may affect a plan for at most 30 days; other watch events for at
+most 14 days. Each cat contributes at most four eligible events. The generated
+task includes the source event date so the owner can make an informed decision
+to keep, disable, or remove it before publishing. This filter never deletes or
+rewrites the event timeline.

@@ -160,4 +160,8 @@ Provider matrix:
 - Manual Preview deployments should be recorded with Preview URL, commit, trigger, verification result, and next action in `context/deployment-status.md`.
 - If a `main` deployment is blocked by Hobby commit-author checks after merging a contributor PR, the Vercel project owner should redeploy `main` manually. If the same contributor-authored commit remains blocked, create an owner-authored no-op trigger commit after confirming the reviewed tree is already merged, or upgrade Vercel collaboration.
 - Production verification should cover the main user path, not only static page load.
+- Vercel Functions have a 4.5 MB request-body limit. CatCare care evidence must
+  preprocess a selected phone original in the browser to at most 3 MB and keep
+  the server route's 4 MB hard limit; do not merely raise the route limit and
+  create an environment-dependent 413 failure.
 - Do not create empty Vercel entries for optional fallback keys. Leave unused optional placeholders empty only in `.env.example`.

@@ -13,13 +13,16 @@ import { CatCareButton } from "../owner-flow-components";
 import type { CatCarePlan } from "@/lib/catcare/product-service";
 import { DeletePlanButton } from "./delete-plan-button";
 import { formatPlanCatNames } from "./plan-cat-names";
+import { isPlanOverdue } from "./plan-list-state";
 
 export function PlansListClient({
   activePlans,
-  historyPlans
+  historyPlans,
+  today
 }: {
   activePlans: CatCarePlan[];
   historyPlans: CatCarePlan[];
+  today: string;
 }) {
   const toast = useCatCareToast();
   const [deletedPlanIds, setDeletedPlanIds] = useState<string[]>([]);
@@ -44,7 +47,7 @@ export function PlansListClient({
       {visibleActivePlans.length > 0 ? (
         <div className="mt-5 grid gap-3">
           {visibleActivePlans.map((plan) => (
-            <PlanCard key={plan.id} onDeleted={handleDeleted} plan={plan} />
+            <PlanCard key={plan.id} onDeleted={handleDeleted} plan={plan} today={today} />
           ))}
         </div>
       ) : (
@@ -67,7 +70,7 @@ export function PlansListClient({
           </div>
           <div className="mt-5 grid gap-3">
             {visibleHistoryPlans.map((plan) => (
-              <PlanCard key={plan.id} onDeleted={handleDeleted} plan={plan} />
+              <PlanCard key={plan.id} onDeleted={handleDeleted} plan={plan} today={today} />
             ))}
           </div>
         </div>
@@ -78,16 +81,19 @@ export function PlansListClient({
 
 function PlanCard({
   onDeleted,
-  plan
+  plan,
+  today
 }: {
   onDeleted: (planId: string) => void;
   plan: CatCarePlan;
+  today: string;
 }) {
   const displayTitle = formatPlanDisplayTitle(plan);
-  const status = getPlanStatusMeta(plan.status);
-  const action = getPlanAction(plan);
+  const overdue = isPlanOverdue(plan, today);
+  const status = getPlanStatusMeta(plan.status, overdue);
+  const action = getPlanAction(plan, overdue);
   const canDelete = canDeletePlan(plan);
-  const timingNote = getPlanTimingNote(plan);
+  const timingNote = getPlanTimingNote(plan, overdue);
 
   return (
     <article
@@ -112,7 +118,7 @@ function PlanCard({
             </p>
           ) : null}
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}>
+        <span className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}>
           {status.label}
         </span>
       </div>
@@ -139,23 +145,12 @@ function PlanCard({
   );
 }
 
-function getPlanTimingNote(plan: CatCarePlan) {
-  if (plan.status !== "published" || !plan.endOn) {
+function getPlanTimingNote(plan: CatCarePlan, overdue: boolean) {
+  if (plan.status !== "published" || !overdue) {
     return null;
   }
 
-  return plan.endOn < getTodayIsoDate()
-    ? "计划日期已过；分享链接仍有效时，照看者可以补提交，主人侧在结果页查看。"
-    : null;
-}
-
-function getTodayIsoDate() {
-  return new Intl.DateTimeFormat("en-CA", {
-    day: "2-digit",
-    month: "2-digit",
-    timeZone: "Asia/Shanghai",
-    year: "numeric"
-  }).format(new Date());
+  return "计划已结束；分享链接仍有效时，照看者可以补提交，主人侧在结果页查看。";
 }
 
 function canDeletePlan(plan: CatCarePlan) {
@@ -167,13 +162,19 @@ function canDeletePlan(plan: CatCarePlan) {
   );
 }
 
-function getPlanStatusMeta(status: CatCarePlan["status"]) {
+function getPlanStatusMeta(status: CatCarePlan["status"], overdue: boolean) {
   if (status === "closed") {
     return { className: "bg-[#f2f4f7] text-[#526177]", label: "已关闭" };
   }
 
   if (status === "reviewed") {
     return { className: "bg-[#eef4ff] text-[#315a9f]", label: "已复盘" };
+  }
+
+  if (overdue) {
+    return status === "published"
+      ? { className: "bg-[#fff8e6] text-[#8a5a00]", label: "已结束·可补交" }
+      : { className: "bg-[#f2f4f7] text-[#526177]", label: "已过期" };
   }
 
   if (status === "published") {
@@ -183,7 +184,7 @@ function getPlanStatusMeta(status: CatCarePlan["status"]) {
   return { className: "bg-[#fff8e6] text-[#8a5a00]", label: "草稿" };
 }
 
-function getPlanAction(plan: CatCarePlan): {
+function getPlanAction(plan: CatCarePlan, overdue: boolean): {
   href: string;
   icon: ReactNode;
   label: string;
@@ -193,12 +194,12 @@ function getPlanAction(plan: CatCarePlan): {
     return {
       href: `/catcare/plans/${plan.id}`,
       icon: <CatCareSaveIcon />,
-      label: "继续确认",
-      variant: "primary"
+      label: overdue ? "查看草稿" : "继续确认",
+      variant: overdue ? "ghost" : "primary"
     };
   }
 
-  if (plan.status === "published") {
+  if (plan.status === "published" && !overdue) {
     return {
       href: `/catcare/plans/${plan.id}`,
       icon: <CatCareCalendarIcon />,

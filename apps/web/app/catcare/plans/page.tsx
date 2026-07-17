@@ -19,6 +19,7 @@ import {
   type PlanCreateErrorKind
 } from "./plan-create-error";
 import { PlanCreateSubmitButton } from "./plan-create-submit-button";
+import { getTodayInShanghai, isHistoryPlan } from "./plan-list-state";
 import {
   getCatCarePlanListWorkspace,
   type CatCarePlan
@@ -60,11 +61,12 @@ export default async function CatCarePlansPage({
     getCatCarePlanListWorkspace(),
     getCurrentBillingEntitlements()
   ]);
+  const today = getTodayInShanghai();
   const activePlans = result.ok
-    ? result.data.plans.filter((plan) => !isHistoryPlan(plan))
+    ? result.data.plans.filter((plan) => !isHistoryPlan(plan, today))
     : [];
   const historyPlans = result.ok
-    ? result.data.plans.filter(isHistoryPlan)
+    ? result.data.plans.filter((plan) => isHistoryPlan(plan, today))
     : [];
   const currentPlan = billingResult.ok ? billingResult.data.planId : "free";
   const planLimits = getCatCarePlanLimits(currentPlan);
@@ -292,6 +294,7 @@ export default async function CatCarePlansPage({
                   <PlansListClient
                     activePlans={activePlans}
                     historyPlans={historyPlans}
+                    today={today}
                   />
                 </div>
               </CatCarePanel>
@@ -412,10 +415,6 @@ function formatPlanAiMode(mode: string) {
 
 function formatPlanAiCost(value: number) {
   return formatAiCreditsAsUsesLabel(value);
-}
-
-function isHistoryPlan(plan: CatCarePlan) {
-  return plan.status === "closed" || plan.status === "reviewed";
 }
 
 function getScenarioIconTone(scenario: (typeof scenarioOptions)[number][0]) {

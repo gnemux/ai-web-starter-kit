@@ -48,3 +48,7 @@ STORAGE_SECRET_ACCESS_KEY=
   server-side product authorization; no public or signed object URL is exposed.
 - Supabase Free image transformation is not assumed. The application decodes
   and re-encodes uploaded images with Sharp to remove metadata and bound size.
+- Care-evidence phone originals are first reduced in the browser from at most
+  15 MB to a network-safe WebP no larger than 3 MB. This is only a transport
+  optimization; the server repeats decode, format, dimension, byte-size, and
+  metadata enforcement before writing the private bucket.

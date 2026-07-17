@@ -19,8 +19,8 @@ import {
 import {
   closeCatCarePlanLocalAction,
   createCarePlanShareLinkLocalAction,
-  publishCatCarePlanLocalAction,
   revokeCarePlanShareLinkLocalAction,
+  saveAndPublishCatCarePlanLocalAction,
   updateCatCarePlanTasksLocalAction
 } from "../actions";
 import type {
@@ -62,10 +62,11 @@ export function PlanDetailClient({
 }) {
   const [currentPlan, setCurrentPlan] = useState(plan);
   const [currentShareLink, setCurrentShareLink] = useState(shareLinkState);
+  const [currentAuditActivities, setCurrentAuditActivities] = useState(auditActivities);
   const [copyableShareUrl, setCopyableShareUrl] = useState<string | null>(null);
   const toast = useCatCareToast();
   const [pendingAction, setPendingAction] = useState<
-    "close" | "publish" | "share" | "revoke-share" | null
+    "close" | "publish" | "save" | "share" | "revoke-share" | null
   >(null);
   const status = getPlanStatusMeta(currentPlan.status);
   const canClose = currentPlan.status !== "closed";
@@ -76,11 +77,12 @@ export function PlanDetailClient({
   };
   const canPublish =
     currentPlan.status === "draft" && visiblePlan.tasks.length > 0;
+  const taskFormId = `catcare-plan-tasks-${currentPlan.id}`;
 
   async function runPlanAction(
     formData: FormData,
     action: (formData: FormData) => Promise<PlanMutationResult>,
-    actionName: "close" | "publish"
+    actionName: "close"
   ) {
     setPendingAction(actionName);
 
@@ -99,11 +101,7 @@ export function PlanDetailClient({
       submissions: previous.submissions,
       tasks: previous.tasks
     }));
-    toast.showSuccess(
-      actionName === "publish"
-        ? "计划已发布，每日任务已按到访时间排好，可在分享入口发送给照看者"
-        : "计划已关闭，历史清单和照护结果已保留"
-    );
+    toast.showSuccess("计划已关闭，历史清单和照护结果已保留");
   }
 
   async function runShareAction(
@@ -113,7 +111,15 @@ export function PlanDetailClient({
   ) {
     setPendingAction(actionName);
 
-    const result = await action(formData);
+    let result: ShareLinkMutationResult;
+
+    try {
+      result = await action(formData);
+    } catch {
+      setPendingAction(null);
+      toast.showError("分享操作暂时没有完成，请稍后重试");
+      return;
+    }
 
     setPendingAction(null);
 
@@ -128,6 +134,14 @@ export function PlanDetailClient({
       revokedAt: result.data.revokedAt,
       status: result.data.status
     });
+    setCurrentAuditActivities((activities) => [
+      createImmediateShareActivity(
+        actionName,
+        actionName === "share" && currentShareLink.status === "active",
+        result.data
+      ),
+      ...activities
+    ]);
 
     if (result.data.token) {
       const nextUrl = `${window.location.origin}/s/${result.data.token}`;
@@ -222,18 +236,16 @@ export function PlanDetailClient({
             </div>
             <div className="grid gap-3 [&_a]:w-full [&_a]:whitespace-nowrap [&_button]:w-full [&_button]:whitespace-nowrap">
               {canPublish ? (
-                <form
-                  action={(formData) =>
-                    runPlanAction(formData, publishCatCarePlanLocalAction, "publish")
-                  }
-                  className={pendingAction === "publish" ? "pointer-events-none opacity-70" : ""}
+                <CatCareButton
+                  disabled={pendingAction !== null}
+                  form={taskFormId}
+                  name="intent"
+                  type="submit"
+                  value="publish"
                 >
-                  <input name="planId" type="hidden" value={currentPlan.id} />
-                  <CatCareButton type="submit">
-                    <CatCareSaveIcon />
-                    发布计划
-                  </CatCareButton>
-                </form>
+                  <CatCareSaveIcon />
+                  {pendingAction === "publish" ? "正在保存并发布…" : "保存并发布"}
+                </CatCareButton>
               ) : (
                 <CatCareButton href={`/catcare/plans/${currentPlan.id}/results`}>
                   <CatCareCalendarIcon />
@@ -245,10 +257,10 @@ export function PlanDetailClient({
                   action={(formData) =>
                     runPlanAction(formData, closeCatCarePlanLocalAction, "close")
                   }
-                  className={pendingAction === "close" ? "pointer-events-none opacity-70" : ""}
+                  className={pendingAction ? "pointer-events-none opacity-70" : ""}
                 >
                   <input name="planId" type="hidden" value={currentPlan.id} />
-                  <CatCareButton type="submit" variant="ghost">
+                  <CatCareButton disabled={pendingAction !== null} type="submit" variant="ghost">
                     <CatCareXIcon />
                     结束计划
                   </CatCareButton>
@@ -279,7 +291,18 @@ export function PlanDetailClient({
           {canPublish ? (
             <PlanTaskSaveForm
               action={updateCatCarePlanTasksLocalAction}
+              blocked={pendingAction !== null}
+              formId={taskFormId}
               itemOptions={itemOptions}
+              onPendingChange={setPendingAction}
+              onPublished={(publishedPlan) =>
+                setCurrentPlan((previous) => ({
+                  ...previous,
+                  ...publishedPlan,
+                  submissions: previous.submissions,
+                  tasks: publishedPlan.tasks
+                }))
+              }
               onSaved={(result) =>
                 setCurrentPlan((previous) => ({
                   ...previous,
@@ -289,6 +312,7 @@ export function PlanDetailClient({
               }
               plan={visiblePlan}
               planId={currentPlan.id}
+              publishAction={saveAndPublishCatCarePlanLocalAction}
               tasks={visiblePlan.tasks}
             />
           ) : (
@@ -349,9 +373,13 @@ export function PlanDetailClient({
             </h2>
             <ShareLinkPanel
               copyableShareUrl={copyableShareUrl}
-              isPending={pendingAction === "share" || pendingAction === "revoke-share"}
               onCopy={() => copyShareUrl()}
               onRunShareAction={runShareAction}
+              pendingAction={
+                pendingAction === "share" || pendingAction === "revoke-share"
+                  ? pendingAction
+                  : null
+              }
               plan={currentPlan}
               shareLink={currentShareLink}
             />
@@ -361,12 +389,41 @@ export function PlanDetailClient({
             <h2 className="text-xl font-semibold text-[#101a32]">
               分享与安全记录
             </h2>
-            <AuditActivityList activities={auditActivities} />
+            <AuditActivityList activities={currentAuditActivities} />
           </CatCarePanel>
         </aside>
       </div>
     </div>
   );
+}
+
+function createImmediateShareActivity(
+  actionName: "share" | "revoke-share",
+  regenerated: boolean,
+  result: CarePlanShareLinkMutation
+): CatCareAuditActivity {
+  const occurredAt =
+    actionName === "share"
+      ? result.generatedAt ?? new Date().toISOString()
+      : result.revokedAt ?? new Date().toISOString();
+
+  if (actionName === "share") {
+    return {
+      description: "拿到有效链接的人可以查看授权照护信息。",
+      id: `local-share-${occurredAt}`,
+      kind: "success",
+      occurredAt,
+      title: regenerated ? "私密链接已重新生成" : "私密链接已生成"
+    };
+  }
+
+  return {
+    description: "旧链接不能继续访问，已提交结果仍保留。",
+    id: `local-revoke-${occurredAt}`,
+    kind: "warning",
+    occurredAt,
+    title: "私密链接已撤销"
+  };
 }
 
 function AuditActivityList({
@@ -436,20 +493,20 @@ function PlanMetricCard({ label, value }: { label: string; value: string }) {
 
 function ShareLinkPanel({
   copyableShareUrl,
-  isPending,
   onCopy,
   onRunShareAction,
+  pendingAction,
   plan,
   shareLink
 }: {
   copyableShareUrl: string | null;
-  isPending: boolean;
   onCopy: () => void;
   onRunShareAction: (
     formData: FormData,
     action: (formData: FormData) => Promise<ShareLinkMutationResult>,
     actionName: "share" | "revoke-share"
   ) => Promise<void>;
+  pendingAction: "share" | "revoke-share" | null;
   plan: CatCarePlan;
   shareLink: CarePlanShareLinkState;
 }) {
@@ -521,16 +578,24 @@ function ShareLinkPanel({
             action={(formData) =>
               onRunShareAction(formData, createCarePlanShareLinkLocalAction, "share")
             }
-            className={isPending ? "pointer-events-none opacity-70" : ""}
+            aria-busy={pendingAction === "share"}
+            className={pendingAction ? "pointer-events-none opacity-70" : ""}
           >
             <input name="planId" type="hidden" value={plan.id} />
             <CatCareButton
+              disabled={pendingAction !== null}
               fullWidth
               type="submit"
               variant={isActiveShareLink && hasCopyableShareUrl ? "secondary" : "primary"}
             >
               <CatCareLinkIcon />
-              {isActiveShareLink ? "重新生成" : "生成分享链接"}
+              {pendingAction === "share"
+                ? isActiveShareLink
+                  ? "正在重新生成…"
+                  : "正在生成链接…"
+                : isActiveShareLink
+                  ? "重新生成"
+                  : "生成分享链接"}
             </CatCareButton>
           </form>
         ) : null}
@@ -539,12 +604,18 @@ function ShareLinkPanel({
             action={(formData) =>
               onRunShareAction(formData, revokeCarePlanShareLinkLocalAction, "revoke-share")
             }
-            className={isPending ? "pointer-events-none opacity-70" : ""}
+            aria-busy={pendingAction === "revoke-share"}
+            className={pendingAction ? "pointer-events-none opacity-70" : ""}
           >
             <input name="planId" type="hidden" value={plan.id} />
-            <CatCareButton fullWidth type="submit" variant="ghost">
+            <CatCareButton
+              disabled={pendingAction !== null}
+              fullWidth
+              type="submit"
+              variant="ghost"
+            >
               <CatCareXIcon />
-              撤销链接
+              {pendingAction === "revoke-share" ? "正在撤销…" : "撤销链接"}
             </CatCareButton>
           </form>
         ) : null}

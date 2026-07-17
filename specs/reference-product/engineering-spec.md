@@ -251,9 +251,12 @@ email delivery is release evidence.
 anonymous status form
 -> existing share-token gate and idempotent care submission
 -> status/Audit/Outbox committed first
--> server action receives the actual selected File objects
+-> browser validates a <= 15 MB JPG/PNG/WebP and precompresses it to <= 3 MB
+-> server action receives the first actual selected File for required-photo validation
 -> POST /api/catcare/share/submissions/:submissionId/attachments
    (raw token remains in request body, not the API path)
+   (the client sends each prepared file separately; replaying the first is
+   idempotent and every response returns the authoritative attachment count)
 -> revalidate active token + published plan + scoped submission
 -> Sharp decode / auto-orient / resize / WebP encode / metadata strip
 -> service-role write to private care-evidence bucket
@@ -277,13 +280,19 @@ then uses a server-side admin client to read the object after the owner check.
 No signed or public object URL is returned, so token revocation and owner
 authorization remain application-controlled.
 
-Input validation checks declared MIME, 4 MB evidence / 5 MB cat-photo bounds,
-decoded JPEG/PNG/WebP format, a 40-million-pixel decoder ceiling, and single
-frame content. Sharp auto-orients, limits evidence to 1600 px and cat photos to
-1200 px, emits WebP, and does not retain metadata. A second lower-quality pass
-is used only when needed to stay below 2 MB. Cat upload replacement removes the
-old object after the database update and removes a newly uploaded object if its
-database mutation fails.
+Client evidence preprocessing accepts a selected JPG/PNG/WebP up to 15 MB,
+decodes it in the browser, bounds its longest edge to 1600 px, and emits WebP
+with bounded quality until the request file is no larger than 3 MB. The UI
+shows a processing state and does not submit while preprocessing is incomplete.
+The server remains authoritative: input validation still checks declared MIME,
+a 4 MB evidence / 5 MB cat-photo bound, decoded JPEG/PNG/WebP format, a
+40-million-pixel decoder ceiling, and single-frame content. Sharp auto-orients,
+limits evidence to 1600 px and cat photos to 1200 px, emits WebP, and does not
+retain metadata. A second lower-quality pass is used only when needed to stay
+below 2 MB. The 4 MB server boundary intentionally leaves multipart headroom
+under Vercel's 4.5 MB Function request limit and rejects clients that bypass
+preprocessing. Cat upload replacement removes the old object after the database
+update and removes a newly uploaded object if its database mutation fails.
 
 Text and media are deliberately separate failure domains. Exceptions are never
 blocked by camera or upload failure. A normal photo-required submission is
@@ -291,8 +300,10 @@ validated from actual server-received files, never from a client-reported
 count. The server action uploads the first selection sequentially after the
 text result is durable; the client retains failed local selections and retries
 only media through the scoped route. Duplicate image hashes return the existing
-attachment. A concurrent unique conflict reloads current attachments, returns
-the winning same-hash row, or reallocates a free position with a bounded retry.
+attachment and the current database attachment count, so a lost response cannot
+make a later retry display the wrong total. A concurrent unique conflict reloads
+current attachments, returns the winning same-hash row, or reallocates a free
+position with a bounded retry.
 An insert failure removes the just-written object; cleanup failure is reported
 instead of silently declaring success. Retained historical attachments follow
 submission/plan retention;
@@ -304,3 +315,16 @@ runtime upload pipeline depends directly on pinned `sharp`. Product-specific
 task, token, bucket, and evidence semantics remain in `apps/web` and the product
 migration; nothing is moved into the clean template or `packages/*` in this
 issue.
+
+Plan-list presentation derives an `overdue` time state from `end_on` and one
+server-computed Asia/Shanghai date passed to both grouping and card rendering.
+This avoids a midnight hydration disagreement. Overdue published plans stay
+durably published but are grouped as history, receive the no-wrap
+`已结束·可补交` badge, and link to results.
+
+Plan event relevance is a product-local pure policy evaluated against
+`start_on`. It accepts an ongoing ranged event, or a point/ended event within
+30 days when its type is health/medicine or severity is urgent, otherwise
+within 14 days for watch severity. Normal events remain excluded, future events
+are not pulled backward, and the existing per-cat maximum of four is applied
+after the time filter. Event-derived task instructions include the source date.

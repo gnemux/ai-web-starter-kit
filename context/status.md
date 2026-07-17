@@ -4,6 +4,42 @@
 
 MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundation, Payment foundation, AI foundation, and Analytics dashboard/observability foundation are complete locally and sealed on GitHub as tag `v0.2.0` (`26443d2`). MVP3 starts from this baseline. Real-provider AI production smoke remains `not_run` until a provider is configured and deployed.
 
+## Current GNE-319 Acceptance Repair
+
+- PR #104 is merged and migration
+  `20260716093000_gne_319_private_care_media` is applied to the single shared
+  Supabase test project.
+- The user-reported follow-up is implemented locally on branch
+  `codex/gne-319-acceptance-repairs`: an ended plan is grouped into history by
+  the Asia/Shanghai date without mutating its stored lifecycle state; generated
+  plans use bounded event influence windows; and a selected phone photo up to
+  15 MB is precompressed in the browser before the existing private-media
+  server normalization.
+- Local acceptance performance follow-up parallelizes independent plan-detail
+  reads and gives share-token create/regenerate/revoke actions an immediate
+  disabled progress label. The returned share state updates locally without an
+  unnecessary full plan-detail revalidation, and the visible security activity
+  reflects the completed operation immediately. The token lifecycle, persisted
+  Audit, and bounded Analytics delivery remain server-controlled.
+- Local verification passes 121 web tests, TypeScript typecheck, production
+  build, `git diff --check`, and an unauthenticated HTTP protection smoke on
+  port 3003. No schema change, database write, commit, push, PR, or deployment
+  is part of this follow-up yet. GNE-319 remains In Progress pending user page
+  acceptance.
+- Draft-only save and save-and-publish now submit the live task editor form
+  through the same atomic Postgres RPC. Both operations lock the owner draft;
+  task edits and plan metadata commit or roll back together, and publishing
+  additionally requires at least one executable task before changing status.
+  A delayed save from another tab cannot mutate an already published plan, so
+  tasks marked `暂不执行` cannot reappear because publish skipped a separate
+  save. `仅保存草稿` remains optional.
+- Private care photos now use one CatCare in-page lightbox in both the sitter's
+  pre-upload picker and the owner's results page. Thumbnails open a contained
+  large preview with close, previous/next, arrow-key/Escape support, and the
+  owner-only safety-processed download action; the existing authenticated
+  proxy remains the only owner media read path. Local verification now passes
+  121 web tests, TypeScript typecheck, production build, and `git diff --check`.
+
 ## Completed
 
 - Created initial repository structure.
@@ -1586,6 +1622,8 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
   separate positions, and a fourth image returns 400. Web tests are 99/99;
   full lint, typecheck, build, package/release/AI safety, and template drift
   gates pass after the fix.
-- The shared cloud Supabase migration, PR/Merge, Vercel deployment, and final
-  deployed smoke are still `not_run`. They require the normal database approval
-  and publication gates before GNE-319 can be Done.
+- PR #104 is merged and the shared-cloud migration is applied. The subsequent
+  user-acceptance repair for plan status, event influence, and large phone-photo
+  preprocessing remains local on `codex/gne-319-acceptance-repairs`; its
+  publication and deployed smoke remain `not_run` until the user approves the
+  local 3003 result. GNE-319 remains In Progress and GNE-320 has not started.

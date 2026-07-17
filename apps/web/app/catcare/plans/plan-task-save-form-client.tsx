@@ -16,19 +16,33 @@ type PlanTaskSaveResult =
   | { data: { handoffNotes: string | null; id: string; tasks: CatCareTask[] }; ok: true }
   | { error: { message: string }; ok: false };
 
+type PlanTaskPublishResult =
+  | { data: CatCarePlan; ok: true }
+  | { error: { message: string }; ok: false };
+
 export function PlanTaskSaveForm({
   action,
+  blocked = false,
+  formId,
   itemOptions = [],
+  onPendingChange,
+  onPublished,
   onSaved,
   plan,
   planId,
+  publishAction,
   tasks
 }: {
   action: (formData: FormData) => Promise<PlanTaskSaveResult>;
+  blocked?: boolean;
+  formId: string;
   itemOptions?: string[];
+  onPendingChange?: (intent: "publish" | "save" | null) => void;
+  onPublished?: (plan: CatCarePlan) => void;
   onSaved?: (result: { handoffNotes: string | null; tasks: CatCareTask[] }) => void;
   plan: CatCarePlan;
   planId: string;
+  publishAction: (formData: FormData) => Promise<PlanTaskPublishResult>;
   tasks: CatCareTask[];
 }) {
   const [currentTasks, setCurrentTasks] = useState(tasks);
@@ -39,7 +53,7 @@ export function PlanTaskSaveForm({
   const [newTaskInitialTime, setNewTaskInitialTime] = useState(
     () => inferVisitTimes(tasks, getPlanVisitCount(plan))[0] ?? "08:30"
   );
-  const [pending, setPending] = useState(false);
+  const [pendingIntent, setPendingIntent] = useState<"publish" | "save" | null>(null);
   const toast = useCatCareToast();
   const visitCount = getPlanVisitCount(plan);
 
@@ -55,28 +69,54 @@ export function PlanTaskSaveForm({
       <CatCareToast message={null} toast={toast.toast} />
       <form
         action={async (formData) => {
-          setPending(true);
+          const intent = formData.get("intent") === "publish" ? "publish" : "save";
+          setPendingIntent(intent);
+          onPendingChange?.(intent);
 
-          const result = await action(formData);
+          try {
+            if (intent === "publish") {
+              const result = await publishAction(formData);
 
-          setPending(false);
+              if (!result.ok) {
+                toast.showError(result.error.message);
+                return;
+              }
 
-          if (!result.ok) {
-            toast.showError(result.error.message);
-            return;
+              setCurrentTasks(result.data.tasks);
+              setEnabledById(
+                Object.fromEntries(result.data.tasks.map((task) => [task.id, task.enabled]))
+              );
+              onPublished?.(result.data);
+              toast.showSuccess("当前清单已保存并发布，可生成分享链接发送给照看者");
+              return;
+            }
+
+            const result = await action(formData);
+
+            if (!result.ok) {
+              toast.showError(result.error.message);
+              return;
+            }
+
+            setCurrentTasks(result.data.tasks);
+            setEnabledById(
+              Object.fromEntries(result.data.tasks.map((task) => [task.id, task.enabled]))
+            );
+            onSaved?.({
+              handoffNotes: result.data.handoffNotes,
+              tasks: result.data.tasks
+            });
+            toast.showSuccess("清单草稿已保存，可继续检查或直接发布");
+          } catch {
+            toast.showError("清单操作暂时没有完成，请稍后重试");
+          } finally {
+            setPendingIntent(null);
+            onPendingChange?.(null);
           }
-
-          setCurrentTasks(result.data.tasks);
-          setEnabledById(
-            Object.fromEntries(result.data.tasks.map((task) => [task.id, task.enabled]))
-          );
-          onSaved?.({
-            handoffNotes: result.data.handoffNotes,
-            tasks: result.data.tasks
-          });
-          toast.showSuccess("清单微调已保存，发布前可继续检查执行日历");
         }}
-        className={`grid gap-3 ${pending ? "pointer-events-none opacity-70" : ""}`}
+        aria-busy={pendingIntent !== null}
+        className={`grid gap-3 ${blocked || pendingIntent ? "pointer-events-none opacity-70" : ""}`}
+        id={formId}
       >
         <input name="planId" type="hidden" value={planId} />
         <label className="grid gap-2 rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">
@@ -115,10 +155,25 @@ export function PlanTaskSaveForm({
           onEnabledChange={updateTaskEnabled}
           tasks={currentTasks}
         />
-        <div className="pt-2">
-          <CatCareButton type="submit" variant="secondary">
+        <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+          <CatCareButton
+            disabled={blocked || pendingIntent !== null}
+            name="intent"
+            type="submit"
+            value="save"
+            variant="secondary"
+          >
             <CatCareSaveIcon />
-            保存微调
+            {pendingIntent === "save" ? "正在保存…" : "仅保存草稿"}
+          </CatCareButton>
+          <CatCareButton
+            disabled={blocked || pendingIntent !== null}
+            name="intent"
+            type="submit"
+            value="publish"
+          >
+            <CatCareSaveIcon />
+            {pendingIntent === "publish" ? "正在保存并发布…" : "保存并发布"}
           </CatCareButton>
         </div>
       </form>

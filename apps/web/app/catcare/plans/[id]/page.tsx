@@ -27,14 +27,15 @@ export default async function CatCarePlanDetailPage({
     notFound();
   }
 
-  const itemOptionsResult =
-    result.ok && result.data.status === "draft"
-      ? await getCatCarePlanItemOptions()
-      : null;
-  const shareLinkResult =
-    result.ok ? await getCarePlanShareLinkState(result.data.id) : null;
-  const auditResult =
-    result.ok ? await getCatCareAuditActivities(result.data.ownerId, result.data.id) : null;
+  const [itemOptionsResult, shareLinkResult, auditResult] = result.ok
+    ? await Promise.all([
+        result.data.status === "draft"
+          ? getCatCarePlanItemOptions()
+          : Promise.resolve(null),
+        getCarePlanShareLinkState(result.data.id),
+        getCatCareAuditActivities(result.data.ownerId, result.data.id)
+      ])
+    : [null, null, null];
 
   return (
     <>

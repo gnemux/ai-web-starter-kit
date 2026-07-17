@@ -83,6 +83,7 @@ export function CatCareButton({
   children,
   fullWidth = false,
   disabled = false,
+  form,
   href,
   name,
   onClick,
@@ -92,6 +93,7 @@ export function CatCareButton({
 }: {
   children: ReactNode;
   disabled?: boolean;
+  form?: string;
   fullWidth?: boolean;
   href?: string;
   name?: string;
@@ -114,6 +116,7 @@ export function CatCareButton({
     <button
       className={className}
       disabled={disabled}
+      form={form}
       name={name}
       onClick={onClick}
       type={type}

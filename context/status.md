@@ -4,6 +4,36 @@
 
 MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundation, Payment foundation, AI foundation, and Analytics dashboard/observability foundation are complete locally and sealed on GitHub as tag `v0.2.0` (`26443d2`). MVP3 starts from this baseline. Real-provider AI production smoke remains `not_run` until a provider is configured and deployed.
 
+## Current GNE-320 Final Acceptance
+
+- PR #109 merged through merge commit `8a46d16`; GitHub CI run
+  `29560464698` and the corresponding Vercel automatic `main` deployment both
+  completed successfully.
+- The explicitly approved migration
+  `20260717150000_gne_320_notification_revision` is applied to the single
+  shared Supabase test project. Local and remote migration history match
+  through that version. Read-only catalog checks confirm both revision columns,
+  a security-invoker function with an empty search path, service-role-only
+  execution, and no anonymous/authenticated revision mutation path.
+- Deployed browser acceptance used only a named synthetic GNE-320 plan. A real
+  sitter note update advanced the submission and existing notification from
+  revision 1 to 2, reopened exactly one unread notification, updated its order,
+  and preserved the total at two submissions and two notifications. Reading the
+  notification persisted after refresh.
+- Re-saving the identical status and note did not advance either revision,
+  create a notification, reopen unread state, or change `last_notified_at`.
+  This proves that meaningful updates and network/idempotent retries are
+  separated by durable database state rather than timing guesses.
+- Desktop/mobile notification placement, bounded scrolling, exception emphasis,
+  and information density were reviewed as fit for the current inbox size. No
+  additional filtering or grouping is required in GNE-320.
+- Cleanup revoked the synthetic private link and closed the synthetic plan.
+  Its two submissions and two notifications remain as logical history with zero
+  unread notifications. No real user data was edited and no raw token or secret
+  was recorded.
+- GNE-320 is ready for Linear closure. Stop after this Issue; do not activate
+  GNE-321 automatically.
+
 ## Current GNE-319 Acceptance Repair
 
 - PR #104 is merged and migration

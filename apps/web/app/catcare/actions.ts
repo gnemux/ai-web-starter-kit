@@ -21,7 +21,7 @@ import { deleteCatCareEventFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCareLibraryItemFromFormData } from "@/lib/catcare/product-service";
 import { deleteCatCarePlan } from "@/lib/catcare/product-service";
 import { getCatCarePlanDetail } from "@/lib/catcare/product-service";
-import { publishCatCarePlan } from "@/lib/catcare/product-service";
+import { saveAndPublishCatCarePlanFromFormData } from "@/lib/catcare/product-service";
 import { revokeCarePlanShareLink } from "@/lib/catcare/product-service";
 import { saveCatCarePlanAiRecap } from "@/lib/catcare/product-service";
 import { saveCatCareRoutineFromFormData } from "@/lib/catcare/product-service";
@@ -388,24 +388,8 @@ export async function createCatCarePlanAction(formData: FormData) {
   redirect(`/catcare/plans/${result.data.id}`);
 }
 
-export async function publishCatCarePlanAction(formData: FormData) {
-  const planId = String(formData.get("planId") ?? "").trim();
-  const result = await publishCatCarePlan(planId);
-
-  if (!result.ok) {
-    throw new Error(result.error.message);
-  }
-
-  revalidatePath("/catcare");
-  revalidatePath("/catcare/plans");
-  revalidatePath(`/catcare/plans/${result.data.id}`);
-  redirect(`/catcare/plans/${result.data.id}?published=1`);
-}
-
-export async function publishCatCarePlanLocalAction(formData: FormData) {
-  const planId = String(formData.get("planId") ?? "").trim();
-
-  return publishCatCarePlan(planId);
+export async function saveAndPublishCatCarePlanLocalAction(formData: FormData) {
+  return saveAndPublishCatCarePlanFromFormData(formData);
 }
 
 export async function updateCatCarePlanTasksAction(formData: FormData) {
@@ -452,20 +436,14 @@ export async function deleteCatCarePlanLocalAction(formData: FormData) {
 
 export async function createCarePlanShareLinkLocalAction(formData: FormData) {
   const planId = String(formData.get("planId") ?? "").trim();
-  const result = await createCarePlanShareLink(planId);
 
-  revalidatePath(`/catcare/plans/${planId}`);
-
-  return result;
+  return createCarePlanShareLink(planId);
 }
 
 export async function revokeCarePlanShareLinkLocalAction(formData: FormData) {
   const planId = String(formData.get("planId") ?? "").trim();
-  const result = await revokeCarePlanShareLink(planId);
 
-  revalidatePath(`/catcare/plans/${planId}`);
-
-  return result;
+  return revokeCarePlanShareLink(planId);
 }
 
 export async function runCatCarePlanAiRecapAction(

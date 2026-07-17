@@ -30,9 +30,7 @@ export async function submitAnonymousCareTaskAction(formData: FormData) {
       continue;
     }
 
-    if (!uploadResult.data.alreadyUploaded) {
-      attachmentCount += 1;
-    }
+    attachmentCount = uploadResult.data.attachmentCount;
   }
 
   if (token) {

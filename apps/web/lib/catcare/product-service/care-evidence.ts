@@ -34,7 +34,11 @@ export async function uploadAnonymousCareEvidence(input: {
   file: FormDataEntryValue | null;
   secret: string;
   submissionId: string;
-}): Promise<ServiceResult<{ alreadyUploaded: boolean; attachment: CatCareEvidenceAttachment }>> {
+}): Promise<ServiceResult<{
+  alreadyUploaded: boolean;
+  attachment: CatCareEvidenceAttachment;
+  attachmentCount: number;
+}>> {
   const fileResult = validatePrivateImageFile(input.file, careEvidenceInputMaxBytes);
 
   if (!fileResult.ok) {
@@ -116,7 +120,8 @@ export async function uploadAnonymousCareEvidence(input: {
   if (duplicate) {
     return serviceOk({
       alreadyUploaded: true,
-      attachment: mapEvidenceAttachment(duplicate)
+      attachment: mapEvidenceAttachment(duplicate),
+      attachmentCount: existingResult.data?.length ?? 0
     });
   }
 
@@ -166,7 +171,8 @@ export async function uploadAnonymousCareEvidence(input: {
 
       return serviceOk({
         alreadyUploaded: true,
-        attachment: mapEvidenceAttachment(concurrentDuplicate)
+        attachment: mapEvidenceAttachment(concurrentDuplicate),
+        attachmentCount: currentAttachments.length
       });
     }
 
@@ -205,7 +211,11 @@ export async function uploadAnonymousCareEvidence(input: {
     if (!insertResult.error) {
       return serviceOk({
         alreadyUploaded: false,
-        attachment: mapEvidenceAttachment(insertResult.data)
+        attachment: mapEvidenceAttachment(insertResult.data),
+        attachmentCount: Math.min(
+          currentAttachments.length + 1,
+          careEvidenceMaxCount
+        )
       });
     }
 

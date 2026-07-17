@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { AnonymousCareTaskSubmissionView } from "@/lib/catcare/product-service";
+import { prepareClientImageForUpload } from "@/lib/media/client-image";
+import { reconcileEvidenceAttachmentCount } from "@/lib/media/evidence-upload-state";
 
+import {
+  CarePhotoLightbox,
+  type CarePhotoLightboxItem
+} from "../../catcare/care-photo-lightbox-client";
 import { CatCareTaskCategoryIcon } from "../../catcare/catcare-item-type-icon";
 import {
   formatOwnerLabel,
@@ -35,6 +41,9 @@ type SelectedEvidence = {
   id: string;
   previewUrl: string;
 };
+
+const careEvidencePickerMaxBytes = 15 * 1024 * 1024;
+const careEvidenceNetworkMaxBytes = 3 * 1024 * 1024;
 
 type AnonymousVisitSection = {
   tasks: AnonymousTask[];
@@ -265,6 +274,7 @@ function TaskStep({
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [processingEvidence, setProcessingEvidence] = useState(false);
 
   useEffect(() => {
     evidenceFilesRef.current = evidenceFiles;
@@ -274,33 +284,44 @@ function TaskStep({
     evidenceFilesRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
   }, []);
 
-  function onEvidenceChange(files: FileList | null) {
+  async function onEvidenceChange(files: FileList | null) {
     if (!files) {
       return;
     }
 
     const available = Math.max(3 - attachmentCount - evidenceFiles.length, 0);
     const nextFiles = Array.from(files).slice(0, available);
-    const invalid = nextFiles.find(
-      (file) =>
-        !["image/jpeg", "image/png", "image/webp"].includes(file.type) ||
-        file.size > 4 * 1024 * 1024
-    );
+    const prepared: SelectedEvidence[] = [];
 
-    if (invalid) {
-      setError("仅支持单张不超过 4 MB 的 JPG、PNG 或 WebP 照片。");
-      return;
-    }
-
+    setProcessingEvidence(true);
     setError(null);
-    setEvidenceFiles((current) => [
-      ...current,
-      ...nextFiles.map((file) => ({
-        file,
-        id: `${file.name}:${file.size}:${file.lastModified}:${crypto.randomUUID()}`,
-        previewUrl: URL.createObjectURL(file)
-      }))
-    ]);
+
+    try {
+      for (const file of nextFiles) {
+        const uploadFile = await prepareClientImageForUpload(file, {
+          maxDimension: 1600,
+          maxInputBytes: careEvidencePickerMaxBytes,
+          maxOutputBytes: careEvidenceNetworkMaxBytes
+        });
+
+        prepared.push({
+          file: uploadFile,
+          id: `${file.name}:${file.size}:${file.lastModified}:${crypto.randomUUID()}`,
+          previewUrl: URL.createObjectURL(uploadFile)
+        });
+      }
+
+      setEvidenceFiles((current) => [...current, ...prepared]);
+    } catch (cause) {
+      prepared.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "照片处理失败，请换一张照片后重试。"
+      );
+    } finally {
+      setProcessingEvidence(false);
+    }
   }
 
   function removeEvidence(id: string) {
@@ -315,9 +336,9 @@ function TaskStep({
     });
   }
 
-  async function uploadEvidence(submissionId: string) {
+  async function uploadEvidence(submissionId: string, baseCount = attachmentCount) {
     const uploadedIds = new Set<string>();
-    let nextCount = attachmentCount;
+    let nextCount = baseCount;
     let uploadError: string | null = null;
 
     for (const item of evidenceFiles) {
@@ -329,7 +350,11 @@ function TaskStep({
         { body, method: "POST" }
       );
       const payload = (await response.json().catch(() => null)) as
-        | { alreadyUploaded?: boolean; error?: string }
+        | {
+            alreadyUploaded?: boolean;
+            attachmentCount?: number;
+            error?: string;
+          }
         | null;
 
       if (!response.ok) {
@@ -338,7 +363,7 @@ function TaskStep({
       }
 
       uploadedIds.add(item.id);
-      nextCount += payload?.alreadyUploaded ? 0 : 1;
+      nextCount = reconcileEvidenceAttachmentCount(nextCount, payload ?? {});
     }
 
     setEvidenceFiles((current) =>
@@ -357,7 +382,7 @@ function TaskStep({
   }
 
   async function onEvidenceRetry() {
-    if (!submission || evidenceFiles.length === 0) {
+    if (!submission || evidenceFiles.length === 0 || processingEvidence) {
       return;
     }
 
@@ -379,6 +404,12 @@ function TaskStep({
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (processingEvidence) {
+      setError("照片仍在处理中，请稍候再提交。");
+      return;
+    }
+
     setPending(true);
     setError(null);
     setMessage(null);
@@ -388,8 +419,8 @@ function TaskStep({
     formData.set("token", token);
     formData.set("submissionRef", task.submissionRef);
     formData.set("visitTime", task.visitTime);
-    for (const item of evidenceFiles) {
-      formData.append("photos", item.file);
+    if (evidenceFiles[0]) {
+      formData.append("photos", evidenceFiles[0].file);
     }
 
     const result = await submitAnonymousCareTaskAction(formData);
@@ -400,15 +431,17 @@ function TaskStep({
       return;
     }
 
-    const nextAttachmentCount = result.data.attachmentCount;
-    const mediaError = result.data.mediaUploadError;
-
-    if (!mediaError) {
-      setEvidenceFiles((current) => {
-        current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-        return [];
-      });
-    }
+    const uploadResult = evidenceFiles.length > 0
+      ? await uploadEvidence(
+          result.data.submissionId,
+          result.data.attachmentCount
+        )
+      : {
+          attachmentCount: result.data.attachmentCount,
+          error: result.data.mediaUploadError
+        };
+    const nextAttachmentCount = uploadResult.attachmentCount;
+    const mediaError = uploadResult.error;
 
     setPending(false);
     setSubmission({
@@ -512,7 +545,8 @@ function TaskStep({
               onEvidenceRemove={removeEvidence}
               onNoteChange={setNote}
               onSubmit={onSubmit}
-              pending={pending}
+              pending={pending || processingEvidence}
+              processingEvidence={processingEvidence}
               photoRequired={task.photoRequired}
               serviceDate={task.serviceDate}
               status={status}
@@ -531,6 +565,7 @@ function TaskStep({
               onChange={onEvidenceChange}
               onRemove={removeEvidence}
               photoRequired={task.photoRequired}
+              processing={processingEvidence}
             />
             {error ? (
               <p className="rounded-xl bg-[#fff4f2] px-3 py-2 text-sm font-semibold leading-6 text-[#b7352c]" role="alert">
@@ -539,11 +574,15 @@ function TaskStep({
             ) : null}
             <button
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#07847f] bg-white px-4 text-sm font-semibold text-[#07847f] disabled:cursor-not-allowed disabled:border-[#d9e0ea] disabled:text-[#98a4b5]"
-              disabled={pending || evidenceFiles.length === 0}
+              disabled={pending || processingEvidence || evidenceFiles.length === 0}
               onClick={onEvidenceRetry}
               type="button"
             >
-              {pending ? "上传中…" : "补充上传所选照片"}
+              {processingEvidence
+                ? "正在处理照片…"
+                : pending
+                  ? "上传中…"
+                  : "补充上传所选照片"}
             </button>
           </div>
         ) : null}
@@ -563,6 +602,7 @@ function TaskSubmissionForm({
   onStatusChange,
   onSubmit,
   pending,
+  processingEvidence,
   photoRequired,
   serviceDate,
   status,
@@ -580,6 +620,7 @@ function TaskSubmissionForm({
   onStatusChange: (value: "completed" | "note" | "exception") => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   pending: boolean;
+  processingEvidence: boolean;
   photoRequired: boolean;
   serviceDate: string;
   status: "completed" | "note" | "exception";
@@ -657,6 +698,7 @@ function TaskSubmissionForm({
         onChange={onEvidenceChange}
         onRemove={onEvidenceRemove}
         photoRequired={photoRequired}
+        processing={processingEvidence}
       />
       {error ? (
         <p
@@ -682,61 +724,93 @@ function EvidencePicker({
   files,
   onChange,
   onRemove,
-  photoRequired
+  photoRequired,
+  processing
 }: {
   attachmentCount: number;
   files: SelectedEvidence[];
   onChange: (files: FileList | null) => void;
   onRemove: (id: string) => void;
   photoRequired: boolean;
+  processing: boolean;
 }) {
   const remaining = Math.max(3 - attachmentCount - files.length, 0);
+  const [activePreviewIndex, setActivePreviewIndex] = useState<number | null>(null);
+  const previewItems: CarePhotoLightboxItem[] = files.map((item, index) => ({
+    alt: `待上传照护照片 ${index + 1}`,
+    caption: "这是上传前的本机预览；提交后服务端还会清除定位信息并安全压缩。",
+    id: item.id,
+    src: item.previewUrl
+  }));
 
   return (
-    <div className="grid gap-3 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-3">
-      <div>
-        <p className="text-sm font-semibold text-[#101a32]">
-          照护照片{photoRequired ? "（主人要求）" : "（可选）"}
-        </p>
-        <p className="mt-1 text-xs font-semibold leading-5 text-[#75839a]">
-          最多 3 张，单张不超过 4 MB；上传后会压缩并清除定位信息，仅主人登录后可查看。
-        </p>
-      </div>
-      {files.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2">
-          {files.map((item) => (
-            <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-[#d9e0ea]" key={item.id}>
-              <img alt="待上传照护照片预览" className="aspect-square w-full object-cover" src={item.previewUrl} />
-              <button
-                aria-label={`移除照片 ${item.file.name}`}
-                className="absolute right-1 top-1 grid h-8 w-8 place-items-center rounded-full bg-black/70 text-sm font-bold text-white"
-                onClick={() => onRemove(item.id)}
-                type="button"
-              >
-                ×
-              </button>
-            </div>
-          ))}
+    <>
+      <div className="grid gap-3 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-3">
+        <div>
+          <p className="text-sm font-semibold text-[#101a32]">
+            照护照片{photoRequired ? "（主人要求）" : "（可选）"}
+          </p>
+          <p className="mt-1 text-xs font-semibold leading-5 text-[#75839a]">
+            最多 3 张，可选择单张不超过 15 MB 的手机原图；上传前会自动压缩，服务端会再次清除定位信息，仅主人登录后可查看。
+          </p>
         </div>
-      ) : null}
-      {remaining > 0 ? (
-        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#7ebdb8] bg-white px-4 text-sm font-semibold text-[#07847f]">
-          选择照片（还可选 {remaining} 张）
-          <input
-            accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
-            multiple
-            onChange={(event) => {
-              onChange(event.currentTarget.files);
-              event.currentTarget.value = "";
-            }}
-            type="file"
-          />
-        </label>
-      ) : (
-        <p className="text-xs font-semibold text-[#526177]">已达到 3 张上限。</p>
-      )}
-    </div>
+        {files.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2">
+            {files.map((item, index) => (
+              <div className="relative overflow-hidden rounded-xl bg-white ring-1 ring-[#d9e0ea]" key={item.id}>
+                <button
+                  aria-label={`放大预览 ${item.file.name}`}
+                  className="group block w-full overflow-hidden focus:outline-none focus:ring-4 focus:ring-inset focus:ring-[#07847f]/30"
+                  onClick={() => setActivePreviewIndex(index)}
+                  type="button"
+                >
+                  <img
+                    alt={`待上传照护照片 ${index + 1}`}
+                    className="aspect-square w-full object-cover transition duration-200 group-hover:scale-[1.03]"
+                    src={item.previewUrl}
+                  />
+                  <span className="absolute bottom-1 left-1 rounded-full bg-black/65 px-2 py-1 text-[10px] font-semibold text-white">
+                    放大
+                  </span>
+                </button>
+                <button
+                  aria-label={`移除照片 ${item.file.name}`}
+                  className="absolute right-1 top-1 z-10 grid h-8 w-8 place-items-center rounded-full bg-black/70 text-sm font-bold text-white"
+                  onClick={() => onRemove(item.id)}
+                  type="button"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : null}
+        {remaining > 0 ? (
+          <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#7ebdb8] bg-white px-4 text-sm font-semibold text-[#07847f] has-[:disabled]:cursor-wait has-[:disabled]:border-[#d9e0ea] has-[:disabled]:text-[#75839a]">
+            {processing ? "正在压缩照片…" : `选择照片（还可选 ${remaining} 张）`}
+            <input
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              disabled={processing}
+              multiple
+              onChange={(event) => {
+                onChange(event.currentTarget.files);
+                event.currentTarget.value = "";
+              }}
+              type="file"
+            />
+          </label>
+        ) : (
+          <p className="text-xs font-semibold text-[#526177]">已达到 3 张上限。</p>
+        )}
+      </div>
+      <CarePhotoLightbox
+        activeIndex={activePreviewIndex}
+        items={previewItems}
+        onClose={() => setActivePreviewIndex(null)}
+        onNavigate={setActivePreviewIndex}
+      />
+    </>
   );
 }
 

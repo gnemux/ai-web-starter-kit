@@ -1320,6 +1320,22 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      save_care_plan_tasks: {
+        Args: {
+          should_publish: boolean;
+          submitted_handoff_notes: string | null;
+          submitted_new_tasks: Json;
+          submitted_task_updates: Json;
+          submitted_visit_count: number;
+          target_plan_id: string;
+        };
+        Returns: Array<{
+          enabled_task_count: number;
+          plan_status: string;
+          saved_owner_id: string;
+          saved_plan_id: string;
+        }>;
+      };
       soft_delete_cat_profile: {
         Args: { target_cat_id: string };
         Returns: Array<{

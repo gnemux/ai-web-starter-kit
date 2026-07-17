@@ -359,7 +359,7 @@ function NewTaskCard({
       </summary>
       <div className="mt-4 grid gap-4">
         <p className="text-xs font-semibold text-[#75839a]">
-          例如加药、临时观察或额外交代；可先加入多条待保存任务，最后统一保存微调。
+          例如加药、临时观察或额外交代；可先加入多条任务，再保存草稿或直接发布。
         </p>
         {draftTasks.length > 0 ? (
           <div className="grid gap-2 rounded-xl border border-[#e2e6ee] bg-[#fbfdfc] p-3">

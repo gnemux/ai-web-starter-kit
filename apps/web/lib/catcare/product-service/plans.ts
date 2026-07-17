@@ -4,12 +4,14 @@ import { randomUUID } from "node:crypto";
 
 import { serviceError, serviceOk, type ServiceResult } from "@xwlc/core";
 
-import { fanOutSafeCapabilityContext } from "../../capabilities/capability-context";
-
 import { createSupabaseServerClient, type AppSupabaseClient } from "../../supabase/server";
 import type { Json } from "../../supabase/database.types";
 import { recordCatCareAuditEvent } from "./audit";
 import { mapEvidenceAttachment } from "./care-evidence";
+import {
+  getCareEventReferenceDate,
+  isCareEventRelevantToPlan
+} from "./plan-event-policy";
 
 import {
   CARE_EVENT_SELECT,
@@ -17,7 +19,6 @@ import {
   CAT_SELECT,
   CareEventRow,
   CareRoutineItemRow,
-  CareTaskInsert,
   CatCareItem,
   CatCarePlan,
   CatCareTask,
@@ -41,7 +42,6 @@ import {
   normalizePlanVisitCount,
   normalizeTaskTimeHint,
   trackCatCareProductEvent,
-  withPlanVisitCount,
   withRelatedItemInstruction,
   withTaskScopeTitle,
 } from "./core";
@@ -128,11 +128,18 @@ export async function createCatCarePlanFromFormData(
     });
   }
 
+  if (!inputResult.data.startOn) {
+    return serviceError("validation_error", "Set a start date for the care plan.", {
+      startOn: "required"
+    });
+  }
+
   const planTasksResult = await buildMultiCatPlanTasks(
     clientResult.data,
     ownerResult.data,
     selectedCats,
-    inputResult.data.tasks
+    inputResult.data.tasks,
+    inputResult.data.startOn
   );
 
   if (!planTasksResult.ok) {
@@ -349,16 +356,33 @@ export async function saveCatCarePlanAiRecap(input: {
 export async function updateCatCarePlanTasksFromFormData(
   formData: FormData
 ): Promise<ServiceResult<{ handoffNotes: string | null; id: string; tasks: CatCareTask[] }>> {
-  const planId = String(formData.get("planId") ?? "").trim();
-  const handoffNotes = normalizeOptionalText(formData.get("handoffNotes"));
-  const visitCount = normalizePlanVisitCount(formData.get("visitCount"));
-  const taskIds = formData
-    .getAll("taskId")
-    .map((value) => String(value).trim())
-    .filter(Boolean);
+  const result = await saveCatCarePlanTaskForm(formData, false);
 
-  if (!planId || taskIds.length === 0) {
-    return serviceError("validation_error", "Choose a care plan to update.");
+  if (!result.ok) {
+    return result;
+  }
+
+  return serviceOk({
+    handoffNotes: result.data.handoffNotes,
+    id: result.data.id,
+    tasks: result.data.tasks
+  });
+}
+
+export async function saveAndPublishCatCarePlanFromFormData(
+  formData: FormData
+): Promise<ServiceResult<CatCarePlan>> {
+  return saveCatCarePlanTaskForm(formData, true);
+}
+
+async function saveCatCarePlanTaskForm(
+  formData: FormData,
+  shouldPublish: boolean
+): Promise<ServiceResult<CatCarePlan>> {
+  const inputResult = normalizeAtomicPlanInput(formData, shouldPublish);
+
+  if (!inputResult.ok) {
+    return inputResult;
   }
 
   const clientResult = await createSupabaseServerClient();
@@ -373,132 +397,145 @@ export async function updateCatCarePlanTasksFromFormData(
     return ownerResult;
   }
 
-  const planResult = await clientResult.data
-    .from("care_plans")
-    .select("id, status, ai_input_summary")
-    .eq("owner_id", ownerResult.data)
-    .eq("id", planId)
-    .single();
+  const correlationId = randomUUID();
+  const saveResult = await clientResult.data.rpc("save_care_plan_tasks", {
+    should_publish: shouldPublish,
+    submitted_handoff_notes: inputResult.data.handoffNotes,
+    submitted_new_tasks: inputResult.data.newTasks,
+    submitted_task_updates: inputResult.data.taskUpdates,
+    submitted_visit_count: inputResult.data.visitCount,
+    target_plan_id: inputResult.data.planId
+  });
 
-  if (planResult.error) {
-    return mapSupabaseError(planResult.error);
+  if (saveResult.error) {
+    return mapAtomicPlanSaveError(saveResult.error);
   }
 
-  if (planResult.data.status !== "draft") {
-    return serviceError("validation_error", "Only draft plans can be edited.");
+  const saved = saveResult.data?.[0];
+
+  if (
+    !saved ||
+    saved.saved_owner_id !== ownerResult.data ||
+    saved.saved_plan_id !== inputResult.data.planId ||
+    saved.plan_status !== (shouldPublish ? "published" : "draft")
+  ) {
+    return serviceError("system_error", "照护计划保存结果暂时无法确认，请刷新后重试。");
+  }
+
+  const detailResult = await getCatCarePlanDetail(inputResult.data.planId, {
+    includeSubmissions: false
+  });
+
+  if (!detailResult.ok) {
+    return detailResult;
+  }
+
+  if (shouldPublish) {
+    await trackCatCareProductEvent(
+      ownerResult.data,
+      "catcare_plan_published",
+      {
+        enabled_task_count: saved.enabled_task_count,
+        plan_status: detailResult.data.status,
+        result: "success"
+      },
+      {
+        correlation_id: correlationId,
+        request_source: "catcare_plan_publish",
+        resource_id: inputResult.data.planId,
+        resource_type: "care_plan"
+      }
+    );
+    void recordCatCareAuditEvent({
+      actorType: "user",
+      correlationId,
+      eventName: "care_plan_published",
+      ownerId: ownerResult.data,
+      properties: { task_count: saved.enabled_task_count },
+      resourceId: inputResult.data.planId,
+      resourceType: "care_plan"
+    });
+  } else {
+    await trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
+      enabled_task_count: saved.enabled_task_count,
+      task_count: detailResult.data.tasks.length
+    });
+  }
+
+  return detailResult;
+}
+
+function normalizeAtomicPlanInput(
+  formData: FormData,
+  shouldPublish: boolean
+): ServiceResult<{
+  handoffNotes: string | null;
+  newTasks: Json;
+  planId: string;
+  taskUpdates: Json;
+  visitCount: number;
+}> {
+  const planId = String(formData.get("planId") ?? "").trim();
+  const handoffNotes = normalizeOptionalText(formData.get("handoffNotes"));
+  const visitCount = normalizePlanVisitCount(formData.get("visitCount"));
+  const taskIds = Array.from(new Set(
+    formData
+      .getAll("taskId")
+      .map((value) => String(value).trim())
+      .filter(Boolean)
+  ));
+
+  if (!planId || taskIds.length === 0) {
+    return serviceError("validation_error", "请保留至少一项可确认的照护任务。");
   }
 
   if (handoffNotes && handoffNotes.length > 2000) {
-    return serviceError("validation_error", "Handoff notes are too long.", {
+    return serviceError("validation_error", "交接备注最多 2000 个字。", {
       handoffNotes: "invalid"
     });
   }
 
-  const existingResult = await clientResult.data
-    .from("care_tasks")
-    .select(
-      "id, category, title, instructions, time_hint, frequency, sort_order, source, source_ref, required, photo_required, enabled"
-    )
-    .eq("plan_id", planId)
-    .in("id", taskIds);
-
-  if (existingResult.error) {
-    return mapSupabaseError(existingResult.error);
-  }
-
-  const existingTasks = new Map(
-    (existingResult.data ?? []).map((task) => [task.id, task])
-  );
+  const taskUpdates: Array<Record<string, Json>> = [];
 
   for (const taskId of taskIds) {
-    if (!existingTasks.has(taskId)) {
-      return serviceError("validation_error", "Task does not belong to this plan.");
-    }
-  }
-
-  const nextTasks: CatCareTask[] = [];
-  const taskUpdates = [];
-
-  for (const taskId of taskIds) {
-    const existingTask = existingTasks.get(taskId);
     const title = String(formData.get(`task.${taskId}.title`) ?? "").trim();
     const instructions = normalizeOptionalText(
       formData.get(`task.${taskId}.instructions`)
     );
     const timeHint = normalizeTaskTimeHint(formData, `task.${taskId}.timeHint`);
 
-    if (!title || title.length > 160) {
-      return serviceError("validation_error", "Task title is required.", {
+    if (!title || title.length > 120) {
+      return serviceError("validation_error", "请检查照护任务名称。", {
         title: "invalid"
       });
     }
 
-    const update = {
-      category: existingTask?.category ?? "other",
+    taskUpdates.push({
       enabled: formData.get(`task.${taskId}.enabled`) === "on",
-      frequency: existingTask?.frequency ?? null,
       id: taskId,
       instructions,
-      plan_id: planId,
       photo_required: formData.get(`task.${taskId}.photoRequired`) === "on",
       required: formData.get(`task.${taskId}.required`) === "on",
-      sort_order: existingTask?.sort_order ?? 0,
-      source: existingTask?.source ?? "owner",
-      source_ref: existingTask?.source_ref ?? null,
       time_hint: timeHint,
       title
-    };
-
-    if (
-      update.enabled !== existingTask?.enabled ||
-      update.instructions !== (existingTask?.instructions ?? null) ||
-      update.photo_required !== existingTask?.photo_required ||
-      update.required !== existingTask?.required ||
-      update.time_hint !== (existingTask?.time_hint ?? null) ||
-      update.title !== existingTask?.title
-    ) {
-      taskUpdates.push(update);
-    }
-
-    nextTasks.push({
-      category: update.category,
-      enabled: update.enabled,
-      frequency: update.frequency,
-      id: update.id,
-      instructions: update.instructions,
-      planId,
-      photoRequired: update.photo_required,
-      required: update.required,
-      sortOrder: update.sort_order,
-      source: update.source,
-      timeHint: update.time_hint,
-      title: update.title
     });
   }
 
-  if (taskUpdates.length > 0) {
-    const updateResult = await clientResult.data
-      .from("care_tasks")
-      .upsert(taskUpdates, { onConflict: "id" });
-
-    if (updateResult.error) {
-      return mapSupabaseError(updateResult.error);
-    }
-  }
-
-  const newTaskIds = formData
-    .getAll("newTaskId")
-    .map((value) => String(value).trim())
-    .filter(Boolean);
+  const newTaskIds = Array.from(new Set(
+    formData
+      .getAll("newTaskId")
+      .map((value) => String(value).trim())
+      .filter(Boolean)
+  ));
   const legacyNewTaskTitle = String(formData.get("newTask.title") ?? "").trim();
   const pendingNewTaskIds = newTaskIds.length > 0
     ? newTaskIds
     : legacyNewTaskTitle
       ? [""]
       : [];
-  const tasksToInsert: CareTaskInsert[] = [];
+  const newTasks: Array<Record<string, Json>> = [];
 
-  for (const [index, newTaskId] of pendingNewTaskIds.entries()) {
+  for (const newTaskId of pendingNewTaskIds) {
     const fieldPrefix = newTaskId ? `newTask.${newTaskId}` : "newTask";
     const newTaskTitle = String(formData.get(`${fieldPrefix}.title`) ?? "").trim();
 
@@ -506,118 +543,69 @@ export async function updateCatCarePlanTasksFromFormData(
       continue;
     }
 
-    const scopedNewTaskTitle = withTaskScopeTitle(
+    const scopedTitle = withTaskScopeTitle(
       newTaskTitle,
       normalizeOptionalText(formData.get(`${fieldPrefix}.scope`))
     );
+    const instructions = withRelatedItemInstruction(
+      normalizeOptionalText(formData.get(`${fieldPrefix}.instructions`)),
+      normalizeOptionalText(formData.get(`${fieldPrefix}.relatedItem`))
+    );
 
-    if (scopedNewTaskTitle.length > 160) {
-      return serviceError("validation_error", "Task title is required.", {
+    if (scopedTitle.length > 120) {
+      return serviceError("validation_error", "请检查新增照护任务名称。", {
         title: "invalid"
       });
     }
 
-    const relatedItem = normalizeOptionalText(formData.get(`${fieldPrefix}.relatedItem`));
-    const newTaskInstructions = withRelatedItemInstruction(
-      normalizeOptionalText(formData.get(`${fieldPrefix}.instructions`)),
-      relatedItem
-    );
-
-    tasksToInsert.push({
+    newTasks.push({
       category: normalizeCareTaskCategory(formData.get(`${fieldPrefix}.category`)),
       enabled: formData.get(`${fieldPrefix}.enabled`) === "on",
-      frequency: "daily",
-      instructions: newTaskInstructions,
-      plan_id: planId,
+      instructions,
       photo_required: formData.get(`${fieldPrefix}.photoRequired`) === "on",
       required: formData.get(`${fieldPrefix}.required`) === "on",
-      sort_order: existingTasks.size + index,
-      source: "owner",
-      source_ref: null,
       time_hint: normalizeTaskTimeHint(formData, `${fieldPrefix}.timeHint`) ?? "08:30",
-      title: scopedNewTaskTitle
+      title: scopedTitle
     });
   }
 
-  if (tasksToInsert.length > 0) {
-    const insertResult = await clientResult.data
-      .from("care_tasks")
-      .insert(tasksToInsert);
-
-    if (insertResult.error) {
-      return mapSupabaseError(insertResult.error);
-    }
+  if (
+    shouldPublish &&
+    !taskUpdates.some((task) => task.enabled === true) &&
+    !newTasks.some((task) => task.enabled === true)
+  ) {
+    return serviceError("validation_error", "至少保留一项要执行的照护任务后再发布。");
   }
 
-  const planUpdateQuery = clientResult.data
-    .from("care_plans")
-    .update({
-      ai_input_summary: withPlanVisitCount(
-        planResult.data.ai_input_summary,
-        visitCount
-      ),
-      handoff_notes: handoffNotes
-    })
-    .eq("owner_id", ownerResult.data)
-    .eq("id", planId)
-    .select("handoff_notes")
-    .single();
+  return serviceOk({ handoffNotes, newTasks, planId, taskUpdates, visitCount });
+}
 
-  if (tasksToInsert.length === 0) {
-    const planUpdateResult = await planUpdateQuery;
-
-    if (planUpdateResult.error) {
-      return mapSupabaseError(planUpdateResult.error);
-    }
-
-    await trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
-      enabled_task_count: nextTasks.filter((task) => task.enabled).length,
-      task_count: nextTasks.length
-    });
-
-    return serviceOk({
-      handoffNotes: planUpdateResult.data.handoff_notes,
-      id: planId,
-      tasks: nextTasks.sort((a, b) => a.sortOrder - b.sortOrder)
-    });
+function mapAtomicPlanSaveError(error: { code?: string; message?: string }) {
+  if (error.message?.includes("care_plan_requires_enabled_task")) {
+    return serviceError("validation_error", "至少保留一项要执行的照护任务后再发布。");
   }
 
-  const [tasksResult, planUpdateResult] = await Promise.all([
-    clientResult.data
-      .from("care_tasks")
-      .select(
-        "id, plan_id, category, title, instructions, time_hint, frequency, source, source_ref, sort_order, required, photo_required, enabled, created_at, updated_at"
-      )
-      .eq("plan_id", planId)
-      .order("sort_order", { ascending: true }),
-    planUpdateQuery
-  ]);
-
-  if (tasksResult.error) {
-    return mapSupabaseError(tasksResult.error);
+  if (error.message?.includes("care_plan_not_editable")) {
+    return serviceError("conflict", "这份计划已被发布或修改，请刷新页面后再操作。");
   }
 
-  if (planUpdateResult.error) {
-    return mapSupabaseError(planUpdateResult.error);
+  if (error.message?.includes("care_plan_task_set_changed")) {
+    return serviceError("conflict", "计划任务已在其他页面发生变化，请刷新后重新确认。");
   }
 
-  await trackCatCareProductEvent(ownerResult.data, "catcare_plan_tasks_updated", {
-    enabled_task_count: (tasksResult.data ?? []).filter((task) => task.enabled).length,
-    task_count: tasksResult.data?.length ?? 0
-  });
+  if (error.message?.includes("care_plan_")) {
+    return serviceError("validation_error", "请检查当前照护清单后再发布。");
+  }
 
-  return serviceOk({
-    handoffNotes: planUpdateResult.data.handoff_notes,
-    id: planId,
-    tasks: (tasksResult.data ?? []).map(mapTask)
-  });
+  return mapSupabaseError(error);
 }
 
 async function buildMultiCatPlanTasks(
   client: AppSupabaseClient,
   ownerId: string,
   cats: CatRow[],
-  fallbackTasks: CreatePlanInput["tasks"]
+  fallbackTasks: CreatePlanInput["tasks"],
+  planStartOn: string
 ): Promise<
   ServiceResult<{
     eventCount: number;
@@ -728,7 +716,15 @@ async function buildMultiCatPlanTasks(
 
   const eventsByCatId = new Map<string, CareEventRow[]>();
 
-  for (const event of careEventsResult.data ?? []) {
+  const eligibleEvents = (careEventsResult.data ?? [])
+    .filter((event) => isCareEventRelevantToPlan(event, planStartOn))
+    .sort((left, right) =>
+      (getCareEventReferenceDate(right) ?? "").localeCompare(
+        getCareEventReferenceDate(left) ?? ""
+      )
+    );
+
+  for (const event of eligibleEvents) {
     const events = eventsByCatId.get(event.cat_id) ?? [];
 
     if (events.length < 4) {
@@ -792,6 +788,9 @@ async function buildMultiCatPlanTasks(
         enabled: true,
         frequency: null,
         instructions: [
+          getCareEventReferenceDate(event)
+            ? `事件日期：${getCareEventReferenceDate(event)}`
+            : null,
           event.note,
           event.related_item_name ? `关联：${event.related_item_name}` : null
         ]
@@ -952,103 +951,6 @@ function parseCatScopedTaskTitle(title: string) {
   }
 
   return { action, catName };
-}
-
-export async function publishCatCarePlan(
-  planId: string
-): Promise<ServiceResult<CatCarePlan>> {
-  const correlationId = randomUUID();
-  const clientResult = await createSupabaseServerClient();
-
-  if (!clientResult.ok) {
-    return clientResult;
-  }
-
-  const ownerResult = await getAuthenticatedOwnerId(clientResult.data);
-
-  if (!ownerResult.ok) {
-    return ownerResult;
-  }
-
-  const { count, error: taskError } = await clientResult.data
-    .from("care_tasks")
-    .select("id", { count: "exact", head: true })
-    .eq("plan_id", planId)
-    .eq("enabled", true);
-
-  if (taskError) {
-    return mapSupabaseError(taskError);
-  }
-
-  if (!count) {
-    return serviceError(
-      "validation_error",
-      "Add at least one care task before publishing.",
-      { taskTitle: "required" }
-    );
-  }
-
-  const { data, error } = await clientResult.data
-    .from("care_plans")
-    .update({
-      status: "published",
-      published_at: new Date().toISOString()
-    })
-    .eq("id", planId)
-    .eq("owner_id", ownerResult.data)
-    .eq("status", "draft")
-    .select(
-      "id, owner_id, cat_id, routine_id, title, status, scenario, generation_source, ai_input_summary, start_on, end_on, handoff_notes, generated_at, published_at, reviewed_at, closed_at, created_at, updated_at"
-    )
-    .single();
-
-  if (error) {
-    return mapSupabaseError(error);
-  }
-
-  const analyticsDeliveries: Promise<void>[] = [];
-  fanOutSafeCapabilityContext(
-    {
-      correlation_id: correlationId,
-      request_source: "catcare_plan_publish",
-      resource_id: data.id,
-      resource_type: "care_plan"
-    },
-    [
-      (context) => {
-        analyticsDeliveries.push(trackCatCareProductEvent(
-          ownerResult.data,
-          "catcare_plan_published",
-          {
-            enabled_task_count: count ?? 0,
-            plan_status: data.status,
-            result: "success"
-          },
-          context
-        ));
-      },
-      (context) => {
-        void recordCatCareAuditEvent({
-          actorType: "user",
-          correlationId: context.correlation_id ?? correlationId,
-          eventName: "care_plan_published",
-          ownerId: ownerResult.data,
-          properties: {
-            task_count: count ?? 0
-          },
-          resourceId: context.resource_id ?? data.id,
-          resourceType: "care_plan"
-        });
-      }
-    ]
-  );
-  await Promise.all(analyticsDeliveries);
-
-  return serviceOk({
-    ...mapPlan(data),
-    tasks: [],
-    submissions: []
-  });
 }
 
 export async function closeCatCarePlan(

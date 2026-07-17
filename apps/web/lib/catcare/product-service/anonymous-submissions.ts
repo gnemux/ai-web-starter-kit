@@ -591,18 +591,29 @@ async function getAnonymousSubmissionBySlot(
     return slot?.serviceDate === serviceDate && slot.visitTime === visitTime;
   });
 
-  return serviceOk(
-    submission?.idempotency_key
-      ? {
-          abnormal: submission.abnormal,
-          attachmentCount: 0,
-          idempotencyKey: submission.idempotency_key,
-          note: submission.note,
-          submissionId: submission.id,
-          serviceDate,
-          status: submission.status,
-          submittedAt: submission.created_at
-        }
-      : null
-  );
+  if (!submission?.idempotency_key) {
+    return serviceOk(null);
+  }
+
+  const attachmentResult = await client
+    .from("care_submission_attachments")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", ownerId)
+    .eq("plan_id", planId)
+    .eq("submission_id", submission.id);
+
+  if (attachmentResult.error) {
+    return mapSupabaseError(attachmentResult.error);
+  }
+
+  return serviceOk({
+    abnormal: submission.abnormal,
+    attachmentCount: Math.min(attachmentResult.count ?? 0, careEvidenceMaxCount),
+    idempotencyKey: submission.idempotency_key,
+    note: submission.note,
+    submissionId: submission.id,
+    serviceDate,
+    status: submission.status,
+    submittedAt: submission.created_at
+  });
 }

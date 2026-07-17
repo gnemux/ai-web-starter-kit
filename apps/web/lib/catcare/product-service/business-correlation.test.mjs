@@ -45,14 +45,14 @@ test("product and AI analytics forward the action safe metadata", () => {
 test("publish owns one correlation id for Audit and PostHog", () => {
   const publish = section(
     plans,
-    "export async function publishCatCarePlan",
-    "export async function closeCatCarePlan"
+    "async function saveCatCarePlanTaskForm",
+    "function normalizeAtomicPlanInput"
   );
 
   assert.equal((publish.match(/randomUUID\(\)/g) ?? []).length, 1);
   assert.match(
     publish,
-    /fanOutSafeCapabilityContext\([\s\S]*correlation_id: correlationId[\s\S]*trackCatCareProductEvent\([\s\S]*context[\s\S]*recordCatCareAuditEvent/
+    /trackCatCareProductEvent\([\s\S]*correlation_id: correlationId[\s\S]*recordCatCareAuditEvent\([\s\S]*correlationId,/
   );
 });
 

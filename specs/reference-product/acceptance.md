@@ -627,14 +627,16 @@
   a recoverable field message. The server validates real selected files rather
   than trusting a numeric count from the client. An exception with a note is committed first even
   without a photo and offers a later media retry.
-- The sitter can preview/remove up to three local images. Uploads are separate
+- The sitter can preview/remove up to three local images and open each local
+  preview at full size before submission. Uploads are separate
   from the text mutation, identical retry is idempotent, the fourth image is
   rejected, and revoked/tampered/out-of-scope tokens cannot upload.
 - Server normalization accepts only bounded JPG/PNG/WebP input, auto-orients,
   limits dimensions, emits a WebP no larger than 2 MB, and strips EXIF/GPS/XMP.
 - `care-evidence` is private and has no direct anon/authenticated Storage policy.
   Anonymous access to the owner proxy returns 401, cross-owner metadata reads
-  return no rows, and only the owning authenticated account sees thumbnails and
+  return no rows, and only the owning authenticated account sees thumbnails,
+  an in-page large-photo viewer with previous/next and keyboard close, and
   download links.
 - Cat-profile uploads use the same server normalization and clean up replaced
   or failed objects. Runtime CatCare assets referenced by pages use compressed
@@ -644,7 +646,40 @@
 - Concurrent same-image uploads converge to one attachment and both requests
   succeed idempotently; concurrent distinct images take different positions,
   and a fourth image is rejected.
+- A 5–15 MB JPG/PNG/WebP phone original is accepted by the picker, visibly
+  preprocessed to a network file no larger than 3 MB, and then passes the same
+  authoritative server normalization. A raw request above the 4 MB server
+  boundary is still rejected. Processing failure preserves a recoverable
+  selection/error state and never loses an already committed text result.
+- Status badges remain single-line at 390 px. A plan ending before the current
+  Shanghai date is counted and rendered in history rather than active; an
+  overdue published plan is labeled `已结束·可补交`, links to results, keeps its
+  durable published state, and still permits a valid share link to submit.
+- Plan detail loads independent item options, share state, and Audit activity
+  concurrently after the scoped plan is known. Generate, regenerate, and revoke
+  share actions immediately show a disabled in-progress label so a bounded
+  remote token/Audit/Analytics operation never looks like an ignored click.
+  The returned share state updates the client directly; these actions do not
+  revalidate and rerun the entire private plan-detail route. A successful
+  result also updates the visible security activity immediately while the
+  server remains authoritative for the persisted Audit record.
+- Plan generation excludes watch events older than 14 days and excludes
+  health/medicine or urgent events older than 30 days relative to the plan
+  start date. Eligible event tasks show their source date and each cat still
+  contributes at most four; the historical event timeline is unchanged.
+- Both draft-only save and publishing submit the current editor form through
+  the same locked transaction. Tasks marked `暂不执行`, changed visit times,
+  handoff notes, and newly added tasks commit together; publishing additionally
+  changes the status and requires at least one executable task. A delayed save
+  from another tab cannot mutate a published plan. Users may still choose
+  `仅保存草稿`, but it is never required before `保存并发布` and disabling a
+  generated food or event task must survive direct publishing.
 - Clean local `supabase db reset`, schema/grant/policy inspection, image tests,
   web tests, typecheck, package boundaries, production build, and browser/API
-  smoke must pass. Shared cloud migration and deployed smoke remain `not_run`
-  until the repository owner explicitly approves the database gate.
+  smoke must pass. PR #104 is merged and migration
+  `20260716093000_gne_319_private_care_media` is applied to the shared cloud
+  test project. The later plan/event/large-photo acceptance repair remains
+  local and requires user page acceptance before any follow-up publication.
+- If the first image is committed but its response is lost, reselecting and
+  retrying the same image restores the authoritative database count instead of
+  displaying zero or double-counting it.

@@ -14,6 +14,7 @@ test("owner notification insert contains only bounded submission facts", () => {
     serviceDate: "2026-07-17",
     status: "exception",
     submissionId: "submission-1",
+    submissionRevision: 1,
     taskId: "task-1",
     taskTitle: `  ${"x".repeat(180)}  `,
     visitTime: "09:30"
@@ -32,6 +33,7 @@ test("owner notification insert contains only bounded submission facts", () => {
     "plan_id",
     "service_date",
     "submission_id",
+    "submission_revision",
     "submission_status",
     "task_id",
     "task_title",
@@ -51,6 +53,7 @@ test("notification target is product-local and safely disappears with its plan",
     read_at: null,
     service_date: "2026-07-17",
     submission_id: "submission-1",
+    submission_revision: 1,
     submission_status: "completed",
     task_id: "task-1",
     task_title: "补充饮水",
@@ -65,21 +68,21 @@ test("notification target is product-local and safely disappears with its plan",
   assert.equal(mapOwnerNotification({ ...base, plan_id: null }).href, null);
 });
 
-test("a meaningful submission update can reopen the existing notification", () => {
+test("notification payload carries the source submission revision", () => {
   const insert = buildOwnerSubmissionNotification({
     abnormal: false,
-    markUnread: true,
     ownerId: "owner-1",
     planId: "plan-1",
     serviceDate: "2026-07-17",
     status: "note",
     submissionId: "submission-1",
+    submissionRevision: 2,
     taskId: "task-1",
     taskTitle: "补充饮水",
     visitTime: "09:30"
   });
 
-  assert.equal(insert.read_at, null);
-  assert.equal(typeof insert.last_notified_at, "string");
-  assert.equal(Number.isNaN(Date.parse(insert.last_notified_at)), false);
+  assert.equal(insert.submission_revision, 2);
+  assert.equal("read_at" in insert, false);
+  assert.equal("last_notified_at" in insert, false);
 });

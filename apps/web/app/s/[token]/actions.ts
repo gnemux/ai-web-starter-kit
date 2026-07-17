@@ -17,8 +17,10 @@ export async function submitAnonymousCareTaskAction(formData: FormData) {
 
   let attachmentCount = result.data.attachmentCount;
   let mediaUploadError: string | null = null;
+  const uploadedPhotoIndexes: number[] = [];
+  const photos = formData.getAll("photos");
 
-  for (const file of formData.getAll("photos")) {
+  for (const [index, file] of photos.entries()) {
     const uploadResult = await uploadAnonymousCareEvidence({
       file,
       secret: token,
@@ -30,6 +32,7 @@ export async function submitAnonymousCareTaskAction(formData: FormData) {
       continue;
     }
 
+    uploadedPhotoIndexes.push(index);
     attachmentCount = uploadResult.data.attachmentCount;
   }
 
@@ -42,7 +45,8 @@ export async function submitAnonymousCareTaskAction(formData: FormData) {
     data: {
       ...result.data,
       attachmentCount: Math.min(attachmentCount, 3),
-      mediaUploadError
+      mediaUploadError,
+      uploadedPhotoIndexes
     }
   };
 }

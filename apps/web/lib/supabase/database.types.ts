@@ -147,6 +147,7 @@ export type Database = {
           read_at: string | null;
           service_date: string;
           submission_id: string | null;
+          submission_revision: number;
           submission_status: "completed" | "note" | "exception";
           task_id: string | null;
           task_title: string;
@@ -164,6 +165,7 @@ export type Database = {
           read_at?: string | null;
           service_date: string;
           submission_id?: string | null;
+          submission_revision?: number;
           submission_status: "completed" | "note" | "exception";
           task_id?: string | null;
           task_title: string;
@@ -181,6 +183,7 @@ export type Database = {
           read_at?: string | null;
           service_date?: string;
           submission_id?: string | null;
+          submission_revision?: number;
           submission_status?: "completed" | "note" | "exception";
           task_id?: string | null;
           task_title?: string;
@@ -1221,6 +1224,7 @@ export type Database = {
           submitted_by_label: string;
           status: "completed" | "note" | "exception";
           note: string | null;
+          revision: number;
           abnormal: boolean;
           idempotency_key: string | null;
           created_at: string;
@@ -1233,6 +1237,7 @@ export type Database = {
           submitted_by_label: string;
           status: "completed" | "note" | "exception";
           note?: string | null;
+          revision?: number;
           abnormal?: boolean;
           idempotency_key?: string | null;
           created_at?: string;
@@ -1245,6 +1250,7 @@ export type Database = {
           submitted_by_label?: string;
           status?: "completed" | "note" | "exception";
           note?: string | null;
+          revision?: number;
           abnormal?: boolean;
           idempotency_key?: string | null;
           created_at?: string;
@@ -1374,6 +1380,22 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: {
+      upsert_owner_submission_notification: {
+        Args: {
+          p_event_type: string;
+          p_idempotency_key: string;
+          p_owner_id: string;
+          p_plan_id: string | null;
+          p_service_date: string;
+          p_submission_id: string | null;
+          p_submission_revision: number;
+          p_submission_status: string;
+          p_task_id: string | null;
+          p_task_title: string;
+          p_visit_time: string;
+        };
+        Returns: string;
+      };
       save_care_plan_tasks: {
         Args: {
           should_publish: boolean;

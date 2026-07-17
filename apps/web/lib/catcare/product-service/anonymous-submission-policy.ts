@@ -41,6 +41,19 @@ export function requiresAnonymousCareSubmissionNote(
   return status === "note" || status === "exception";
 }
 
+export function satisfiesAnonymousCareSubmissionPhotoRequirement(input: {
+  existingAttachmentCount: number;
+  pendingPhotoCount: number;
+  photoRequired: boolean;
+  status: AnonymousCareSubmissionStatus;
+}) {
+  return (
+    !input.photoRequired ||
+    input.status === "exception" ||
+    input.existingAttachmentCount + input.pendingPhotoCount > 0
+  );
+}
+
 export function getAnonymousCarePlanServiceDates(
   startOn: string | null,
   endOn: string | null,

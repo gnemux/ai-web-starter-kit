@@ -18,7 +18,8 @@ import {
   normalizeAnonymousCareSubmissionNote,
   parseAnonymousCareSubmissionSlotKey,
   parseAnonymousCareSubmissionStatus,
-  requiresAnonymousCareSubmissionNote
+  requiresAnonymousCareSubmissionNote,
+  satisfiesAnonymousCareSubmissionPhotoRequirement
 } from "./anonymous-submission-policy";
 import { recordCatCareAuditEvent } from "./audit";
 import { ensureCriticalSubmissionEffects } from "./critical-effects";
@@ -45,6 +46,7 @@ export type AnonymousCareSubmissionMutation = AnonymousCareTaskSubmissionView & 
 
 type AnonymousCareSubmissionSlotView = AnonymousCareTaskSubmissionView & {
   idempotencyKey: string;
+  revision: number;
   submissionId: string;
 };
 
@@ -222,16 +224,6 @@ export async function submitAnonymousCareSubmissionFromFormData(
     });
   }
 
-  if (
-    task.photoRequired &&
-    status !== "exception" &&
-    evidenceFiles.length < 1
-  ) {
-    return serviceError("validation_error", "主人要求这项任务附带照片，请先选择照片。", {
-      photo: "required"
-    });
-  }
-
   const idempotencyKey = createAnonymousSubmissionIdempotencyKey(
     serviceDate,
     visitTime,
@@ -250,6 +242,19 @@ export async function submitAnonymousCareSubmissionFromFormData(
     return existingResult;
   }
 
+  if (
+    !satisfiesAnonymousCareSubmissionPhotoRequirement({
+      existingAttachmentCount: existingResult.data?.attachmentCount ?? 0,
+      pendingPhotoCount: evidenceFiles.length,
+      photoRequired: task.photoRequired,
+      status
+    })
+  ) {
+    return serviceError("validation_error", "主人要求这项任务附带照片，请先选择照片。", {
+      photo: "required"
+    });
+  }
+
   if (existingResult.data) {
     if (
       existingResult.data.status !== status ||
@@ -260,16 +265,25 @@ export async function submitAnonymousCareSubmissionFromFormData(
         .update({
           abnormal: status === "exception",
           note,
+          revision: existingResult.data.revision + 1,
           status
         })
         .eq("owner_id", tokenResult.data.ownerId)
         .eq("plan_id", tokenResult.data.resourceId)
         .eq("idempotency_key", existingResult.data.idempotencyKey)
-        .select("id, status, note, abnormal, created_at")
-        .single();
+        .eq("revision", existingResult.data.revision)
+        .select("id, status, note, abnormal, created_at, revision")
+        .maybeSingle();
 
       if (updateResult.error) {
         return mapSupabaseError(updateResult.error);
+      }
+
+      if (!updateResult.data) {
+        return serviceError(
+          "conflict",
+          "这项照护反馈刚被更新，请刷新页面后重新确认。"
+        );
       }
 
       const auditResult = await recordCatCareAuditEvent({
@@ -311,9 +325,9 @@ export async function submitAnonymousCareSubmissionFromFormData(
       }
       const notificationResult = await recordSubmissionNotification({
         abnormal: updateResult.data.abnormal,
-        markUnread: true,
         ownerId: tokenResult.data.ownerId,
         planId: tokenResult.data.resourceId,
+        revision: updateResult.data.revision,
         serviceDate,
         status: updateResult.data.status,
         submissionId: updateResult.data.id,
@@ -369,6 +383,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
         abnormal: existingSubmission.abnormal,
         ownerId: tokenResult.data.ownerId,
         planId: tokenResult.data.resourceId,
+        revision: existingSubmission.revision,
         serviceDate,
         status: existingSubmission.status,
         submissionId: existingSubmission.submissionId,
@@ -398,7 +413,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
       submitted_by_label: "照看者",
       task_id: task.id
     })
-    .select("id, status, note, abnormal, created_at")
+    .select("id, status, note, abnormal, created_at, revision")
     .single();
 
   if (insertResult.error?.code === "23505") {
@@ -434,6 +449,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
           abnormal: duplicate.abnormal,
           ownerId: tokenResult.data.ownerId,
           planId: tokenResult.data.resourceId,
+          revision: duplicate.revision,
           serviceDate,
           status: duplicate.status,
           submissionId: duplicate.submissionId,
@@ -497,6 +513,7 @@ export async function submitAnonymousCareSubmissionFromFormData(
     abnormal: insertResult.data.abnormal,
     ownerId: tokenResult.data.ownerId,
     planId: tokenResult.data.resourceId,
+    revision: insertResult.data.revision,
     serviceDate,
     status: insertResult.data.status,
     submissionId: insertResult.data.id,
@@ -573,9 +590,9 @@ function recordSubmissionOutbox({
 
 function recordSubmissionNotification(input: {
   abnormal: boolean;
-  markUnread?: boolean;
   ownerId: string;
   planId: string;
+  revision: number;
   serviceDate: string;
   status: Database["public"]["Tables"]["care_submissions"]["Row"]["status"];
   submissionId: string;
@@ -583,7 +600,12 @@ function recordSubmissionNotification(input: {
   taskTitle: string;
   visitTime: string;
 }) {
-  return recordOwnerSubmissionNotification(input);
+  const { revision, ...notificationInput } = input;
+
+  return recordOwnerSubmissionNotification({
+    ...notificationInput,
+    submissionRevision: revision
+  });
 }
 
 
@@ -641,7 +663,7 @@ async function getAnonymousSubmissionBySlot(
 ): Promise<ServiceResult<AnonymousCareSubmissionSlotView | null>> {
   const result = await client
     .from("care_submissions")
-    .select("id, status, note, abnormal, idempotency_key, created_at")
+    .select("id, status, note, abnormal, idempotency_key, created_at, revision")
     .eq("owner_id", ownerId)
     .eq("plan_id", planId)
     .eq("task_id", taskId)
@@ -678,6 +700,7 @@ async function getAnonymousSubmissionBySlot(
     attachmentCount: Math.min(attachmentResult.count ?? 0, careEvidenceMaxCount),
     idempotencyKey: submission.idempotency_key,
     note: submission.note,
+    revision: submission.revision,
     submissionId: submission.id,
     serviceDate,
     status: submission.status,

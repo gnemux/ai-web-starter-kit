@@ -244,3 +244,63 @@ typecheck, lint, tests, and build. The target Supabase
 project's exact `/auth/recovery` URL must be in the Auth redirect allowlist and
 its Recovery Email Template must match the documented contract before real
 email delivery is release evidence.
+
+## GNE-319 Private Media Architecture
+
+```text
+anonymous status form
+-> existing share-token gate and idempotent care submission
+-> status/Audit/Outbox committed first
+-> server action receives the actual selected File objects
+-> POST /api/catcare/share/submissions/:submissionId/attachments
+   (raw token remains in request body, not the API path)
+-> revalidate active token + published plan + scoped submission
+-> Sharp decode / auto-orient / resize / WebP encode / metadata strip
+-> service-role write to private care-evidence bucket
+-> care_submission_attachments metadata row
+-> authenticated owner-only proxy for preview or download
+```
+
+`care_tasks.photo_required` is a product flag, not a storage permission.
+`care_submission_attachments` stores owner, plan, submission and optional task
+relations plus position, private object path, normalized content type, bounded
+dimensions/bytes, SHA-256, and creation time. Position is constrained to
+`0..2` and unique per submission, which makes more than three rows impossible;
+submission plus hash is unique so a same-file retry is idempotent.
+
+The `care-evidence` bucket is private, accepts only `image/webp`, and has a 2 MB
+object limit. It intentionally has no anon or authenticated `storage.objects`
+policy. The anonymous upload route uses the service role only after validating
+the raw share credential and its owner/plan/submission scope. The owner metadata
+table grants authenticated users `SELECT` only under owner RLS; the application
+then uses a server-side admin client to read the object after the owner check.
+No signed or public object URL is returned, so token revocation and owner
+authorization remain application-controlled.
+
+Input validation checks declared MIME, 4 MB evidence / 5 MB cat-photo bounds,
+decoded JPEG/PNG/WebP format, a 40-million-pixel decoder ceiling, and single
+frame content. Sharp auto-orients, limits evidence to 1600 px and cat photos to
+1200 px, emits WebP, and does not retain metadata. A second lower-quality pass
+is used only when needed to stay below 2 MB. Cat upload replacement removes the
+old object after the database update and removes a newly uploaded object if its
+database mutation fails.
+
+Text and media are deliberately separate failure domains. Exceptions are never
+blocked by camera or upload failure. A normal photo-required submission is
+validated from actual server-received files, never from a client-reported
+count. The server action uploads the first selection sequentially after the
+text result is durable; the client retains failed local selections and retries
+only media through the scoped route. Duplicate image hashes return the existing
+attachment. A concurrent unique conflict reloads current attachments, returns
+the winning same-hash row, or reallocates a free position with a bounded retry.
+An insert failure removes the just-written object; cleanup failure is reported
+instead of silently declaring success. Retained historical attachments follow
+submission/plan retention;
+automatic physical purging remains a separately governed lifecycle operation.
+
+Supabase Free image transformations are not a dependency. Static CatCare
+runtime PNG assets are precompressed to WebP in the repository, while the
+runtime upload pipeline depends directly on pinned `sharp`. Product-specific
+task, token, bucket, and evidence semantics remain in `apps/web` and the product
+migration; nothing is moved into the clean template or `packages/*` in this
+issue.

@@ -50,7 +50,7 @@ MVP2 扩展底座
 MVP3 Reference Product：双底座架构与 Package 消费验证
 -> use the cat temporary care-plan Reference Product to prove that product repos can consume the XWLC platform foundation through versioned packages instead of copying Starter Kit source
 -> execution parents are `GNE-228` through `GNE-234`, followed by `GNE-298` and `GNE-317`: PLAN, PLATFORM, DELIVERY, PRODUCT, ACCESS, CAPABILITY, VERIFY, TEMPLATE, and PRODUCT HARDENING
--> `GNE-317` starts only after the accepted clean template candidate in `GNE-298`; it closes three real CatCare usability gaps without copying CatCare business code into the template repository
+-> `GNE-317` starts only after the accepted clean template candidate in `GNE-298`; it closes four real CatCare usability gaps without copying CatCare business code into the template repository
 
 Future Growth / Backlog
 -> keep `GNE-75 FUTURE GROWTH-00` as a horizontal growth and feedback capability outside MVP3/MVP4/MVP5/MVP6 until a real product-growth decision reopens it
@@ -137,7 +137,7 @@ position in this list.
 - MVP3 uses the 4-package naming convention `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and `@xwlc/db`. Do not mix in a 5-package naming scheme during MVP3 unless a later v0.3.x decision explicitly splits packages.
 - MVP3 execution starts with `GNE-228 / MVP3-01 PLAN`, proceeds through `GNE-229 PLATFORM`, `GNE-230 DELIVERY`, `GNE-231 PRODUCT`, `GNE-232 ACCESS`, `GNE-233 CAPABILITY`, `GNE-234 VERIFY`, and `GNE-298 TEMPLATE`, then enters `GNE-317 PRODUCT HARDENING` only after the template acceptance gate.
 - MVP3 follows a 小团队 WIP rule: keep the main implementation on one parent issue at a time. The next parent can be reviewed ahead, but child issues should not be executed out of their parent issue sequence.
-- MVP3 child issues are created under `GNE-228` through `GNE-234`, `GNE-298`, and `GNE-317`. They stay off the milestone view and carry no Linear labels; parent issues remain the milestone-level navigation and acceptance surface. `GNE-317` runs `GNE-318 -> GNE-319 -> GNE-320`, keeps exactly one child In Progress, and stops after the current child instead of entering the next automatically.
+- MVP3 child issues are created under `GNE-228` through `GNE-234`, `GNE-298`, and `GNE-317`. They stay off the milestone view and carry no Linear labels; parent issues remain the milestone-level navigation and acceptance surface. `GNE-317` runs `GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`, keeps exactly one child In Progress, and stops after the current child instead of entering the next automatically.
 - The first template candidate inherits `packages/*` as a version-stamped local workspace snapshot with source-commit provenance. Central registry publishing and cross-repository upgrades remain trigger-based work for a second real consumer, not claims of `GNE-298`.
 - GNE-301 freezes the TEMPLATE boundary in `specs/template/*`: one research/evidence repository, one separately generated clean candidate, and one independently deployed repository per real product. It changes no runtime code or database.
 - MVP3 CatCare is a small Reference Product, not a demo reskin. It must be good enough to prove that the common foundation can support a real product flow, even though live payment, live AI, and full business automation remain out of MVP3 scope.

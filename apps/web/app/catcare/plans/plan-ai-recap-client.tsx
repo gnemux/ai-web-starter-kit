@@ -127,7 +127,7 @@ export function CatCareAiRecapPanel({
           <img
             alt=""
             className="h-32 w-32 object-contain mix-blend-multiply sm:h-40 sm:w-40 lg:h-48 lg:w-48"
-            src="/catcare/illustrations/ai-billing-robot-cat.png"
+            src="/catcare/illustrations/ai-billing-robot-cat.webp"
           />
         </div>
       </div>

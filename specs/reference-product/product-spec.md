@@ -172,3 +172,37 @@ work does not add SMS recovery, MFA, social login,
 administrator password changes, a custom email provider, or a database
 migration. It must not log or emit email addresses, passwords, OTPs, recovery
 codes, token hashes, or reset URLs.
+
+## GNE-319 Private Care Media
+
+CatCare owners may mark an individual plan task as requiring photo evidence.
+The requirement follows every scheduled visit for that task and is visible in
+the owner editor, published plan, schedule, and anonymous sitter page. A normal
+completion cannot be submitted without selecting at least one photo when the
+owner enabled this requirement. The server receives and validates the real
+selected files and does not trust a client-provided photo count. An exception
+report is different: it must be
+saved immediately with its required note even when the camera, image upload, or
+network is unavailable, and the sitter is prompted to add photos afterward.
+
+The sitter can select, locally preview, remove, and retry up to three JPG, PNG,
+or WebP images per submitted task. Each input is limited to 4 MB. Text status is
+committed first and each photo uploads independently, so one failed image does
+not lose the care result or repeat the Audit/Outbox side effects. The page shows
+only the attachment count after upload; it does not expose stored object URLs
+or allow an anonymous visitor to read back private evidence.
+
+The owner sees lazy-loaded evidence thumbnails beside the matching real
+submission and can open or download the safety-processed copy only while
+authenticated as that owner. There is no public bucket URL. Stored evidence is
+retained with the submission and immutable plan history; failed application
+writes clean up their just-uploaded object, while a future governed data-purge
+workflow owns physical deletion of retained history.
+
+Runtime CatCare raster assets use compressed WebP delivery. Owner cat-profile
+uploads and sitter evidence are decoded and re-encoded server-side to bound
+dimensions and size and remove EXIF, GPS, XMP, and other source metadata. This
+conversion preserves existing cat profiles that stored the former built-in PNG
+illustration paths by resolving them to their new WebP equivalents. This
+issue does not add video, arbitrary documents, public galleries, image editing,
+face recognition, or a generic cross-product media platform.

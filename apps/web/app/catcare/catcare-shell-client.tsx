@@ -134,7 +134,7 @@ export function CatCareShellClient({
               alt=""
               aria-hidden="true"
               className="h-44 w-full object-contain object-bottom"
-              src="/catcare/hero-handoff.png"
+              src="/catcare/hero-handoff.webp"
             />
           </div>
         </aside>

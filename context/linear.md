@@ -714,7 +714,8 @@ GNE-298 TEMPLATE
 GNE-317 PRODUCT HARDENING
 ├── GNE-318 HARDENING-01 [AUTH/SECURITY] 忘记密码与账户恢复
 ├── GNE-319 HARDENING-02 [MEDIA/SECURITY] 图片性能与私密照护凭证
-└── GNE-320 HARDENING-03 [NOTIFICATION/UX] 真实站内通知与铃铛
+├── GNE-320 HARDENING-03 [NOTIFICATION/UX] 真实站内通知与铃铛
+└── GNE-321 HARDENING-04 [AUTH/OAUTH] Google / Apple 注册登录
 ```
 
 `GNE-298` is blocked by `GNE-234` and is the only TEMPLATE parent in the MVP3
@@ -727,8 +728,8 @@ approval for that execution.
 
 `GNE-317` is blocked by completed `GNE-298` and is the current active parent.
 Its children have no milestone or labels and execute in the fixed order
-`GNE-318 -> GNE-319 -> GNE-320`. `GNE-318` is the only active child. The parent
-owns only the three confirmed CatCare commercial-usability gaps; it does not
+`GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`. `GNE-319` is the only active child. The parent
+owns only the four confirmed CatCare commercial-usability gaps; it does not
 reopen template extraction or create a generic media/notification platform.
 
 GNE-301 is the documentation-only architecture gate. Its binding repository

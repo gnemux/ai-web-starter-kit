@@ -97,6 +97,12 @@ export { getCatCareAuditActivities } from "./product-service/audit";
 export type { CatCareAuditActivity } from "./product-service/audit";
 export { submitAnonymousCareSubmissionFromFormData } from "./product-service/anonymous-submissions";
 export { getAnonymousCarePlanView } from "./product-service/anonymous-view";
+export {
+  getCatCareEvidenceAttachmentById,
+  mapEvidenceAttachment,
+  uploadAnonymousCareEvidence
+} from "./product-service/care-evidence";
+export type { CatCareEvidenceAttachment } from "./product-service/care-evidence";
 
 export {
   createCarePlanShareLink,

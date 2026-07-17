@@ -20,6 +20,8 @@ export type CareTaskRow = Database["public"]["Tables"]["care_tasks"]["Row"];
 export type CareTaskInsert = Database["public"]["Tables"]["care_tasks"]["Insert"];
 export type CareSubmissionRow =
   Database["public"]["Tables"]["care_submissions"]["Row"];
+export type CareSubmissionAttachmentRow =
+  Database["public"]["Tables"]["care_submission_attachments"]["Row"];
 
 export type CarePlanStatus = "draft" | "published" | "reviewed" | "closed";
 export type CareSubmissionStatus = "completed" | "note" | "exception";
@@ -53,6 +55,7 @@ export type CatCareTask = {
   instructions: string | null;
   sortOrder: number;
   required: boolean;
+  photoRequired: boolean;
   source: CareTaskRow["source"];
 };
 
@@ -187,6 +190,7 @@ export type CatCareSubmission = {
   note: string | null;
   idempotencyKey: string | null;
   createdAt: string;
+  attachments: import("./care-evidence").CatCareEvidenceAttachment[];
 };
 
 export type CatCarePlan = {

@@ -155,7 +155,7 @@ function TaskEditorRow({
               {task.title}
             </p>
             <p className="mt-1 text-xs font-semibold text-[#75839a]">
-              {[task.timeHint, formatFrequency(task.frequency)].filter(Boolean).join(" · ")}
+              {[task.timeHint, formatFrequency(task.frequency), task.photoRequired ? "需照片" : null].filter(Boolean).join(" · ")}
             </p>
           </div>
         </div>
@@ -200,6 +200,9 @@ function HiddenTaskFields({
       {task.required ? (
         <input name={`task.${task.id}.required`} type="hidden" value="on" />
       ) : null}
+      {task.photoRequired ? (
+        <input name={`task.${task.id}.photoRequired`} type="hidden" value="on" />
+      ) : null}
       <input name={`task.${task.id}.title`} type="hidden" value={task.title} />
       {(task.timeHint ?? "")
         .split(/[，,]/)
@@ -243,6 +246,15 @@ function ExpandedTaskFields({ task }: { task: CatCareTask }) {
             type="checkbox"
           />
           必做
+        </label>
+        <label className="inline-flex items-center gap-2">
+          <input
+            className="h-4 w-4 accent-[#07847f]"
+            defaultChecked={task.photoRequired}
+            name={`task.${task.id}.photoRequired`}
+            type="checkbox"
+          />
+          要求照片
         </label>
       </div>
       <label className="grid gap-2">
@@ -300,6 +312,7 @@ function NewTaskCard({
   const [scope, setScope] = useState(scopeOptions[0] ?? "家庭共用");
   const [enabled, setEnabled] = useState(true);
   const [required, setRequired] = useState(true);
+  const [photoRequired, setPhotoRequired] = useState(false);
   const [category, setCategory] = useState<(typeof categories)[number][0]>("medicine");
   const [title, setTitle] = useState("");
   const [relatedItem, setRelatedItem] = useState("");
@@ -321,6 +334,7 @@ function NewTaskCard({
         id: `tmp-${Date.now()}-${items.length}`,
         instructions: instructions.trim(),
         relatedItem: relatedItem.trim(),
+        photoRequired,
         required,
         scope,
         timeHint: time,
@@ -425,6 +439,15 @@ function NewTaskCard({
             />
             必做
           </label>
+          <label className="inline-flex items-center gap-2">
+            <input
+              className="h-4 w-4 accent-[#07847f]"
+              checked={photoRequired}
+              onChange={(event) => setPhotoRequired(event.currentTarget.checked)}
+              type="checkbox"
+            />
+            要求照片
+          </label>
         </div>
         <div className="grid gap-2">
           <span className="text-xs font-semibold text-[#526177]">类型</span>
@@ -523,6 +546,7 @@ type DraftNewTask = {
   enabled: boolean;
   id: string;
   instructions: string;
+  photoRequired: boolean;
   relatedItem: string;
   required: boolean;
   scope: string;
@@ -555,6 +579,9 @@ function HiddenDraftNewTaskFields({ task }: { task: DraftNewTask }) {
       ) : null}
       {task.required ? (
         <input name={`${fieldPrefix}.required`} type="hidden" value="on" />
+      ) : null}
+      {task.photoRequired ? (
+        <input name={`${fieldPrefix}.photoRequired`} type="hidden" value="on" />
       ) : null}
     </>
   );

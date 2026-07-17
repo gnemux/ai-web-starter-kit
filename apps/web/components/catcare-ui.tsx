@@ -67,7 +67,7 @@ export function CatCareHeroImage({
       <img
         alt=""
         className="h-full min-h-[16rem] w-full object-cover"
-        src="/catcare/hero-handoff.png"
+        src="/catcare/hero-handoff.webp"
       />
     </div>
   );

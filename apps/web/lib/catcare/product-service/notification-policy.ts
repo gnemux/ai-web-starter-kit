@@ -19,12 +19,12 @@ export type OwnerNotificationView = {
 
 export function buildOwnerSubmissionNotification(input: {
   abnormal: boolean;
-  markUnread?: boolean;
   ownerId: string;
   planId: string;
   serviceDate: string;
   status: OwnerNotificationRow["submission_status"];
   submissionId: string;
+  submissionRevision: number;
   taskId: string;
   taskTitle: string;
   visitTime: string;
@@ -39,11 +39,9 @@ export function buildOwnerSubmissionNotification(input: {
     idempotency_key: `owner-notification:submission:${input.submissionId}`,
     owner_id: input.ownerId,
     plan_id: input.planId,
-    ...(input.markUnread
-      ? { last_notified_at: new Date().toISOString(), read_at: null }
-      : {}),
     service_date: input.serviceDate,
     submission_id: input.submissionId,
+    submission_revision: input.submissionRevision,
     submission_status: input.status,
     task_id: input.taskId,
     task_title: taskTitle,

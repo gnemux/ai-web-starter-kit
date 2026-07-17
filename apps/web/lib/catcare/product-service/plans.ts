@@ -1117,7 +1117,7 @@ export async function getCatCarePlanDetail(
       : clientResult.data
           .from("care_submissions")
           .select(
-            "id, owner_id, plan_id, task_id, submitted_by_label, status, note, abnormal, idempotency_key, created_at"
+            "id, owner_id, plan_id, task_id, submitted_by_label, status, note, revision, abnormal, idempotency_key, created_at"
           )
           .eq("owner_id", ownerResult.data)
           .eq("plan_id", planId)

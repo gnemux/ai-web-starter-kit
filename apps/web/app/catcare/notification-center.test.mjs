@@ -60,3 +60,33 @@ test("care exceptions remain visually distinct from ordinary submissions", async
   assert.equal(source.match(/hover:bg-teal-50\/70/g)?.length, 2);
   assert.equal(source.match(/hover:bg-amber-100\/70/g)?.length, 1);
 });
+
+test("a sitter can revise meaningful feedback while photo-only follow-up stays separate", async () => {
+  const [source, actionSource] = await Promise.all([
+    readFile(
+      new URL("../s/[token]/visit-accordion-client.tsx", catcareDirectory),
+      "utf8"
+    ),
+    readFile(new URL("../s/[token]/actions.ts", catcareDirectory), "utf8")
+  ]);
+  const photoOnlyFlow = source.slice(
+    source.indexOf("async function onEvidenceRetry"),
+    source.indexOf("async function onSubmit")
+  );
+  const submitFlow = source.slice(
+    source.indexOf("async function onSubmit"),
+    source.indexOf("return (", source.indexOf("async function onSubmit"))
+  );
+
+  assert.match(source, /const \[isEditing, setIsEditing\] = useState\(false\)/);
+  assert.match(source, /修改状态或备注/);
+  assert.match(source, /保存最新反馈/);
+  assert.match(source, /取消修改/);
+  assert.match(source, /submission && !isEditing && attachmentCount < 3/);
+  assert.match(source, /if \(!wasAlreadySubmitted\)/);
+  assert.match(source, /clearEvidenceFiles\(\)/);
+  assert.match(photoOnlyFlow, /await uploadEvidence\(submission\.submissionId\)/);
+  assert.doesNotMatch(photoOnlyFlow, /submitAnonymousCareTaskAction/);
+  assert.doesNotMatch(submitFlow, /await uploadEvidence/);
+  assert.match(actionSource, /uploadedPhotoIndexes\.push\(index\)/);
+});

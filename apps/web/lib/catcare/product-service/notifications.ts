@@ -14,7 +14,7 @@ import {
 } from "./notification-policy";
 
 const ownerNotificationSelect =
-  "id, owner_id, event_type, plan_id, task_id, submission_id, task_title, service_date, visit_time, submission_status, idempotency_key, read_at, last_notified_at, created_at, updated_at";
+  "id, owner_id, event_type, plan_id, task_id, submission_id, submission_revision, task_title, service_date, visit_time, submission_status, idempotency_key, read_at, last_notified_at, created_at, updated_at";
 
 export type OwnerNotificationCenter = {
   notifications: OwnerNotificationView[];
@@ -69,12 +69,12 @@ export async function getOwnerNotificationCenter(
 
 export async function recordOwnerSubmissionNotification(input: {
   abnormal: boolean;
-  markUnread?: boolean;
   ownerId: string;
   planId: string;
   serviceDate: string;
   status: "completed" | "note" | "exception";
   submissionId: string;
+  submissionRevision: number;
   taskId: string;
   taskTitle: string;
   visitTime: string;
@@ -87,16 +87,29 @@ export async function recordOwnerSubmissionNotification(input: {
 
   const notification = buildOwnerSubmissionNotification(input);
   const result = await clientResult.data
-    .from("owner_notifications")
-    .upsert(notification, { onConflict: "idempotency_key" })
-    .select("id")
-    .single();
+    .rpc("upsert_owner_submission_notification", {
+      p_event_type: notification.event_type,
+      p_idempotency_key: notification.idempotency_key,
+      p_owner_id: notification.owner_id,
+      p_plan_id: notification.plan_id ?? null,
+      p_service_date: notification.service_date,
+      p_submission_id: notification.submission_id ?? null,
+      p_submission_revision: input.submissionRevision,
+      p_submission_status: notification.submission_status,
+      p_task_id: notification.task_id ?? null,
+      p_task_title: notification.task_title,
+      p_visit_time: notification.visit_time
+    });
 
   if (result.error) {
     return mapSupabaseError(result.error);
   }
 
-  return serviceOk({ id: result.data.id });
+  if (!result.data) {
+    return serviceError("system_error", "Owner notification could not be written.");
+  }
+
+  return serviceOk({ id: result.data });
 }
 
 export async function markOwnerNotificationRead(

@@ -264,6 +264,7 @@ function TaskStep({
   >(task.submission?.status ?? "completed");
   const [note, setNote] = useState(task.submission?.note ?? "");
   const [submission, setSubmission] = useState(task.submission);
+  const [isEditing, setIsEditing] = useState(false);
   const [attachmentCount, setAttachmentCount] = useState(
     task.submission?.attachmentCount ?? 0
   );
@@ -333,6 +334,13 @@ function TaskStep({
       }
 
       return current.filter((item) => item.id !== id);
+    });
+  }
+
+  function clearEvidenceFiles() {
+    setEvidenceFiles((current) => {
+      current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      return [];
     });
   }
 
@@ -413,14 +421,15 @@ function TaskStep({
     setPending(true);
     setError(null);
     setMessage(null);
+    const wasAlreadySubmitted = Boolean(submission);
 
     const formData = new FormData(event.currentTarget);
     formData.set("serviceDate", task.serviceDate);
     formData.set("token", token);
     formData.set("submissionRef", task.submissionRef);
     formData.set("visitTime", task.visitTime);
-    if (evidenceFiles[0]) {
-      formData.append("photos", evidenceFiles[0].file);
+    for (const item of evidenceFiles) {
+      formData.append("photos", item.file);
     }
 
     const result = await submitAnonymousCareTaskAction(formData);
@@ -431,17 +440,19 @@ function TaskStep({
       return;
     }
 
-    const uploadResult = evidenceFiles.length > 0
-      ? await uploadEvidence(
-          result.data.submissionId,
-          result.data.attachmentCount
-        )
-      : {
-          attachmentCount: result.data.attachmentCount,
-          error: result.data.mediaUploadError
-        };
-    const nextAttachmentCount = uploadResult.attachmentCount;
-    const mediaError = uploadResult.error;
+    const uploadedPhotoIndexes = new Set(result.data.uploadedPhotoIndexes);
+    setEvidenceFiles((current) =>
+      current.filter((item, index) => {
+        if (!uploadedPhotoIndexes.has(index)) {
+          return true;
+        }
+
+        URL.revokeObjectURL(item.previewUrl);
+        return false;
+      })
+    );
+    const nextAttachmentCount = result.data.attachmentCount;
+    const mediaError = result.data.mediaUploadError;
 
     setPending(false);
     setSubmission({
@@ -453,6 +464,7 @@ function TaskStep({
       submissionId: result.data.submissionId,
       submittedAt: result.data.submittedAt
     });
+    setIsEditing(false);
     setStatus(result.data.status);
     setNote(result.data.note ?? "");
     setMessage(
@@ -465,7 +477,9 @@ function TaskStep({
             : result.data.message
     );
     setError(mediaError);
-    onSubmitted();
+    if (!wasAlreadySubmitted) {
+      onSubmitted();
+    }
   }
 
   return (
@@ -528,9 +542,21 @@ function TaskStep({
             <p className="mt-2 text-xs font-semibold text-[#526177]">
               私密照片：{attachmentCount}/3 张
             </p>
+            {!isEditing ? (
+              <button
+                className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-[#07847f] bg-white px-4 text-sm font-semibold text-[#07847f] transition hover:bg-[#e6f7f2]"
+                onClick={() => {
+                  setError(null);
+                  setIsEditing(true);
+                }}
+                type="button"
+              >
+                修改状态或备注
+              </button>
+            ) : null}
           </div>
         ) : null}
-        {!submission ? (
+        {!submission || isEditing ? (
           task.locked ? (
             <p className="mt-4 rounded-xl bg-[#f2f4f7] px-3 py-2 text-sm font-semibold leading-6 text-[#526177]">
               这项任务到 {task.serviceDate} 当天才开放提交。
@@ -544,6 +570,17 @@ function TaskStep({
               onEvidenceChange={onEvidenceChange}
               onEvidenceRemove={removeEvidence}
               onNoteChange={setNote}
+              onCancel={
+                submission
+                  ? () => {
+                      setError(null);
+                      setStatus(submission.status);
+                      setNote(submission.note ?? "");
+                      clearEvidenceFiles();
+                      setIsEditing(false);
+                    }
+                  : undefined
+              }
               onSubmit={onSubmit}
               pending={pending || processingEvidence}
               processingEvidence={processingEvidence}
@@ -553,11 +590,12 @@ function TaskStep({
               submissionRef={task.submissionRef}
               token={token}
               visitTime={task.visitTime}
+              submitLabel={submission ? "保存最新反馈" : "提交这项结果"}
               onStatusChange={setStatus}
             />
           )
         ) : null}
-        {submission && attachmentCount < 3 ? (
+        {submission && !isEditing && attachmentCount < 3 ? (
           <div className="mt-4 grid gap-3 border-t border-[#e2e6ee] pt-4">
             <EvidencePicker
               attachmentCount={attachmentCount}
@@ -598,6 +636,7 @@ function TaskSubmissionForm({
   note,
   onEvidenceChange,
   onEvidenceRemove,
+  onCancel,
   onNoteChange,
   onStatusChange,
   onSubmit,
@@ -606,6 +645,7 @@ function TaskSubmissionForm({
   photoRequired,
   serviceDate,
   status,
+  submitLabel,
   submissionRef,
   token,
   visitTime
@@ -616,6 +656,7 @@ function TaskSubmissionForm({
   note: string;
   onEvidenceChange: (files: FileList | null) => void;
   onEvidenceRemove: (id: string) => void;
+  onCancel?: () => void;
   onNoteChange: (value: string) => void;
   onStatusChange: (value: "completed" | "note" | "exception") => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
@@ -624,6 +665,7 @@ function TaskSubmissionForm({
   photoRequired: boolean;
   serviceDate: string;
   status: "completed" | "note" | "exception";
+  submitLabel: string;
   submissionRef: string;
   token: string;
   visitTime: string;
@@ -708,13 +750,25 @@ function TaskSubmissionForm({
           {error}
         </p>
       ) : null}
-      <button
-        className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#07847f] bg-[#07847f] px-5 text-base font-semibold text-white shadow-sm shadow-teal-900/20 transition hover:bg-[#06706c] disabled:cursor-not-allowed disabled:border-[#d9e0ea] disabled:bg-[#f2f4f7] disabled:text-[#98a4b5] disabled:shadow-none"
-        disabled={pending}
-        type="submit"
-      >
-        {pending ? "提交中…" : "提交这项结果"}
-      </button>
+      <div className={`grid gap-2 ${onCancel ? "sm:grid-cols-2" : ""}`}>
+        {onCancel ? (
+          <button
+            className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#d9e0ea] bg-white px-5 text-base font-semibold text-[#526177] transition hover:bg-[#f2f4f7] disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={pending}
+            onClick={onCancel}
+            type="button"
+          >
+            取消修改
+          </button>
+        ) : null}
+        <button
+          className="inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-[#07847f] bg-[#07847f] px-5 text-base font-semibold text-white shadow-sm shadow-teal-900/20 transition hover:bg-[#06706c] disabled:cursor-not-allowed disabled:border-[#d9e0ea] disabled:bg-[#f2f4f7] disabled:text-[#98a4b5] disabled:shadow-none"
+          disabled={pending}
+          type="submit"
+        >
+          {pending ? "提交中…" : submitLabel}
+        </button>
+      </div>
     </form>
   );
 }

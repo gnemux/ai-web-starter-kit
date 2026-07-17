@@ -10,7 +10,8 @@ import {
   normalizeAnonymousCareSubmissionNote,
   parseAnonymousCareSubmissionSlotKey,
   parseAnonymousCareSubmissionStatus,
-  requiresAnonymousCareSubmissionNote
+  requiresAnonymousCareSubmissionNote,
+  satisfiesAnonymousCareSubmissionPhotoRequirement
 } from "./anonymous-submission-policy.ts";
 
 test("anonymous submission status is strictly whitelisted", () => {
@@ -36,6 +37,36 @@ test("only note and exception statuses require a note", () => {
   assert.equal(requiresAnonymousCareSubmissionNote("completed"), false);
   assert.equal(requiresAnonymousCareSubmissionNote("note"), true);
   assert.equal(requiresAnonymousCareSubmissionNote("exception"), true);
+});
+
+test("required-photo edits accept existing evidence without weakening first submit", () => {
+  assert.equal(
+    satisfiesAnonymousCareSubmissionPhotoRequirement({
+      existingAttachmentCount: 0,
+      pendingPhotoCount: 0,
+      photoRequired: true,
+      status: "completed"
+    }),
+    false
+  );
+  assert.equal(
+    satisfiesAnonymousCareSubmissionPhotoRequirement({
+      existingAttachmentCount: 1,
+      pendingPhotoCount: 0,
+      photoRequired: true,
+      status: "note"
+    }),
+    true
+  );
+  assert.equal(
+    satisfiesAnonymousCareSubmissionPhotoRequirement({
+      existingAttachmentCount: 0,
+      pendingPhotoCount: 0,
+      photoRequired: true,
+      status: "exception"
+    }),
+    true
+  );
 });
 
 test("anonymous service dates cover each plan day", () => {

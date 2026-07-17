@@ -12,6 +12,7 @@ import {
 } from "@/lib/analytics/client";
 
 import type { AuthFormMode, AuthFormState } from "./actions";
+import { trackOAuthEvent } from "./oauth-analytics";
 
 type AuthFormLabels = {
   accessDashboard: string;
@@ -41,10 +42,21 @@ type AuthFormLabels = {
 
 type OAuthLabels = {
   apple: string;
+  callbackFailed: string;
+  cancelled: string;
   google: string;
   title: string;
   unavailable: string;
+  workingApple: string;
+  workingGoogle: string;
 };
+
+export type OAuthFailure =
+  | "cancelled"
+  | "callback_failed"
+  | "provider_unavailable";
+
+export type OAuthProvider = "apple" | "google";
 
 type AuthFormErrorLabels = {
   accountExists: string;
@@ -63,7 +75,9 @@ export function AuthForm({
   labels,
   modePath = "/login",
   nextPath,
-  oauthLabels
+  oauthFailure,
+  oauthLabels,
+  oauthProvider
 }: {
   defaultNextPath?: string;
   errorLabels: AuthFormErrorLabels;
@@ -71,7 +85,9 @@ export function AuthForm({
   labels: AuthFormLabels;
   modePath?: string;
   nextPath: string;
+  oauthFailure?: OAuthFailure;
   oauthLabels?: OAuthLabels;
+  oauthProvider?: OAuthProvider;
 }) {
   const router = useRouter();
   const [mode, setMode] = useState<AuthFormMode>(initialMode);
@@ -227,7 +243,14 @@ export function AuthForm({
         </div>
       )}
 
-      {oauthLabels && !isReset ? <OAuthOptions labels={oauthLabels} /> : null}
+      {oauthLabels && !isReset ? (
+        <OAuthOptions
+          initialFailure={oauthFailure}
+          initialProvider={oauthProvider}
+          labels={oauthLabels}
+          nextPath={nextPath}
+        />
+      ) : null}
 
       <div>
         <label className="text-sm font-medium text-slate-700" htmlFor="email">
@@ -371,24 +394,87 @@ export function AuthForm({
   }
 }
 
-function OAuthOptions({ labels }: { labels: OAuthLabels }) {
+function OAuthOptions({
+  initialFailure,
+  initialProvider,
+  labels,
+  nextPath
+}: {
+  initialFailure?: OAuthFailure;
+  initialProvider?: OAuthProvider;
+  labels: OAuthLabels;
+  nextPath: string;
+}) {
+  const [pendingProvider, setPendingProvider] =
+    useState<OAuthProvider | null>(null);
+  const [runtimeFailure, setRuntimeFailure] =
+    useState<OAuthFailure | null>(null);
+  const trackedFailureRef = useRef<string | null>(null);
+  const visibleFailure = runtimeFailure ?? initialFailure;
+
+  useEffect(() => {
+    if (!initialFailure || !initialProvider) {
+      return;
+    }
+
+    const key = `${initialProvider}:${initialFailure}`;
+    if (trackedFailureRef.current === key) {
+      return;
+    }
+
+    trackedFailureRef.current = key;
+    trackOAuthEvent("auth_login_failed", {
+      auth_method: "oauth",
+      auth_provider: initialProvider,
+      error_category: initialFailure,
+      result: "failure"
+    });
+  }, [initialFailure, initialProvider]);
+
   return (
     <div className="space-y-4">
       <div className="grid gap-3">
-        {[labels.google, labels.apple].map((label) => (
+        {(["google", "apple"] as const).map((provider) => (
           <button
-            className="flex min-h-16 min-w-0 cursor-not-allowed items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 text-base font-medium text-slate-400 sm:gap-4"
-            disabled
-            key={label}
+            aria-busy={pendingProvider === provider}
+            className="flex min-h-16 min-w-0 items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 text-base font-semibold text-slate-800 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-100 disabled:cursor-wait disabled:opacity-60 sm:gap-4"
+            disabled={pendingProvider !== null}
+            key={provider}
+            onClick={() => startOAuth(provider)}
             type="button"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-sm text-slate-500">
-              {label.includes("Google") ? "G" : ""}
+            <span
+              aria-hidden="true"
+              className="flex h-7 w-7 shrink-0 items-center justify-center"
+            >
+              {provider === "google" ? <GoogleOAuthIcon /> : (
+                <span className="text-2xl leading-none text-black"></span>
+              )}
             </span>
-            <span className="min-w-0 text-center leading-6">{label}</span>
+            <span className="min-w-0 text-center leading-6">
+              {pendingProvider === provider
+                ? provider === "google"
+                  ? labels.workingGoogle
+                  : labels.workingApple
+                : labels[provider]}
+            </span>
           </button>
         ))}
       </div>
+      {visibleFailure ? (
+        <div
+          className="rounded-md border border-rose-200 bg-rose-50 p-3"
+          role="alert"
+        >
+          <p className="text-sm font-medium text-rose-900">
+            {visibleFailure === "cancelled"
+              ? labels.cancelled
+              : visibleFailure === "callback_failed"
+                ? labels.callbackFailed
+                : labels.unavailable}
+          </p>
+        </div>
+      ) : null}
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 text-sm text-slate-400">
         <span className="h-px bg-slate-200" />
         <span>{labels.title}</span>
@@ -396,6 +482,76 @@ function OAuthOptions({ labels }: { labels: OAuthLabels }) {
       </div>
     </div>
   );
+
+  async function startOAuth(provider: OAuthProvider) {
+    setPendingProvider(provider);
+    setRuntimeFailure(null);
+    trackOAuthEvent("login_started", {
+      auth_method: "oauth",
+      auth_provider: provider
+    });
+
+    const formData = new FormData();
+    formData.set("next", nextPath);
+    formData.set("provider", provider);
+
+    try {
+      const response = await fetch("/auth/oauth/start", {
+        body: formData,
+        method: "POST",
+        signal: AbortSignal.timeout(12_000)
+      });
+      const result = (await response.json()) as {
+        ok?: boolean;
+        provider?: string;
+        url?: string;
+      };
+
+      if (
+        !response.ok ||
+        !result.ok ||
+        result.provider !== provider ||
+        !isSafeOAuthNavigation(result.url)
+      ) {
+        throw new Error("oauth_start_failed");
+      }
+
+      window.location.assign(result.url);
+    } catch {
+      setRuntimeFailure("provider_unavailable");
+      setPendingProvider(null);
+      trackOAuthEvent("auth_login_failed", {
+        auth_method: "oauth",
+        auth_provider: provider,
+        error_category: "provider_unavailable",
+        result: "failure"
+      });
+    }
+  }
+}
+
+function GoogleOAuthIcon() {
+  return (
+    <svg aria-hidden="true" height="22" viewBox="0 0 24 24" width="22">
+      <path d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z" fill="#4285F4" />
+      <path d="M12 22c2.7 0 4.98-.9 6.63-2.36l-3.24-2.54c-.9.6-2.05.96-3.39.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.62A10 10 0 0 0 12 22Z" fill="#34A853" />
+      <path d="M6.39 13.93A6.02 6.02 0 0 1 6.08 12c0-.67.12-1.33.31-1.93V7.45H3.04A10 10 0 0 0 2 12c0 1.61.38 3.14 1.04 4.55l3.35-2.62Z" fill="#FBBC05" />
+      <path d="M12 5.94c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.96 5.45l3.35 2.62C7.18 7.7 9.39 5.94 12 5.94Z" fill="#EA4335" />
+    </svg>
+  );
+}
+
+function isSafeOAuthNavigation(value: string | undefined): value is string {
+  if (!value) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.hostname === "localhost";
+  } catch {
+    return false;
+  }
 }
 
 function buildModeUrl(

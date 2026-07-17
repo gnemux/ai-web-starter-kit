@@ -11,20 +11,25 @@ import { updateProfileAction, type ProfileFormState } from "./actions";
 export function ProfileForm({
   errorLabels,
   labels,
-  initialDisplayName
+  initialDisplayName,
+  isProfileCompletion = false,
+  nextPath = "/catcare"
 }: {
   errorLabels: {
     displayName: string;
     general: string;
   };
   initialDisplayName: string;
+  isProfileCompletion?: boolean;
   labels: {
     displayName: string;
     displayNamePlaceholder: string;
+    continue: string;
     save: string;
     saving: string;
     updated: string;
   };
+  nextPath?: string;
 }) {
   const [state, formAction, isPending] = useActionState<
     ProfileFormState,
@@ -43,6 +48,9 @@ export function ProfileForm({
 
   return (
     <form action={formAction} className="mt-5 space-y-4">
+      {isProfileCompletion ? (
+        <input name="next" type="hidden" value={nextPath} />
+      ) : null}
       <div>
         <label
           className="text-sm font-medium text-slate-700"
@@ -57,6 +65,7 @@ export function ProfileForm({
           maxLength={80}
           name="displayName"
           placeholder={labels.displayNamePlaceholder}
+          required={isProfileCompletion}
           type="text"
         />
         {!state?.ok && state?.error.fields?.displayName ? (
@@ -82,7 +91,13 @@ export function ProfileForm({
         </div>
       ) : null}
 
-      <Button type="submit">{isPending ? labels.saving : labels.save}</Button>
+      <Button type="submit">
+        {isPending
+          ? labels.saving
+          : isProfileCompletion
+            ? labels.continue
+            : labels.save}
+      </Button>
     </form>
   );
 }

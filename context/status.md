@@ -1703,3 +1703,30 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
   `plans.ts`, `visit-accordion-client.tsx`, and `plan-detail-client.tsx`; it
   must not be hidden inside GNE-320 or moved into shared packages without a
   second product consumer.
+
+## 2026-07-17 GNE-321 social OAuth checkpoint
+
+- `GNE-320` is Done and `GNE-321` is the only In Progress child under
+  `GNE-317`. This is the last hardening child, but `GNE-317` must not be closed
+  or entered automatically after this checkpoint.
+- The research app now has Supabase SSR PKCE start/callback boundaries for
+  Google and Apple, fixed internal return allowlisting, automatic first-login
+  profile initialization, Apple/no-name profile completion, localized safe
+  recovery states, provider-specific pending controls, and bounded OAuth
+  Analytics containing provider/result/method only. The app performs no manual
+  email-only account linking and never exposes provider tokens or raw callback
+  payloads.
+- Read-only inspection of the current single shared Supabase test project
+  reports both Google and Apple providers disabled. No credential, provider
+  console, Supabase Auth setting, database migration, or production operation
+  was changed. Real new-user, verified same-email, cancellation, Apple missing
+  name, and repeated-callback smoke therefore remain `not_run` and block Done.
+- Local evidence passes 139 web tests, web typecheck, template drift, diff
+  checks, desktop/mobile Chinese/English browser checks, safe callback failure
+  checks, and disabled-provider recovery. Independent Auth review found no
+  P0/P1; its two P2 observations were corrected by aligning the Analytics spec
+  to the Issue and moving the explicit allowlist adapter out of CatCare.
+- The clean-template repository and mapped shared Auth contracts remain
+  unchanged. `template/source-map.json` records GNE-321 as research-app input;
+  `GNE-317` must later decide retain/transform/exclude after real-provider
+  acceptance rather than silently backfilling the mother template.

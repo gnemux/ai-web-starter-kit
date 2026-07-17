@@ -10,6 +10,7 @@ import {
   updateCurrentUserProfileFromFormData
 } from "@/lib/services/auth";
 import { switchCurrentBillingPlanToFree } from "@/lib/services/billing";
+import { normalizeInternalReturnTo } from "@/lib/services/internal-return";
 
 export type ProfileFormState = ServiceResult<UserProfile> | null;
 export type SignOutState = ServiceResult<AuthActionPayload> | null;
@@ -18,11 +19,30 @@ export async function updateProfileAction(
   _previousState: ProfileFormState,
   formData: FormData
 ): Promise<ProfileFormState> {
+  const requestedNext = formData.get("next");
+  if (
+    typeof requestedNext === "string" &&
+    String(formData.get("displayName") ?? "").trim().length === 0
+  ) {
+    return {
+      error: {
+        code: "validation_error",
+        fields: { displayName: "required" },
+        message: "Enter a display name to continue."
+      },
+      ok: false
+    };
+  }
+
   const result = await updateCurrentUserProfileFromFormData(formData);
 
   if (result.ok) {
     revalidatePath("/account");
     revalidatePath("/dashboard");
+
+    if (typeof requestedNext === "string") {
+      redirect(normalizeInternalReturnTo(requestedNext, "/catcare"));
+    }
   }
 
   return result;

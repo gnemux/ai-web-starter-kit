@@ -92,7 +92,11 @@ expect(
   "Auth confirmation must support Supabase token_hash callbacks and return signup confirmations to login without an authenticated session."
 );
 
-const getAppUrl = section(authService, "function getAppUrl", "async function");
+const getAppUrl = section(
+  authService,
+  "function getAuthAppUrl",
+  "async function"
+);
 expect(
   getAppUrl.includes("NEXT_PUBLIC_APP_ENV") &&
     getAppUrl.includes("process.env.VERCEL") &&

@@ -5,18 +5,28 @@
 - Validate email/password normalization in `packages/core`.
 - Validate display name normalization in `packages/core`.
 - Validate analytics event names and safe properties through TypeScript contracts.
+- Validate Google/Apple provider allowlisting, bounded callback codes, configured callback origins, and allowlisted internal returns.
+- Validate OAuth start calls the selected provider once and maps raw failures to stable application categories.
+- Validate callback exchange creates/reads the existing profile, preserves an existing display name, and requires profile completion when name is absent.
 
 ## Integration Tests
 
 - Service returns `unauthorized` without a valid Supabase session.
 - Sign in maps validation and provider failures to safe service errors.
 - Profile update upserts only the current user's `user_profiles` row.
+- OAuth start returns only the Supabase authorize URL; OAuth callback exchanges through the cookie-aware server client and removes callback parameters by redirect.
+- Verified same-email linking is verified against Supabase Auth identities; the app contains no manual link-by-email write.
 
 ## Browser / E2E Checks
 
 - Path: `/login`
 - Expected result: sign in form renders and invalid values return validation feedback.
 - Expected result: the global language switch changes page labels between Chinese and English.
+- Expected result: Google and Apple buttons expose provider-specific pending states, cannot double-submit, and failures remain actionable without raw provider detail.
+
+- Path: `/auth/oauth/callback`
+- Expected result: valid Google/Apple PKCE callbacks establish a session and redirect to a clean allowlisted path.
+- Expected result: cancellation, missing code/provider, invalid provider, expired/repeated code, and external `next` return safely to localized login guidance.
 
 - Path: `/dashboard`
 - Expected result: unauthenticated request redirects to `/login?next=%2Fdashboard`.
@@ -48,10 +58,25 @@
 - Confirm Auth events use `signup_started`, `user_signed_up`, `login_started`, `user_logged_in`, `auth_login_failed`, `user_logged_out`, and `user_profile_updated`.
 - Confirm each Auth event includes `app`, `mvp_stage`, `market`, `env`, `version`, and `module=auth`.
 - Confirm no event contains passwords, OTPs, magic links, OAuth codes, Supabase tokens, session cookies, or raw provider payloads.
+- With real provider configuration, verify Google new/existing/cancel flows and Apple new/existing/cancel flows on the deployed domain.
+- Verify an existing verified password account signing in with the same Google/Apple email does not create an unexplained duplicate user.
+- Verify Apple/no-name users land in profile completion, save once, and continue to the original allowlisted path.
+- Verify provider disable/misconfiguration is recoverable and no secret or raw callback detail appears in page copy, logs, Analytics, PR, or Linear evidence.
 - For production verification, confirm the event URL is not localhost and `env=production`.
+- 2026-07-17 GNE-321 local checkpoint: 139 web tests, web typecheck,
+  template drift, and diff checks passed. Desktop and 390px mobile browser
+  checks passed in Chinese and English with no horizontal overflow; malicious
+  return paths, cancelled/missing callbacks, and disabled-provider recovery
+  returned localized bounded errors without raw provider detail.
+- 2026-07-17 provider readiness: read-only Supabase Auth settings reported
+  Google disabled and Apple disabled. All real-provider browser checks above
+  remain `not_run`; this is an explicit external acceptance gate, not a local
+  code pass.
 
 ## Regression Risks
 
 - Protected route proxy can accidentally block static assets if matcher is too broad.
 - Supabase Auth dashboard settings can change sign up behavior.
 - Vercel deployments need a fresh redeploy after environment variables are changed.
+- OAuth callback allowlists and provider console configuration can drift independently from app code.
+- Apple Web OAuth does not provide a dependable full name and its generated client secret expires, so profile completion and six-month rotation checks are mandatory.

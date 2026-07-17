@@ -79,6 +79,7 @@ Before using a Vercel deployment as release evidence, confirm these Supabase set
      - `https://ai-web-starter-kit-web.vercel.app/auth/confirm/**`
      - `https://ai-web-starter-kit-web.vercel.app/auth/recovery`
      - `https://ai-web-starter-kit-web.vercel.app/auth/recovery/**`
+     - `https://ai-web-starter-kit-web.vercel.app/auth/oauth/callback`
    - Local Redirect URLs are optional and only for local testing. Add exact ports that are actually used, for example:
      - `http://localhost:3000/auth/confirm`
      - `http://localhost:3000/auth/confirm/**`
@@ -86,6 +87,7 @@ Before using a Vercel deployment as release evidence, confirm these Supabase set
      - `http://localhost:3003/auth/confirm/**`
      - `http://localhost:3003/auth/recovery`
      - `http://localhost:3003/auth/recovery/**`
+     - `http://localhost:3003/auth/oauth/callback`
    - Supabase wildcard matching is useful for paths and preview domains, but do not rely on a single unbounded localhost-port rule. Add explicit local ports used by reviewers, or keep `NEXT_PUBLIC_APP_URL` stable during local Auth tests.
 3. Email confirmation:
    - Confirm the Supabase email template uses the configured redirect target flow. If a template hardcodes `SiteURL`, production email confirmation can still point to the wrong host even when app code passes `emailRedirectTo`.
@@ -259,6 +261,8 @@ Routes:
 
 - `/login`: email/password sign in and sign up.
 - `/auth/confirm`: Supabase email confirmation code exchange.
+- `/auth/oauth/start`: allowlisted Google/Apple OAuth start through Supabase.
+- `/auth/oauth/callback`: PKCE code exchange into the existing SSR cookie session, followed by a clean local redirect.
 - `/dashboard`: protected product workspace.
 - `/account`: protected profile settings page.
 - `/account/billing`: protected Plans page for plan choice, Billing entitlement state, and plan records.
@@ -271,3 +275,14 @@ Operational notes:
 - Vercel Production and Preview entries must be configured separately. Redeploy after changing any Supabase env key before using that deployment as verification evidence.
 - If Auth redirect URLs are restricted in Supabase, add local, preview, and production URLs before testing email confirmation.
 - Real signup/login verification may send email to the test address and should be done by the account owner.
+
+### Google and Apple social login (GNE-321)
+
+- Enable only Google and Apple in the current Supabase project. The app does not carry provider client secrets.
+- Google needs a Web OAuth Client whose authorized origin is the deployed app and whose redirect URI is the exact Supabase callback shown in the Google provider panel. Keep scopes to OpenID, email, and profile.
+- Apple Web login needs an Apple Developer account, App ID, Services ID, verified domain/return URL, Team ID, Key ID, and `.p8` key. Store the generated client secret only in Supabase and rotate it before its six-month expiry.
+- Add the app callback routes above to Supabase Auth redirect allowlists. Local port `3003` is only for local smoke and must not replace the deployed URL.
+- Supabase automatically links identities only when it can trust the same verified email. Do not add a custom database or admin-API link-by-email path.
+- The app consumes only the Supabase session and bounded profile fields. Provider access, refresh, and ID tokens are never persisted or sent to PostHog.
+- Apple Web OAuth does not provide a dependable full name. A missing name is completed on `/account`; existing profile values are preserved.
+- Provider setup and real credentials are an external release gate: implementation tests can pass before configuration, but GNE-321 cannot be marked Done until real Google and Apple smoke passes.

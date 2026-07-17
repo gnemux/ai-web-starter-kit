@@ -605,9 +605,13 @@ export const dictionaries = {
       ],
       oauth: {
         title: "或",
-        google: "使用 Google 登录（预留）",
-        apple: "使用 Apple 登录（预留）",
-        unavailable: "后续接入"
+        google: "使用 Google 继续",
+        apple: "使用 Apple 继续",
+        workingGoogle: "正在前往 Google...",
+        workingApple: "正在前往 Apple...",
+        cancelled: "已取消社交登录，你可以重新尝试或使用邮箱登录。",
+        callbackFailed: "社交登录链接已失效，请从这里重新开始。",
+        unavailable: "社交登录暂时不可用，请稍后重试或使用邮箱登录。"
       },
       form: {
         email: "邮箱",
@@ -723,8 +727,11 @@ export const dictionaries = {
       profile: {
         title: "个人资料",
         description: "保存后会写入当前用户自己的 profile 记录。",
+        completionTitle: "再补充一个称呼",
+        completionDescription: "社交登录已成功。设置显示名称后继续进入产品；这不会修改你的 Google 或 Apple 账户。",
         displayName: "显示名称",
         displayNamePlaceholder: "未设置",
+        continue: "保存并继续",
         save: "保存资料",
         saving: "保存中...",
         updated: "资料已更新。"
@@ -1660,9 +1667,13 @@ export const dictionaries = {
       ],
       oauth: {
         title: "or",
-        google: "Continue with Google (reserved)",
-        apple: "Continue with Apple (reserved)",
-        unavailable: "Coming later"
+        google: "Continue with Google",
+        apple: "Continue with Apple",
+        workingGoogle: "Opening Google...",
+        workingApple: "Opening Apple...",
+        cancelled: "Social sign-in was cancelled. Try again or use email instead.",
+        callbackFailed: "That social sign-in link expired. Start again here.",
+        unavailable: "Social sign-in is unavailable. Try again later or use email."
       },
       form: {
         email: "Email",
@@ -1778,8 +1789,11 @@ export const dictionaries = {
       profile: {
         title: "Profile",
         description: "Saving writes to the signed-in user's own profile row.",
+        completionTitle: "Add a name to continue",
+        completionDescription: "Social sign-in succeeded. Set the name shown in this product; your Google or Apple account is not changed.",
         displayName: "Display name",
         displayNamePlaceholder: "Not set",
+        continue: "Save and continue",
         save: "Save profile",
         saving: "Saving...",
         updated: "Profile updated."

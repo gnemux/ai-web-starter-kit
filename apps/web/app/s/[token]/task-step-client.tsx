@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 import { prepareClientImageForUpload } from "@/lib/media/client-image";
-import { reconcileEvidenceAttachmentCount } from "@/lib/media/evidence-upload-state";
+import {
+  reconcileEvidenceAttachmentCount,
+  reconcileSubmittedEvidenceState
+} from "@/lib/media/evidence-upload-state";
 
 import { CatCareTaskCategoryIcon } from "../../catcare/catcare-item-type-icon";
 import type { CarePhotoViewerLabels } from "../../catcare/care-photo-lightbox-client";
@@ -230,7 +233,8 @@ export function TaskStep({
     formData.set("token", token);
     formData.set("submissionRef", task.submissionRef);
     formData.set("visitTime", task.visitTime);
-    for (const item of evidenceFiles) {
+    const submittedEvidence = [...evidenceFiles];
+    for (const item of submittedEvidence) {
       formData.append("photos", item.file);
     }
 
@@ -242,10 +246,15 @@ export function TaskStep({
       return;
     }
 
-    const uploadedPhotoIndexes = new Set(result.data.uploadedPhotoIndexes);
+    const reconciledEvidence = reconcileSubmittedEvidenceState({
+      attachmentCount: result.data.attachmentCount,
+      evidenceIds: submittedEvidence.map((item) => item.id),
+      uploadedPhotoIndexes: result.data.uploadedPhotoIndexes
+    });
+    const uploadedIds = new Set(reconciledEvidence.uploadedIds);
     setEvidenceFiles((current) =>
-      current.filter((item, index) => {
-        if (!uploadedPhotoIndexes.has(index)) {
+      current.filter((item) => {
+        if (!uploadedIds.has(item.id)) {
           return true;
         }
 
@@ -253,9 +262,10 @@ export function TaskStep({
         return false;
       })
     );
-    const nextAttachmentCount = result.data.attachmentCount;
+    const nextAttachmentCount = reconciledEvidence.attachmentCount;
     const mediaError = result.data.mediaUploadError;
 
+    setAttachmentCount(Math.min(nextAttachmentCount, 3));
     setPending(false);
     setSubmission({
       abnormal: result.data.abnormal,
@@ -421,6 +431,7 @@ export function TaskStep({
           <div className="mt-4 grid gap-3 border-t border-[#e2e6ee] pt-4">
             <EvidencePicker
               attachmentCount={attachmentCount}
+              disabled={pending}
               files={evidenceFiles}
               labels={careSubmissionLabels}
               onChange={onEvidenceChange}

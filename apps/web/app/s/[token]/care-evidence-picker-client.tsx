@@ -15,6 +15,7 @@ export type CareSubmissionLabels = Dictionary["catcare"]["owner"]["careSubmissio
 
 export function EvidencePicker({
   attachmentCount,
+  disabled,
   files,
   labels,
   onChange,
@@ -24,6 +25,7 @@ export function EvidencePicker({
   processing
 }: {
   attachmentCount: number;
+  disabled?: boolean;
   files: SelectedEvidence[];
   labels: CareSubmissionLabels;
   onChange: (files: FileList | null) => void;
@@ -75,6 +77,7 @@ export function EvidencePicker({
                   aria-label={`${photoViewerLabels.removePhoto}: ${item.file.name}`}
                   className="absolute right-1 top-1 z-10 grid h-8 w-8 place-items-center rounded-full bg-black/70 text-sm font-bold text-white"
                   onClick={() => onRemove(item.id)}
+                  disabled={disabled}
                   type="button"
                 >
                   ×
@@ -91,7 +94,7 @@ export function EvidencePicker({
             <input
               accept="image/jpeg,image/png,image/webp"
               className="sr-only"
-              disabled={processing}
+              disabled={disabled || processing}
               multiple
               onChange={(event) => {
                 onChange(event.currentTarget.files);

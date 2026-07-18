@@ -25,12 +25,20 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   internal returns, client image preprocessing and focus handling stay reviewed
   research inputs; none is silently copied into the clean candidate without a
   neutral contract or second product consumer.
-- Web tests, typecheck and lint pass after the split. Remaining gates are root
-  and candidate builds, deterministic generation, read-only remote-template
-  cleanliness, real browser desktop/mobile/bilingual/keyboard/weak-network
-  acceptance, one independent review, and the normal PR/merge/deploy checks.
-  GNE-317 must remain open until explicit owner acceptance and execution must
-  stop there.
+- Root tests, typecheck, lint, production build, deterministic candidate
+  generation, candidate verification, and read-only remote-template inspection
+  pass after the split. Real browser acceptance also passes at desktop and
+  390 px in Chinese and English: recovery and Google state, disabled Apple,
+  notification and photo focus boundaries, photo navigation/download, and a
+  failed media upload retry all preserve the committed result without duplicate
+  submission or notification effects. The acceptance data was isolated, its
+  share link revoked, its plan ended, and its cat logically deleted afterward.
+- Browser acceptance found and fixed one UI-only stale-state defect: after the
+  first successful photo submission, the persisted server count now updates the
+  visible attachment count immediately. The server remained authoritative and
+  no data, ACL, notification, or upload contract changed. The remaining gates
+  are independent review plus the normal PR/merge/deploy checks. GNE-317 must
+  remain open until explicit owner acceptance and execution must stop there.
 
 ## Current GNE-320 Final Acceptance
 

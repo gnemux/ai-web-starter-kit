@@ -54,6 +54,10 @@ test("upload preview and owner results both consume the shared viewer", async ()
   assert.match(formSource, /labels\.formTitle/);
   assert.match(taskSource, /careSubmissionLabels\.photoUploadFailed/);
   assert.match(taskSource, /careSubmissionLabels\.submissionFailed/);
+  assert.match(
+    taskSource,
+    /const nextAttachmentCount = reconciledEvidence\.attachmentCount;[\s\S]*setAttachmentCount\(Math\.min\(nextAttachmentCount, 3\)\)/
+  );
   assert.doesNotMatch(taskSource, /setError\(result\.error\.message\)/);
   assert.doesNotMatch(taskSource, /setError\(mediaError\)/);
   assert.doesNotMatch(uploadSource, /[\u3400-\u9fff]/u);

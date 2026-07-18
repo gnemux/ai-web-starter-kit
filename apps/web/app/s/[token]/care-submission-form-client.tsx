@@ -120,6 +120,7 @@ export function TaskSubmissionForm({
       </label>
       <EvidencePicker
         attachmentCount={attachmentCount}
+        disabled={pending}
         files={evidenceFiles}
         labels={labels}
         onChange={onEvidenceChange}

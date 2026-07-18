@@ -3,7 +3,10 @@ import { notFound } from "next/navigation";
 import { EmptyState, ErrorState } from "@xwlc/ui";
 
 import { CatCareArrowLeftIcon } from "../../../catcare-action-icons";
-import { CareEvidenceGallery } from "../../../care-photo-lightbox-client";
+import {
+  CareEvidenceGallery,
+  type CarePhotoViewerLabels
+} from "../../../care-photo-lightbox-client";
 import { CatCareTaskCategoryIcon } from "../../../catcare-item-type-icon";
 import {
   CatCareButton,
@@ -19,6 +22,8 @@ import {
   getCatCarePlanDetail,
   type CatCarePlan
 } from "@/lib/catcare/product-service";
+import { getDictionary } from "@/lib/i18n";
+import { getRequestLocale } from "@/lib/i18n-server";
 import { CatCareAiRecapPanel } from "../../plan-ai-recap-client";
 import { formatPlanCatNames } from "../../plan-cat-names";
 import {
@@ -45,7 +50,12 @@ export default async function CatCarePlanResultsPage({
   params,
   searchParams
 }: CatCarePlanResultsPageProps) {
-  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const [{ id }, query, locale] = await Promise.all([
+    params,
+    searchParams,
+    getRequestLocale()
+  ]);
+  const photoViewerLabels = getDictionary(locale).catcare.owner.photoViewer;
   const [result, billingResult] = await Promise.all([
     getCatCarePlanDetail(id),
     getCurrentBillingEntitlements()
@@ -71,6 +81,7 @@ export default async function CatCarePlanResultsPage({
           hasAiQuota={aiUsage ? aiUsage.remaining > 0 : true}
           paymentResult={query.payment_result ?? query.checkout_result}
           plan={result.data}
+          photoViewerLabels={photoViewerLabels}
         />
       )}
     </>
@@ -80,11 +91,13 @@ export default async function CatCarePlanResultsPage({
 function PlanResults({
   hasAiQuota,
   paymentResult,
-  plan
+  plan,
+  photoViewerLabels
 }: {
   hasAiQuota: boolean;
   paymentResult?: string;
   plan: CatCarePlan;
+  photoViewerLabels: CarePhotoViewerLabels;
 }) {
   const status = getPlanStatusMeta(plan.status);
   const resultSummary = buildPlanResultSummary(plan);
@@ -156,7 +169,10 @@ function PlanResults({
             </section>
           ) : null}
 
-          <PlanResultEntries summary={resultSummary} />
+          <PlanResultEntries
+            photoViewerLabels={photoViewerLabels}
+            summary={resultSummary}
+          />
 
           <details className="mt-6 rounded-2xl border border-[#e2e6ee] bg-[#fbfdfc] p-4">
             <summary className="cursor-pointer text-base font-semibold text-[#07847f]">
@@ -438,7 +454,13 @@ function getFocusClassName(tone: "attention" | "note" | "pending") {
   return "bg-[#f2fbf8] ring-[#d9eee7]";
 }
 
-function PlanResultEntries({ summary }: { summary: PlanResultSummary }) {
+function PlanResultEntries({
+  photoViewerLabels,
+  summary
+}: {
+  photoViewerLabels: CarePhotoViewerLabels;
+  summary: PlanResultSummary;
+}) {
   if (summary.entries.length === 0) {
     return (
       <div className="mt-6">
@@ -462,6 +484,7 @@ function PlanResultEntries({ summary }: { summary: PlanResultSummary }) {
       {reviewEntries.length > 0 ? (
         <ResultEntryGroup
           entries={reviewEntries}
+          photoViewerLabels={photoViewerLabels}
           title="异常与备注"
         />
       ) : null}
@@ -474,7 +497,10 @@ function PlanResultEntries({ summary }: { summary: PlanResultSummary }) {
             提交明细（{detailEntries.length} 项）
           </summary>
           <div className="mt-4">
-            <ResultEntryGroup entries={detailEntries} />
+            <ResultEntryGroup
+              entries={detailEntries}
+              photoViewerLabels={photoViewerLabels}
+            />
           </div>
         </details>
       ) : null}
@@ -484,9 +510,11 @@ function PlanResultEntries({ summary }: { summary: PlanResultSummary }) {
 
 function ResultEntryGroup({
   entries,
+  photoViewerLabels,
   title
 }: {
   entries: PlanResultEntry[];
+  photoViewerLabels: CarePhotoViewerLabels;
   title?: string;
 }) {
   if (entries.length === 0) {
@@ -500,14 +528,24 @@ function ResultEntryGroup({
       ) : null}
       <div className={title ? "mt-4 grid gap-0" : "grid gap-0"}>
         {entries.map((entry) => (
-          <ResultEntryCard entry={entry} key={entry.id} />
+          <ResultEntryCard
+            entry={entry}
+            key={entry.id}
+            photoViewerLabels={photoViewerLabels}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function ResultEntryCard({ entry }: { entry: PlanResultEntry }) {
+function ResultEntryCard({
+  entry,
+  photoViewerLabels
+}: {
+  entry: PlanResultEntry;
+  photoViewerLabels: CarePhotoViewerLabels;
+}) {
   const isAttention = entry.status === "attention";
   const statusClassName = isAttention
     ? "bg-[#fff3f0] text-[#b7342c]"
@@ -568,7 +606,11 @@ function ResultEntryCard({ entry }: { entry: PlanResultEntry }) {
             </p>
           ) : null}
           {entry.attachments.length > 0 ? (
-            <CareEvidenceGallery attachments={entry.attachments} title={entry.title} />
+            <CareEvidenceGallery
+              attachments={entry.attachments}
+              labels={photoViewerLabels}
+              title={entry.title}
+            />
           ) : null}
         </div>
       </div>

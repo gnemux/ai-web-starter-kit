@@ -540,6 +540,19 @@ test("OAuth routes and UI keep secrets out and expose real pending controls", as
   assert.doesNotMatch(form, /cursor-not-allowed[\s\S]{0,200}后续接入/);
 });
 
+test("Apple deferred decision is visible and cannot start an unavailable OAuth flow", async () => {
+  const [formSource, dictionarySource] = await Promise.all([
+    readFile(new URL("../../app/login/auth-form.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../i18n/dictionaries.ts", import.meta.url), "utf8")
+  ]);
+
+  assert.match(formSource, /const deferred = provider === "apple"/);
+  assert.match(formSource, /disabled=\{pendingProvider !== null \|\| deferred\}/);
+  assert.match(formSource, /labels\.appleDeferred/);
+  assert.match(dictionarySource, /Apple 登录暂未开放/);
+  assert.match(dictionarySource, /Apple sign-in is not available yet/);
+});
+
 function createAuthMock(overrides = {}) {
   return {
     async exchangeCodeForSession() {

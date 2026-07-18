@@ -4,6 +4,42 @@
 
 MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundation, Payment foundation, AI foundation, and Analytics dashboard/observability foundation are complete locally and sealed on GitHub as tag `v0.2.0` (`26443d2`). MVP3 starts from this baseline. Real-provider AI production smoke remains `not_run` until a provider is configured and deployed.
 
+## Current GNE-317 Product Hardening Closeout
+
+- GNE-318, GNE-319 and GNE-320 are Done. GNE-321 has completed controlled
+  Google login and existing-session replacement acceptance; Apple is explicitly
+  deferred, remains disabled in the login UI, and is `not_run` rather than
+  claimed available. Public Google access is also separate from controlled
+  acceptance while the Google consent screen remains in Testing.
+- Final architecture work is isolated on
+  `codex/gne-317-product-hardening-closeout`. The former 1,223-line plan service
+  now delegates to generation, editor/publish, read, and results modules; the
+  948-line anonymous visit client delegates to task, form, evidence, display,
+  and model modules; the 795-line plan detail delegates summary and
+  share/security presentation while retaining orchestration locally.
+- The photo viewer and notification panel now share a CatCare-local accessible
+  focus boundary. Photo controls use the request locale end to end; exception
+  notifications keep one clear hierarchy without redundant warning emphasis.
+- Final retain/transform/exclude decision keeps CatCare media, notification,
+  Outbox and plan semantics product-local. OAuth cookie replacement, safe
+  internal returns, client image preprocessing and focus handling stay reviewed
+  research inputs; none is silently copied into the clean candidate without a
+  neutral contract or second product consumer.
+- Root tests, typecheck, lint, production build, deterministic candidate
+  generation, candidate verification, and read-only remote-template inspection
+  pass after the split. Real browser acceptance also passes at desktop and
+  390 px in Chinese and English: recovery and Google state, disabled Apple,
+  notification and photo focus boundaries, photo navigation/download, and a
+  failed media upload retry all preserve the committed result without duplicate
+  submission or notification effects. The acceptance data was isolated, its
+  share link revoked, its plan ended, and its cat logically deleted afterward.
+- Browser acceptance found and fixed one UI-only stale-state defect: after the
+  first successful photo submission, the persisted server count now updates the
+  visible attachment count immediately. The server remained authoritative and
+  no data, ACL, notification, or upload contract changed. The remaining gates
+  are independent review plus the normal PR/merge/deploy checks. GNE-317 must
+  remain open until explicit owner acceptance and execution must stop there.
+
 ## Current GNE-320 Final Acceptance
 
 - PR #109 merged through merge commit `8a46d16`; GitHub CI run

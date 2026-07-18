@@ -309,12 +309,16 @@ an error. Output must be created in an empty directory, written through a
 temporary directory, verified, and atomically promoted. A failed run removes or
 marks the incomplete temporary output and never looks complete.
 
-GNE-318 changes the research application's Auth service inventory to backport
-password recovery into CatCare. The clean candidate already has an independently
-verified neutral reset/update flow under `modules/platform/auth`, so the
-research-only `password-recovery.ts` helper and CatCare account page are not new
-template projections. The inventory hash is reviewed and updated without
-changing the blueprint or the published clean-template repository.
+GNE-317 projects the stable GNE-318 and GNE-321 Auth boundaries into the clean
+candidate. Password recovery uses a neutral scanner-safe interstitial: the
+email fragment is removed from the address bar, a user-confirmed POST verifies
+the token hash, and only the resulting recovery session can open the protected
+password form. Optional Google OAuth uses a request-scoped Supabase client,
+clears only an existing local browser session before provider navigation, and
+applies every replacement cookie to the exact callback response. Apple remains
+visibly disabled until its external owner and real-account gate exist. These are
+neutral platform projections, not copies of CatCare page composition or product
+Analytics.
 
 `template-version.json` must record at least:
 
@@ -345,6 +349,8 @@ docs and orchestration files. The manifest fails on a new unclassified input.
 | `app/page.tsx` | Transform | neutral configured home, no CatCare import or `/catcare` default |
 | `app/login/*` | Transform | retain Auth form/action; neutral shell and configured safe default path |
 | `app/auth/confirm` | Keep/Transform | retain confirmation adapter; configured safe return |
+| `app/auth/recovery/**` | Transform | scanner-safe recovery interstitial and protected password update; Analytics excluded from the sensitive subtree |
+| `app/auth/oauth/**` | Transform | optional Google start/callback with complete cookie replacement; Apple deferred and disabled |
 | `app/account/page.tsx`, profile/action | Transform | retain profile behavior behind neutral account shell |
 | `app/account/billing`, `usage` | Transform | neutral platform page; product pricing/copy and CatCare components excluded |
 | `app/account/payment`, `api/payment` | Transform | sandbox/disabled application adapter, no live claim |
@@ -373,7 +379,7 @@ redistribution entries in `THIRD_PARTY_NOTICES.md`.
 
 | Current source | Classification | Candidate ownership |
 | --- | --- | --- |
-| `lib/services/auth.ts`, `lib/supabase/**` | Transform | `modules/platform/auth` and Supabase adapter |
+| `lib/services/auth.ts`, password recovery/OAuth helpers, `lib/supabase/**` | Transform | neutral `modules/platform/auth` and request-scoped Supabase adapters; no product copy, provider secrets or automatic account merge |
 | `lib/services/billing*`, `payment.ts`, `ai*` | Transform | platform app adapters consuming `@xwlc/core`; sandbox/mock/no-op defaults |
 | `lib/analytics/**`, provider catalog/server | Transform | platform analytics/provider adapters; optional safe no-op |
 | `lib/access/share-token-gate.ts`, `lib/capabilities/**` | Keep/Transform | app facade over public `@xwlc/platform`; no CatCare policy |

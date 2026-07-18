@@ -18,7 +18,7 @@ M4 implements Supabase Auth and a profile/account reference flow on top of the M
 - `apps/web/proxy.ts` connects the Next.js proxy boundary.
 - `apps/web/lib/services/auth.ts` owns sign up, sign in, sign out, current user, and profile update use cases.
 - `apps/web/lib/services/oauth.ts` owns provider allowlisting, OAuth start/callback normalization, PKCE exchange, and safe provider-error mapping so the existing Auth service does not become a second monolith.
-- `/auth/oauth/start` locally signs out an existing browser session before starting Google or Apple through `signInWithOAuth`; `/auth/oauth/callback` exchanges the one-time code for the normal SSR cookie session and immediately removes callback parameters through a clean redirect.
+- `/auth/oauth/start` locally signs out an existing browser session before starting an enabled provider through `signInWithOAuth`; `/auth/oauth/callback` exchanges the one-time code for the normal SSR cookie session and immediately removes callback parameters through a clean redirect. Google is currently enabled; Apple stays in a disabled deferred state.
 - OAuth Route Handlers create one request-scoped Supabase client, capture every cookie mutation and Supabase-provided anti-cache header, and apply them to the exact JSON/redirect response. Auth clients are never shared across requests, and protected-route proxy responses preserve the same cookie/header contract.
 - Auth server actions translate `FormData`, call services, revalidate affected paths, and redirect on successful navigation.
 - Client form components call server actions and capture safe PostHog events through `trackEvent`.
@@ -48,7 +48,7 @@ Validation rules:
 - Error: safe error banners render validation/provider categories.
 - Success: profile update returns a success state and refreshes account/dashboard.
 - I18n: default Chinese labels, English switch available through the single global language switcher.
-- OAuth: provider buttons have visible keyboard focus, provider-specific pending text, disable duplicate starts while redirecting, and keep the existing CatCare login composition on desktop and mobile.
+- OAuth: the enabled Google button has visible keyboard focus and provider-specific pending text, disables duplicate starts while redirecting, and keeps the existing CatCare login composition on desktop and mobile. Apple renders a localized disabled control until its rollout gates are met.
 - Profile completion: a successful OAuth callback with no display name redirects to `/account?complete_profile=1&next=<safe>`; saving returns to the allowlisted product path.
 
 ## External Providers
@@ -85,7 +85,7 @@ PostHog:
 - Local: run with ignored `.env.local` values and local or staging Supabase.
 - Preview: Vercel preview needs Supabase and PostHog public environment variables.
 - Production: deployment must be redeployed after environment changes; production schema changes still require reviewed migrations.
-- Provider rollout: Google and Apple stay release-blocked until their exact Supabase callback, application origin/Services ID, and real account smoke pass. Apple client-secret rotation is an operational requirement at least every six months.
+- Provider rollout: Google is delivered only after its exact Supabase callback, application origin, and real account smoke pass. Apple remains release-blocked until a collaborator supplies Apple Developer resources and its exact Services ID/return URL, real account smoke, name-completion behavior, cancellation handling, and six-month client-secret rotation ownership all pass.
 
 ## Open Questions
 

@@ -21,6 +21,7 @@ import {
   markAllOwnerNotificationsReadAction,
   markOwnerNotificationReadAction
 } from "./notification-actions";
+import { useDialogFocusBoundary } from "./use-dialog-focus-boundary";
 
 type NotificationLabels = Dictionary["catcare"]["owner"]["notifications"];
 
@@ -34,7 +35,6 @@ export function CatCareNotificationCenter({
   locale: Locale;
 }) {
   const router = useRouter();
-  const hasOpenedRef = useRef(false);
   const panelRef = useRef<HTMLElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -43,6 +43,14 @@ export function CatCareNotificationCenter({
   const [notifications, setNotifications] = useState(center.notifications);
   const [unreadCount, setUnreadCount] = useState(center.unreadCount);
   const [pending, startTransition] = useTransition();
+
+  useDialogFocusBoundary({
+    active: isOpen,
+    containerRef: panelRef,
+    initialFocusRef: panelRef,
+    onClose: () => setIsOpen(false),
+    returnFocusRef: triggerRef
+  });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -57,31 +65,10 @@ export function CatCareNotificationCenter({
       }
     }
 
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    }
-
     document.addEventListener("pointerdown", closeOnOutsideClick);
-    document.addEventListener("keydown", closeOnEscape);
     return () => {
       document.removeEventListener("pointerdown", closeOnOutsideClick);
-      document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      hasOpenedRef.current = true;
-      panelRef.current?.focus();
-      return;
-    }
-
-    if (hasOpenedRef.current) {
-      hasOpenedRef.current = false;
-      triggerRef.current?.focus();
-    }
   }, [isOpen]);
 
   function toggleCenter() {
@@ -252,7 +239,7 @@ export function CatCareNotificationCenter({
                         className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
                           isException
                             ? isUnread
-                              ? "bg-amber-600 ring-4 ring-amber-100"
+                              ? "bg-amber-600"
                               : "bg-slate-300"
                             : isUnread
                               ? "bg-teal-600"
@@ -263,7 +250,7 @@ export function CatCareNotificationCenter({
                         <span className="flex items-start justify-between gap-3">
                           <span
                             className={`font-semibold ${
-                              isException ? "text-amber-950" : "text-slate-950"
+                              "text-slate-950"
                             }`}
                           >
                             {isException

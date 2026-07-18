@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | automatic main deployment for `8a46d16` succeeded; GNE-320 notification revision acceptance passed |
+| Latest production status | automatic main deployment for `7accbc3` succeeded; controlled Google login and existing-session switch acceptance passed |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | `8a46d16dc9f5f4601ab22d40727752c1a8cc0352` |
+| Latest production commit | `7accbc3c03b2025e87cc513af463cf96223cbcd2` |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | No GNE-320 deployment, migration, notification, or Analytics blocker. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
-| Next owner action | Review and close only GNE-320. Do not activate GNE-321 automatically. |
+| Current blocked items | Apple OAuth provider setup and real Apple-user smoke are explicitly deferred/`not_run`; Google public access remains limited while its consent screen is in Testing. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
+| Next owner action | Complete GNE-317 architecture/template/browser closeout, then request explicit owner acceptance. Do not close the parent or enter another Issue automatically. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 

@@ -733,3 +733,30 @@
 - Shared Supabase migration, authenticated deployed browser verification and
   Vercel evidence remain `not_run` until the normal merge/migration approval
   gates are satisfied.
+
+## GNE-317 Product Hardening Closeout Checks
+
+- Run all Web tests, typecheck and lint after splitting plan service, anonymous
+  visit, and plan-detail responsibilities. Keep behavioral tests pointed at the
+  new owning modules so the compatibility barrels do not create false coverage.
+- Run root package boundaries, template drift plus negative fixtures, test,
+  typecheck, lint, production build, and `git diff --check`.
+- Generate the clean candidate twice into isolated temporary directories and
+  compare their tree hashes. In one candidate run a frozen/offline install,
+  candidate verification, tests, typecheck, lint, and production build.
+- Inspect `gnemux/ai-web-starter-kit-template` and
+  `ww1851884/xwlc-web-starter-template` read-only. Confirm their default-branch
+  trees contain no CatCare/Demo path, secret, credential, generated local
+  environment, or temporary acceptance artifact. Do not push either repository
+  during GNE-317.
+- On the real local app, verify recovery, active Google and disabled Apple
+  controls in both locales at desktop and 390 px. Use keyboard-only Tab,
+  Shift+Tab and Escape checks on notifications and the shared photo viewer, and
+  prove focus returns to the opener.
+- Throttle the media request in the browser and prove an already committed text
+  result survives delayed/failed photo upload, retry converges to the server
+  attachment count, and no duplicate submission or notification is created.
+- Request one independent read-only review of the stable diff, with special
+  attention to Auth session safety, private-media access, notification facts,
+  module ownership, template contamination, and hidden behavior changes. Fix
+  every blocking finding and rerun affected gates before PR.

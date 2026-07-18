@@ -24,7 +24,7 @@ test("save-and-publish delegates to the atomic product-service boundary", async 
 test("draft save and publish share one locked product-service boundary", async () => {
   const actionsSource = await readFile(new URL("../actions.ts", plansDirectory), "utf8");
   const serviceSource = await readFile(
-    new URL("../../../lib/catcare/product-service/plans.ts", plansDirectory),
+    new URL("../../../lib/catcare/product-service/plan-editor.ts", plansDirectory),
     "utf8"
   );
   const migrationSource = await readFile(

@@ -708,3 +708,41 @@
 - Clean local migration rebuild, dedicated RLS rollback test, web tests,
   typecheck, lint, production build, package/template boundary checks and an
   independent security review pass before publication or shared migration.
+
+## GNE-317 Product Hardening Closeout Acceptance
+
+- GNE-318 account recovery, GNE-319 private media/evidence, GNE-320 owner
+  notifications, and the delivered Google portion of GNE-321 retain their
+  completed automated and deployed evidence. Apple is explicitly `not_run`,
+  remains disabled in the login UI, and is not described as an available
+  provider.
+- The product service plan implementation is separated into generation,
+  editing/publishing, read, and results lifecycle modules behind the existing
+  `plans.ts` compatibility entry. The anonymous visit UI is separated into
+  visit orchestration, task step, submission form, evidence picker, view
+  helpers, and model modules. Plan detail separates orchestration from summary
+  and share/security presentation. No product DTO or CatCare event type moves
+  into a shared package solely to reduce line counts.
+- Owner evidence and sitter pre-upload images consume one localized in-page
+  lightbox. The lightbox and notification panel trap Tab/Shift+Tab, close with
+  Escape, restore trigger focus, and expose Chinese/English accessible names.
+  Notification exceptions remain clearly identifiable without repeating the
+  same warning through border, badge, title color, and extra icon emphasis.
+- A retain/transform/exclude review confirms that CatCare storage, notification
+  facts, Outbox/event semantics, private RPCs, and plan lifecycle remain in the
+  product layer. OAuth session replacement, safe internal returns, client image
+  preprocessing, and dialog focus behavior remain reviewed research inputs;
+  they are not silently copied into the independently owned clean template
+  before a neutral contract or second real product consumer exists.
+- Web tests, typecheck, lint, package-boundary checks, template drift and
+  negative fixtures, root production build, two deterministic candidate
+  generations, candidate frozen install/tests/build, and read-only inspection
+  of both template repositories pass. Generated candidates contain no CatCare,
+  Demo, local secrets, test credentials, or temporary acceptance harness.
+- Real browser acceptance covers desktop and 390 px, Chinese and English,
+  recovery entry, Google login state, disabled Apple state, notification
+  focus/close behavior, photo focus/navigation/download behavior, and a weak-
+  network media submission retry without duplicate business effects.
+- GNE-317 remains open after engineering evidence is complete. Only explicit
+  owner acceptance can close this parent; execution must not continue to the
+  next Issue automatically.

@@ -36,3 +36,28 @@ test("client selection accepts a 15 MB phone original and rejects larger input",
     /JPG、PNG 或 WebP/
   );
 });
+
+test("client selection accepts localized error messages without changing limits", () => {
+  const maxBytes = 15 * 1024 * 1024;
+  const messages = {
+    oversizedPhoto: "Each photo must be no larger than {megabytes} MB.",
+    unsupportedPhoto: "Only JPG, PNG, or WebP photos are supported."
+  };
+
+  assert.equal(
+    validateClientImageSelection(
+      { size: maxBytes + 1, type: "image/jpeg" },
+      maxBytes,
+      messages
+    ),
+    "Each photo must be no larger than 15 MB."
+  );
+  assert.equal(
+    validateClientImageSelection(
+      { size: 100, type: "image/gif" },
+      maxBytes,
+      messages
+    ),
+    "Only JPG, PNG, or WebP photos are supported."
+  );
+});

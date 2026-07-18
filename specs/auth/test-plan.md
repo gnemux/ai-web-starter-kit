@@ -24,10 +24,10 @@
 - Path: `/login`
 - Expected result: sign in form renders and invalid values return validation feedback.
 - Expected result: the global language switch changes page labels between Chinese and English.
-- Expected result: Google and Apple buttons expose provider-specific pending states, cannot double-submit, and failures remain actionable without raw provider detail.
+- Expected result: Google exposes a provider-specific pending state and cannot double-submit; Apple is visibly disabled with localized deferred copy and cannot start OAuth.
 
 - Path: `/auth/oauth/callback`
-- Expected result: valid Google/Apple PKCE callbacks establish a session and redirect to a clean allowlisted path.
+- Expected result: a valid Google PKCE callback establishes a session and redirects to a clean allowlisted path; Apple callback behavior remains unit-tested but its real provider smoke is deferred.
 - Expected result: cancellation, missing code/provider, invalid provider, expired/repeated code, and external `next` return safely to localized login guidance.
 
 - Path: `/dashboard`
@@ -60,10 +60,10 @@
 - Confirm Auth events use `signup_started`, `user_signed_up`, `login_started`, `user_logged_in`, `auth_login_failed`, `user_logged_out`, and `user_profile_updated`.
 - Confirm each Auth event includes `app`, `mvp_stage`, `market`, `env`, `version`, and `module=auth`.
 - Confirm no event contains passwords, OTPs, magic links, OAuth codes, Supabase tokens, session cookies, or raw provider payloads.
-- With real provider configuration, verify Google new/existing/cancel flows and Apple new/existing/cancel flows on the deployed domain.
-- Verify an existing verified password account signing in with the same Google/Apple email does not create an unexplained duplicate user.
+- With the delivered provider configuration, verify Google new/existing/cancel flows on the deployed domain. Run Apple new/existing/cancel flows only after the separate Apple rollout is explicitly resumed.
+- Verify an existing verified password account signing in with the same Google email does not create an unexplained duplicate user; repeat for Apple only during its future rollout.
 - Verify an existing QQ/password session can intentionally switch to a different Gmail/Google account, lands as the Gmail Auth user, and does not silently merge the two user IDs.
-- Verify Apple/no-name users land in profile completion, save once, and continue to the original allowlisted path.
+- Future Apple rollout gate: verify Apple/no-name users land in profile completion, save once, and continue to the original allowlisted path.
 - Verify provider disable/misconfiguration is recoverable and no secret or raw callback detail appears in page copy, logs, Analytics, PR, or Linear evidence.
 - Verify a normal first provider-settings response taking between 1.5 and 3 seconds does not falsely report that social login is unavailable; this timeout applies only to OAuth availability preflight, not other product requests.
 - For production verification, confirm the event URL is not localhost and `env=production`.

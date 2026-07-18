@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const core = read("./core.ts");
-const plans = read("./plans.ts");
+const plans = read("./plan-editor.ts");
 const shares = read("./share-tokens.ts");
 const view = read("./anonymous-view.ts");
 const submissions = read("./anonymous-submissions.ts");

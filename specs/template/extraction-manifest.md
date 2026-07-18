@@ -127,6 +127,8 @@ until then those implementations stay with their product.
 | `app/login/page.tsx` | Transform | platform-app/Auth | remove CatCare brand/hero/icons/copy; default `next` comes from safe config |
 | `app/login/actions.ts`, `auth-form.tsx`, `login/auth/route.ts` | Transform | platform-app/Auth | retain behavior and Analytics safety; no product default |
 | `app/auth/confirm/route.ts` | Transform | platform-app/Auth | preserve code exchange and validated return path |
+| `app/auth/recovery/**` | Transform | platform-app/Auth | fragment-clearing interstitial, explicit verification POST and protected password form; no product Analytics |
+| `app/auth/oauth/**` | Transform | platform-app/Auth | optional Google provider, request-scoped cookie replacement and safe return; Apple visibly disabled/not_run |
 | `app/account/account-shell.tsx` | Transform | platform-app/account | render neutral shell, not `CatCareAppShell` |
 | account profile/action/form | Transform | platform-app/account | retain generic profile behavior |
 | account Billing/Usage | Transform | platform-app/capabilities | retain shared facts; product pricing/copy/assets become config/product slots |
@@ -161,8 +163,8 @@ until then those implementations stay with their product.
 
 | Source | Class | Target/action | Verification |
 | --- | --- | --- | --- |
-| `lib/services/auth.ts` | Transform | `modules/platform/auth` | Auth/session/profile tests and no CatCare default |
-| `lib/supabase/**` | Transform | `modules/platform/supabase` | server/client separation, no service key in client |
+| `lib/services/auth.ts`, `password-recovery.ts`, OAuth helpers | Transform | `modules/platform/auth` | neutral email/password, scanner-safe recovery and optional Google contracts; no CatCare default or automatic email merge |
+| `lib/supabase/**` | Transform | `modules/platform/supabase` | server/client separation, request-scoped route cookies and no service key in client |
 | `lib/services/billing*` | Transform | `modules/platform/billing` | generic contracts, idempotency, retained ledger tests |
 | `lib/services/payment.ts` | Transform | `modules/platform/payment` | sandbox/disabled, webhook/server truth |
 | `lib/services/ai*` | Transform | `modules/platform/ai` | mock/no-op and Credit failure/release behavior |

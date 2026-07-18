@@ -3,8 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { CatCareEvidenceAttachment } from "@/lib/catcare/product-service";
+import type { Dictionary } from "@/lib/i18n";
 
 import { CatCareXIcon } from "./catcare-action-icons";
+import { useDialogFocusBoundary } from "./use-dialog-focus-boundary";
+
+export type CarePhotoViewerLabels =
+  Dictionary["catcare"]["owner"]["photoViewer"];
 
 export type CarePhotoLightboxItem = {
   alt: string;
@@ -17,37 +22,40 @@ export type CarePhotoLightboxItem = {
 export function CarePhotoLightbox({
   activeIndex,
   items,
+  labels,
   onClose,
   onNavigate
 }: {
   activeIndex: number | null;
   items: CarePhotoLightboxItem[];
+  labels: CarePhotoViewerLabels;
   onClose: () => void;
   onNavigate: (index: number) => void;
 }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   const safeIndex = activeIndex === null
     ? null
     : Math.min(Math.max(activeIndex, 0), Math.max(items.length - 1, 0));
   const activeItem = safeIndex === null ? null : items[safeIndex];
+
+  useDialogFocusBoundary({
+    active: Boolean(activeItem),
+    containerRef: dialogRef,
+    initialFocusRef: closeButtonRef,
+    lockBodyScroll: true,
+    onClose
+  });
 
   useEffect(() => {
     if (!activeItem || safeIndex === null) {
       return;
     }
 
-    const previousFocus = document.activeElement instanceof HTMLElement
-      ? document.activeElement
-      : null;
     const currentIndex = safeIndex;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
 
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        onClose();
-      } else if (event.key === "ArrowLeft" && items.length > 1) {
+      if (event.key === "ArrowLeft" && items.length > 1) {
         onNavigate((currentIndex - 1 + items.length) % items.length);
       } else if (event.key === "ArrowRight" && items.length > 1) {
         onNavigate((currentIndex + 1) % items.length);
@@ -57,9 +65,7 @@ export function CarePhotoLightbox({
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
-      previousFocus?.focus();
     };
   }, [activeItem, items.length, onClose, onNavigate, safeIndex]);
 
@@ -78,20 +84,22 @@ export function CarePhotoLightbox({
       role="presentation"
     >
       <section
-        aria-label="照片大图预览"
+        aria-label={labels.dialogLabel}
         aria-modal="true"
         className="mx-auto grid h-full min-h-0 w-full max-w-6xl grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-2xl border border-white/15 bg-[#101820] text-white shadow-2xl"
         role="dialog"
+        ref={dialogRef}
+        tabIndex={-1}
       >
         <header className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-3 sm:px-5">
           <div>
-            <h2 className="text-base font-semibold">照片预览</h2>
+            <h2 className="text-base font-semibold">{labels.title}</h2>
             <p className="mt-0.5 text-xs font-semibold text-white/60">
               {safeIndex + 1} / {items.length}
             </p>
           </div>
           <button
-            aria-label="关闭照片预览"
+            aria-label={labels.close}
             className="grid h-11 w-11 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-[#65d6ca]"
             onClick={onClose}
             ref={closeButtonRef}
@@ -110,7 +118,7 @@ export function CarePhotoLightbox({
           {items.length > 1 ? (
             <>
               <button
-                aria-label="查看上一张照片"
+                aria-label={labels.previous}
                 className="absolute left-3 grid h-12 w-12 place-items-center rounded-full bg-black/55 text-2xl text-white transition hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-[#65d6ca] sm:left-5"
                 onClick={() => onNavigate((safeIndex - 1 + items.length) % items.length)}
                 type="button"
@@ -118,7 +126,7 @@ export function CarePhotoLightbox({
                 ←
               </button>
               <button
-                aria-label="查看下一张照片"
+                aria-label={labels.next}
                 className="absolute right-3 grid h-12 w-12 place-items-center rounded-full bg-black/55 text-2xl text-white transition hover:bg-black/75 focus:outline-none focus:ring-2 focus:ring-[#65d6ca] sm:right-5"
                 onClick={() => onNavigate((safeIndex + 1) % items.length)}
                 type="button"
@@ -131,14 +139,14 @@ export function CarePhotoLightbox({
 
         <footer className="flex flex-col gap-3 border-t border-white/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <p className="text-sm font-semibold leading-6 text-white/70">
-            {activeItem.caption ?? "按 Esc 或使用右上角按钮关闭预览。"}
+            {activeItem.caption ?? labels.closeHint}
           </p>
           {activeItem.downloadUrl ? (
             <a
               className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-[#19a79d] px-5 text-sm font-semibold text-white transition hover:bg-[#138c84] focus:outline-none focus:ring-2 focus:ring-[#65d6ca]"
               href={activeItem.downloadUrl}
             >
-              下载安全处理版
+              {labels.downloadSafe}
             </a>
           ) : null}
         </footer>
@@ -149,15 +157,17 @@ export function CarePhotoLightbox({
 
 export function CareEvidenceGallery({
   attachments,
+  labels,
   title
 }: {
   attachments: CatCareEvidenceAttachment[];
+  labels: CarePhotoViewerLabels;
   title: string;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const items: CarePhotoLightboxItem[] = attachments.map((attachment, index) => ({
-    alt: `${title} 的照护照片 ${index + 1}`,
-    caption: "这是服务端清除定位信息并压缩后的安全处理版。",
+    alt: `${labels.evidenceAlt} ${index + 1}: ${title}`,
+    caption: labels.evidenceCaption,
     downloadUrl: attachment.downloadUrl,
     id: attachment.id,
     src: attachment.previewUrl
@@ -172,7 +182,7 @@ export function CareEvidenceGallery({
             key={attachment.id}
           >
             <button
-              aria-label={`放大预览 ${title} 的照护照片 ${index + 1}`}
+              aria-label={`${labels.enlargePhoto} ${index + 1}: ${title}`}
               className="group relative block w-full overflow-hidden bg-[#e8efec] focus:outline-none focus:ring-4 focus:ring-inset focus:ring-[#07847f]/30"
               onClick={() => setActiveIndex(index)}
               type="button"
@@ -186,14 +196,14 @@ export function CareEvidenceGallery({
                 width={attachment.width}
               />
               <span className="absolute bottom-2 right-2 rounded-full bg-black/65 px-2.5 py-1 text-xs font-semibold text-white">
-                放大查看
+                {labels.enlarge}
               </span>
             </button>
             <a
               className="flex min-h-10 items-center justify-center px-3 text-xs font-semibold text-[#07847f]"
               href={attachment.downloadUrl}
             >
-              下载安全处理版
+              {labels.downloadSafe}
             </a>
           </figure>
         ))}
@@ -201,6 +211,7 @@ export function CareEvidenceGallery({
       <CarePhotoLightbox
         activeIndex={activeIndex}
         items={items}
+        labels={labels}
         onClose={() => setActiveIndex(null)}
         onNavigate={setActiveIndex}
       />

@@ -36,9 +36,18 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
 - Browser acceptance found and fixed one UI-only stale-state defect: after the
   first successful photo submission, the persisted server count now updates the
   visible attachment count immediately. The server remained authoritative and
-  no data, ACL, notification, or upload contract changed. The remaining gates
-  are independent review plus the normal PR/merge/deploy checks. GNE-317 must
-  remain open until explicit owner acceptance and execution must stop there.
+  no data, ACL, notification, or upload contract changed.
+- PR #112 merged at `5358a81` and its automatic Vercel deployment completed,
+  but the first deployed Google start exposed one recoverable stale-session
+  defect: an invalid local refresh cookie was cleared by the response while the
+  same first request still returned provider-unavailable, so the second click
+  succeeded. The follow-up accepts only Supabase's three explicit stale-session
+  codes, preserves fail-closed behavior for unknown/provider errors, applies
+  cookie deletion to the same response, and continues the first OAuth start.
+  Research-app and neutral-template regressions cover all three codes; no
+  identity linking, provider secret, CatCare business rule, or Apple boundary
+  changes. GNE-321 and GNE-317 remain open until the follow-up is merged,
+  redeployed and accepted; execution must stop at the parent closeout.
 
 ## Current GNE-320 Final Acceptance
 

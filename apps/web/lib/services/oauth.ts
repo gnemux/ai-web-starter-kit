@@ -12,6 +12,12 @@ type OAuthProviderError = {
   status?: number;
 } | null;
 
+const RECOVERABLE_STALE_SESSION_CODES = new Set([
+  "refresh_token_already_used",
+  "refresh_token_not_found",
+  "session_not_found"
+]);
+
 type SocialOAuthUser = {
   email?: string;
   id: string;
@@ -158,11 +164,15 @@ export async function clearCurrentSessionForSocialOAuth(
 ): Promise<ServiceResult<{ cleared: boolean }>> {
   const { data, error } = await auth.getSession();
 
-  if (error) {
+  if (error && !isRecoverableStaleSessionError(error)) {
     return oauthError(
       "system_error",
       "Social sign-in is temporarily unavailable."
     );
+  }
+
+  if (error) {
+    return oauthOk({ cleared: true });
   }
 
   if (!data.session) {
@@ -179,6 +189,10 @@ export async function clearCurrentSessionForSocialOAuth(
   }
 
   return oauthOk({ cleared: true });
+}
+
+export function isRecoverableStaleSessionError(error: OAuthProviderError) {
+  return Boolean(error?.code && RECOVERABLE_STALE_SESSION_CODES.has(error.code));
 }
 
 export async function completeSocialOAuthWithAuth(

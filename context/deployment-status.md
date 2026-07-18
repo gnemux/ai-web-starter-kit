@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | automatic main deployment for `5358a81` succeeded, but deployed Google first-click smoke failed with a recoverable stale browser session; second click succeeded after cleanup |
+| Latest production status | automatic main deployment for `c4fcaaa` succeeded; fresh signed-out Google login passed on the first click and returned as the selected Gmail identity |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | `5358a816c7027e790b18336a53eb17ecca15483c` |
+| Latest production commit | `c4fcaaa9d7018b157562efb0bfdc5e47f8efc41b` |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | GNE-321/GNE-317 closure is blocked on merging and redeploying the stale-session first-click repair. Apple OAuth provider setup and real Apple-user smoke are explicitly deferred/`not_run`; Google public access remains limited while its consent screen is in Testing. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
-| Next owner action | Merge the reviewed stale-session repair, repeat deployed Google first-click smoke, then finish GNE-321/GNE-317 and clean-candidate closure. Do not enter another Issue automatically. |
+| Current blocked items | Apple OAuth provider setup and real Apple-user smoke are explicitly deferred/`not_run`; Google public access remains limited while its consent screen is in Testing. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
+| Next owner action | Close GNE-321 and GNE-317 with the recorded evidence, then stop. Do not enter another Issue automatically. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -73,6 +73,44 @@ GNE-182 provider selector and server-only key names are documented in `context/e
   stale-cookie cleanup and no committed data or schema operation was affected.
 - Closure is blocked until a forward code repair passes CI, deployment, first-
   click Google smoke, deterministic candidate generation, and candidate gates.
+
+## 2026-07-18 23:25 CST - GNE-321 stale-session repair and GNE-317 final candidate acceptance
+
+### Deployment Metadata
+
+| Field | Value |
+| --- | --- |
+| Linear issue | `GNE-321` / `GNE-317` |
+| Environment | Vercel automatic `main` target with the single shared reference/staging/test Supabase project |
+| Deployment type | automatic `main` deployment, deployed Auth smoke and local clean-candidate acceptance |
+| Trigger | PR #113 merge commit |
+| Branch | `main` |
+| Commit | `c4fcaaa9d7018b157562efb0bfdc5e47f8efc41b` |
+| Vercel URL | `https://ai-web-starter-kit-web.vercel.app` |
+| Actor | Codex / Sol under explicit user approval |
+| Verifier | Codex / Sol with two-pass independent review |
+| Provider values | unchanged |
+| Notes | No provider, database, migration, identity-linking, Apple, secret, payment, or production-data setting changed. |
+
+### Smoke Test Result
+
+| Check | Status | Evidence | Next action |
+| --- | --- | --- | --- |
+| GitHub CI | pass | PR #113 run `29648588890` completed lint, typecheck, tests and build successfully. | Track the separate GitHub Actions Node runtime deprecation warning outside this functional closeout. |
+| Vercel deployment | pass | GitHub Vercel status reported `Deployment has completed` for `c4fcaaa` at 23:25 CST. | None. |
+| Google first click | pass | After an explicit UI sign-out, one click on the deployed Google control completed OAuth and landed on `/catcare`; no intermediate provider-unavailable state appeared. | None for controlled acceptance. |
+| Selected identity and account isolation | pass | The resulting account menu displayed the selected Gmail identity. Different-email password and Google accounts were not linked or merged. | Preserve the regression contract. |
+| Apple boundary | not_run | Apple stayed visibly disabled and no Apple provider or real-user operation was attempted. | Collaborator-owned follow-up after Apple Developer ownership exists. |
+| Google public availability | blocked | The Google consent screen remains in Testing, so controlled test users can authenticate but unrestricted public availability is not claimed. | Publish the Google consent screen only under a separate explicit provider-release decision. |
+| Clean-template candidate | pass | Candidate `0.2.0-candidate.11` was generated twice from `c4fcaaa`; identical tree hash `5ec5c6ecb0b6b360f6527fccc0684f74131d65e098cb9398adca08e8cdb583de`. Frozen install, three-layer verification, 24 neutral platform tests, full tests, typecheck, lint and build passed. | Keep one local final candidate; do not push template repositories without a separate explicit request. |
+
+### Rollback Plan
+
+- Rollback is not required: deployment, first-click OAuth, account isolation and
+  the final clean-candidate gates passed.
+- If stale-session behavior regresses, preserve the three-code allowlist, keep
+  unknown provider failures fail-closed, and repair forward through a reviewed
+  PR. Do not weaken account isolation or manually edit Auth identities.
 
 ## 2026-07-17 14:55 CST - GNE-320 deployed notification revision acceptance
 

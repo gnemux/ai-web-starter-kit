@@ -31,6 +31,7 @@
 
 - [x] Google and Apple controls are active, localized, keyboard accessible, mobile-safe, and prevent duplicate starts while pending.
 - [ ] Google and Apple new users establish the existing Supabase SSR cookie session and enter the requested allowlisted product context.
+- [ ] An existing email/password browser session can switch to Google without the old Auth cookie overriding the Google user; only the current browser session is cleared and different emails stay separate.
 - [ ] A verified same-email password identity is linked by Supabase without an unexplained duplicate account; no application-level email-only linking exists.
 - [x] Missing social profile name enters profile completion; existing display names are never overwritten at the application boundary.
 - [x] External, protocol-relative, and sibling-prefix `next` values fall back to `/catcare`.

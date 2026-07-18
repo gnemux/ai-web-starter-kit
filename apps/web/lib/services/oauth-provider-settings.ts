@@ -10,6 +10,7 @@ import { getSupabasePublicConfig } from "../supabase/config";
 import type { SocialOAuthProvider } from "./oauth";
 
 const providerSettingsCacheTtlMs = 5 * 60_000;
+const providerSettingsTimeoutMs = 3_000;
 const providerSettingsCache = new Map<
   SocialOAuthProvider,
   { enabled: boolean; expiresAt: number }
@@ -42,7 +43,7 @@ export async function getSocialOAuthProviderAvailability(
     const response = await fetch(settingsUrl, {
       cache: "no-store",
       headers: { apikey: configResult.data.publishableKey },
-      signal: AbortSignal.timeout(1_500)
+      signal: AbortSignal.timeout(providerSettingsTimeoutMs)
     });
 
     if (!response.ok) {

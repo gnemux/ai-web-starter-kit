@@ -11,7 +11,9 @@ import {
   type SocialOAuthProvider
 } from "@/lib/services/oauth";
 import { normalizeInternalReturnTo } from "@/lib/services/internal-return";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseRouteClient } from "@/lib/supabase/route";
+
+export const dynamic = "force-dynamic";
 
 type OAuthFailure =
   | "cancelled"
@@ -47,7 +49,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const clientResult = await createSupabaseServerClient();
+  const clientResult = createSupabaseRouteClient(request);
   if (!clientResult.ok) {
     return redirectToLoginFailure(
       request,
@@ -57,8 +59,11 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const respond = (response: NextResponse) =>
+    clientResult.data.applyToResponse(response);
+
   const completionResult = await completeSocialOAuthWithAuth(
-    clientResult.data.auth as unknown as SocialOAuthAuthClient,
+    clientResult.data.client.auth as unknown as SocialOAuthAuthClient,
     {
       code: request.nextUrl.searchParams.get("code") ?? "",
       provider
@@ -66,26 +71,30 @@ export async function GET(request: NextRequest) {
   );
 
   if (!completionResult.ok) {
-    return redirectToLoginFailure(
-      request,
-      "callback_failed",
-      provider,
-      nextPath
+    return respond(
+      redirectToLoginFailure(
+        request,
+        "callback_failed",
+        provider,
+        nextPath
+      )
     );
   }
 
   const profileResult = await ensureAuthenticatedUserProfile(
-    clientResult.data,
+    clientResult.data.client,
     completionResult.data.userId,
     completionResult.data.displayNameCandidate
   );
 
   if (!profileResult.ok) {
-    return redirectToLoginFailure(
-      request,
-      "provider_unavailable",
-      provider,
-      nextPath
+    return respond(
+      redirectToLoginFailure(
+        request,
+        "provider_unavailable",
+        provider,
+        nextPath
+      )
     );
   }
 
@@ -104,10 +113,12 @@ export async function GET(request: NextRequest) {
     const completionUrl = new URL("/account", request.nextUrl.origin);
     completionUrl.searchParams.set("complete_profile", "1");
     completionUrl.searchParams.set("next", nextPath);
-    return NextResponse.redirect(completionUrl, 303);
+    return respond(NextResponse.redirect(completionUrl, 303));
   }
 
-  return NextResponse.redirect(new URL(nextPath, request.nextUrl.origin), 303);
+  return respond(
+    NextResponse.redirect(new URL(nextPath, request.nextUrl.origin), 303)
+  );
 }
 
 function redirectToLoginFailure(

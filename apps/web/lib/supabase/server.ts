@@ -6,7 +6,6 @@ import {
   type SupabaseClient
 } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { cache } from "react";
 
 import {
   serviceError,
@@ -19,7 +18,7 @@ import type { Database } from "./database.types";
 
 export type AppSupabaseClient = SupabaseClient<Database>;
 
-export const createSupabaseServerClient = cache(async function createSupabaseServerClient(): Promise<
+export async function createSupabaseServerClient(): Promise<
   ServiceResult<AppSupabaseClient>
 > {
   const config = getSupabasePublicConfig();
@@ -48,7 +47,7 @@ export const createSupabaseServerClient = cache(async function createSupabaseSer
       }
     })
   );
-});
+}
 
 export function createSupabaseAdminClient(): ServiceResult<AppSupabaseClient> {
   const config = getSupabasePublicConfig();

@@ -1730,3 +1730,38 @@ GNE-303 final local user-acceptance checkpoint on 2026-07-15:
   unchanged. `template/source-map.json` records GNE-321 as research-app input;
   `GNE-317` must later decide retain/transform/exclude after real-provider
   acceptance rather than silently backfilling the mother template.
+
+## 2026-07-18 GNE-321 existing-session switch repair
+
+- Read-only Auth evidence confirmed that Google created the selected Google
+  identity correctly, then a stale existing password session refreshed and
+  replaced it in the browser. The two different-email identities remain
+  separate; no application-level identity merge was introduced.
+- OAuth start now clears only the current browser session before provider
+  navigation. Start and callback use a request-scoped Supabase client that
+  applies all Auth cookie mutations and anti-cache headers to the exact returned
+  response; the protected-route proxy preserves the same contract, and the
+  server client is no longer React-cached across requests.
+- The automated regression models an existing QQ password session switching to
+  a distinct Google identity, verifies local-only sign-out, the selected Google
+  result, zero identity-link calls, removal of every stale Auth chunk, PKCE
+  cleanup, and installation of only the new Google chunks. All 142 Web tests,
+  full repository tests, template drift, diff checks, and production build pass
+  locally. A repeat real
+  Google switch on the deployed build remains required before marking the
+  acceptance item complete.
+- The published clean template is unchanged. The new route adapter is explicitly
+  recorded as GNE-321 research input; GNE-317 must independently decide whether
+  to project the neutral session-replacement pattern into the mother template.
+- The owner-approved shared-test Auth configuration now retains all existing
+  redirects and additionally allowlists `http://localhost:3003/**`. A repeat
+  real local smoke started from the CatCare login page, returned to
+  `http://localhost:3003/catcare`, and showed the selected Google identity
+  instead of the previous password identity. The stale hosted callback-code tab
+  is not acceptance evidence and may be discarded.
+- Apple provider setup and real-account smoke are explicitly deferred to the
+  collaborator who has the required Apple Developer account and Apple user.
+  The shared adapter and safe disabled-provider behavior remain, but Apple is
+  `not_run` and must not be reported as available. Google publication and
+  deployed smoke may proceed independently; GNE-321 remains open until its live
+  Issue acceptance is reconciled with that external follow-up.

@@ -18,7 +18,8 @@ M4 implements Supabase Auth and a profile/account reference flow on top of the M
 - `apps/web/proxy.ts` connects the Next.js proxy boundary.
 - `apps/web/lib/services/auth.ts` owns sign up, sign in, sign out, current user, and profile update use cases.
 - `apps/web/lib/services/oauth.ts` owns provider allowlisting, OAuth start/callback normalization, PKCE exchange, and safe provider-error mapping so the existing Auth service does not become a second monolith.
-- `/auth/oauth/start` starts Google or Apple through `signInWithOAuth`; `/auth/oauth/callback` exchanges the one-time code for the normal SSR cookie session and immediately removes callback parameters through a clean redirect.
+- `/auth/oauth/start` locally signs out an existing browser session before starting Google or Apple through `signInWithOAuth`; `/auth/oauth/callback` exchanges the one-time code for the normal SSR cookie session and immediately removes callback parameters through a clean redirect.
+- OAuth Route Handlers create one request-scoped Supabase client, capture every cookie mutation and Supabase-provided anti-cache header, and apply them to the exact JSON/redirect response. Auth clients are never shared across requests, and protected-route proxy responses preserve the same cookie/header contract.
 - Auth server actions translate `FormData`, call services, revalidate affected paths, and redirect on successful navigation.
 - Client form components call server actions and capture safe PostHog events through `trackEvent`.
 - Pages render service results and never import Supabase SDKs directly.
@@ -76,6 +77,8 @@ PostHog:
 - Return safety: every OAuth `next` value passes `normalizeInternalReturnTo`; callback provider and code are bounded allowlisted inputs.
 - Callback privacy: authorization codes and raw callback errors are never logged, rendered, added to Analytics, or copied into the post-login URL.
 - Identity safety: the application does not manually link by unverified email and does not overwrite an existing profile name with provider metadata.
+- Session switching: an existing browser session is signed out with `scope=local` before social OAuth starts. This does not revoke other devices, does not link different emails, and prevents a stale password-session cookie from winning after the callback.
+- Cache safety: every response that writes or refreshes Auth cookies carries the `@supabase/ssr` anti-cache headers; OAuth routes are forced dynamic.
 
 ## Rollout
 

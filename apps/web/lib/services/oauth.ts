@@ -36,6 +36,16 @@ export type SocialOAuthAuthClient = {
   }>;
 };
 
+export type SocialOAuthSessionSwitchClient = {
+  getSession(): Promise<{
+    data: { session: { user: { id: string } } | null };
+    error: OAuthProviderError;
+  }>;
+  signOut(input: { scope: "local" }): Promise<{
+    error: OAuthProviderError;
+  }>;
+};
+
 export type SocialOAuthCompletion = {
   displayNameCandidate: string | null;
   email: string;
@@ -141,6 +151,34 @@ export async function startSocialOAuthWithAuth(
   }
 
   return oauthOk({ provider: input.provider, url: data.url });
+}
+
+export async function clearCurrentSessionForSocialOAuth(
+  auth: SocialOAuthSessionSwitchClient
+): Promise<ServiceResult<{ cleared: boolean }>> {
+  const { data, error } = await auth.getSession();
+
+  if (error) {
+    return oauthError(
+      "system_error",
+      "Social sign-in is temporarily unavailable."
+    );
+  }
+
+  if (!data.session) {
+    return oauthOk({ cleared: false });
+  }
+
+  const { error: signOutError } = await auth.signOut({ scope: "local" });
+
+  if (signOutError) {
+    return oauthError(
+      "system_error",
+      "Social sign-in is temporarily unavailable."
+    );
+  }
+
+  return oauthOk({ cleared: true });
 }
 
 export async function completeSocialOAuthWithAuth(

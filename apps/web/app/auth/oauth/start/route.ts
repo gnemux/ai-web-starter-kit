@@ -2,13 +2,17 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import {
   buildSocialOAuthCallbackUrl,
+  clearCurrentSessionForSocialOAuth,
   normalizeSocialOAuthStartInput,
   startSocialOAuthWithAuth,
-  type SocialOAuthAuthClient
+  type SocialOAuthAuthClient,
+  type SocialOAuthSessionSwitchClient
 } from "@/lib/services/oauth";
 import { getAuthAppUrl } from "@/lib/services/auth";
 import { getSocialOAuthProviderAvailability } from "@/lib/services/oauth-provider-settings";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseRouteClient } from "@/lib/supabase/route";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   const formData = await request.formData();
@@ -54,7 +58,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const clientResult = await createSupabaseServerClient();
+  const clientResult = createSupabaseRouteClient(request);
   if (!clientResult.ok) {
     return NextResponse.json(
       { error: "provider_unavailable", ok: false },
@@ -62,8 +66,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const respond = (response: NextResponse) =>
+    clientResult.data.applyToResponse(response);
+  const sessionSwitchResult = await clearCurrentSessionForSocialOAuth(
+    clientResult.data.client.auth as unknown as SocialOAuthSessionSwitchClient
+  );
+
+  if (!sessionSwitchResult.ok) {
+    return respond(
+      NextResponse.json(
+        { error: "provider_unavailable", ok: false },
+        { status: 503 }
+      )
+    );
+  }
+
   const startResult = await startSocialOAuthWithAuth(
-    clientResult.data.auth as unknown as SocialOAuthAuthClient,
+    clientResult.data.client.auth as unknown as SocialOAuthAuthClient,
     {
       provider: inputResult.data.provider,
       redirectTo: callbackResult.data
@@ -71,15 +90,19 @@ export async function POST(request: NextRequest) {
   );
 
   if (!startResult.ok) {
-    return NextResponse.json(
-      { error: "provider_unavailable", ok: false },
-      { status: 503 }
+    return respond(
+      NextResponse.json(
+        { error: "provider_unavailable", ok: false },
+        { status: 503 }
+      )
     );
   }
 
-  return NextResponse.json({
-    ok: true,
-    provider: startResult.data.provider,
-    url: startResult.data.url
-  });
+  return respond(
+    NextResponse.json({
+      ok: true,
+      provider: startResult.data.provider,
+      url: startResult.data.url
+    })
+  );
 }

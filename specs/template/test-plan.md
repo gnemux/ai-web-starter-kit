@@ -256,6 +256,14 @@ not Production migration evidence.
 - CSP has a reviewed `frame-ancestors` policy;
 - Referrer-Policy and X-Content-Type-Options are present;
 - Auth/session cookie expectations and safe return paths pass negatives;
+- recovery links remove token fragments before any provider call, require an
+  explicit verification POST, and protect the password form with the recovery
+  session; sensitive recovery routes initialize no product Analytics;
+- optional Google OAuth stays disabled when the provider is absent, clears an
+  old local session before provider navigation, replaces all cookie chunks on
+  callback, rejects unsafe returns, and never auto-merges different emails;
+- Apple remains a visible disabled/not_run boundary until external ownership is
+  supplied;
 - no service key or secret appears in browser bundles/logs/evidence;
 - all dependencies are represented by the committed lockfile;
 - root license and third-party/asset notices cover redistributed inputs;

@@ -133,6 +133,19 @@ The candidate includes `@xwlc/core`, `@xwlc/ui`, `@xwlc/platform`, and
 commit. This is a practical cold-start mechanism for the first candidate. It is
 not evidence of registry publication or automatic upgrades across repositories.
 
+The neutral Auth shell includes email/password access, scanner-safe password
+recovery, and an optional Google OAuth path that becomes usable only when the
+new product configures Google in its own Supabase project. Starting Google from
+an already signed-in browser replaces that local session without merging
+different email identities. Apple remains disabled until a future product owns
+the Apple Developer configuration and acceptance evidence. Sensitive recovery
+routes do not initialize product Analytics.
+
+Client image preprocessing is deliberately not part of this candidate release.
+It is currently proven by one product only; its compression dimensions, file
+limits, EXIF policy and upload contract remain product-owned until a second real
+consumer or a neutral candidate capability proves a stable interface.
+
 CatCare Outbox worker/store/event types and deterministic Audit IDs remain
 product-bound. Their proven patterns may be referenced, but extraction waits
 until a working second product would otherwise copy the same semantics.

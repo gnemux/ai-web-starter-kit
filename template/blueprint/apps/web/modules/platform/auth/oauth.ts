@@ -2,6 +2,12 @@ import { normalizeInternalReturn } from "../navigation/internal-return.ts";
 
 export type SocialOAuthProvider = "google";
 
+const RECOVERABLE_STALE_SESSION_CODES = new Set([
+  "refresh_token_already_used",
+  "refresh_token_not_found",
+  "session_not_found"
+]);
+
 export function normalizeOAuthProvider(value: FormDataEntryValue | string | null | undefined): SocialOAuthProvider | null {
   return String(value ?? "").trim().toLowerCase() === "google" ? "google" : null;
 }
@@ -34,6 +40,10 @@ export function isSafeOAuthNavigation(value: string | null): value is string {
 export function buildProfileCompletionPath(accountPath: string, nextValue: string, fallback: string) {
   const search = new URLSearchParams({ complete_profile: "1", next: normalizeInternalReturn(nextValue, fallback) });
   return `${accountPath}?${search.toString()}`;
+}
+
+export function isRecoverableStaleSessionError(error: { code?: string } | null) {
+  return Boolean(error?.code && RECOVERABLE_STALE_SESSION_CODES.has(error.code));
 }
 
 export function boundedProviderDisplayName(metadata: Record<string, unknown> | undefined) {

@@ -19,15 +19,15 @@ Do not record secrets, real private tokens, service-role keys, passwords, custom
 
 | Field | Current value |
 | --- | --- |
-| Latest production status | automatic main deployment for `7accbc3` succeeded; controlled Google login and existing-session switch acceptance passed |
+| Latest production status | automatic main deployment for `5358a81` succeeded, but deployed Google first-click smoke failed with a recoverable stale browser session; second click succeeded after cleanup |
 | Latest production URL | `https://ai-web-starter-kit-web.vercel.app` |
-| Latest production commit | `7accbc3c03b2025e87cc513af463cf96223cbcd2` |
+| Latest production commit | `5358a816c7027e790b18336a53eb17ecca15483c` |
 | Latest preview status | unknown |
 | Latest preview URL | unknown |
 | Latest preview commit | unknown |
 | Environment variable split | Vercel Production and Preview should be separate entries. Values may temporarily match while only one provider environment exists. |
-| Current blocked items | Apple OAuth provider setup and real Apple-user smoke are explicitly deferred/`not_run`; Google public access remains limited while its consent screen is in Testing. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
-| Next owner action | Complete GNE-317 architecture/template/browser closeout, then request explicit owner acceptance. Do not close the parent or enter another Issue automatically. |
+| Current blocked items | GNE-321/GNE-317 closure is blocked on merging and redeploying the stale-session first-click repair. Apple OAuth provider setup and real Apple-user smoke are explicitly deferred/`not_run`; Google public access remains limited while its consent screen is in Testing. Live AI/payment, real Outbox delivery, and separate production providers remain `not_run`. |
+| Next owner action | Merge the reviewed stale-session repair, repeat deployed Google first-click smoke, then finish GNE-321/GNE-317 and clean-candidate closure. Do not enter another Issue automatically. |
 
 GNE-182 provider selector and server-only key names are documented in `context/environment-matrix.md`. This file records configured/missing/unknown status only when an actual deployment or env dashboard verification is performed.
 
@@ -38,6 +38,41 @@ GNE-182 provider selector and server-only key names are documented in `context/e
 - `blocked`: cannot be verified until an owner action, permission, provider setup, or missing fact is resolved.
 - `not_run`: intentionally not run yet.
 - `unknown`: existing state is not known and no verification was attempted.
+
+## 2026-07-18 22:25 CST - GNE-317 closeout deployment smoke found recoverable stale-session defect
+
+### Deployment Metadata
+
+| Field | Value |
+| --- | --- |
+| Linear issue | `GNE-321` / `GNE-317` |
+| Environment | Vercel automatic `main` target with the single shared reference/staging/test Supabase project |
+| Deployment type | automatic `main` deployment plus deployed Auth smoke |
+| Trigger | PR #112 merge commit |
+| Branch | `main` |
+| Commit | `5358a816c7027e790b18336a53eb17ecca15483c` |
+| Vercel URL | `https://ai-web-starter-kit-web.vercel.app` |
+| Actor | Codex / Sol under explicit user approval |
+| Verifier | Codex / Sol with independent review |
+| Provider values | unchanged |
+| Notes | No provider, database, migration, identity-linking, Apple, secret, payment, or production-data setting changed. |
+
+### Smoke Test Result
+
+| Check | Status | Evidence | Next action |
+| --- | --- | --- | --- |
+| Vercel deployment | pass | GitHub Vercel status reported the `5358a81` deployment completed. | None for deployment health. |
+| Login provider state | pass | Deployed login exposed Google and kept Apple visibly disabled. | Keep the same boundary. |
+| Google first click with stale browser session | fail | The first start returned the localized provider-unavailable state; the same response cleared the invalid refresh cookie and a second click reached Google and returned as the selected Google identity. | Accept only explicit stale-session errors as recoverable, keep unknown errors fail-closed, redeploy and repeat first-click smoke. |
+| Account isolation | pass | The selected Google identity remained distinct from the previous different-email password identity; no automatic linking was introduced. | Preserve this invariant in the repair. |
+| Clean-template projection | blocked | The merged candidate includes the earlier neutral Auth contract, but this newly reproduced first-click state is not yet projected and revalidated. | Project the neutral recovery rule, regenerate deterministically, and rerun the candidate gates after the repair merge. |
+
+### Rollback Plan
+
+- Rollback was not required because the deployed product remains usable after
+  stale-cookie cleanup and no committed data or schema operation was affected.
+- Closure is blocked until a forward code repair passes CI, deployment, first-
+  click Google smoke, deterministic candidate generation, and candidate gates.
 
 ## 2026-07-17 14:55 CST - GNE-320 deployed notification revision acceptance
 

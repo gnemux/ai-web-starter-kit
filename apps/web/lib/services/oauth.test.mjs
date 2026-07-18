@@ -205,7 +205,82 @@ test("social OAuth does not sign out without a session and stops on cleanup fail
   assert.deepEqual(emptyResult, { data: { cleared: false }, ok: true });
   assert.equal(signOutCalls, 0);
 
+  for (const staleCode of [
+    "refresh_token_already_used",
+    "refresh_token_not_found",
+    "session_not_found"
+  ]) {
+    const staleCookieState = createSupabaseRouteCookieState([
+      { name: "sb-project-auth-token", value: "stale-session" }
+    ]);
+    let oauthStarts = 0;
+    const staleAuth = createAuthMock({
+      async getSession() {
+        staleCookieState.setAll(
+          [
+            {
+              name: "sb-project-auth-token",
+              options: { maxAge: 0, path: "/" },
+              value: ""
+            }
+          ],
+          { "Cache-Control": "private, no-store" }
+        );
+        return {
+          data: { session: null },
+          error: { code: staleCode, status: 400 }
+        };
+      },
+      async signInWithOAuth() {
+        oauthStarts += 1;
+        return {
+          data: { url: "https://provider.example/authorize?state=opaque" },
+          error: null
+        };
+      }
+    });
+
+    const staleResult = await clearCurrentSessionForSocialOAuth(staleAuth);
+    assert.deepEqual(staleResult, { data: { cleared: true }, ok: true });
+    assert.equal(
+      (
+        await startSocialOAuthWithAuth(staleAuth, {
+          provider: "google",
+          redirectTo: "https://product.example/auth/oauth/callback"
+        })
+      ).ok,
+      true
+    );
+    assert.equal(oauthStarts, 1);
+
+    const response = createCookieResponseMock();
+    staleCookieState.applyToResponse(response.response);
+    assert.deepEqual(response.mutations, [
+      {
+        name: "sb-project-auth-token",
+        options: { maxAge: 0, path: "/" },
+        value: ""
+      }
+    ]);
+  }
+
   const failedResult = await clearCurrentSessionForSocialOAuth(
+    createAuthMock({
+      async getSession() {
+        return {
+          data: { session: null },
+          error: { code: "request_timeout", status: 504 }
+        };
+      },
+      async signOut() {
+        return { error: null };
+      }
+    })
+  );
+
+  assert.equal(failedResult.ok, false);
+
+  const signOutFailedResult = await clearCurrentSessionForSocialOAuth(
     createAuthMock({
       async getSession() {
         return {
@@ -221,10 +296,10 @@ test("social OAuth does not sign out without a session and stops on cleanup fail
     })
   );
 
-  assert.equal(failedResult.ok, false);
-  if (!failedResult.ok) {
-    assert.equal(failedResult.error.code, "system_error");
-    assert.doesNotMatch(failedResult.error.message, /raw|sensitive/i);
+  assert.equal(signOutFailedResult.ok, false);
+  if (!signOutFailedResult.ok) {
+    assert.equal(signOutFailedResult.error.code, "system_error");
+    assert.doesNotMatch(signOutFailedResult.error.message, /raw|sensitive/i);
   }
 });
 

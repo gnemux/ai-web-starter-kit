@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { productConfig } from "@/config/product.config";
-import { buildOAuthCallbackUrl, isSafeOAuthNavigation, normalizeOAuthProvider } from "@/modules/platform/auth/oauth";
+import { buildOAuthCallbackUrl, isRecoverableStaleSessionError, isSafeOAuthNavigation, normalizeOAuthProvider } from "@/modules/platform/auth/oauth";
 import { getAuthAppUrl } from "@/modules/platform/auth/confirmation-url";
 import { getOAuthProviderAvailability } from "@/modules/platform/auth/oauth-provider-settings";
 import { normalizeInternalReturn } from "@/modules/platform/navigation/internal-return";
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
   try { redirectTo = buildOAuthCallbackUrl(appUrl, provider, next, productConfig.paths.product); }
   catch { return authJson({ ok: false, error: "provider_unavailable" }, 503); }
   const { data: sessionData, error: sessionError } = await routeClient.client.auth.getSession();
-  if (sessionError) return routeClient.applyToResponse(authJson({ ok: false, error: "provider_unavailable" }, 503));
+  if (sessionError && !isRecoverableStaleSessionError(sessionError)) return routeClient.applyToResponse(authJson({ ok: false, error: "provider_unavailable" }, 503));
   if (sessionData.session) {
     const { error } = await routeClient.client.auth.signOut({ scope: "local" });
     if (error) return routeClient.applyToResponse(authJson({ ok: false, error: "provider_unavailable" }, 503));

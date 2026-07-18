@@ -5,7 +5,10 @@ import { useRef, useState } from "react";
 import type { CarePhotoViewerLabels } from "../../catcare/care-photo-lightbox-client";
 import type { CareSubmissionLabels } from "./care-evidence-picker-client";
 import { TaskStep } from "./task-step-client";
-import type { AnonymousServiceDay } from "./visit-model";
+import type {
+  AnonymousServiceDay,
+  ShareHandoffLabels
+} from "./visit-model";
 import {
   formatDaySummary,
   formatVisitSummary,
@@ -17,12 +20,14 @@ export function AnonymousVisitAccordion({
   careSubmissionLabels,
   days,
   photoViewerLabels,
+  shareHandoffLabels,
   today,
   token
 }: {
   careSubmissionLabels: CareSubmissionLabels;
   days: AnonymousServiceDay[];
   photoViewerLabels: CarePhotoViewerLabels;
+  shareHandoffLabels: ShareHandoffLabels;
   today: string;
   token: string;
 }) {
@@ -101,14 +106,18 @@ export function AnonymousVisitAccordion({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[#07847f]">
-                    第 {dayIndex + 1} 天 · {day.dateLabel}
+                    {shareHandoffLabels.dayLabel
+                      .replace("{count}", String(dayIndex + 1))
+                      .replace("{date}", day.dateLabel)}
                   </p>
                   <h3 className="mt-1 break-words text-lg font-semibold leading-7 text-[#101a32]">
-                    {formatDaySummary(day)}
+                    {formatDaySummary(day, shareHandoffLabels)}
                   </h3>
                 </div>
                 <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
-                  {dayOpen ? "收起" : "展开"} · {day.statusLabel}
+                  {dayOpen
+                    ? shareHandoffLabels.collapse
+                    : shareHandoffLabels.expand} · {day.statusLabel}
                 </span>
               </div>
             </button>
@@ -116,7 +125,7 @@ export function AnonymousVisitAccordion({
               <div className="mt-4 grid gap-3" id={dayPanelId}>
                 {day.locked ? (
                   <p className="rounded-xl bg-[#f2f4f7] px-3 py-2 text-sm font-semibold leading-6 text-[#526177]">
-                    这一天还没到，可以先查看安排；到当天后再提交完成、备注或异常。
+                    {shareHandoffLabels.lockedDay}
                   </p>
                 ) : null}
                 {day.visits.map((visit, visitIndex) => {
@@ -149,16 +158,23 @@ export function AnonymousVisitAccordion({
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-[#07847f]">
-                              第 {visitIndex + 1} 次到访 · {visit.timeLabel}
+                              {shareHandoffLabels.visitLabel
+                                .replace("{count}", String(visitIndex + 1))
+                                .replace("{time}", visit.timeLabel)}
                             </p>
                             <h4 className="mt-1 break-words text-base font-semibold leading-6 text-[#101a32]">
-                              {formatVisitSummary(visit.tasks)}
+                              {formatVisitSummary(
+                                visit.tasks,
+                                shareHandoffLabels
+                              )}
                             </h4>
                           </div>
                           <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
                             {allSubmitted
-                              ? "已提交"
-                              : visitOpen ? "收起" : "展开"} · {submittedCount}/{visit.tasks.length}
+                              ? shareHandoffLabels.submitted
+                              : visitOpen
+                                ? shareHandoffLabels.collapse
+                                : shareHandoffLabels.expand} · {submittedCount}/{visit.tasks.length}
                           </span>
                         </div>
                       </button>
@@ -171,6 +187,7 @@ export function AnonymousVisitAccordion({
                               step={taskIndex + 1}
                               task={task}
                               photoViewerLabels={photoViewerLabels}
+                              shareHandoffLabels={shareHandoffLabels}
                               onSubmitted={() => {
                                 setSubmittedTaskKeys((current) => {
                                   const next = new Set(current);

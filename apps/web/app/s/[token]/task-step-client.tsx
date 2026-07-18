@@ -8,9 +8,7 @@ import { reconcileEvidenceAttachmentCount } from "@/lib/media/evidence-upload-st
 import { CatCareTaskCategoryIcon } from "../../catcare/catcare-item-type-icon";
 import type { CarePhotoViewerLabels } from "../../catcare/care-photo-lightbox-client";
 import {
-  formatOwnerLabel,
   formatTaskAction,
-  getCategoryLabel,
   getCategoryStyle,
   parseTaskTitle
 } from "../../catcare/plans/plan-task-display";
@@ -20,7 +18,11 @@ import {
   type CareSubmissionLabels
 } from "./care-evidence-picker-client";
 import { TaskSubmissionForm } from "./care-submission-form-client";
-import type { AnonymousTask, SelectedEvidence } from "./visit-model";
+import type {
+  AnonymousTask,
+  SelectedEvidence,
+  ShareHandoffLabels
+} from "./visit-model";
 import {
   careEvidenceNetworkMaxBytes,
   careEvidencePickerMaxBytes
@@ -28,6 +30,8 @@ import {
 import {
   CatOwnerBadge,
   formatFrequency,
+  formatShareCategory,
+  formatShareOwner,
   formatSubmissionStatus
 } from "./visit-display";
 
@@ -36,6 +40,7 @@ export function TaskStep({
   task,
   careSubmissionLabels,
   photoViewerLabels,
+  shareHandoffLabels,
   onSubmitted,
   token
 }: {
@@ -44,6 +49,7 @@ export function TaskStep({
   step: number;
   task: AnonymousTask;
   photoViewerLabels: CarePhotoViewerLabels;
+  shareHandoffLabels: ShareHandoffLabels;
   token: string;
 }) {
   const title = parseTaskTitle(task.title);
@@ -299,7 +305,7 @@ export function TaskStep({
             <span
               className={`inline-flex min-h-7 items-center rounded-full px-2.5 text-xs font-semibold ${getCategoryStyle(task.category)}`}
             >
-              {getCategoryLabel(task.category)}
+              {formatShareCategory(task.category, shareHandoffLabels)}
             </span>
             <span className="inline-flex min-h-7 items-center rounded-full bg-white px-2.5 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
               {task.required
@@ -311,13 +317,16 @@ export function TaskStep({
                 {careSubmissionLabels.photoRequired}
               </span>
             ) : null}
-            <CatOwnerBadge name={formatOwnerLabel(title.owner)} />
+            <CatOwnerBadge
+              name={formatShareOwner(title.owner, shareHandoffLabels)}
+              styleOwner={title.owner}
+            />
           </div>
           <h4 className="mt-2 break-words text-lg font-semibold leading-7 text-[#101a32]">
             {formatTaskAction(task.title)}
           </h4>
           <p className="mt-1 text-sm font-semibold leading-6 text-[#526177]">
-            {formatFrequency(task.frequency)}
+            {formatFrequency(task.frequency, shareHandoffLabels)}
           </p>
         </div>
       </div>
@@ -330,7 +339,7 @@ export function TaskStep({
         {submission ? (
           <div className="mt-4 rounded-xl bg-[#f2fbf8] px-3 py-3 ring-1 ring-[#d9eee7]">
             <p className="text-sm font-semibold text-[#07847f]">
-              {formatSubmissionStatus(submission.status)}
+              {formatSubmissionStatus(submission.status, shareHandoffLabels)}
             </p>
             {submission.note ? (
               <p className="mt-2 whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[#101a32]">

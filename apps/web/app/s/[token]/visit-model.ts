@@ -2,6 +2,10 @@ import type {
   AnonymousCareTaskSubmissionView,
   AnonymousCareTaskView
 } from "@/lib/catcare/product-service";
+import type { Dictionary } from "@/lib/i18n";
+
+export type ShareHandoffLabels =
+  Dictionary["catcare"]["owner"]["shareHandoff"];
 
 export type AnonymousTask = {
   category: AnonymousCareTaskView["category"];

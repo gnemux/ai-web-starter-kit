@@ -276,13 +276,14 @@ Operational notes:
 - If Auth redirect URLs are restricted in Supabase, add local, preview, and production URLs before testing email confirmation.
 - Real signup/login verification may send email to the test address and should be done by the account owner.
 
-### Google and Apple social login (GNE-321)
+### Google delivery and deferred Apple social login (GNE-321)
 
-- Enable only Google and Apple in the current Supabase project. The app does not carry provider client secrets.
+- Google is the delivered social provider for the controlled MVP3 environment. The app does not carry provider client secrets.
 - Google needs a Web OAuth Client whose authorized origin is the deployed app and whose redirect URI is the exact Supabase callback shown in the Google provider panel. Keep scopes to OpenID, email, and profile.
-- Apple Web login needs an Apple Developer account, App ID, Services ID, verified domain/return URL, Team ID, Key ID, and `.p8` key. Store the generated client secret only in Supabase and rotate it before its six-month expiry.
+- Apple Web login remains deferred by explicit product decision. Enabling it later needs an Apple Developer account, App ID, Services ID, verified domain/return URL, Team ID, Key ID, `.p8` key, and real Apple-user smoke. Store the generated client secret only in Supabase and rotate it before its six-month expiry.
 - Add the app callback routes above to Supabase Auth redirect allowlists. Local port `3003` is only for local smoke and must not replace the deployed URL.
 - Supabase automatically links identities only when it can trust the same verified email. Do not add a custom database or admin-API link-by-email path.
 - The app consumes only the Supabase session and bounded profile fields. Provider access, refresh, and ID tokens are never persisted or sent to PostHog.
-- Apple Web OAuth does not provide a dependable full name. A missing name is completed on `/account`; existing profile values are preserved.
-- Provider setup and real credentials are an external release gate: implementation tests can pass before configuration, but GNE-321 cannot be marked Done until real Google and Apple smoke passes.
+- Apple Web OAuth does not provide a dependable full name. The retained adapter sends a missing name to `/account`; existing profile values are preserved.
+- The login page must keep Apple disabled and must not start an Apple OAuth request while that provider is deferred. Google controlled-environment acceptance and the explicit Apple `not_run` decision are the GNE-321 scope; a future Apple rollout requires its own provider/configuration acceptance and cannot be inferred from these tests.
+- The current Google Cloud OAuth consent screen may remain in Testing for controlled MVP3 acceptance, which restricts access to configured test users. Public availability requires publishing the consent screen and completing the applicable branding, domain, privacy, and Google verification gates.

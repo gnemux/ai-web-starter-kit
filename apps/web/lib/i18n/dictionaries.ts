@@ -261,6 +261,22 @@ export const dictionaries = {
           exceptionBadge: "异常",
           targetUnavailable: "关联结果已不可用，这条通知仍保留供你核对。"
         },
+        photoViewer: {
+          dialogLabel: "照护照片大图预览",
+          title: "照片预览",
+          close: "关闭照片预览",
+          previous: "查看上一张照片",
+          next: "查看下一张照片",
+          closeHint: "按 Esc 或使用右上角按钮关闭预览。",
+          downloadSafe: "下载安全处理版",
+          evidenceAlt: "照护照片",
+          evidenceCaption: "这是服务端清除定位信息并压缩后的安全处理版。",
+          enlarge: "放大查看",
+          enlargePhoto: "放大预览照护照片",
+          localAlt: "待上传照护照片",
+          localCaption: "这是上传前的本机预览；提交后服务端还会清除定位信息并安全压缩。",
+          removePhoto: "移除照片"
+        },
         metrics: {
           cats: "猫咪档案",
           onboarding: "新手进度",
@@ -607,6 +623,7 @@ export const dictionaries = {
         title: "或",
         google: "使用 Google 继续",
         apple: "使用 Apple 继续",
+        appleDeferred: "Apple 登录暂未开放",
         workingGoogle: "正在前往 Google...",
         workingApple: "正在前往 Apple...",
         cancelled: "已取消社交登录，你可以重新尝试或使用邮箱登录。",
@@ -1322,6 +1339,24 @@ export const dictionaries = {
           targetUnavailable:
             "The linked result is no longer available. This notification remains for reference."
         },
+        photoViewer: {
+          dialogLabel: "Large care photo preview",
+          title: "Photo preview",
+          close: "Close photo preview",
+          previous: "View previous photo",
+          next: "View next photo",
+          closeHint: "Press Esc or use the close button in the top-right corner.",
+          downloadSafe: "Download safe copy",
+          evidenceAlt: "Care photo",
+          evidenceCaption:
+            "This safe copy was compressed after location metadata was removed on the server.",
+          enlarge: "Enlarge",
+          enlargePhoto: "Enlarge care photo",
+          localAlt: "Care photo awaiting upload",
+          localCaption:
+            "This is a local preview. The server will remove location metadata and compress it after submission.",
+          removePhoto: "Remove photo"
+        },
         metrics: {
           cats: "Cat profiles",
           onboarding: "Onboarding",
@@ -1669,6 +1704,7 @@ export const dictionaries = {
         title: "or",
         google: "Continue with Google",
         apple: "Continue with Apple",
+        appleDeferred: "Apple sign-in is not available yet",
         workingGoogle: "Opening Google...",
         workingApple: "Opening Apple...",
         cancelled: "Social sign-in was cancelled. Try again or use email instead.",

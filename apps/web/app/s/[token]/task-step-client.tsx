@@ -1,0 +1,415 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+import { prepareClientImageForUpload } from "@/lib/media/client-image";
+import { reconcileEvidenceAttachmentCount } from "@/lib/media/evidence-upload-state";
+
+import { CatCareTaskCategoryIcon } from "../../catcare/catcare-item-type-icon";
+import type { CarePhotoViewerLabels } from "../../catcare/care-photo-lightbox-client";
+import {
+  formatOwnerLabel,
+  formatTaskAction,
+  getCategoryLabel,
+  getCategoryStyle,
+  parseTaskTitle
+} from "../../catcare/plans/plan-task-display";
+import { submitAnonymousCareTaskAction } from "./actions";
+import { EvidencePicker } from "./care-evidence-picker-client";
+import { TaskSubmissionForm } from "./care-submission-form-client";
+import type { AnonymousTask, SelectedEvidence } from "./visit-model";
+import {
+  careEvidenceNetworkMaxBytes,
+  careEvidencePickerMaxBytes
+} from "./visit-model";
+import {
+  CatOwnerBadge,
+  formatFrequency,
+  formatSubmissionStatus
+} from "./visit-display";
+
+export function TaskStep({
+  step,
+  task,
+  photoViewerLabels,
+  onSubmitted,
+  token
+}: {
+  onSubmitted: () => void;
+  step: number;
+  task: AnonymousTask;
+  photoViewerLabels: CarePhotoViewerLabels;
+  token: string;
+}) {
+  const title = parseTaskTitle(task.title);
+  const [status, setStatus] = useState<
+    "completed" | "note" | "exception"
+  >(task.submission?.status ?? "completed");
+  const [note, setNote] = useState(task.submission?.note ?? "");
+  const [submission, setSubmission] = useState(task.submission);
+  const [isEditing, setIsEditing] = useState(false);
+  const [attachmentCount, setAttachmentCount] = useState(
+    task.submission?.attachmentCount ?? 0
+  );
+  const [evidenceFiles, setEvidenceFiles] = useState<SelectedEvidence[]>([]);
+  const evidenceFilesRef = useRef<SelectedEvidence[]>([]);
+  const [message, setMessage] = useState<string | null>(
+    task.submission ? "这项任务已提交" : null
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const [processingEvidence, setProcessingEvidence] = useState(false);
+
+  useEffect(() => {
+    evidenceFilesRef.current = evidenceFiles;
+  }, [evidenceFiles]);
+
+  useEffect(() => () => {
+    evidenceFilesRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+  }, []);
+
+  async function onEvidenceChange(files: FileList | null) {
+    if (!files) {
+      return;
+    }
+
+    const available = Math.max(3 - attachmentCount - evidenceFiles.length, 0);
+    const nextFiles = Array.from(files).slice(0, available);
+    const prepared: SelectedEvidence[] = [];
+
+    setProcessingEvidence(true);
+    setError(null);
+
+    try {
+      for (const file of nextFiles) {
+        const uploadFile = await prepareClientImageForUpload(file, {
+          maxDimension: 1600,
+          maxInputBytes: careEvidencePickerMaxBytes,
+          maxOutputBytes: careEvidenceNetworkMaxBytes
+        });
+
+        prepared.push({
+          file: uploadFile,
+          id: `${file.name}:${file.size}:${file.lastModified}:${crypto.randomUUID()}`,
+          previewUrl: URL.createObjectURL(uploadFile)
+        });
+      }
+
+      setEvidenceFiles((current) => [...current, ...prepared]);
+    } catch (cause) {
+      prepared.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "照片处理失败，请换一张照片后重试。"
+      );
+    } finally {
+      setProcessingEvidence(false);
+    }
+  }
+
+  function removeEvidence(id: string) {
+    setEvidenceFiles((current) => {
+      const removed = current.find((item) => item.id === id);
+
+      if (removed) {
+        URL.revokeObjectURL(removed.previewUrl);
+      }
+
+      return current.filter((item) => item.id !== id);
+    });
+  }
+
+  function clearEvidenceFiles() {
+    setEvidenceFiles((current) => {
+      current.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      return [];
+    });
+  }
+
+  async function uploadEvidence(submissionId: string, baseCount = attachmentCount) {
+    const uploadedIds = new Set<string>();
+    let nextCount = baseCount;
+    let uploadError: string | null = null;
+
+    for (const item of evidenceFiles) {
+      const body = new FormData();
+      body.set("photo", item.file);
+      body.set("token", token);
+      const response = await fetch(
+        `/api/catcare/share/submissions/${submissionId}/attachments`,
+        { body, method: "POST" }
+      );
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            alreadyUploaded?: boolean;
+            attachmentCount?: number;
+            error?: string;
+          }
+        | null;
+
+      if (!response.ok) {
+        uploadError = payload?.error ?? "照片上传失败，请稍后重试。";
+        continue;
+      }
+
+      uploadedIds.add(item.id);
+      nextCount = reconcileEvidenceAttachmentCount(nextCount, payload ?? {});
+    }
+
+    setEvidenceFiles((current) =>
+      current.filter((item) => {
+        if (!uploadedIds.has(item.id)) {
+          return true;
+        }
+
+        URL.revokeObjectURL(item.previewUrl);
+        return false;
+      })
+    );
+    setAttachmentCount(Math.min(nextCount, 3));
+
+    return { attachmentCount: Math.min(nextCount, 3), error: uploadError };
+  }
+
+  async function onEvidenceRetry() {
+    if (!submission || evidenceFiles.length === 0 || processingEvidence) {
+      return;
+    }
+
+    setPending(true);
+    setError(null);
+    const result = await uploadEvidence(submission.submissionId);
+    setPending(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    setSubmission((current) =>
+      current ? { ...current, attachmentCount: result.attachmentCount } : current
+    );
+    setMessage("照片已安全上传，主人可以在照护结果中查看和下载");
+  }
+
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (processingEvidence) {
+      setError("照片仍在处理中，请稍候再提交。");
+      return;
+    }
+
+    setPending(true);
+    setError(null);
+    setMessage(null);
+    const wasAlreadySubmitted = Boolean(submission);
+
+    const formData = new FormData(event.currentTarget);
+    formData.set("serviceDate", task.serviceDate);
+    formData.set("token", token);
+    formData.set("submissionRef", task.submissionRef);
+    formData.set("visitTime", task.visitTime);
+    for (const item of evidenceFiles) {
+      formData.append("photos", item.file);
+    }
+
+    const result = await submitAnonymousCareTaskAction(formData);
+
+    if (!result.ok) {
+      setPending(false);
+      setError(result.error.message);
+      return;
+    }
+
+    const uploadedPhotoIndexes = new Set(result.data.uploadedPhotoIndexes);
+    setEvidenceFiles((current) =>
+      current.filter((item, index) => {
+        if (!uploadedPhotoIndexes.has(index)) {
+          return true;
+        }
+
+        URL.revokeObjectURL(item.previewUrl);
+        return false;
+      })
+    );
+    const nextAttachmentCount = result.data.attachmentCount;
+    const mediaError = result.data.mediaUploadError;
+
+    setPending(false);
+    setSubmission({
+      abnormal: result.data.abnormal,
+      attachmentCount: nextAttachmentCount,
+      note: result.data.note,
+      serviceDate: result.data.serviceDate,
+      status: result.data.status,
+      submissionId: result.data.submissionId,
+      submittedAt: result.data.submittedAt
+    });
+    setIsEditing(false);
+    setStatus(result.data.status);
+    setNote(result.data.note ?? "");
+    setMessage(
+      mediaError
+        ? "照护结果已提交，但部分照片上传失败，请在下方重试"
+        : status === "exception" && nextAttachmentCount === 0
+          ? "异常已优先提交，请在安全方便时补充照片"
+          : nextAttachmentCount > 0
+            ? `${result.data.message}，${nextAttachmentCount} 张照片已安全上传`
+            : result.data.message
+    );
+    setError(mediaError);
+    if (!wasAlreadySubmitted) {
+      onSubmitted();
+    }
+  }
+
+  return (
+    <li className="overflow-hidden rounded-2xl bg-white ring-1 ring-[#e2e6ee]">
+      <div className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 bg-[#fbfdfc] px-3 py-3">
+        <div className="relative grid h-14 w-14 place-items-center rounded-2xl bg-[#f2fbf8] ring-1 ring-[#d9eee7]">
+          <CatCareTaskCategoryIcon
+            category={task.category}
+            className="h-9 w-9"
+            treatment="plain"
+          />
+          <span className="absolute -right-1 -top-1 grid h-6 w-6 place-items-center rounded-full bg-[#07847f] text-[11px] font-bold text-white ring-2 ring-white">
+            {step}
+          </span>
+        </div>
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex min-h-7 items-center rounded-full px-2.5 text-xs font-semibold ${getCategoryStyle(task.category)}`}
+            >
+              {getCategoryLabel(task.category)}
+            </span>
+            <span className="inline-flex min-h-7 items-center rounded-full bg-white px-2.5 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
+              {task.required ? "必做" : "可选"}
+            </span>
+            {task.photoRequired ? (
+              <span className="inline-flex min-h-7 items-center rounded-full bg-[#e6f7f2] px-2.5 text-xs font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
+                需照片
+              </span>
+            ) : null}
+            <CatOwnerBadge name={formatOwnerLabel(title.owner)} />
+          </div>
+          <h4 className="mt-2 break-words text-lg font-semibold leading-7 text-[#101a32]">
+            {formatTaskAction(task.title)}
+          </h4>
+          <p className="mt-1 text-sm font-semibold leading-6 text-[#526177]">
+            {formatFrequency(task.frequency)}
+          </p>
+        </div>
+      </div>
+      <div className="px-3 pb-3">
+        {task.instructions ? (
+          <p className="mt-2 whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[#101a32]">
+            {task.instructions}
+          </p>
+        ) : null}
+        {submission ? (
+          <div className="mt-4 rounded-xl bg-[#f2fbf8] px-3 py-3 ring-1 ring-[#d9eee7]">
+            <p className="text-sm font-semibold text-[#07847f]">
+              {formatSubmissionStatus(submission.status)}
+            </p>
+            {submission.note ? (
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm font-semibold leading-6 text-[#101a32]">
+                {submission.note}
+              </p>
+            ) : null}
+            <p className="mt-2 text-xs font-semibold text-[#75839a]">
+              {message ?? "已提交给主人查看"}
+            </p>
+            <p className="mt-2 text-xs font-semibold text-[#526177]">
+              私密照片：{attachmentCount}/3 张
+            </p>
+            {!isEditing ? (
+              <button
+                className="mt-3 inline-flex min-h-10 items-center justify-center rounded-xl border border-[#07847f] bg-white px-4 text-sm font-semibold text-[#07847f] transition hover:bg-[#e6f7f2]"
+                onClick={() => {
+                  setError(null);
+                  setIsEditing(true);
+                }}
+                type="button"
+              >
+                修改状态或备注
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+        {!submission || isEditing ? (
+          task.locked ? (
+            <p className="mt-4 rounded-xl bg-[#f2f4f7] px-3 py-2 text-sm font-semibold leading-6 text-[#526177]">
+              这项任务到 {task.serviceDate} 当天才开放提交。
+            </p>
+          ) : (
+            <TaskSubmissionForm
+              error={error}
+              evidenceFiles={evidenceFiles}
+              attachmentCount={attachmentCount}
+              note={note}
+              onEvidenceChange={onEvidenceChange}
+              onEvidenceRemove={removeEvidence}
+              onNoteChange={setNote}
+              onCancel={
+                submission
+                  ? () => {
+                      setError(null);
+                      setStatus(submission.status);
+                      setNote(submission.note ?? "");
+                      clearEvidenceFiles();
+                      setIsEditing(false);
+                    }
+                  : undefined
+              }
+              onSubmit={onSubmit}
+              pending={pending || processingEvidence}
+              processingEvidence={processingEvidence}
+              photoRequired={task.photoRequired}
+              photoViewerLabels={photoViewerLabels}
+              serviceDate={task.serviceDate}
+              status={status}
+              submissionRef={task.submissionRef}
+              token={token}
+              visitTime={task.visitTime}
+              submitLabel={submission ? "保存最新反馈" : "提交这项结果"}
+              onStatusChange={setStatus}
+            />
+          )
+        ) : null}
+        {submission && !isEditing && attachmentCount < 3 ? (
+          <div className="mt-4 grid gap-3 border-t border-[#e2e6ee] pt-4">
+            <EvidencePicker
+              attachmentCount={attachmentCount}
+              files={evidenceFiles}
+              onChange={onEvidenceChange}
+              onRemove={removeEvidence}
+              photoRequired={task.photoRequired}
+              photoViewerLabels={photoViewerLabels}
+              processing={processingEvidence}
+            />
+            {error ? (
+              <p className="rounded-xl bg-[#fff4f2] px-3 py-2 text-sm font-semibold leading-6 text-[#b7352c]" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <button
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#07847f] bg-white px-4 text-sm font-semibold text-[#07847f] disabled:cursor-not-allowed disabled:border-[#d9e0ea] disabled:text-[#98a4b5]"
+              disabled={pending || processingEvidence || evidenceFiles.length === 0}
+              onClick={onEvidenceRetry}
+              type="button"
+            >
+              {processingEvidence
+                ? "正在处理照片…"
+                : pending
+                  ? "上传中…"
+                  : "补充上传所选照片"}
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </li>
+  );
+}

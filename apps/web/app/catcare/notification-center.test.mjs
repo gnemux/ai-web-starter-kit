@@ -16,18 +16,26 @@ test("CatCare shell consumes real notification state instead of a fixed badge", 
   assert.match(centerSource, /markAllOwnerNotificationsReadAction/);
 });
 
-test("notification center has accessible disclosure, empty, error and stale-target states", async () => {
-  const source = await readFile(
-    new URL("./notification-center-client.tsx", catcareDirectory),
-    "utf8"
-  );
+test("notification center has an accessible focus boundary plus empty, error and stale-target states", async () => {
+  const [source, focusSource] = await Promise.all([
+    readFile(
+      new URL("./notification-center-client.tsx", catcareDirectory),
+      "utf8"
+    ),
+    readFile(
+      new URL("./use-dialog-focus-boundary.ts", catcareDirectory),
+      "utf8"
+    )
+  ]);
 
   assert.match(source, /aria-expanded=\{isOpen\}/);
   assert.match(source, /role="dialog"/);
-  assert.match(source, /panelRef\.current\?\.focus\(\)/);
-  assert.match(source, /triggerRef\.current\?\.focus\(\)/);
+  assert.match(source, /useDialogFocusBoundary/);
+  assert.match(source, /returnFocusRef: triggerRef/);
   assert.match(source, /tabIndex=\{-1\}/);
-  assert.match(source, /event\.key === "Escape"/);
+  assert.match(focusSource, /event\.key === "Escape"/);
+  assert.match(focusSource, /event\.key !== "Tab"/);
+  assert.match(focusSource, /event\.shiftKey/);
   assert.match(source, /labels\.emptyTitle/);
   assert.match(source, /labels\.loadError/);
   assert.match(source, /labels\.targetUnavailable/);
@@ -45,7 +53,7 @@ test("notification list uses delivery time instead of read-state update time", a
   assert.doesNotMatch(serviceSource, /\.order\("updated_at"/);
 });
 
-test("care exceptions remain visually distinct from ordinary submissions", async () => {
+test("care exceptions remain distinct without redundant emphasis layers", async () => {
   const source = await readFile(
     new URL("./notification-center-client.tsx", catcareDirectory),
     "utf8"
@@ -54,7 +62,7 @@ test("care exceptions remain visually distinct from ordinary submissions", async
   assert.match(source, /notification\.eventType === "care_exception"/);
   assert.match(source, /border-l-amber-500/);
   assert.match(source, /bg-amber-100\/60/);
-  assert.match(source, /ring-amber-100/);
+  assert.doesNotMatch(source, /ring-amber-100/);
   assert.match(source, /isUnread[\s\S]*bg-slate-300/);
   assert.match(source, /labels\.exceptionBadge/);
   assert.equal(source.match(/hover:bg-teal-50\/70/g)?.length, 2);
@@ -62,9 +70,13 @@ test("care exceptions remain visually distinct from ordinary submissions", async
 });
 
 test("a sitter can revise meaningful feedback while photo-only follow-up stays separate", async () => {
-  const [source, actionSource] = await Promise.all([
+  const [source, formSource, actionSource] = await Promise.all([
     readFile(
-      new URL("../s/[token]/visit-accordion-client.tsx", catcareDirectory),
+      new URL("../s/[token]/task-step-client.tsx", catcareDirectory),
+      "utf8"
+    ),
+    readFile(
+      new URL("../s/[token]/care-submission-form-client.tsx", catcareDirectory),
       "utf8"
     ),
     readFile(new URL("../s/[token]/actions.ts", catcareDirectory), "utf8")
@@ -81,7 +93,7 @@ test("a sitter can revise meaningful feedback while photo-only follow-up stays s
   assert.match(source, /const \[isEditing, setIsEditing\] = useState\(false\)/);
   assert.match(source, /修改状态或备注/);
   assert.match(source, /保存最新反馈/);
-  assert.match(source, /取消修改/);
+  assert.match(formSource, /取消修改/);
   assert.match(source, /submission && !isEditing && attachmentCount < 3/);
   assert.match(source, /if \(!wasAlreadySubmitted\)/);
   assert.match(source, /clearEvidenceFiles\(\)/);

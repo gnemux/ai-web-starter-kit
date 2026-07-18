@@ -9,6 +9,8 @@ import {
   getAnonymousCarePlanServiceDates,
   getAnonymousCareTodayIsoDate
 } from "@/lib/catcare/product-service/anonymous-submission-policy";
+import { getDictionary } from "@/lib/i18n";
+import { getRequestLocale } from "@/lib/i18n-server";
 
 import {
   formatOwnerLabel,
@@ -31,14 +33,19 @@ type SharePageProps = {
 };
 
 export default async function AnonymousCarePlanPage({ params }: SharePageProps) {
-  const { token } = await params;
+  const [{ token }, locale] = await Promise.all([params, getRequestLocale()]);
   const result = await getAnonymousCarePlanView(token);
+  const photoViewerLabels = getDictionary(locale).catcare.owner.photoViewer;
 
   return (
     <main className="min-h-screen w-screen max-w-[100vw] overflow-x-hidden bg-[#f7f3ee] px-3 py-5 text-[#101a32] sm:px-6 lg:px-8">
       <div className="mx-auto grid w-full min-w-0 max-w-full gap-5 sm:max-w-[1196px]">
         {result.ok ? (
-          <AnonymousCarePlan plan={result.data} token={token} />
+          <AnonymousCarePlan
+            photoViewerLabels={photoViewerLabels}
+            plan={result.data}
+            token={token}
+          />
         ) : (
           <>
             <AnonymousHeader expiresAt={null} />
@@ -90,9 +97,11 @@ function AnonymousHeader({ expiresAt }: { expiresAt: string | null }) {
 }
 
 function AnonymousCarePlan({
+  photoViewerLabels,
   plan,
   token
 }: {
+  photoViewerLabels: ReturnType<typeof getDictionary>["catcare"]["owner"]["photoViewer"];
   plan: AnonymousCarePlanView;
   token: string;
 }) {
@@ -208,6 +217,7 @@ function AnonymousCarePlan({
 
           <AnonymousVisitAccordion
             days={serviceDays}
+            photoViewerLabels={photoViewerLabels}
             today={getAnonymousCareTodayIsoDate()}
             token={token}
           />

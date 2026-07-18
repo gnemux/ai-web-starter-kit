@@ -42,6 +42,7 @@ type AuthFormLabels = {
 
 type OAuthLabels = {
   apple: string;
+  appleDeferred: string;
   callbackFailed: string;
   cancelled: string;
   google: string;
@@ -434,11 +435,14 @@ function OAuthOptions({
   return (
     <div className="space-y-4">
       <div className="grid gap-3">
-        {(["google", "apple"] as const).map((provider) => (
+        {(["google", "apple"] as const).map((provider) => {
+          const deferred = provider === "apple";
+
+          return (
           <button
             aria-busy={pendingProvider === provider}
-            className="flex min-h-16 min-w-0 items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 text-base font-semibold text-slate-800 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-100 disabled:cursor-wait disabled:opacity-60 sm:gap-4"
-            disabled={pendingProvider !== null}
+            className="flex min-h-16 min-w-0 items-center justify-center gap-3 rounded-xl border border-slate-300 bg-white px-4 text-base font-semibold text-slate-800 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-100 disabled:cursor-not-allowed disabled:opacity-60 sm:gap-4"
+            disabled={pendingProvider !== null || deferred}
             key={provider}
             onClick={() => startOAuth(provider)}
             type="button"
@@ -452,14 +456,17 @@ function OAuthOptions({
               )}
             </span>
             <span className="min-w-0 text-center leading-6">
-              {pendingProvider === provider
+              {deferred
+                ? labels.appleDeferred
+                : pendingProvider === provider
                 ? provider === "google"
                   ? labels.workingGoogle
                   : labels.workingApple
                 : labels[provider]}
             </span>
           </button>
-        ))}
+          );
+        })}
       </div>
       {visibleFailure ? (
         <div

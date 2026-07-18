@@ -16,7 +16,8 @@ The starter kit currently has data and service examples, but no complete user ac
 ## Goals
 
 - Support email and password sign up, sign in, and sign out through Supabase Auth.
-- Support Google and Apple sign up/sign in through the same Supabase session and profile.
+- Support Google sign up/sign in through the same Supabase session and profile.
+- Keep the Apple adapter and account-profile fallback testable, but present Apple as unavailable until an Apple Developer owner completes provider configuration and real-account acceptance.
 - Protect product routes that require a verified server-side session.
 - Read and update `public.user_profiles` through a service boundary.
 - Track safe Auth funnel events in PostHog through a local analytics abstraction.
@@ -34,7 +35,7 @@ The starter kit currently has data and service examples, but no complete user ac
 
 ```text
 landing page
--> create account or sign in with email, Google, or Apple
+-> create account or sign in with email or Google
 -> Supabase validates credentials and sets cookies
 -> protected dashboard loads user data through services
 -> user updates profile on account page
@@ -44,12 +45,12 @@ landing page
 ## Requirements
 
 - `GET /login` exposes sign in and sign up modes.
-- `/login` exposes active Google and Apple controls with provider-specific pending and safe failure states.
+- `/login` exposes an active Google control with pending and safe failure states. Apple remains visible but disabled with explicit unavailable copy until its external provider gate is complete.
 - OAuth returns only to allowlisted `/catcare` or `/account` paths; external, protocol-relative, and sibling-prefix returns fall back to `/catcare`.
 - Starting social sign-in from a browser that already has an email/password session clears only that browser session before the provider redirect. A successful callback must replace every stale Supabase Auth cookie chunk with the selected provider session; different-email accounts remain separate unless the user later completes an explicit identity-linking flow.
 - Verified same-email identities rely on Supabase automatic identity linking; the application must not implement email-only manual linking.
 - A first social sign-in creates the existing `user_profiles` row. A missing display name opens the account profile-completion flow without overwriting an existing name.
-- Apple Web OAuth is not treated as a reliable name source; users can complete the display name after sign-in.
+- The retained Apple adapter does not treat Apple Web OAuth as a reliable name source; if Apple is enabled later, users complete a missing display name after sign-in.
 - Auth forms validate email and password before calling Supabase.
 - Successful Auth redirects to the requested protected path or `/dashboard`.
 - Public landing header reads the server-validated session when available and replaces Login with an account menu trigger for Dashboard, account settings, and sign out.

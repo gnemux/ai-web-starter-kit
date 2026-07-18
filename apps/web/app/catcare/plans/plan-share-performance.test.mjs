@@ -33,11 +33,15 @@ test("share controls expose an immediate disabled progress state", async () => {
     new URL("./plan-detail-client.tsx", plansDirectory),
     "utf8"
   );
+  const securitySource = await readFile(
+    new URL("./plan-detail-security.tsx", plansDirectory),
+    "utf8"
+  );
 
   assert.match(clientSource, /disabled=\{pendingAction !== null\}/);
-  assert.match(clientSource, /正在生成链接…/);
-  assert.match(clientSource, /正在重新生成…/);
-  assert.match(clientSource, /正在撤销…/);
+  assert.match(securitySource, /正在生成链接…/);
+  assert.match(securitySource, /正在重新生成…/);
+  assert.match(securitySource, /正在撤销…/);
   assert.match(clientSource, /AuditActivityList activities=\{currentAuditActivities\}/);
-  assert.match(clientSource, /私密链接已重新生成/);
+  assert.match(securitySource, /私密链接已重新生成/);
 });

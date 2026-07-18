@@ -726,11 +726,14 @@ normal verified branch/PR flow, while creating or writing a new candidate or
 Smoke GitHub repository and configuring a Vercel test project require explicit
 approval for that execution.
 
-`GNE-317` is blocked by completed `GNE-298` and is the current active parent.
-Its children have no milestone or labels and execute in the fixed order
-`GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`. `GNE-320` is the only active child. The parent
-owns only the four confirmed CatCare commercial-usability gaps; it does not
-reopen template extraction or create a generic media/notification platform.
+`GNE-317` follows completed `GNE-298` and is the current active parent. Its
+children have no milestone or labels and executed in the fixed order
+`GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`. GNE-318 through GNE-320 are Done;
+GNE-321 is in final review with controlled Google acceptance complete and Apple
+explicitly deferred/`not_run`. The parent now owns the final architecture,
+template-boundary, regression and user-acceptance closeout. It does not create
+a generic media/notification platform, cannot close without explicit owner
+acceptance, and must not enter another Issue automatically.
 
 GNE-301 is the documentation-only architecture gate. Its binding repository
 outputs are `specs/template/product-spec.md`, `engineering-spec.md`,

@@ -46,8 +46,17 @@ MVP1 foundation complete. MVP2 integrations provider foundation, Billing foundat
   cookie deletion to the same response, and continues the first OAuth start.
   Research-app and neutral-template regressions cover all three codes; no
   identity linking, provider secret, CatCare business rule, or Apple boundary
-  changes. GNE-321 and GNE-317 remain open until the follow-up is merged,
-  redeployed and accepted; execution must stop at the parent closeout.
+  changes. The follow-up merged through PR #113 at `c4fcaaa`; Vercel deployment
+  and a fresh signed-out browser flow both passed on the first Google click and
+  returned as the selected Gmail identity, while Apple remained disabled.
+- Final candidate `0.2.0-candidate.11` was generated twice from exact source
+  commit `c4fcaaa`; both trees matched at
+  `5ec5c6ecb0b6b360f6527fccc0684f74131d65e098cb9398adca08e8cdb583de`.
+  Frozen-lock install, three-layer verification, 24 neutral Web platform tests,
+  the complete candidate test suite, typecheck, lint and production build all
+  pass. The candidate exposes only neutral Auth/account/product routes, keeps
+  CatCare-specific media/notification/plan/Outbox semantics out, and is ready
+  for GNE-321/GNE-317 acceptance. Execution must stop at the parent closeout.
 
 ## Current GNE-320 Final Acceptance
 

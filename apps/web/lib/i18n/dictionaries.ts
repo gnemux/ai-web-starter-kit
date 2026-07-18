@@ -279,6 +279,7 @@ export const dictionaries = {
         },
         careSubmission: {
           taskSubmitted: "这项任务已提交",
+          submissionFailed: "照护结果提交失败，请检查填写内容后重试。",
           photoProcessingFailed: "照片处理失败，请换一张照片后重试。",
           photoUploadFailed: "照片上传失败，请稍后重试。",
           photoUploadSuccess: "照片已安全上传，主人可以在照护结果中查看和下载",
@@ -1403,6 +1404,7 @@ export const dictionaries = {
         },
         careSubmission: {
           taskSubmitted: "This task has been submitted",
+          submissionFailed: "The care result could not be submitted. Check the form and try again.",
           photoProcessingFailed: "The photo could not be processed. Choose another photo and try again.",
           photoUploadFailed: "The photo could not be uploaded. Try again later.",
           photoUploadSuccess: "The photo was uploaded securely. The owner can view and download it with the care results.",

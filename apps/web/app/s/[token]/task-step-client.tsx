@@ -232,7 +232,7 @@ export function TaskStep({
 
     if (!result.ok) {
       setPending(false);
-      setError(result.error.message);
+      setError(careSubmissionLabels.submissionFailed);
       return;
     }
 
@@ -275,7 +275,7 @@ export function TaskStep({
               )
             : careSubmissionLabels.taskSubmitted
     );
-    setError(mediaError);
+    setError(mediaError ? careSubmissionLabels.photoUploadFailed : null);
     if (!wasAlreadySubmitted) {
       onSubmitted();
     }

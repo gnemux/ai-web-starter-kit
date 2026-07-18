@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import type { Dictionary } from "@/lib/i18n";
+
 import {
   CarePhotoLightbox,
   type CarePhotoLightboxItem,
@@ -9,9 +11,12 @@ import {
 } from "../../catcare/care-photo-lightbox-client";
 import type { SelectedEvidence } from "./visit-model";
 
+export type CareSubmissionLabels = Dictionary["catcare"]["owner"]["careSubmission"];
+
 export function EvidencePicker({
   attachmentCount,
   files,
+  labels,
   onChange,
   onRemove,
   photoRequired,
@@ -20,6 +25,7 @@ export function EvidencePicker({
 }: {
   attachmentCount: number;
   files: SelectedEvidence[];
+  labels: CareSubmissionLabels;
   onChange: (files: FileList | null) => void;
   onRemove: (id: string) => void;
   photoRequired: boolean;
@@ -40,10 +46,10 @@ export function EvidencePicker({
       <div className="grid gap-3 rounded-xl border border-[#d9e0ea] bg-[#fbfdfc] p-3">
         <div>
           <p className="text-sm font-semibold text-[#101a32]">
-            照护照片{photoRequired ? "（主人要求）" : "（可选）"}
+            {photoRequired ? labels.requiredPhotoTitle : labels.optionalPhotoTitle}
           </p>
           <p className="mt-1 text-xs font-semibold leading-5 text-[#75839a]">
-            最多 3 张，可选择单张不超过 15 MB 的手机原图；上传前会自动压缩，服务端会再次清除定位信息，仅主人登录后可查看。
+            {labels.photoDescription}
           </p>
         </div>
         {files.length > 0 ? (
@@ -79,7 +85,9 @@ export function EvidencePicker({
         ) : null}
         {remaining > 0 ? (
           <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-[#7ebdb8] bg-white px-4 text-sm font-semibold text-[#07847f] has-[:disabled]:cursor-wait has-[:disabled]:border-[#d9e0ea] has-[:disabled]:text-[#75839a]">
-            {processing ? "正在压缩照片…" : `选择照片（还可选 ${remaining} 张）`}
+            {processing
+              ? labels.processingPhotos
+              : labels.choosePhotos.replace("{count}", String(remaining))}
             <input
               accept="image/jpeg,image/png,image/webp"
               className="sr-only"
@@ -93,7 +101,9 @@ export function EvidencePicker({
             />
           </label>
         ) : (
-          <p className="text-xs font-semibold text-[#526177]">已达到 3 张上限。</p>
+          <p className="text-xs font-semibold text-[#526177]">
+            {labels.maximumPhotos}
+          </p>
         )}
       </div>
       <CarePhotoLightbox
@@ -106,4 +116,3 @@ export function EvidencePicker({
     </>
   );
 }
-

@@ -99,7 +99,8 @@ product a declared App Router subtree and product-test subtree that it can
 replace without invalidating candidate provenance.
 
 GNE-317 executes `GNE-318 -> GNE-319 -> GNE-320 -> GNE-321`: account recovery,
-CatCare media/evidence, owner notifications, then Google/Apple sign-in. Account recovery reuses the existing
+CatCare media/evidence, owner notifications, then social sign-in. Google is the
+delivered social provider; Apple remains a disabled future rollout. Account recovery reuses the existing
 provider-neutral Auth/session boundary; CatCare share-token authorization and
 notification semantics remain app-local. Product-agnostic promotion from media
 or notifications requires a second real consumer and is not automatic.

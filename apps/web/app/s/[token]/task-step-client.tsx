@@ -15,7 +15,10 @@ import {
   parseTaskTitle
 } from "../../catcare/plans/plan-task-display";
 import { submitAnonymousCareTaskAction } from "./actions";
-import { EvidencePicker } from "./care-evidence-picker-client";
+import {
+  EvidencePicker,
+  type CareSubmissionLabels
+} from "./care-evidence-picker-client";
 import { TaskSubmissionForm } from "./care-submission-form-client";
 import type { AnonymousTask, SelectedEvidence } from "./visit-model";
 import {
@@ -31,11 +34,13 @@ import {
 export function TaskStep({
   step,
   task,
+  careSubmissionLabels,
   photoViewerLabels,
   onSubmitted,
   token
 }: {
   onSubmitted: () => void;
+  careSubmissionLabels: CareSubmissionLabels;
   step: number;
   task: AnonymousTask;
   photoViewerLabels: CarePhotoViewerLabels;
@@ -54,7 +59,7 @@ export function TaskStep({
   const [evidenceFiles, setEvidenceFiles] = useState<SelectedEvidence[]>([]);
   const evidenceFilesRef = useRef<SelectedEvidence[]>([]);
   const [message, setMessage] = useState<string | null>(
-    task.submission ? "这项任务已提交" : null
+    task.submission ? careSubmissionLabels.taskSubmitted : null
   );
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -85,7 +90,15 @@ export function TaskStep({
         const uploadFile = await prepareClientImageForUpload(file, {
           maxDimension: 1600,
           maxInputBytes: careEvidencePickerMaxBytes,
-          maxOutputBytes: careEvidenceNetworkMaxBytes
+          maxOutputBytes: careEvidenceNetworkMaxBytes,
+          messages: {
+            oversizedPhoto: careSubmissionLabels.oversizedPhoto,
+            processingFailed: careSubmissionLabels.photoProcessingFailed,
+            unsafeCompression: careSubmissionLabels.unsafeCompression,
+            unreadablePhoto: careSubmissionLabels.unreadablePhoto,
+            unsupportedBrowser: careSubmissionLabels.unsupportedBrowser,
+            unsupportedPhoto: careSubmissionLabels.unsupportedPhoto
+          }
         });
 
         prepared.push({
@@ -101,7 +114,7 @@ export function TaskStep({
       setError(
         cause instanceof Error
           ? cause.message
-          : "照片处理失败，请换一张照片后重试。"
+          : careSubmissionLabels.photoProcessingFailed
       );
     } finally {
       setProcessingEvidence(false);
@@ -149,7 +162,7 @@ export function TaskStep({
         | null;
 
       if (!response.ok) {
-        uploadError = payload?.error ?? "照片上传失败，请稍后重试。";
+        uploadError = careSubmissionLabels.photoUploadFailed;
         continue;
       }
 
@@ -190,14 +203,14 @@ export function TaskStep({
     setSubmission((current) =>
       current ? { ...current, attachmentCount: result.attachmentCount } : current
     );
-    setMessage("照片已安全上传，主人可以在照护结果中查看和下载");
+    setMessage(careSubmissionLabels.photoUploadSuccess);
   }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (processingEvidence) {
-      setError("照片仍在处理中，请稍候再提交。");
+      setError(careSubmissionLabels.photoStillProcessing);
       return;
     }
 
@@ -252,12 +265,15 @@ export function TaskStep({
     setNote(result.data.note ?? "");
     setMessage(
       mediaError
-        ? "照护结果已提交，但部分照片上传失败，请在下方重试"
+        ? careSubmissionLabels.partialPhotoUploadFailed
         : status === "exception" && nextAttachmentCount === 0
-          ? "异常已优先提交，请在安全方便时补充照片"
+          ? careSubmissionLabels.exceptionSubmitted
           : nextAttachmentCount > 0
-            ? `${result.data.message}，${nextAttachmentCount} 张照片已安全上传`
-            : result.data.message
+            ? careSubmissionLabels.photosUploaded.replace(
+                "{count}",
+                String(nextAttachmentCount)
+              )
+            : careSubmissionLabels.taskSubmitted
     );
     setError(mediaError);
     if (!wasAlreadySubmitted) {
@@ -286,11 +302,13 @@ export function TaskStep({
               {getCategoryLabel(task.category)}
             </span>
             <span className="inline-flex min-h-7 items-center rounded-full bg-white px-2.5 text-xs font-semibold text-[#526177] ring-1 ring-[#d9e0ea]">
-              {task.required ? "必做" : "可选"}
+              {task.required
+                ? careSubmissionLabels.required
+                : careSubmissionLabels.optional}
             </span>
             {task.photoRequired ? (
               <span className="inline-flex min-h-7 items-center rounded-full bg-[#e6f7f2] px-2.5 text-xs font-semibold text-[#07847f] ring-1 ring-[#bfe5d7]">
-                需照片
+                {careSubmissionLabels.photoRequired}
               </span>
             ) : null}
             <CatOwnerBadge name={formatOwnerLabel(title.owner)} />
@@ -320,10 +338,13 @@ export function TaskStep({
               </p>
             ) : null}
             <p className="mt-2 text-xs font-semibold text-[#75839a]">
-              {message ?? "已提交给主人查看"}
+              {message ?? careSubmissionLabels.submittedFallback}
             </p>
             <p className="mt-2 text-xs font-semibold text-[#526177]">
-              私密照片：{attachmentCount}/3 张
+              {careSubmissionLabels.privatePhotos.replace(
+                "{count}",
+                String(attachmentCount)
+              )}
             </p>
             {!isEditing ? (
               <button
@@ -334,7 +355,7 @@ export function TaskStep({
                 }}
                 type="button"
               >
-                修改状态或备注
+                {careSubmissionLabels.editFeedback}
               </button>
             ) : null}
           </div>
@@ -342,12 +363,16 @@ export function TaskStep({
         {!submission || isEditing ? (
           task.locked ? (
             <p className="mt-4 rounded-xl bg-[#f2f4f7] px-3 py-2 text-sm font-semibold leading-6 text-[#526177]">
-              这项任务到 {task.serviceDate} 当天才开放提交。
+              {careSubmissionLabels.lockedUntil.replace(
+                "{date}",
+                task.serviceDate
+              )}
             </p>
           ) : (
             <TaskSubmissionForm
               error={error}
               evidenceFiles={evidenceFiles}
+              labels={careSubmissionLabels}
               attachmentCount={attachmentCount}
               note={note}
               onEvidenceChange={onEvidenceChange}
@@ -374,7 +399,11 @@ export function TaskStep({
               submissionRef={task.submissionRef}
               token={token}
               visitTime={task.visitTime}
-              submitLabel={submission ? "保存最新反馈" : "提交这项结果"}
+              submitLabel={
+                submission
+                  ? careSubmissionLabels.saveFeedback
+                  : careSubmissionLabels.submitResult
+              }
               onStatusChange={setStatus}
             />
           )
@@ -384,6 +413,7 @@ export function TaskStep({
             <EvidencePicker
               attachmentCount={attachmentCount}
               files={evidenceFiles}
+              labels={careSubmissionLabels}
               onChange={onEvidenceChange}
               onRemove={removeEvidence}
               photoRequired={task.photoRequired}
@@ -402,10 +432,10 @@ export function TaskStep({
               type="button"
             >
               {processingEvidence
-                ? "正在处理照片…"
+                ? careSubmissionLabels.processingPhotos
                 : pending
-                  ? "上传中…"
-                  : "补充上传所选照片"}
+                  ? careSubmissionLabels.uploading
+                  : careSubmissionLabels.retryPhotos}
             </button>
           </div>
         ) : null}

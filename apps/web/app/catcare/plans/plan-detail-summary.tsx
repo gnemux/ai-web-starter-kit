@@ -121,4 +121,3 @@ function formatFrequency(value: string | null) {
 
   return `每日 ${count} 次`;
 }
-

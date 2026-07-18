@@ -268,5 +268,3 @@ function mapAtomicPlanSaveError(error: { code?: string; message?: string }) {
 
   return mapSupabaseError(error);
 }
-
-

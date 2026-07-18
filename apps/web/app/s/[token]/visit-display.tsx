@@ -89,4 +89,3 @@ export function formatVisitSummary(tasks: AnonymousTask[]) {
 
   return `完成${visible.join("、")}`;
 }
-

@@ -29,9 +29,17 @@ test("shared CatCare photo viewer provides accessible modal navigation and local
   assert.match(focusSource, /document\.body\.style\.overflow = "hidden"/);
 });
 test("upload preview and owner results both consume the shared viewer", async () => {
-  const [uploadSource, resultsSource] = await Promise.all([
+  const [uploadSource, formSource, taskSource, resultsSource] = await Promise.all([
     readFile(
       new URL("../s/[token]/care-evidence-picker-client.tsx", catcareDirectory),
+      "utf8"
+    ),
+    readFile(
+      new URL("../s/[token]/care-submission-form-client.tsx", catcareDirectory),
+      "utf8"
+    ),
+    readFile(
+      new URL("../s/[token]/task-step-client.tsx", catcareDirectory),
       "utf8"
     ),
     readFile(
@@ -42,6 +50,12 @@ test("upload preview and owner results both consume the shared viewer", async ()
 
   assert.match(uploadSource, /CarePhotoLightbox/);
   assert.match(uploadSource, /photoViewerLabels\.enlargePhoto/);
+  assert.match(uploadSource, /labels\.photoDescription/);
+  assert.match(formSource, /labels\.formTitle/);
+  assert.match(taskSource, /careSubmissionLabels\.photoUploadFailed/);
+  assert.doesNotMatch(uploadSource, /[\u3400-\u9fff]/u);
+  assert.doesNotMatch(formSource, /[\u3400-\u9fff]/u);
+  assert.doesNotMatch(taskSource, /[\u3400-\u9fff]/u);
   assert.match(resultsSource, /CareEvidenceGallery/);
   assert.doesNotMatch(resultsSource, /target="_blank"/);
 });

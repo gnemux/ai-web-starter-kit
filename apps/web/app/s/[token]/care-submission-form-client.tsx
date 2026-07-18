@@ -3,13 +3,17 @@
 import type { FormEvent } from "react";
 
 import type { CarePhotoViewerLabels } from "../../catcare/care-photo-lightbox-client";
-import { EvidencePicker } from "./care-evidence-picker-client";
+import {
+  EvidencePicker,
+  type CareSubmissionLabels
+} from "./care-evidence-picker-client";
 import type { SelectedEvidence } from "./visit-model";
 
 export function TaskSubmissionForm({
   attachmentCount,
   error,
   evidenceFiles,
+  labels,
   note,
   onEvidenceChange,
   onEvidenceRemove,
@@ -31,6 +35,7 @@ export function TaskSubmissionForm({
   attachmentCount: number;
   error: string | null;
   evidenceFiles: SelectedEvidence[];
+  labels: CareSubmissionLabels;
   note: string;
   onEvidenceChange: (files: FileList | null) => void;
   onEvidenceRemove: (id: string) => void;
@@ -61,13 +66,13 @@ export function TaskSubmissionForm({
       <input name="visitTime" type="hidden" value={visitTime} />
       <fieldset className="grid gap-2" disabled={pending}>
         <legend className="text-sm font-semibold text-[#526177]">
-          提交结果
+          {labels.formTitle}
         </legend>
         <div className="grid gap-2 sm:grid-cols-3">
           {[
-            { label: "已完成", value: "completed" },
-            { label: "完成并备注", value: "note" },
-            { label: "有异常", value: "exception" }
+            { label: labels.completed, value: "completed" },
+            { label: labels.completedWithNote, value: "note" },
+            { label: labels.exception, value: "exception" }
           ].map((option) => (
             <label
               className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#d9e0ea] bg-white px-3 text-sm font-semibold text-[#526177] transition has-[:checked]:border-[#07847f] has-[:checked]:bg-[#e6f7f2] has-[:checked]:text-[#07847f] has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60"
@@ -93,10 +98,10 @@ export function TaskSubmissionForm({
       <label className="grid gap-2">
         <span className="text-sm font-semibold text-[#526177]">
           {status === "exception"
-            ? "异常说明（必填）"
+            ? labels.exceptionRequired
             : status === "note"
-              ? "备注（必填，仍算已完成）"
-              : "备注（可选）"}
+              ? labels.noteRequired
+              : labels.noteOptional}
         </span>
         <textarea
           className="min-h-24 w-full resize-y rounded-xl border border-[#d9e0ea] bg-white px-3 py-3 text-base font-semibold leading-7 text-[#101a32] outline-none transition placeholder:text-[#98a4b5] focus:border-[#07847f] focus:ring-4 focus:ring-[#07847f]/10 disabled:cursor-not-allowed disabled:bg-[#f2f4f7] disabled:text-[#75839a]"
@@ -106,8 +111,8 @@ export function TaskSubmissionForm({
           onChange={(event) => onNoteChange(event.currentTarget.value)}
           placeholder={
             status === "exception"
-              ? "请写清异常情况和已采取的处理"
-              : "可补充位置、食量、精神状态或需要主人知道的事"
+              ? labels.exceptionPlaceholder
+              : labels.notePlaceholder
           }
           required={status !== "completed"}
           value={note}
@@ -116,6 +121,7 @@ export function TaskSubmissionForm({
       <EvidencePicker
         attachmentCount={attachmentCount}
         files={evidenceFiles}
+        labels={labels}
         onChange={onEvidenceChange}
         onRemove={onEvidenceRemove}
         photoRequired={photoRequired}
@@ -138,7 +144,7 @@ export function TaskSubmissionForm({
             onClick={onCancel}
             type="button"
           >
-            取消修改
+            {labels.cancel}
           </button>
         ) : null}
         <button
@@ -146,7 +152,7 @@ export function TaskSubmissionForm({
           disabled={pending}
           type="submit"
         >
-          {pending ? "提交中…" : submitLabel}
+          {pending ? labels.pending : submitLabel}
         </button>
       </div>
     </form>

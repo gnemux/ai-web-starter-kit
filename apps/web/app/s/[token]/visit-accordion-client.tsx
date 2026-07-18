@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import type { CarePhotoViewerLabels } from "../../catcare/care-photo-lightbox-client";
+import type { CareSubmissionLabels } from "./care-evidence-picker-client";
 import { TaskStep } from "./task-step-client";
 import type { AnonymousServiceDay } from "./visit-model";
 import {
@@ -13,11 +14,13 @@ import {
 } from "./visit-display";
 
 export function AnonymousVisitAccordion({
+  careSubmissionLabels,
   days,
   photoViewerLabels,
   today,
   token
 }: {
+  careSubmissionLabels: CareSubmissionLabels;
   days: AnonymousServiceDay[];
   photoViewerLabels: CarePhotoViewerLabels;
   today: string;
@@ -163,6 +166,7 @@ export function AnonymousVisitAccordion({
                         <ol className="mt-3 grid gap-3" id={visitPanelId}>
                           {visit.tasks.map((task, taskIndex) => (
                             <TaskStep
+                              careSubmissionLabels={careSubmissionLabels}
                               key={`${day.date}-${visit.timeLabel}-${task.sortOrder}-${task.title}`}
                               step={taskIndex + 1}
                               task={task}

@@ -1033,13 +1033,14 @@ GNE-234 MVP3-07 VERIFY [QA] 交叉验证、升级演练与 v0.3.0 结论
 GNE-298 MVP3-08 TEMPLATE [ARCH/PRODUCT] 纯净基础母版候选
 GNE-317 MVP3-09 PRODUCT HARDENING [PRODUCT/ARCH] CatCare 商用体验收口
 
-Current hardening execution on 2026-07-17: `GNE-321` is the only In Progress
-child under `GNE-317`; `GNE-318..GNE-320` are Done. Google and Apple OAuth code
-and local recovery behavior are verified, but both providers are disabled in
-the current shared Supabase test project, so real provider smoke is `not_run`.
-Keep `GNE-321` In Progress and do not close `GNE-317` until provider credentials,
-callback allowlists, deployed new/existing/cancel flows, and Apple rotation
-ownership are verified.
+Current hardening execution on 2026-07-18: `GNE-318..GNE-320` are Done and
+`GNE-321` is In Review under `GNE-317`. Google is enabled in the current shared
+Supabase test project and its local plus deployed session-switch flow is
+verified. Apple stays visibly disabled and is recorded as deferred / `not_run`
+until the collaborator-owned Apple Developer resources exist and the user
+explicitly resumes rollout. Do not close `GNE-317` until its parent-level
+architecture, template, browser, accessibility, bilingual, and independent
+review gates pass and the user explicitly accepts the result.
 
 Retired legacy route, not current MVP3 execution:
 The old Product Validation Kit parent and CP task line was replaced by

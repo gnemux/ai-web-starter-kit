@@ -10,6 +10,26 @@ export type ClientImagePreparationOptions = {
   maxDimension: number;
   maxInputBytes: number;
   maxOutputBytes: number;
+  messages?: Partial<ClientImagePreparationMessages>;
+};
+
+export type ClientImagePreparationMessages = {
+  processingFailed: string;
+  oversizedPhoto: string;
+  unsafeCompression: string;
+  unreadablePhoto: string;
+  unsupportedBrowser: string;
+  unsupportedPhoto: string;
+};
+
+const defaultClientImageMessages: ClientImagePreparationMessages = {
+  processingFailed: "照片处理失败，请换一张照片后重试。",
+  oversizedPhoto: "单张手机原图不能超过 {megabytes} MB。",
+  unsafeCompression:
+    "当前浏览器无法把照片安全压缩到上传范围，请换一张照片后重试。",
+  unreadablePhoto: "照片无法读取，请重新选择 JPG、PNG 或 WebP 照片。",
+  unsupportedBrowser: "当前浏览器无法处理手机原图，请更新浏览器后重试。",
+  unsupportedPhoto: "仅支持 JPG、PNG 或 WebP 照片。"
 };
 
 export function getBoundedImageDimensions(
@@ -27,14 +47,20 @@ export function getBoundedImageDimensions(
 
 export function validateClientImageSelection(
   file: Pick<File, "size" | "type">,
-  maxInputBytes: number
+  maxInputBytes: number,
+  messageOverrides?: Partial<ClientImagePreparationMessages>
 ) {
+  const messages = { ...defaultClientImageMessages, ...messageOverrides };
+
   if (!clientImageMimeTypes.includes(file.type as ClientImageMimeType)) {
-    return "仅支持 JPG、PNG 或 WebP 照片。";
+    return messages.unsupportedPhoto;
   }
 
   if (file.size > maxInputBytes) {
-    return `单张手机原图不能超过 ${Math.floor(maxInputBytes / 1024 / 1024)} MB。`;
+    return messages.oversizedPhoto.replace(
+      "{megabytes}",
+      String(Math.floor(maxInputBytes / 1024 / 1024))
+    );
   }
 
   return null;
@@ -44,14 +70,19 @@ export async function prepareClientImageForUpload(
   file: File,
   options: ClientImagePreparationOptions
 ) {
-  const selectionError = validateClientImageSelection(file, options.maxInputBytes);
+  const messages = { ...defaultClientImageMessages, ...options.messages };
+  const selectionError = validateClientImageSelection(
+    file,
+    options.maxInputBytes,
+    messages
+  );
 
   if (selectionError) {
     throw new Error(selectionError);
   }
 
   if (typeof createImageBitmap !== "function") {
-    throw new Error("当前浏览器无法处理手机原图，请更新浏览器后重试。");
+    throw new Error(messages.unsupportedBrowser);
   }
 
   let bitmap: ImageBitmap;
@@ -59,7 +90,7 @@ export async function prepareClientImageForUpload(
   try {
     bitmap = await createImageBitmap(file);
   } catch {
-    throw new Error("照片无法读取，请重新选择 JPG、PNG 或 WebP 照片。");
+    throw new Error(messages.unreadablePhoto);
   }
 
   try {
@@ -83,7 +114,7 @@ export async function prepareClientImageForUpload(
     const context = canvas.getContext("2d", { alpha: false });
 
     if (!context) {
-      throw new Error("照片处理失败，请换一张照片后重试。");
+      throw new Error(messages.processingFailed);
     }
 
     context.imageSmoothingEnabled = true;
@@ -91,7 +122,11 @@ export async function prepareClientImageForUpload(
     context.drawImage(bitmap, 0, 0, dimensions.width, dimensions.height);
 
     for (const quality of [0.84, 0.74, 0.64, 0.54]) {
-      const blob = await canvasToBlob(canvas, quality);
+      const blob = await canvasToBlob(
+        canvas,
+        quality,
+        messages.processingFailed
+      );
 
       if (
         blob.type === "image/webp" &&
@@ -104,13 +139,17 @@ export async function prepareClientImageForUpload(
       }
     }
 
-    throw new Error("当前浏览器无法把照片安全压缩到上传范围，请换一张照片后重试。");
+    throw new Error(messages.unsafeCompression);
   } finally {
     bitmap.close();
   }
 }
 
-function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
+function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  quality: number,
+  processingFailedMessage: string
+) {
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -119,7 +158,7 @@ function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
           return;
         }
 
-        reject(new Error("照片处理失败，请换一张照片后重试。"));
+        reject(new Error(processingFailedMessage));
       },
       "image/webp",
       quality

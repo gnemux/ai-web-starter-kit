@@ -619,4 +619,3 @@ function parseCatScopedTaskTitle(title: string) {
 
   return { action, catName };
 }
-

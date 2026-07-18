@@ -1,7 +1,10 @@
-import type { AnonymousCareTaskSubmissionView } from "@/lib/catcare/product-service";
+import type {
+  AnonymousCareTaskSubmissionView,
+  AnonymousCareTaskView
+} from "@/lib/catcare/product-service";
 
 export type AnonymousTask = {
-  category: "meal" | "water" | "medicine" | "litter" | "play" | "observe" | "treat" | "environment" | "other";
+  category: AnonymousCareTaskView["category"];
   frequency: string | null;
   instructions: string | null;
   locked: boolean;

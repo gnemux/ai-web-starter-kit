@@ -300,4 +300,3 @@ function formatShareUrlPreview(value: string) {
 
   return `${origin}/s/${token.slice(0, 6)}...${token.slice(-6)}`;
 }
-

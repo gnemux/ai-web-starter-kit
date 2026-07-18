@@ -91,9 +91,9 @@ test("a sitter can revise meaningful feedback while photo-only follow-up stays s
   );
 
   assert.match(source, /const \[isEditing, setIsEditing\] = useState\(false\)/);
-  assert.match(source, /修改状态或备注/);
-  assert.match(source, /保存最新反馈/);
-  assert.match(formSource, /取消修改/);
+  assert.match(source, /careSubmissionLabels\.editFeedback/);
+  assert.match(source, /careSubmissionLabels\.saveFeedback/);
+  assert.match(formSource, /labels\.cancel/);
   assert.match(source, /submission && !isEditing && attachmentCount < 3/);
   assert.match(source, /if \(!wasAlreadySubmitted\)/);
   assert.match(source, /clearEvidenceFiles\(\)/);

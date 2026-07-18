@@ -80,4 +80,4 @@ landing page
 - Retention: repeat authenticated dashboard access.
 - Conversion: later billing events can join against identified users.
 - Quality: low `auth_login_failed` rate after deployment configuration is complete.
-- OAuth quality: successful real-provider smoke for both providers and no unexplained duplicate accounts for verified same-email users.
+- OAuth quality: successful real-provider smoke for every enabled provider and no unexplained duplicate accounts for verified same-email users. Google is enabled for this phase; Apple remains deferred until its separate rollout gates pass.

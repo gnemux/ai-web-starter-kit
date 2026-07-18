@@ -27,20 +27,22 @@
 - [x] Auth success and failure metrics are defined.
 - [x] Missing provider configuration fails safely.
 
-## GNE-321 Google / Apple OAuth Checks
+## GNE-321 Google OAuth Delivery And Deferred Apple Rollout
 
-- [x] Google and Apple controls are active, localized, keyboard accessible, mobile-safe, and prevent duplicate starts while pending.
-- [ ] Google and Apple new users establish the existing Supabase SSR cookie session and enter the requested allowlisted product context.
-- [ ] An existing email/password browser session can switch to Google without the old Auth cookie overriding the Google user; only the current browser session is cleared and different emails stay separate.
+- [x] Google is active, localized, keyboard accessible, mobile-safe, and prevents duplicate starts while pending; Apple is visibly disabled with localized deferred copy.
+- [x] A Google user establishes the existing Supabase SSR cookie session and enters the requested allowlisted product context.
+- [x] An existing email/password browser session can switch to Google without the old Auth cookie overriding the Google user; only the current browser session is cleared and different emails stay separate.
 - [ ] A verified same-email password identity is linked by Supabase without an unexplained duplicate account; no application-level email-only linking exists.
 - [x] Missing social profile name enters profile completion; existing display names are never overwritten at the application boundary.
 - [x] External, protocol-relative, and sibling-prefix `next` values fall back to `/catcare`.
 - [x] Cancellation, provider refusal, missing/invalid callback values, PKCE failure, and repeated callback have stable localized recovery handling at the application boundary.
 - [x] OAuth application logs and Analytics contain no code, provider token, session cookie, raw profile, raw provider error, email, or secret.
 - [x] Local password signup/login/recovery, logout, session restoration, `/account`, and protected-route regression checks pass.
-- [ ] Unit tests, typecheck, lint, build, independent Auth review, desktop/mobile Chinese/English checks, and real Google/Apple provider smoke pass.
-- [ ] Google/Apple credentials exist only in provider/Supabase controls; Apple client-secret rotation ownership is recorded.
+- [x] Unit tests, typecheck, lint, build, independent Auth review, desktop/mobile Chinese/English checks, and real Google provider smoke pass.
+- [x] Google credentials exist only in provider/Supabase controls; no provider credential is stored in the repository or evidence.
+- [ ] Apple new/existing/cancel/name/rotation smoke remains `not_run` until a collaborator provides the required Apple Developer resources and the user explicitly resumes rollout.
 
-Real-provider items remain unchecked because both providers are disabled in the
-current shared Supabase test project. GNE-321 must remain In Progress until the
-deployed provider checks pass.
+Google is the delivered provider for this phase. Apple adapter and return-policy
+boundaries remain in code, but the Apple control stays disabled and must not be
+described as available. A future Apple rollout reopens its provider, account,
+name-completion, cancellation, deployed smoke, and six-month secret-rotation gates.

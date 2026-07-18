@@ -216,4 +216,3 @@ function withResultRecap(summary: Json, recap: Record<string, Json>): Json {
     result_recap: recap
   };
 }
-

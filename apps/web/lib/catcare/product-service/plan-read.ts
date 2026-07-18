@@ -151,4 +151,3 @@ export async function getCatCarePlanItemOptions(): Promise<ServiceResult<string[
 
   return serviceOk(Array.from(new Set(itemsResult.data.map((item) => item.name))));
 }
-

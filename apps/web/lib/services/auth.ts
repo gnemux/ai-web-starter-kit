@@ -179,7 +179,10 @@ export async function signInWithPasswordFromFormData(
     id: actor.id,
     email: actor.email ?? inputResult.data.email
   });
-  const profileResult = await ensureProfile(clientResult.data, user.id);
+  const profileResult = await ensureAuthenticatedUserProfile(
+    clientResult.data,
+    user.id
+  );
 
   if (!profileResult.ok) {
     return profileResult;
@@ -212,7 +215,7 @@ export async function signUpWithPasswordFromFormData(
     return clientResult;
   }
 
-  const appUrlResult = getAppUrl();
+  const appUrlResult = getAuthAppUrl();
 
   if (!appUrlResult.ok) {
     return appUrlResult;
@@ -243,7 +246,10 @@ export async function signUpWithPasswordFromFormData(
   });
 
   if (data.session && data.user.email_confirmed_at) {
-    const profileResult = await ensureProfile(clientResult.data, user.id);
+    const profileResult = await ensureAuthenticatedUserProfile(
+      clientResult.data,
+      user.id
+    );
 
     if (!profileResult.ok) {
       return profileResult;
@@ -287,7 +293,7 @@ export async function requestPasswordResetFromFormData(
     return clientResult;
   }
 
-  const appUrlResult = getAppUrl();
+  const appUrlResult = getAuthAppUrl();
 
   if (!appUrlResult.ok) {
     return appUrlResult;
@@ -519,9 +525,10 @@ async function getProfileForUser(
   return serviceOk(profile);
 }
 
-async function ensureProfile(
+export async function ensureAuthenticatedUserProfile(
   supabase: AppSupabaseClient,
-  userId: string
+  userId: string,
+  displayNameCandidate: string | null = null
 ): Promise<ServiceResult<UserProfile>> {
   const { data, error } = await supabase
     .from("user_profiles")
@@ -535,7 +542,25 @@ async function ensureProfile(
     return mapSupabaseError(error);
   }
 
-  const profile = mapProfile(data);
+  let resolvedProfile = data;
+
+  if (!data.display_name && displayNameCandidate) {
+    const { data: updatedProfile, error: updateError } = await supabase
+      .from("user_profiles")
+      .update({ display_name: displayNameCandidate })
+      .eq("id", userId)
+      .is("display_name", null)
+      .select("id, display_name, avatar_url, created_at, updated_at")
+      .maybeSingle();
+
+    if (updateError) {
+      return mapSupabaseError(updateError);
+    }
+
+    resolvedProfile = updatedProfile ?? data;
+  }
+
+  const profile = mapProfile(resolvedProfile);
   writeProfileCache(userId, profile);
 
   return serviceOk(profile);
@@ -668,7 +693,7 @@ function mapSupabaseError(error: { code?: string }): ServiceResult<never> {
   );
 }
 
-function getAppUrl(): ServiceResult<string> {
+export function getAuthAppUrl(): ServiceResult<string> {
   const appUrl = (
     process.env.NEXT_PUBLIC_APP_URL ??
     process.env.VERCEL_URL?.replace(/^/, "https://") ??

@@ -16,6 +16,7 @@ The starter kit currently has data and service examples, but no complete user ac
 ## Goals
 
 - Support email and password sign up, sign in, and sign out through Supabase Auth.
+- Support Google and Apple sign up/sign in through the same Supabase session and profile.
 - Protect product routes that require a verified server-side session.
 - Read and update `public.user_profiles` through a service boundary.
 - Track safe Auth funnel events in PostHog through a local analytics abstraction.
@@ -24,8 +25,8 @@ The starter kit currently has data and service examples, but no complete user ac
 
 ## Non-goals
 
-- OAuth provider setup.
-- Password reset, MFA, passkeys, or organization membership.
+- Additional OAuth providers beyond Google and Apple.
+- MFA, passkeys, or organization membership.
 - Production email template customization.
 - Server-side PostHog feature flag bootstrapping.
 
@@ -33,7 +34,7 @@ The starter kit currently has data and service examples, but no complete user ac
 
 ```text
 landing page
--> create account or sign in
+-> create account or sign in with email, Google, or Apple
 -> Supabase validates credentials and sets cookies
 -> protected dashboard loads user data through services
 -> user updates profile on account page
@@ -43,6 +44,12 @@ landing page
 ## Requirements
 
 - `GET /login` exposes sign in and sign up modes.
+- `/login` exposes active Google and Apple controls with provider-specific pending and safe failure states.
+- OAuth returns only to allowlisted `/catcare` or `/account` paths; external, protocol-relative, and sibling-prefix returns fall back to `/catcare`.
+- Starting social sign-in from a browser that already has an email/password session clears only that browser session before the provider redirect. A successful callback must replace every stale Supabase Auth cookie chunk with the selected provider session; different-email accounts remain separate unless the user later completes an explicit identity-linking flow.
+- Verified same-email identities rely on Supabase automatic identity linking; the application must not implement email-only manual linking.
+- A first social sign-in creates the existing `user_profiles` row. A missing display name opens the account profile-completion flow without overwriting an existing name.
+- Apple Web OAuth is not treated as a reliable name source; users can complete the display name after sign-in.
 - Auth forms validate email and password before calling Supabase.
 - Successful Auth redirects to the requested protected path or `/dashboard`.
 - Public landing header reads the server-validated session when available and replaces Login with an account menu trigger for Dashboard, account settings, and sign out.
@@ -53,6 +60,7 @@ landing page
 - PostHog events are captured for `signup_started`, `user_signed_up`, `login_started`, `user_logged_in`, `auth_login_failed`, `user_logged_out`, and `user_profile_updated`.
 - Auth PostHog events include the shared MVP factory properties: `app`, `mvp_stage`, `market`, `env`, `version`, and `module`.
 - Auth PostHog events do not include passwords, OTPs, magic links, OAuth codes, Supabase tokens, session cookies, or raw provider payloads.
+- OAuth analytics contain only the provider (`google` or `apple`), result category, and auth method.
 - Login, signup, account, and logout UI labels must read from the shared i18n dictionary instead of route-local hardcoded copy.
 
 ## Edge States
@@ -60,6 +68,8 @@ landing page
 - Empty: profile display name can be blank and falls back to email.
 - Loading: forms expose pending submit states through server action status.
 - Error: validation and provider errors render safe messages.
+- OAuth cancellation, unavailable configuration, malformed/repeated callbacks, and PKCE exchange failures return to `/login` with a localized recoverable message.
+- If a signed-in user intentionally starts a different social identity and then cancels, the prior browser session remains signed out; sessions on other browsers or devices are not revoked.
 - Permission denied: unauthenticated protected routes redirect to `/login`.
 - Long content: display names are bounded and truncated in shell surfaces.
 
@@ -69,3 +79,4 @@ landing page
 - Retention: repeat authenticated dashboard access.
 - Conversion: later billing events can join against identified users.
 - Quality: low `auth_login_failed` rate after deployment configuration is complete.
+- OAuth quality: successful real-provider smoke for both providers and no unexplained duplicate accounts for verified same-email users.

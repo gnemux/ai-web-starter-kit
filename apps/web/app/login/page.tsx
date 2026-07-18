@@ -11,16 +11,24 @@ import {
   CatCareHeroImage,
   CatCareProductFrame
 } from "@/components/catcare-ui";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { getDictionary } from "@/lib/i18n";
 import { getRequestLocale } from "@/lib/i18n-server";
+import { normalizeInternalReturnTo } from "@/lib/services/internal-return";
 
-import { AuthForm } from "./auth-form";
+import {
+  AuthForm,
+  type OAuthFailure,
+  type OAuthProvider
+} from "./auth-form";
 import type { AuthFormMode } from "./actions";
 
 type LoginSearchParams = {
   mode?: string;
   next?: string;
   error?: string;
+  oauth_error?: string;
+  oauth_provider?: string;
 };
 
 export default async function LoginPage({
@@ -35,7 +43,9 @@ export default async function LoginPage({
     params.mode === "signup" || params.mode === "reset"
       ? params.mode
       : "signin";
-  const nextPath = normalizeNext(params.next);
+  const nextPath = normalizeInternalReturnTo(params.next, "/catcare");
+  const oauthFailure = normalizeOAuthFailure(params.oauth_error);
+  const oauthProvider = normalizeOAuthProvider(params.oauth_provider);
   const productPointIcons = [
     <CatCareProfileIcon className="h-6 w-6" key="cat-profile" />,
     <CatCareFeedingRoutineIcon className="h-6 w-6" key="routine" />,
@@ -48,9 +58,12 @@ export default async function LoginPage({
         <section className="min-w-0 flex flex-col bg-white px-6 py-8 sm:px-10 lg:px-14">
           <div className="flex min-w-0 items-center justify-between gap-3 sm:gap-4">
             <CatCareBrand />
-            <Button href="/" variant="secondary">
-              {copy.common.backHome}
-            </Button>
+            <div className="flex shrink-0 items-center gap-2">
+              <LanguageSwitcher labels={copy.common} locale={locale} />
+              <Button href="/" variant="secondary">
+                {copy.common.backHome}
+              </Button>
+            </div>
           </div>
 
           <div className="mx-auto mt-8 w-full max-w-md lg:mt-10">
@@ -84,7 +97,9 @@ export default async function LoginPage({
                 sendingReset: copy.login.sendingReset
               }}
               nextPath={nextPath}
+              oauthFailure={oauthFailure}
               oauthLabels={copy.login.oauth}
+              oauthProvider={oauthProvider}
             />
           </div>
         </section>
@@ -129,10 +144,14 @@ export default async function LoginPage({
   );
 }
 
-function normalizeNext(value: string | undefined): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return "/catcare";
-  }
+function normalizeOAuthFailure(value: string | undefined): OAuthFailure | undefined {
+  return value === "cancelled" ||
+    value === "callback_failed" ||
+    value === "provider_unavailable"
+    ? value
+    : undefined;
+}
 
-  return value;
+function normalizeOAuthProvider(value: string | undefined): OAuthProvider | undefined {
+  return value === "google" || value === "apple" ? value : undefined;
 }

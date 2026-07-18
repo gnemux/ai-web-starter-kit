@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabasePublicConfig } from "./config";
@@ -9,9 +9,13 @@ const protectedPathPrefixes = ["/account", "/catcare", "/dashboard", "/demo/acco
 export async function updateSession(request: NextRequest) {
   const config = getSupabasePublicConfig();
   const isProtected = isProtectedPath(request.nextUrl.pathname);
-  let response = NextResponse.next({
-    request
-  });
+  const pendingCookies: Array<{
+    name: string;
+    options: CookieOptions;
+    value: string;
+  }> = [];
+  const pendingHeaders = new Map<string, string>();
+  let response = NextResponse.next({ request });
 
   if (!isProtected) {
     return response;
@@ -29,13 +33,11 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, headers) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({
-            request
-          });
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
+          pendingCookies.push(...cookiesToSet);
+          Object.entries(headers).forEach(([name, value]) => {
+            pendingHeaders.set(name, value);
           });
         }
       }
@@ -55,8 +57,23 @@ export async function updateSession(request: NextRequest) {
     loginUrl.search = "";
     loginUrl.searchParams.set("next", nextPath);
 
-    return NextResponse.redirect(loginUrl);
+    response = NextResponse.redirect(loginUrl);
   }
+
+  return applyAuthResponseState(response, pendingCookies, pendingHeaders);
+}
+
+function applyAuthResponseState(
+  response: NextResponse,
+  cookies: Array<{ name: string; options: CookieOptions; value: string }>,
+  headers: Map<string, string>
+) {
+  cookies.forEach(({ name, value, options }) => {
+    response.cookies.set(name, value, options);
+  });
+  headers.forEach((value, name) => {
+    response.headers.set(name, value);
+  });
 
   return response;
 }
